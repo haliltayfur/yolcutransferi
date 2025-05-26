@@ -1,8 +1,8 @@
 
 export default function Home() {
   return (
-    <main className="text-gray-900">
-      <header className="bg-[#000000] text-white py-6 px-4 shadow-md sticky top-0 z-50">
+    <main className="bg-gray-100 text-gray-900">
+      <header className="bg-black text-white py-6 px-4 shadow-md">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">YolcuTransferi.com</h1>
           <nav className="space-x-4">
@@ -14,36 +14,36 @@ export default function Home() {
         </div>
       </header>
 
-      <section id="anasayfa" className="h-[90vh] bg-cover bg-center text-white flex items-center justify-center" style={{ backgroundImage: 'url(/vip-transfer.jpg)' }}>
-        <div className="bg-black bg-opacity-60 p-10 rounded-xl text-center">
+      <section id="anasayfa" className="bg-cover bg-center h-[70vh] flex items-center justify-center text-center text-white" style={{backgroundImage: 'url(/vip-transfer.jpg)'}}>
+        <div className="bg-black bg-opacity-50 p-6 rounded-xl">
           <h2 className="text-4xl font-bold mb-4">VIP Transfer Hizmetine Hoş Geldiniz</h2>
-          <p className="text-xl">Türkiye genelinde güvenli ve konforlu ulaşım çözümleri sunuyoruz.</p>
+          <p className="text-xl">Türkiye Geneli Konforlu ve Güvenli Ulaşım</p>
         </div>
       </section>
 
-      <section id="hakkimizda" className="max-w-5xl mx-auto py-16 px-4">
-        <h3 className="text-3xl font-semibold mb-6">Hakkımızda</h3>
+      <section id="hakkimizda" className="max-w-5xl mx-auto py-12 px-4">
+        <h3 className="text-2xl font-semibold mb-4">Hakkımızda</h3>
         <p>
-          YolcuTransferi.com olarak, İstanbul başta olmak üzere Türkiye genelinde havalimanı transferi, özel şoförlü araç kiralama ve şehir içi/şehirlerarası VIP transfer hizmetleri sunmaktayız. Amacımız, yolcularımıza lüks, konforlu ve dakik bir ulaşım deneyimi yaşatmaktır.
+          YolcuTransferi.com olarak Türkiye genelinde, özellikle havalimanı, otel, iş merkezi ve turistik bölgeler arası VIP ulaşım çözümleri sunuyoruz. Filomuzda lüks araçlar yer almakta olup, profesyonel şoförlerimizle yüksek standartlarda hizmet vermekteyiz.
         </p>
       </section>
 
-      <section id="hizmetler" className="bg-gray-100 py-16 px-4">
+      <section id="hizmetler" className="bg-white py-12 px-4">
         <div className="max-w-5xl mx-auto">
-          <h3 className="text-3xl font-semibold mb-6">Hizmetlerimiz</h3>
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 list-disc pl-6">
-            <li>Havalimanı Transfer Hizmetleri</li>
-            <li>Özel Şoförlü Araç Kiralama</li>
-            <li>Şehirlerarası VIP Ulaşım</li>
-            <li>Kurumsal Transfer ve Toplantı Hizmetleri</li>
-            <li>Turistik ve VIP Turlar</li>
+          <h3 className="text-2xl font-semibold mb-4">Hizmetlerimiz</h3>
+          <ul className="list-disc pl-6 space-y-2">
+            <li>Havalimanı Karşılama ve Transfer</li>
+            <li>Şehir İçi ve Şehirlerarası Özel Transfer</li>
+            <li>Günlük Şoförlü Araç Kiralama</li>
+            <li>Kurumsal Toplantı & Etkinlik Transferleri</li>
+            <li>Turistik Gezi ve VIP Turlar</li>
           </ul>
         </div>
       </section>
 
-      <section id="iletisim" className="py-16 px-4 bg-white">
-        <div className="max-w-3xl mx-auto text-center">
-          <h3 className="text-2xl font-semibold mb-4">İletişim</h3>
+      <section id="iletisim" className="bg-gray-200 py-12 px-4">
+        <div className="max-w-2xl mx-auto text-center">
+          <h3 className="text-xl font-semibold mb-2">İletişim</h3>
           <p>Telefon: 0539 526 75 69</p>
           <p>E-posta: byhaliltayfur@hotmail.com</p>
           <p>Instagram: @yolcutransferi (yakında)</p>
