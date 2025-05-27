@@ -1,7 +1,3 @@
-import { NextResponse } from "next/server";
-import axios from "axios";
-import cheerio from "cheerio";
-
 // ÖRNEK! Her siteye göre fonksiyon ayrı ayrı yazılır
 async function progoFiyatAl({ from, to, arac, kisi, tarih }) {
   // Buradaki URL ve parametreler tamamen ÖRNEKTİR!
