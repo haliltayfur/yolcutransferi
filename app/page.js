@@ -27,16 +27,16 @@ export default function Home() {
     <main className="relative min-h-screen flex flex-col">
       {/* Responsive arka plan */}
       <div className="fixed inset-0 -z-10">
-        <Image
-          src="/hero-bg.jpg"
-          alt="YolcuTransferi VIP Transfer"
-          fill
-          style={{ objectFit: "cover", objectPosition: "center" }}
-          priority
-          quality={90}
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-black/60" />
+       <Image
+  src="/hero-bg.jpg"
+  alt="YolcuTransferi VIP Transfer"
+  fill
+  style={{ objectFit: "cover", objectPosition: "center top" }} // center'dan "center top" yap!
+  priority
+  quality={90}
+  sizes="100vw"
+/>
+        <div className="absolute inset-0 bg-black/1" />
       </div>
 
       {/* HEADER */}
