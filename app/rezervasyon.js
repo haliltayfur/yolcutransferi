@@ -1,121 +1,167 @@
 "use client";
 import { useState } from "react";
-import FiyatGoster from "./fiyatgoster";
-import Harita from "./harita";
-import locations from "../data/locations.json"; // Kendi dizinine göre kontrol et
 
-// Mapbox Token (kendi dashboardundan al!)
-const MAPBOX_TOKEN = "BURAYA_KENDI_MAPBOX_TOKENINI_YAPISTIR";
+const sehirler = [
+  "İstanbul", "Ankara", "İzmir", "Antalya", "Bodrum", "Trabzon",
+  "Sabiha Gökçen Havalimanı", "İstanbul Havalimanı", "Esenboğa Havalimanı"
+];
 
-function LocationAutocomplete({ label, value, onChange }) {
-  const [input, setInput] = useState(value || "");
-  const [suggestions, setSuggestions] = useState([]);
-  const havalimaniList = [
-    "İstanbul Havalimanı", "Sabiha Gökçen Havalimanı", "Esenboğa Havalimanı",
-    "Antalya Havalimanı", "Adnan Menderes Havalimanı", "Dalaman Havalimanı"
-  ];
-  function handleInput(e) {
-    const val = e.target.value;
-    setInput(val);
-    if (val.length < 2) return setSuggestions([]);
-    const all = [];
-    locations.forEach(ilObj => {
-      if (ilObj.il.toLowerCase().includes(val.toLowerCase())) all.push(ilObj.il);
-      ilObj.ilceler.forEach(ilceObj => {
-        if (ilceObj.ilce.toLowerCase().includes(val.toLowerCase())) all.push(`${ilObj.il} / ${ilceObj.ilce}`);
-        ilceObj.mahalleler.forEach(m => {
-          if (m.toLowerCase().includes(val.toLowerCase())) all.push(`${ilObj.il} / ${ilceObj.ilce} / ${m}`);
-        });
-      });
-    });
-    havalimaniList.forEach(hav => {
-      if (hav.toLowerCase().includes(val.toLowerCase())) all.push(hav);
-    });
-    setSuggestions(all.slice(0, 8));
-  }
-  function selectOption(opt) {
-    setInput(opt);
-    setSuggestions([]);
-    if (onChange) onChange(opt);
-  }
-  return (
-    <div className="w-full relative">
-      <label className="font-semibold mb-1 text-gold block">{label}</label>
-      <input
-        className="w-full px-3 py-2 rounded-lg border border-gray-400 focus:ring-2 focus:ring-gold text-black"
-        value={input}
-        onChange={handleInput}
-        placeholder="İl / ilçe / mahalle / havalimanı"
-        autoComplete="off"
-      />
-      {suggestions.length > 0 && (
-        <ul className="bg-white text-black border border-gold rounded-xl mt-1 z-40 shadow max-h-56 overflow-auto absolute w-full">
-          {suggestions.map((s, i) => (
-            <li key={i} className="p-2 hover:bg-gold/40 cursor-pointer" onClick={() => selectOption(s)}>
-              {s}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
+const aracTipleri = [
+  "Ekonomik", "Standart", "Lüks", "Premium Elite", "Premium +++", "Dron Transferi", "Diğer"
+];
 
-export default function RezervasyonPage() {
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [mesafe, setMesafe] = useState(null);
-  const [aracTip, setAracTip] = useState("VIP Vito");
-  const [fiyat, setFiyat] = useState(null);
+const yolcuSayilari = Array.from({ length: 10 }, (_, i) => (i + 1).toString()).concat("Diğer");
 
-  // Mesafe değiştiğinde fiyatı otomatik hesapla
-  function hesaplaFiyat(km) {
-    // Örnek fiyatlandırma: ilk 20 km 1500 TL, sonrası km başı 25 TL (VIP Vito)
-    // İleride araç tipine göre değişir, çarpan eklenir
-    let tl = 1500;
-    if (km > 20) tl += (km - 20) * 25;
-    if (aracTip === "Maybach") tl *= 1.7;
-    if (aracTip === "Ekonomik") tl *= 0.7;
-    if (aracTip === "Dron Transfer") tl *= 2.0;
-    setFiyat(Math.round(tl));
-  }
+export default function Rezervasyon() {
+  const [nereden, setNereden] = useState("");
+  const [nereye, setNereye] = useState("");
+  const [tarih, setTarih] = useState("");
+  const [saat, setSaat] = useState("");
+  const [arac, setArac] = useState(aracTipleri[0]);
+  const [kisi, setKisi] = useState("1");
+  const [email, setEmail] = useState("");
+  const [telefon, setTelefon] = useState("");
+  const [not, setNot] = useState("");
 
-  // Haritadan gelen mesafe km olarak
-  function handleMesafe(m) {
-    setMesafe(m);
-    hesaplaFiyat(m);
-  }
+  // Filtreleme/autocomplete
+  const filterLoc = (input) =>
+    !input
+      ? []
+      : sehirler.filter((opt) => opt.toLowerCase().includes(input.toLowerCase()));
+
+  const [neredenOpts, setNeredenOpts] = useState([]);
+  const [nereyeOpts, setNereyeOpts] = useState([]);
 
   return (
-    <main className="min-h-[90vh] flex flex-col items-center bg-black/20 pt-8 pb-10">
-      <section className="w-full max-w-2xl bg-black/80 rounded-2xl shadow-lg px-8 py-8 border border-gold mb-10">
-        <h1 className="text-2xl md:text-3xl font-bold text-gold mb-7 text-center">VIP Transfer Rezervasyonu</h1>
-        <div className="flex flex-col gap-5">
-          <LocationAutocomplete label="Nereden" value={from} onChange={setFrom} />
-          <LocationAutocomplete label="Nereye" value={to} onChange={setTo} />
-          <div>
-            <label className="font-semibold text-gold mr-3">Araç Seçimi:</label>
-            <select className="px-3 py-2 rounded-lg border" value={aracTip} onChange={e => setAracTip(e.target.value)}>
-              <option>VIP Vito</option>
-              <option>Maybach</option>
-              <option>Ekonomik</option>
-              <option>Dron Transfer</option>
+    <main className="max-w-2xl mx-auto px-4 py-10">
+      <h1 className="text-2xl font-bold text-gold mb-6 text-center">Transfer Rezervasyon Formu</h1>
+      <form className="bg-black/70 rounded-xl shadow-lg p-7 flex flex-col gap-5" onSubmit={e => e.preventDefault()}>
+        {/* Nereden */}
+        <div>
+          <label className="text-gray-200 font-semibold">Nereden</label>
+          <input
+            className="mt-1 w-full p-3 rounded-lg bg-gray-900/90 text-gold border border-gold/30 focus:outline-none"
+            placeholder="Şehir / Havalimanı yazın"
+            value={nereden}
+            onChange={e => {
+              setNereden(e.target.value);
+              setNeredenOpts(filterLoc(e.target.value));
+            }}
+            list="nereden-list"
+            required
+          />
+          <datalist id="nereden-list">
+            {neredenOpts.map(opt => <option key={opt}>{opt}</option>)}
+          </datalist>
+        </div>
+        {/* Nereye */}
+        <div>
+          <label className="text-gray-200 font-semibold">Nereye</label>
+          <input
+            className="mt-1 w-full p-3 rounded-lg bg-gray-900/90 text-gold border border-gold/30 focus:outline-none"
+            placeholder="Şehir / Havalimanı yazın"
+            value={nereye}
+            onChange={e => {
+              setNereye(e.target.value);
+              setNereyeOpts(filterLoc(e.target.value));
+            }}
+            list="nereye-list"
+            required
+          />
+          <datalist id="nereye-list">
+            {nereyeOpts.map(opt => <option key={opt}>{opt}</option>)}
+          </datalist>
+        </div>
+        {/* Tarih - Saat */}
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="text-gray-200 font-semibold">Tarih</label>
+            <input
+              type="date"
+              className="mt-1 w-full p-3 rounded-lg bg-gray-900/90 text-gold border border-gold/30 focus:outline-none"
+              value={tarih}
+              onChange={e => setTarih(e.target.value)}
+              required
+            />
+          </div>
+          <div className="flex-1">
+            <label className="text-gray-200 font-semibold">Saat</label>
+            <input
+              type="time"
+              className="mt-1 w-full p-3 rounded-lg bg-gray-900/90 text-gold border border-gold/30 focus:outline-none"
+              value={saat}
+              onChange={e => setSaat(e.target.value)}
+              required
+            />
+          </div>
+        </div>
+        {/* Araç Tipi - Kişi */}
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="text-gray-200 font-semibold">Araç Tipi</label>
+            <select
+              className="mt-1 w-full p-3 rounded-lg bg-gray-900/90 text-gold border border-gold/30 focus:outline-none"
+              value={arac}
+              onChange={e => setArac(e.target.value)}
+            >
+              {aracTipleri.map(tip => (
+                <option key={tip}>{tip}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1">
+            <label className="text-gray-200 font-semibold">Kişi Sayısı</label>
+            <select
+              className="mt-1 w-full p-3 rounded-lg bg-gray-900/90 text-gold border border-gold/30 focus:outline-none"
+              value={kisi}
+              onChange={e => setKisi(e.target.value)}
+            >
+              {yolcuSayilari.map(sayi => (
+                <option key={sayi}>{sayi}</option>
+              ))}
             </select>
           </div>
         </div>
-      </section>
-      {/* Harita ve mesafe */}
-      <section className="w-full max-w-2xl">
-        {(from && to) && (
-          <Harita from={from} to={to} token={MAPBOX_TOKEN} onMesafe={handleMesafe} />
-        )}
-      </section>
-      {/* Fiyat gösterimi */}
-      {fiyat && (
-        <section className="w-full max-w-2xl mt-8 flex flex-col items-center">
-          <FiyatGoster tlTutar={fiyat} />
-        </section>
-      )}
+        {/* Email - Telefon */}
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="text-gray-200 font-semibold">E-Posta</label>
+            <input
+              type="email"
+              className="mt-1 w-full p-3 rounded-lg bg-gray-900/90 text-gold border border-gold/30 focus:outline-none"
+              placeholder="E-Posta adresiniz"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="flex-1">
+            <label className="text-gray-200 font-semibold">Telefon</label>
+            <input
+              type="tel"
+              className="mt-1 w-full p-3 rounded-lg bg-gray-900/90 text-gold border border-gold/30 focus:outline-none"
+              placeholder="05xxxxxxxxx"
+              value={telefon}
+              onChange={e => setTelefon(e.target.value)}
+              required
+            />
+          </div>
+        </div>
+        {/* Not */}
+        <div>
+          <label className="text-gray-200 font-semibold">Ekstra Not (isteğe bağlı)</label>
+          <textarea
+            className="mt-1 w-full p-3 rounded-lg bg-gray-900/90 text-gold border border-gold/30 focus:outline-none"
+            rows={2}
+            placeholder="Özel istek/ek bilgi"
+            value={not}
+            onChange={e => setNot(e.target.value)}
+          />
+        </div>
+        <button className="mt-3 bg-gold text-black font-semibold py-3 rounded-xl text-lg shadow hover:bg-yellow-400 transition">
+          Rezervasyon Yap
+        </button>
+      </form>
     </main>
   );
 }
