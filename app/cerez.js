@@ -1,18 +1,26 @@
+"use client";
+
 export default function Cerez() {
   return (
-    <main className="max-w-3xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold text-gold mb-6 text-center">Çerez Politikası</h1>
-      <div className="space-y-6 text-gray-200 text-base">
+    <main className="max-w-3xl mx-auto px-4 py-14">
+      <h2 className="text-3xl md:text-4xl font-extrabold text-gold mb-7 text-center">
+        Çerez (Cookie) Politikası
+      </h2>
+      <div className="bg-black/70 border border-gold/20 rounded-xl shadow-lg p-8 text-gray-200 text-base space-y-5">
         <p>
-          YolcuTransferi.com olarak web sitemizde ziyaretçi deneyimini iyileştirmek ve hizmetlerimizi geliştirmek için çerezler kullanmaktayız.
+          YolcuTransferi.com olarak, kullanıcı deneyimini geliştirmek ve hizmetlerimizi iyileştirmek için çerezler (cookies) kullanıyoruz.
         </p>
-        <ul className="list-disc ml-6">
-          <li>Ziyaretçi bilgileriniz asla üçüncü kişilerle paylaşılmaz.</li>
-          <li>Çerezler sadece istatistiksel analiz ve site işlevselliği için kullanılır.</li>
-          <li>Dilerseniz tarayıcınızın ayarlarından çerezleri silebilir veya engelleyebilirsiniz.</li>
-        </ul>
         <p>
-          Çerez politikamızla ilgili tüm sorular için info@yolcutransferi.com adresine e-posta gönderebilirsiniz.
+          Çerezler; ziyaret ettiğiniz internet siteleri tarafından tarayıcınıza gönderilen ve bilgisayarınızda depolanan küçük metin dosyalarıdır.
+        </p>
+        <p>
+          Çerezler sayesinde; site kullanım tercihlerinizi hatırlayabilir, web sitemizi daha verimli ve kişiselleştirilmiş şekilde sunabiliriz.
+        </p>
+        <p>
+          Tarayıcı ayarlarınızdan çerezleri dilediğiniz zaman silebilir veya engelleyebilirsiniz. Çerezlerin kapatılması, bazı hizmetlerimizin kısıtlı çalışmasına yol açabilir.
+        </p>
+        <p>
+          Detaylı bilgi için <b>info@yolcutransferi.com</b> adresinden bize ulaşabilirsiniz.
         </p>
       </div>
     </main>
