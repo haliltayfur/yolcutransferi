@@ -1,7 +1,3 @@
-// app/api/get-euro/route.js
-import { NextResponse } from "next/server";
-import cheerio from "cheerio";
-
 export async function GET() {
   const url = "https://www.yapikredi.com.tr/en/yatirimci-kosesi/doviz-kurlari";
   try {
