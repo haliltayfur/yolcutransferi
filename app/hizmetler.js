@@ -1,26 +1,53 @@
-export default function Hizmetler() {
+"use client";
+import Image from "next/image";
+
+const HIZMETLER = [
+  {
+    title: "VIP Havalimanı Transferi",
+    desc: "Türkiye’nin tüm havalimanlarında, Mercedes Maybach, Vito, lüks minivan ve özel araçlarla profesyonel, konforlu transfer.",
+    icon: "/icon-havalimani.png"
+  },
+  {
+    title: "Şehirler Arası Transfer",
+    desc: "İstanbul, Bodrum, Antalya, İzmir ve tüm şehirler arası yolculuklarınızda güvenli ve sigortalı taşımacılık.",
+    icon: "/icon-sehir.png"
+  },
+  {
+    title: "Dron Yolcu Transferi",
+    desc: "Dron ile kısa mesafe VIP taşımacılık: geleceğin ulaşımıyla tanışın.",
+    icon: "/icon-dron.png"
+  },
+  {
+    title: "Kurumsal & Toplu Transfer",
+    desc: "Toplantı, seminer, fuar ve şirket organizasyonlarında filomuzla toplu taşıma çözümleri.",
+    icon: "/icon-kurumsal.png"
+  },
+  {
+    title: "Tur & Gezi Transferi",
+    desc: "Tatil, şehir turu ve özel gezi planlarınızda profesyonel sürücülerimiz ve lüks araçlarımızla hizmetinizdeyiz.",
+    icon: "/icon-tur.png"
+  },
+];
+
+export default function Hizmetlerimiz() {
   return (
-    <main className="max-w-4xl mx-auto py-12 px-4">
-      <h1 className="text-3xl font-bold text-gold mb-4 text-center">Hizmetlerimiz</h1>
-      <div className="text-lg text-gray-200 space-y-6">
-        <p>
-          <strong>VIP Transfer:</strong> YolcuTransferi.com ile ultra lüks araçlar ve özel şoförlerle havalimanından veya istediğiniz noktadan güvenli, konforlu ve prestijli ulaşım.
-        </p>
-        <p>
-          <strong>Havalimanı Transferi:</strong> İstanbul, Antalya, İzmir, Bodrum, Ankara ve Türkiye'nin tüm büyük havalimanlarından 7/24 transfer hizmeti.
-        </p>
-        <p>
-          <strong>Dron ile Transfer:</strong> Türkiye’de bir ilk! VIP yolcu dronlarıyla yeni nesil transfer deneyimi için bize ulaşın.
-        </p>
-        <p>
-          <strong>Kurumsal Taşımacılık:</strong> Şirketler ve iş dünyasına özel filo, sürekli servis ve çözüm odaklı taşımacılık çözümleri.
-        </p>
-        <ul className="list-disc ml-6 mt-4 text-base">
-          <li>7/24 online rezervasyon</li>
-          <li>Fiyat garantisi ve şeffaflık</li>
-          <li>Sigortalı, belgeli araç ve şoförler</li>
-          <li>Her ihtiyaca uygun araç seçenekleri</li>
-        </ul>
+    <main className="max-w-4xl mx-auto px-4 py-14">
+      <h2 className="text-3xl md:text-4xl font-extrabold text-gold mb-6 text-center">
+        Hizmetlerimiz
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+        {HIZMETLER.map(hizmet => (
+          <div key={hizmet.title} className="flex items-center bg-black/70 rounded-2xl shadow-lg p-6 border border-gold/25">
+            <Image src={hizmet.icon} alt={hizmet.title} width={54} height={54} className="mr-5" />
+            <div>
+              <h3 className="font-bold text-xl text-gold mb-2">{hizmet.title}</h3>
+              <p className="text-gray-200">{hizmet.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-12 text-center text-gray-400 text-sm">
+        Tüm transferlerimiz sigortalı, lisanslı ve müşteri memnuniyeti odaklıdır.
       </div>
     </main>
   );
