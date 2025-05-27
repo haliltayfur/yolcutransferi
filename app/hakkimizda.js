@@ -1,24 +1,34 @@
+"use client";
+
 export default function Hakkimizda() {
   return (
-    <main className="max-w-3xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold text-gold mb-6 text-center">Hakkımızda</h1>
-      <div className="space-y-6 text-gray-200 text-lg">
+    <main className="max-w-3xl mx-auto px-4 py-14">
+      <h2 className="text-3xl md:text-4xl font-extrabold text-gold mb-7 text-center">
+        Hakkımızda
+      </h2>
+      <div className="bg-black/70 border border-gold/20 rounded-xl shadow-lg p-8 text-lg text-gray-200 space-y-5">
         <p>
-          <strong className="text-gold">YolcuTransferi.com</strong> yeni nesil VIP transfer platformudur. Amacımız, yolculara ve kurumsal firmalara en güvenli, konforlu ve teknolojik ulaşım çözümlerini sunmaktır. 
+          <b>YolcuTransferi.com</b> olarak, lüks ulaşım sektöründe yepyeni bir çağ başlatıyoruz.
+          Müşterilerimize; <b>VIP araçlar, dron transferi</b> ve özel çözümlerle benzersiz bir deneyim sunmayı hedefliyoruz.
         </p>
         <p>
-          Tüm Türkiye genelinde, profesyonel şoför kadrosu ve lüks filomuz ile <span className="text-gold">havalimanı transferi</span>, <span className="text-gold">şehirler arası özel taşımacılık</span> ve <span className="text-gold">dron ile yolcu taşıma</span> hizmetleri veriyoruz.
+          İstanbul’dan Bodrum’a, Antalya’dan İzmir’e ve Türkiye’nin dört bir yanında, deneyimli sürücülerimiz ve geniş araç filomuz ile <b>güvenli, konforlu ve sigortalı</b> taşımacılık hizmeti veriyoruz.
+          Dijital altyapımız sayesinde, dilediğiniz yerden 7/24 online rezervasyon yapabilir; ödemelerinizi güvenle gerçekleştirebilirsiniz.
         </p>
         <p>
-          <span className="text-gold font-semibold">Neden Biz?</span><br />
-          - 7/24 online rezervasyon, gerçek zamanlı fiyat ve kolay ödeme<br />
-          - Her ihtiyaca uygun araç seçenekleri ve sigortalı hizmet<br />
-          - Türkiye’nin her yerine VIP ve ekonomik transfer<br />
-          - %100 müşteri memnuniyeti odaklı yaklaşım
+          Şirketimiz, <b>TÜRSAB üyesi</b> olup, tüm transferlerimiz yasal ve sigortalıdır. En üst düzey müşteri memnuniyeti ve şeffaf fiyat politikası ile yolculuklarınızı kolaylaştırıyoruz.
         </p>
         <p>
-          <span className="text-gold">Dijitalleşen ulaşımda öncü</span> olma hedefimizle, her zaman en yenilikçi teknolojileri kullanıyor ve kullanıcılarımıza maksimum kolaylık sunuyoruz.
+          <b>YolcuTransferi.com</b>’da yenilikçi teknolojileri ve müşteri odaklı yaklaşımı birleştirerek, “Türkiye’nin en güvenilir VIP transfer platformu” olma yolunda ilerliyoruz.  
         </p>
+        <div className="text-gold font-semibold mt-7">
+          “Konfor, hız ve güven bizim işimiz!”
+        </div>
+      </div>
+      <div className="mt-8 text-center text-gray-400 text-sm">
+        <b>Adres:</b> Ümraniye Plazalar Bölgesi, İstanbul<br />
+        <b>E-posta:</b> info@yolcutransferi.com<br />
+        <b>Telefon:</b> +90 539 526 75 69
       </div>
     </main>
   );
