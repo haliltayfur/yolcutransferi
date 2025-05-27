@@ -1,0 +1,11 @@
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #111;
+  color: #fff;
+}
+.text-gold { color: #ffd700; }
+.bg-gold { background-color: #ffd700; }
