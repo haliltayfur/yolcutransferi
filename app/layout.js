@@ -1,5 +1,5 @@
 // app/layout.js (Next.js 13/14 için)
-import "./globals.css";
+import '../styles/globals.css';
 import { Metadata } from 'next';
 import Script from "next/script";
 
