@@ -1,86 +1,47 @@
-import Image from "next/image";
-
-const ARACLAR = [
-  {
-    ad: "Mercedes Maybach Sedan",
-    tip: "Premium VIP",
-    ozellikler: [
-      "Deri koltuk, full konfor",
-      "Özel şoför, soğutmalı içecek",
-      "WiFi, masa, priz, ekran"
-    ],
-    resim: "/maybach.jpg"
-  },
-  {
-    ad: "Mercedes Vito VIP",
-    tip: "Lüks Minivan",
-    ozellikler: [
-      "7 yolcu, lüks iç dizayn",
-      "Elektrikli kapı, LCD TV",
-      "Şoförlü, ekstra bagaj"
-    ],
-    resim: "/vito.jpg"
-  },
-  {
-    ad: "Cadillac Escalade",
-    tip: "Premium SUV",
-    ozellikler: [
-      "Yüksek güvenlik ve konfor",
-      "VIP transfer, şık görünüm",
-      "Büyük aile ve iş grubu"
-    ],
-    resim: "/escalade.jpg"
-  },
-  {
-    ad: "Dron Transfer (eVTOL)",
-    tip: "Yenilikçi Dron",
-    ozellikler: [
-      "2-4 yolcu, şehir içi hava transfer",
-      "Otonom, elektrikli, hızlı",
-      "Çok yakında!"
-    ],
-    resim: "/dron.jpg"
-  },
-  {
-    ad: "Ekonomik Sedan",
-    tip: "Standart",
-    ozellikler: [
-      "Ekonomik fiyat, konfor",
-      "Şoförlü, hızlı transfer",
-      "Küçük gruplar için ideal"
-    ],
-    resim: "/sedan.jpg"
-  }
-];
-
-export default function AraclarPage() {
+export default function Araclar() {
   return (
-    <main className="min-h-[80vh] flex flex-col items-center justify-center bg-black/30 py-8">
-      <section className="w-full max-w-6xl bg-black/70 rounded-2xl shadow-lg px-6 py-10 border border-gold">
-        <h1 className="text-2xl md:text-3xl font-bold text-gold mb-6 text-center">
-          Araç Filomuz
-        </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
-          {ARACLAR.map(arac => (
-            <div key={arac.ad} className="bg-black/60 border border-gold/40 rounded-xl shadow flex flex-col items-center p-4">
-              <div className="relative w-full h-48 mb-3 rounded-lg overflow-hidden">
-                <Image
-                  src={arac.resim}
-                  alt={arac.ad}
-                  fill
-                  style={{ objectFit: "cover", objectPosition: "center" }}
-                  className="rounded-lg"
-                />
-              </div>
-              <h2 className="text-lg text-gold font-bold mb-1">{arac.ad}</h2>
-              <div className="text-xs text-gray-400 mb-1">{arac.tip}</div>
-              <ul className="text-gray-200 text-sm list-disc pl-5 mb-2">
-                {arac.ozellikler.map((ozellik, idx) => <li key={idx}>{ozellik}</li>)}
-              </ul>
-            </div>
-          ))}
+    <main className="max-w-4xl mx-auto py-12 px-4">
+      <h1 className="text-3xl font-bold text-gold mb-4 text-center">Araç Filomuz</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+        <div className="bg-black/50 rounded-xl p-6 flex flex-col items-center">
+          <img src="/maybach.png" alt="Maybach" className="w-32 h-20 object-contain mb-3" />
+          <span className="font-semibold text-lg text-gold">Maybach Sedan</span>
+          <span className="text-gray-200 text-sm text-center mt-2">
+            Ultra lüks, prestijli ve son teknolojiyle donatılmış, özel şoförlü transferler için en üst düzey konfor.
+          </span>
         </div>
-      </section>
+        <div className="bg-black/50 rounded-xl p-6 flex flex-col items-center">
+          <img src="/vito.png" alt="Mercedes Vito" className="w-32 h-20 object-contain mb-3" />
+          <span className="font-semibold text-lg text-gold">Mercedes Vito</span>
+          <span className="text-gray-200 text-sm text-center mt-2">
+            Geniş iç hacmi, VIP dizaynı ve yüksek güvenlik standartları ile aile ve grup transferleri için mükemmel seçim.
+          </span>
+        </div>
+        <div className="bg-black/50 rounded-xl p-6 flex flex-col items-center">
+          <img src="/premium.png" alt="Premium Van" className="w-32 h-20 object-contain mb-3" />
+          <span className="font-semibold text-lg text-gold">Premium Elite Van</span>
+          <span className="text-gray-200 text-sm text-center mt-2">
+            Toplantı, özel etkinlik veya uzun yolculuklar için; şık, konforlu ve teknolojik.
+          </span>
+        </div>
+        <div className="bg-black/50 rounded-xl p-6 flex flex-col items-center">
+          <img src="/dron.png" alt="Dron Transfer" className="w-32 h-20 object-contain mb-3" />
+          <span className="font-semibold text-lg text-gold">Dron ile Transfer</span>
+          <span className="text-gray-200 text-sm text-center mt-2">
+            Geleceğin transferi burada! VIP yolcu taşıma dronlarımızla, hızlı ve prestijli ulaşım.
+          </span>
+        </div>
+        <div className="bg-black/50 rounded-xl p-6 flex flex-col items-center">
+          <img src="/ekonomik.png" alt="Ekonomik Araç" className="w-32 h-20 object-contain mb-3" />
+          <span className="font-semibold text-lg text-gold">Ekonomik Araç</span>
+          <span className="text-gray-200 text-sm text-center mt-2">
+            Konforlu, güvenli ve uygun fiyatlı transferler için ekonomik seçenekler.
+          </span>
+        </div>
+      </div>
+      <div className="text-center mt-10 text-gray-300 text-base">
+        Tüm araçlarımız <span className="text-gold font-semibold">bakımlı, sigortalı ve yasal</span> olarak hizmet vermektedir.
+      </div>
     </main>
   );
 }
