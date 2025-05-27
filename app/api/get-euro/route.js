@@ -1,3 +1,5 @@
+import axios from "axios";
+import cheerio from "cheerio";
 export async function GET() {
   const url = "https://www.yapikredi.com.tr/en/yatirimci-kosesi/doviz-kurlari";
   try {
