@@ -1,25 +1,32 @@
+"use client";
+
 export default function Iade() {
   return (
-    <main className="max-w-3xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold text-gold mb-6 text-center">İade Politikası</h1>
-      <div className="space-y-6 text-gray-200 text-base">
-        <ul className="list-disc ml-6">
-          <li>
-            Transfer saatinden en az <span className="text-gold font-semibold">6 saat önce</span> yapılan iptallerde, ücretin tamamı iade edilir.
-          </li>
-          <li>
-            Son 6 saat içinde yapılan iptallerde <span className="text-gold font-semibold">herhangi bir iade yapılmaz</span>. 
-            (Yolcu için rezervasyon ve şoför için planlama masrafı oluştuğu için)
-          </li>
-          <li>
-            Müşteri, iptal talebini info@yolcutransferi.com adresine e-posta ile iletmelidir.
-          </li>
-          <li>
-            İade işlemleri 1-3 iş günü içinde gerçekleştirilir.
-          </li>
-        </ul>
+    <main className="max-w-3xl mx-auto px-4 py-14">
+      <h2 className="text-3xl md:text-4xl font-extrabold text-gold mb-7 text-center">
+        İade Politikası
+      </h2>
+      <div className="bg-black/70 border border-gold/20 rounded-xl shadow-lg p-8 text-gray-200 text-base space-y-5">
         <p>
-          Detaylar ve özel durumlar için iletişime geçebilirsiniz.
+          YolcuTransferi.com üzerinden yapılan transfer rezervasyonlarının iptal ve iade koşulları aşağıda sunulmuştur.
+        </p>
+        <p>
+          <b>• Transfer saatinden en az 6 saat önce</b> yapılan iptallerde, ödediğiniz ücretin tamamı <b>iade edilir</b>.
+        </p>
+        <p>
+          <b>• 6 saatten az</b> süre kala yapılan iptallerde veya yolculuk başlamışsa, <b>herhangi bir iade yapılmaz</b>.
+        </p>
+        <p>
+          <b>• Şoförün veya aracın geç gelmesi/hiç gelmemesi</b> durumunda ücretin tamamı iade edilir.
+        </p>
+        <p>
+          <b>• Transfer başlamışsa</b> (araç hareket etmişse), kalan güzergah için ücret iadesi yapılmaz.
+        </p>
+        <p>
+          <b>• Ödeme iadesi</b>, iptal talebiniz onaylandıktan sonra en geç 5 iş günü içinde, ödemenizi yaptığınız karta veya hesabınıza iade edilir.
+        </p>
+        <p>
+          <b>• Tüm talepleriniz için</b> info@yolcutransferi.com adresine mail atabilirsiniz.
         </p>
       </div>
     </main>
