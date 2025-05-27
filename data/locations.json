@@ -1,0 +1,59 @@
+[
+  {
+    "il": "İstanbul",
+    "ilceler": [
+      {
+        "ilce": "Kadıköy",
+        "mahalleler": ["Moda", "Kozyatağı", "Fenerbahçe", "Suadiye", "Acıbadem"]
+      },
+      {
+        "ilce": "Beşiktaş",
+        "mahalleler": ["Etiler", "Levent", "Akatlar", "Bebek", "Arnavutköy"]
+      }
+    ]
+  },
+  {
+    "il": "Ankara",
+    "ilceler": [
+      {
+        "ilce": "Çankaya",
+        "mahalleler": ["Bahçelievler", "Kavaklıdere", "Çayyolu"]
+      },
+      {
+        "ilce": "Keçiören",
+        "mahalleler": ["Etlik", "Bağlum", "Aşağı Eğlence"]
+      }
+    ]
+  },
+  {
+    "il": "İzmir",
+    "ilceler": [
+      {
+        "ilce": "Bornova",
+        "mahalleler": ["Kazımdirik", "Erzene"]
+      },
+      {
+        "ilce": "Karşıyaka",
+        "mahalleler": ["Bostanlı", "Alaybey"]
+      }
+    ]
+  },
+  {
+    "il": "Bursa",
+    "ilceler": [
+      {
+        "ilce": "Nilüfer",
+        "mahalleler": ["Görükle", "İhsaniye"]
+      }
+    ]
+  },
+  {
+    "il": "Antalya",
+    "ilceler": [
+      {
+        "ilce": "Muratpaşa",
+        "mahalleler": ["Fener", "Lara"]
+      }
+    ]
+  }
+]
