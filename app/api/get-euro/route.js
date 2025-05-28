@@ -1,5 +1,6 @@
 import axios from "axios";
 import cheerio from "cheerio";
+import { NextResponse } from "next/server";
 export async function GET() {
   const url = "https://www.yapikredi.com.tr/en/yatirimci-kosesi/doviz-kurlari";
   try {
