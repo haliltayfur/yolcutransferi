@@ -1,3 +1,4 @@
+// app/page.js
 "use client";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,7 +14,7 @@ export default function Home() {
   return (
     <main className="min-h-screen w-full bg-black text-white overflow-x-hidden flex flex-col">
 
-      {/* ======= ÜST MENÜ (BANNER) ======= */}
+      {/* Banner */}
       <header className="w-full flex items-center justify-between px-6 md:px-20 py-5 bg-black z-50">
         <div className="flex items-center gap-2">
           <Image src="/logo-vip.png" alt="Logo" width={42} height={42} />
@@ -29,28 +30,23 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* ======= HERO RESMİ TAM BOY, HİÇBİR YERİ KESİLMEYECEK ======= */}
-      <section className="relative w-full flex justify-center items-center bg-black"
-        style={{ height: "calc(100vw * 0.42)", maxHeight: 650, minHeight: 380 }}
-      >
+      {/* Hero Resmi - FULLSCREEN, boşluksuz */}
+      <section className="relative w-full h-[500px] md:h-[700px] overflow-hidden">
         <Image
           src="/hero-bg.jpg"
           alt="YolcuTransferi VIP Transfer"
           fill
-          className="object-contain object-center"
+          className="object-cover object-center"
           priority
           quality={97}
           sizes="100vw"
-          style={{
-            objectFit: "contain",
-            objectPosition: "center",
-          }}
         />
       </section>
 
-      {/* ======= REZERVASYON KUTUSU ======= */}
+      {/* Rezervasyon Kutusu */}
       <section className="w-full flex justify-center mt-0 z-10">
         <div className="bg-white/95 shadow-2xl rounded-2xl px-6 py-7 max-w-3xl w-full flex flex-col md:flex-row md:items-end gap-4 border border-gray-200 backdrop-blur mx-3">
+          {/* ... rezervasyon alanları ... */}
           <div className="flex flex-col flex-1 min-w-[150px]">
             <label className="font-bold text-xs mb-1 text-gray-700">Nereden?</label>
             <input
@@ -108,16 +104,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ======= SLOGAN / AVANTAJ KUTULARI ======= */}
+      {/* Slogan ve avantajlar */}
       <section className="flex flex-col items-center justify-center pt-10 pb-8 px-2 md:px-0">
         <h2 className="text-2xl font-extrabold text-gold mb-4 text-center">Güvenilir Dijital VIP Transfer</h2>
         <p className="max-w-3xl text-lg text-gray-300 text-center mb-6">
           Türkiye'nin her yerinde VIP yolcu taşımacılığı ve dron transferde yeni çağ! Uygun fiyatlarla, 7/24 online rezervasyon ve premium hizmet deneyimi.
         </p>
-        {/* Avantaj kutuları istersek buraya eklenir */}
       </section>
 
-      {/* ======= FOOTER ======= */}
+      {/* Footer */}
       <footer className="w-full px-8 py-6 bg-black/90 flex flex-col md:flex-row items-center justify-between gap-3 mt-auto">
         <div className="text-xs text-gray-400">&copy; 2025 YolcuTransferi.com</div>
         <div className="flex gap-6 items-center">
@@ -126,7 +121,6 @@ export default function Home() {
           <Link href="/iade" className="text-sm underline">İade Politikası</Link>
         </div>
       </footer>
-
     </main>
   );
 }
