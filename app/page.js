@@ -1,130 +1,126 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { FaWhatsapp, FaInstagram, FaTwitter, FaLock } from "react-icons/fa";
-import { MdOutlineSearch } from "react-icons/md";
 import { useState } from "react";
 
-const LANGS = [
-  { code: "tr", label: "TR" },
-  { code: "en", label: "EN" },
-  { code: "ru", label: "RU" }
-];
-
 export default function Home() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [locale, setLocale] = useState("tr");
-
-  // Dil seçince yönlendir
-  const handleLang = (lang) => {
-    setLocale(lang);
-    router.push("/" + lang);
-  };
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [passengers, setPassengers] = useState(1);
 
   return (
-    <main className="relative min-h-screen flex flex-col">
-      {/* Responsive arka plan */}
-      <div className="fixed inset-0 -z-10">
-        <Image
-          src="/hero-bg.jpg"
-          alt="YolcuTransferi VIP Transfer"
-          fill
-          style={{ objectFit: "cover", objectPosition: "center" }}
-          priority
-          quality={90}
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-black/60" />
-      </div>
+    <main className="min-h-screen w-full bg-black text-white overflow-x-hidden flex flex-col">
 
-      {/* HEADER */}
-      <header className="flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-5 bg-black/60 backdrop-blur-md z-20">
-        <div className="text-2xl md:text-3xl font-bold text-gold drop-shadow tracking-wide flex gap-2 items-center">
+      {/* ======== HEADER/BANNER ========= */}
+      <header className="w-full flex items-center justify-between px-6 md:px-20 py-5 bg-black bg-opacity-90 z-50">
+        <div className="flex items-center gap-2">
           <Image src="/logo-vip.png" alt="Logo" width={42} height={42} className="mr-2" />
-          YolcuTransferi.com
+          <span className="text-2xl md:text-3xl font-bold text-gold">YolcuTransferi.com</span>
         </div>
-        <nav className="flex gap-5 mt-3 md:mt-0 items-center text-lg">
+        <nav className="flex flex-wrap items-center gap-4 text-base">
           <Link href="/">Anasayfa</Link>
           <Link href="/hizmetler">Hizmetlerimiz</Link>
           <Link href="/araclar">Araçlar</Link>
           <Link href="/rezervasyon">Rezervasyon</Link>
           <Link href="/sss">SSS</Link>
           <Link href="/iletisim">İletişim</Link>
-          <Link href="/hakkimizda">Hakkımızda</Link>
-          <Link href="/blog">Blog</Link>
-          <Link href="/sozlesme">Sözleşmeler</Link>
-          <MdOutlineSearch className="w-6 h-6 hover:text-gold cursor-pointer" title="Ara" />
-          <FaWhatsapp className="w-6 h-6 hover:text-green-400 cursor-pointer" title="Whatsapp" />
-          <FaInstagram className="w-6 h-6 hover:text-pink-500 cursor-pointer" title="Instagram" />
-          <FaTwitter className="w-6 h-6 hover:text-blue-400 cursor-pointer" title="Twitter" />
-          <div className="flex gap-2 ml-6">
-            {LANGS.map(lang => (
-              <button
-                key={lang.code}
-                className={`px-2 text-sm rounded hover:bg-gold/20 transition ${locale === lang.code ? "font-bold text-gold" : ""}`}
-                onClick={() => handleLang(lang.code)}
-              >{lang.label}</button>
-            ))}
-          </div>
         </nav>
       </header>
 
-      {/* Banner + Slogan + Avantajlar */}
-      <section className="flex flex-col items-center justify-center pt-16 pb-6 px-4 md:px-0">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-gold drop-shadow-lg mb-6 text-center">
-          Güvenilir Dijital VIP Transfer
-        </h1>
-        <p className="max-w-3xl text-lg md:text-xl text-gray-100 text-center mb-6 drop-shadow">
-          Türkiye'nin her yerinde VIP yolcu taşımacılığı ve dron transferde yeni çağ! <br />
-          Uygun fiyatlarla, 7/24 online rezervasyon ve premium hizmet deneyimi.
-        </p>
-        <Link href="/rezervasyon">
-          <button className="bg-gold text-black font-semibold py-3 px-8 rounded-xl text-lg shadow-lg hover:bg-white transition">Transfer Rezervasyonu Yap</button>
-        </Link>
-        <div className="flex flex-wrap gap-5 justify-center mt-8">
-          <div className="bg-black/70 px-6 py-4 rounded-xl border border-gold/50 flex flex-col items-center min-w-[230px]">
-            <span className="font-bold text-lg text-gold">Transfer noktalarını seçin</span>
-            <span className="text-gray-300">Tüm şehirler ve havalimanları</span>
+      {/* ======== HERO GÖRSELİ ========= */}
+      <section className="relative w-full h-[400px] md:h-[570px] flex justify-center items-center overflow-hidden">
+        <Image
+          src="/hero-bg.jpg"
+          alt="YolcuTransferi VIP Transfer"
+          fill
+          className="object-cover object-center"
+          priority
+          quality={97}
+          sizes="100vw"
+        />
+        {/* Hero ÜZERİNDE hiçbir şey yok! */}
+      </section>
+
+      {/* ======= REZERVASYON FORMU ======= */}
+      <section className="w-full flex justify-center -mt-20 z-10">
+        <div className="bg-white/95 shadow-2xl rounded-2xl px-6 py-7 max-w-3xl w-full flex flex-col md:flex-row md:items-end gap-4 border border-gray-200 backdrop-blur mx-3">
+          <div className="flex flex-col flex-1 min-w-[150px]">
+            <label className="font-bold text-xs mb-1 text-gray-700">Nereden?</label>
+            <input
+              type="text"
+              placeholder="Şehir / İlçe / Mahalle"
+              className="rounded-md border border-gray-300 px-3 py-2 bg-white/90 text-black"
+              value={from}
+              onChange={e => setFrom(e.target.value)}
+            />
           </div>
-          <div className="bg-black/70 px-6 py-4 rounded-xl border border-gold/50 flex flex-col items-center min-w-[230px]">
-            <span className="font-bold text-lg text-gold">Araç tipinizi belirleyin</span>
-            <span className="text-gray-300">Vito, Maybach, Premium, Dron</span>
+          <div className="flex flex-col flex-1 min-w-[150px]">
+            <label className="font-bold text-xs mb-1 text-gray-700">Nereye?</label>
+            <input
+              type="text"
+              placeholder="Şehir / İlçe / Mahalle"
+              className="rounded-md border border-gray-300 px-3 py-2 bg-white/90 text-black"
+              value={to}
+              onChange={e => setTo(e.target.value)}
+            />
           </div>
-          <div className="bg-black/70 px-6 py-4 rounded-xl border border-gold/50 flex flex-col items-center min-w-[230px]">
-            <span className="font-bold text-lg text-gold">Rezervasyonunuzu yapın</span>
-            <span className="text-gray-300">Online ödeme ve canlı destek</span>
+          <div className="flex flex-col flex-1 min-w-[110px]">
+            <label className="font-bold text-xs mb-1 text-gray-700">Tarih</label>
+            <input
+              type="date"
+              className="rounded-md border border-gray-300 px-3 py-2 bg-white/90 text-black"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+            />
           </div>
-        </div>
-        <div className="mt-10 max-w-4xl w-full">
-          <h2 className="text-2xl font-bold text-gold mb-2 text-center">Neden YolcuTransferi.com?</h2>
-          <ul className="flex flex-wrap justify-center gap-6 text-lg text-gray-100">
-            <li className="bg-black/60 px-5 py-2 rounded-xl border border-gold/30">Kolay online rezervasyon</li>
-            <li className="bg-black/60 px-5 py-2 rounded-xl border border-gold/30">7/24 müşteri desteği</li>
-            <li className="bg-black/60 px-5 py-2 rounded-xl border border-gold/30">Fiyat avantajı ve şeffaflık</li>
-            <li className="bg-black/60 px-5 py-2 rounded-xl border border-gold/30">Tüm Türkiye'de hizmet</li>
-            <li className="bg-black/60 px-5 py-2 rounded-xl border border-gold/30">VIP ve Dron seçenekleri</li>
-            <li className="bg-black/60 px-5 py-2 rounded-xl border border-gold/30">Kurumsal ve özel çözümler</li>
-          </ul>
+          <div className="flex flex-col flex-1 min-w-[90px]">
+            <label className="font-bold text-xs mb-1 text-gray-700">Saat</label>
+            <input
+              type="time"
+              className="rounded-md border border-gray-300 px-3 py-2 bg-white/90 text-black"
+              value={time}
+              onChange={e => setTime(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col w-20 min-w-[70px]">
+            <label className="font-bold text-xs mb-1 text-gray-700">Kişi</label>
+            <select
+              className="rounded-md border border-gray-300 px-3 py-2 bg-white/90 text-black"
+              value={passengers}
+              onChange={e => setPassengers(e.target.value)}
+            >
+              {[...Array(10)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>{i + 1}</option>
+              ))}
+              <option value="other">Diğer</option>
+            </select>
+          </div>
+          <button className="bg-gold text-black font-semibold px-6 py-3 rounded-xl shadow-lg hover:bg-yellow-500 transition mt-5 md:mt-0 md:self-end">
+            Ara
+          </button>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="w-full px-8 py-6 bg-black/70 flex flex-col md:flex-row items-center justify-between gap-3 mt-auto">
-        <div className="flex items-center gap-3">
-          <FaLock className="text-green-400" />
-          <span className="text-sm text-gray-300">SSL ile korunuyor</span>
-        </div>
+      {/* ======= SAYFA DEVAMI (Alt bilgi) ======= */}
+      <section className="flex flex-col items-center justify-center pt-14 pb-8 px-2 md:px-0">
+        <h2 className="text-2xl font-extrabold text-gold mb-4 text-center">Güvenilir Dijital VIP Transfer</h2>
+        <p className="max-w-3xl text-lg text-gray-300 text-center mb-6">
+          Türkiye'nin her yerinde VIP yolcu taşımacılığı ve dron transferde yeni çağ! Uygun fiyatlarla, 7/24 online rezervasyon ve premium hizmet deneyimi.
+        </p>
+      </section>
+
+      {/* ======== FOOTER ========= */}
+      <footer className="w-full px-8 py-6 bg-black/90 flex flex-col md:flex-row items-center justify-between gap-3 mt-auto">
+        <div className="text-xs text-gray-400">&copy; 2025 YolcuTransferi.com</div>
         <div className="flex gap-6 items-center">
-          <Image src="/tursab-logo.png" alt="TURSAB" width={60} height={40} className="bg-white rounded-md px-1 py-1 object-contain" />
           <Link href="/sozlesme" className="text-sm underline">Mesafeli Satış Sözleşmesi</Link>
           <Link href="/gizlilik" className="text-sm underline">Gizlilik</Link>
           <Link href="/iade" className="text-sm underline">İade Politikası</Link>
-          <Link href="/cerez" className="text-sm underline">Çerez Politikası</Link>
         </div>
-        <div className="text-xs text-gray-400">&copy; 2025 YolcuTransferi.com</div>
       </footer>
+
     </main>
   );
 }
