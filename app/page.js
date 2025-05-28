@@ -47,5 +47,5 @@ export default function Home() {
             <button className="px-2 py-1 text-xs rounded hover:bg-gold/10">RU</button>
           </nav>
         </div>
-        {/* REZERVASYON FORMU */}
+   
         <div className="absolute
