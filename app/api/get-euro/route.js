@@ -1,17 +1,19 @@
 import axios from "axios";
 import cheerio from "cheerio";
 import { NextResponse } from "next/server";
+
 export async function GET() {
   const url = "https://www.yapikredi.com.tr/en/yatirimci-kosesi/doviz-kurlari";
   try {
-    const response = await fetch(url);
-    const html = await response.text();
-
+    const response = await axios.get(url);
+    const html = response.data;
     const $ = cheerio.load(html);
+
     let euro = null;
     $('td:contains("Euro")').each(function () {
       euro = $(this).next().text();
     });
+
     if (euro) {
       euro = euro.replace(/[^\d.,]/g, "").replace(",", ".");
       return NextResponse.json({ euro: parseFloat(euro) });
