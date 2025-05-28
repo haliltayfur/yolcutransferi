@@ -13,10 +13,10 @@ export default function Home() {
   return (
     <main className="min-h-screen w-full bg-black text-white overflow-x-hidden flex flex-col">
 
-      {/* ======== HEADER/BANNER ========= */}
-      <header className="w-full flex items-center justify-between px-6 md:px-20 py-5 bg-black bg-opacity-90 z-50">
+      {/* ======= ÜST MENÜ (BANNER) ======= */}
+      <header className="w-full flex items-center justify-between px-6 md:px-20 py-5 bg-black z-50">
         <div className="flex items-center gap-2">
-          <Image src="/logo-vip.png" alt="Logo" width={42} height={42} className="mr-2" />
+          <Image src="/logo-vip.png" alt="Logo" width={42} height={42} />
           <span className="text-2xl md:text-3xl font-bold text-gold">YolcuTransferi.com</span>
         </div>
         <nav className="flex flex-wrap items-center gap-4 text-base">
@@ -29,22 +29,27 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* ======== HERO GÖRSELİ ========= */}
-      <section className="relative w-full h-[400px] md:h-[570px] flex justify-center items-center overflow-hidden">
+      {/* ======= HERO RESMİ TAM BOY, HİÇBİR YERİ KESİLMEYECEK ======= */}
+      <section className="relative w-full flex justify-center items-center bg-black"
+        style={{ height: "calc(100vw * 0.42)", maxHeight: 650, minHeight: 380 }}
+      >
         <Image
           src="/hero-bg.jpg"
           alt="YolcuTransferi VIP Transfer"
           fill
-          className="object-cover object-center"
+          className="object-contain object-center"
           priority
           quality={97}
           sizes="100vw"
+          style={{
+            objectFit: "contain",
+            objectPosition: "center",
+          }}
         />
-        {/* Hero ÜZERİNDE hiçbir şey yok! */}
       </section>
 
-      {/* ======= REZERVASYON FORMU ======= */}
-      <section className="w-full flex justify-center -mt-20 z-10">
+      {/* ======= REZERVASYON KUTUSU ======= */}
+      <section className="w-full flex justify-center mt-0 z-10">
         <div className="bg-white/95 shadow-2xl rounded-2xl px-6 py-7 max-w-3xl w-full flex flex-col md:flex-row md:items-end gap-4 border border-gray-200 backdrop-blur mx-3">
           <div className="flex flex-col flex-1 min-w-[150px]">
             <label className="font-bold text-xs mb-1 text-gray-700">Nereden?</label>
@@ -103,15 +108,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ======= SAYFA DEVAMI (Alt bilgi) ======= */}
-      <section className="flex flex-col items-center justify-center pt-14 pb-8 px-2 md:px-0">
+      {/* ======= SLOGAN / AVANTAJ KUTULARI ======= */}
+      <section className="flex flex-col items-center justify-center pt-10 pb-8 px-2 md:px-0">
         <h2 className="text-2xl font-extrabold text-gold mb-4 text-center">Güvenilir Dijital VIP Transfer</h2>
         <p className="max-w-3xl text-lg text-gray-300 text-center mb-6">
           Türkiye'nin her yerinde VIP yolcu taşımacılığı ve dron transferde yeni çağ! Uygun fiyatlarla, 7/24 online rezervasyon ve premium hizmet deneyimi.
         </p>
+        {/* Avantaj kutuları istersek buraya eklenir */}
       </section>
 
-      {/* ======== FOOTER ========= */}
+      {/* ======= FOOTER ======= */}
       <footer className="w-full px-8 py-6 bg-black/90 flex flex-col md:flex-row items-center justify-between gap-3 mt-auto">
         <div className="text-xs text-gray-400">&copy; 2025 YolcuTransferi.com</div>
         <div className="flex gap-6 items-center">
