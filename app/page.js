@@ -22,7 +22,7 @@ export default function Home() {
               height: "auto",
               display: "block",
               objectFit: "contain",
-              maxHeight: "1050px", // Gerekirse artır
+              maxHeight: "0 auto", // Gerekirse artır
               margin: "0 auto",
             }}
           />
