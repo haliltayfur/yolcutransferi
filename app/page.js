@@ -31,14 +31,14 @@ export default function Home() {
       </header>
 
       {/* Hero Resmi - FULLSCREEN, boşluksuz */}
-      <section className="relative w-full h-[500px] md:h-[700px] overflow-hidden">
+      <section className="relative w-full h-[650px]">
         <Image
           src="/hero-bg.jpg"
           alt="YolcuTransferi VIP Transfer"
           fill
           className="object-cover object-center"
           priority
-          quality={97}
+          quality={100}
           sizes="100vw"
         />
       </section>
