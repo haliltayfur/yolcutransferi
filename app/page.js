@@ -28,7 +28,7 @@ export default function Home() {
           />
         </div>
         {/* Rezervasyon Kutusu */}
-        <div className="w-full flex justify-center" style={{ marginTop: -50 }}>
+        <div className="w-full flex justify-center" style={{ marginTop: -5 }}>
           <div
             className="bg-white rounded-2xl px-4 py-5 max-w-4xl w-[98vw] flex flex-row flex-wrap items-end gap-3 border border-gray-300 shadow-lg z-30"
             style={{ boxShadow: "0 8px 32px 0 rgba(0,0,0,0.12)", minHeight: 80 }}
