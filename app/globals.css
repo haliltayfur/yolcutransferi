@@ -2,6 +2,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+input, select, button {
+  outline: none;
+  font-size: 16px;
+}
+input:focus, select:focus {
+  border: 2px solid #FFD700 !important;
+}
+label {
+  font-weight: bold;
+  color: #333;
+}
 
 body {
   background-color: #111;
