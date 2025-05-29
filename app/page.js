@@ -13,7 +13,7 @@ export default function Home() {
     <main className="flex flex-col items-center bg-black min-h-screen w-full">
       {/* HERO */}
       <section className="relative w-full flex flex-col items-center justify-center">
-        <div className="relative w-full h-[530px] md:h-[670px] overflow-hidden">
+        <div className="relative w-full h-[560px] md:h-[680px] overflow-hidden">
           <Image
             src="/hero-bg.jpg"
             alt="VIP Transfer Hero"
@@ -22,9 +22,10 @@ export default function Home() {
             priority
           />
         </div>
-        {/* Rezervasyon kutusu görselin ALTINA sabit */}
-        <div className="w-full flex justify-center absolute left-0 right-0" style={{ top: "calc(100% - 56px)" }}>
-          <div className="bg-white/95 shadow-2xl rounded-2xl px-4 py-5 max-w-3xl w-[98vw] flex flex-col md:flex-row md:items-end gap-3 border border-gray-200 backdrop-blur z-30">
+        {/* Kutuyu daha aşağı, görselin ALTINA yerleştir */}
+        <div className="w-full flex justify-center" style={{ marginTop: -60 }}>
+          <div className="bg-white shadow-2xl rounded-2xl px-4 py-5 max-w-3xl w-[98vw] flex flex-col md:flex-row md:items-end gap-3 border border-gray-300 backdrop-blur z-30"
+            style={{ boxShadow: "0 8px 32px 0 rgba(0,0,0,0.18)" }}>
             <div className="flex flex-col flex-1 min-w-[120px]">
               <label className="font-bold text-xs mb-1 text-gray-700">Nereden?</label>
               <input
@@ -81,17 +82,6 @@ export default function Home() {
             </button>
           </div>
         </div>
-      </section>
-
-      {/* ALT BÖLÜM - Tanıtım/Slogan */}
-      <section className="flex flex-col items-center justify-center pt-32 md:pt-40 pb-8 px-2 md:px-0">
-        <h2 className="text-2xl font-extrabold text-gold mb-4 text-center">
-          Güvenilir Dijital VIP Transfer
-        </h2>
-        <p className="max-w-3xl text-lg text-gray-300 text-center mb-6">
-          Türkiye'nin her yerinde VIP yolcu taşımacılığı ve dron transferde yeni çağ!
-          Uygun fiyatlarla, 7/24 online rezervasyon ve premium hizmet deneyimi.
-        </p>
       </section>
     </main>
   );
