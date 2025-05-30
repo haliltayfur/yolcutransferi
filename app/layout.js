@@ -1,15 +1,7 @@
-import "./globals.css";
+// ... diğer importlar ...
 import Image from "next/image";
 import Link from "next/link";
-import { FaWhatsapp, FaInstagram } from "react-icons/fa";
-import { SiX } from "react-icons/si";
-import LanguageSelector from "../components/LanguageSelector";
-import { NextIntlClientProvider, useMessages } from "next-intl";
-
-export const metadata = {
-  title: "YolcuTransferi.com",
-  description: "VIP Transfer | Dron Transfer | Türkiye Geneli",
-};
+// ... diğer importlar ...
 
 export default function RootLayout({ children, params }) {
   const messages = useMessages();
@@ -22,12 +14,19 @@ export default function RootLayout({ children, params }) {
           {/* HEADER */}
           <header className="flex flex-col items-end px-8 md:px-20 py-4 bg-black/95 shadow z-40 w-full">
             <div className="w-full flex items-center justify-between">
+              {/* LOGO alanı güncellendi */}
               <div className="flex items-center gap-2">
                 <Link href={`/${locale}`}>
-                  <Image src="/logo-vip.png" alt="Logo" width={42} height={42} className="mr-2" />
+                  <Image 
+                    src="/LOGO.png" 
+                    alt="YolcuTransferi Logo" 
+                    width={220}  // Uygun bir genişlik ayarlayabilirsin
+                    height={50}
+                    style={{ objectFit: 'contain' }}
+                  />
                 </Link>
-                <span className="text-2xl md:text-3xl font-bold text-yellow-400">YolcuTransferi.com</span>
               </div>
+              {/* NAVBAR */}
               <nav className="flex items-center gap-6 text-base font-medium">
                 <Link href={`/${locale}`}>{messages.menu.home}</Link>
                 <Link href={`/${locale}/hizmetler`}>{messages.menu.services}</Link>
@@ -56,17 +55,13 @@ export default function RootLayout({ children, params }) {
                 </Link>
               </div>
             </div>
-            {/* Dil seçici: butonun hemen altında, sağa yaslı */}
+            {/* Dil seçici */}
             <div className="flex justify-end w-full mt-1">
               <LanguageSelector />
             </div>
           </header>
-
-          <main className="flex-grow">
-            {children}
-          </main>
-
-          {/* FOOTER (aynı şekilde bırak) */}
+          <main className="flex-grow">{children}</main>
+          {/* FOOTER (değişmeden bırak) */}
           <footer className="w-full px-8 py-6 bg-black/90 flex flex-col md:flex-row items-center justify-between gap-3 mt-auto">
             <span className="text-sm text-gray-300">© 2025 YolcuTransferi.com</span>
             <div className="flex gap-6 items-center">
