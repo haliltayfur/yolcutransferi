@@ -1,15 +1,13 @@
 {
   "menu": {
     "home": "Home",
-    "services": "Services",
-    "cars": "Cars",
-    "reservation": "Reservation",
-    "faq": "FAQ",
+    "vipTransfer": "VIP Transfer",
+    "dronTransfer": "Drone Transfer",
+    "individualTransfers": "Individual Transfer",
+    "businessClass": "Business Class",
+    "familyPackages": "Family Packages",
+    "airportTransfers": "Airport Transfer",
     "contact": "Contact"
   },
-  "login": "Login / Sign Up",
-  "welcome": "Welcome to YolcuTransferi.com!",
-  "slogan": "Turkey's Leading VIP Transfer Network",
-  "desc": "Empowering its competitors, VIP transfer, drone taxi and ultra luxury vehicles in every city, 24/7.",
-  "get_offer": "Get Instant Price Now!"
+  "login": "Login / Sign Up"
 }
