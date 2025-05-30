@@ -1,10 +1,8 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   i18n: {
     locales: ['tr', 'en', 'ar'],
     defaultLocale: 'tr',
-    localeDetection: true
-  }
+    localeDetection: true,
+  },
 };
-
 module.exports = nextConfig;
