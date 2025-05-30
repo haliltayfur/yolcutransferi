@@ -4,7 +4,6 @@ import Link from "next/link";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 import LanguageSelector from "../components/LanguageSelector"; // Varsa
-// Üyelik/Login dropdown için ekstra component gerekirse ekleyebiliriz
 
 export const metadata = {
   title: "YolcuTransferi.com",
@@ -42,8 +41,6 @@ export default function RootLayout({ children }) {
             <a href="#" target="_blank" aria-label="X (Twitter)" rel="noopener noreferrer">
               <SiX className="w-6 h-6 text-white hover:text-gray-400" />
             </a>
-            {/* Dil seçici */}
-            <LanguageSelector />
             {/* Login / Üye Ol Dropdown */}
             <div className="relative group">
               <button className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-4 py-1.5 rounded-xl focus:outline-none">
@@ -56,6 +53,10 @@ export default function RootLayout({ children }) {
                 <Link href="/register/driver" className="block px-4 py-2 hover:bg-gray-100">Araçlı Şoför Kaydı</Link>
                 <Link href="/register/partner" className="block px-4 py-2 hover:bg-gray-100">İş Birliği Başvurusu</Link>
                 <Link href="/register/company" className="block px-4 py-2 hover:bg-gray-100">Firma Üyeliği</Link>
+                {/* DİL SEÇİCİ ALTTA */}
+                <div className="pt-2">
+                  <LanguageSelector />
+                </div>
               </div>
             </div>
           </div>
