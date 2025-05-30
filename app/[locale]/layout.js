@@ -10,6 +10,9 @@ export default function LocaleLayout({ children, params }) {
   const messages = useMessages();
   const locale = params.locale;
 
+  // Güvenli şekilde key kontrolü
+  const getMenu = (key) => messages?.menu?.[key] || key;
+
   return (
     <html lang={locale}>
       <body className="bg-black text-white min-h-screen flex flex-col">
@@ -24,12 +27,12 @@ export default function LocaleLayout({ children, params }) {
                 <span className="text-2xl md:text-3xl font-bold text-yellow-400">YolcuTransferi.com</span>
               </div>
               <nav className="flex items-center gap-6 text-base font-medium">
-                <Link href={`/${locale}`}>{messages.menu.home}</Link>
-                <Link href={`/${locale}/hizmetler`}>{messages.menu.services}</Link>
-                <Link href={`/${locale}/araclar`}>{messages.menu.cars}</Link>
-                <Link href={`/${locale}/rezervasyon`}>{messages.menu.reservation}</Link>
-                <Link href={`/${locale}/sss`}>{messages.menu.faq}</Link>
-                <Link href={`/${locale}/iletisim`}>{messages.menu.contact}</Link>
+                <Link href={`/${locale}`}>{getMenu("home")}</Link>
+                <Link href={`/${locale}/hizmetler`}>{getMenu("services")}</Link>
+                <Link href={`/${locale}/araclar`}>{getMenu("cars")}</Link>
+                <Link href={`/${locale}/rezervasyon`}>{getMenu("reservation")}</Link>
+                <Link href={`/${locale}/sss`}>{getMenu("faq")}</Link>
+                <Link href={`/${locale}/iletisim`}>{getMenu("contact")}</Link>
               </nav>
               <div className="flex items-center gap-4">
                 <a href="https://wa.me/905395267569" target="_blank" aria-label="Whatsapp" rel="noopener noreferrer">
@@ -60,10 +63,10 @@ export default function LocaleLayout({ children, params }) {
             <span className="text-sm text-gray-300">© 2025 YolcuTransferi.com</span>
             <div className="flex gap-6 items-center">
               <Link href={`/${locale}/sozlesme`} className="text-sm underline">
-                {messages.menu.contract}
+                {getMenu("contract")}
               </Link>
               <Link href={`/${locale}/gizlilik`} className="text-sm underline">
-                {messages.menu.privacy}
+                {getMenu("privacy")}
               </Link>
             </div>
           </footer>
