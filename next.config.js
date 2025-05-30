@@ -2,7 +2,7 @@ const nextConfig = {
   i18n: {
     locales: ['tr', 'en', 'ar'],
     defaultLocale: 'tr',
-    localeDetection: true,
+    localeDetection: false,
   },
 };
 module.exports = nextConfig;
