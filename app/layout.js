@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 import LanguageSelector from "../components/LanguageSelector";
-import {NextIntlClientProvider, useMessages} from 'next-intl';
+import { NextIntlClientProvider, useMessages } from "next-intl";
 
 export const metadata = {
   title: "YolcuTransferi.com",
@@ -61,9 +61,11 @@ export default function RootLayout({ children, params }) {
               <LanguageSelector />
             </div>
           </header>
+
           <main className="flex-grow">
             {children}
           </main>
+
           {/* FOOTER (aynı şekilde bırak) */}
           <footer className="w-full px-8 py-6 bg-black/90 flex flex-col md:flex-row items-center justify-between gap-3 mt-auto">
             <span className="text-sm text-gray-300">© 2025 YolcuTransferi.com</span>
