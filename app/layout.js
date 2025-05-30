@@ -1,8 +1,9 @@
 import "./globals.css";
 import Image from "next/image";
 import Link from "next/link";
-import LanguageSelector from "@/components/LanguageSelector";
-import SocialMediaBar from "@/components/SocialMediaBar";
+import LanguageSelector from "../components/LanguageSelector";
+import SocialMediaBar from "../components/SocialMediaBar";
+
 
 export const metadata = {
   title: "YolcuTransferi.com",
