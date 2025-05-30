@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  i18n: {
-    locales: ['tr', 'en'],
-    defaultLocale: 'tr',
-    localeDetection: false // true/false olabilir, istersen kaldırabilirsin de.
-  },
+i18n: {
+  locales: ['tr', 'en', 'ar'],
+  defaultLocale: 'tr',
+  localeDetection: false // ← doğru!
+},
   // Diğer ayarların...
 };
 
