@@ -4,7 +4,7 @@ import Link from "next/link";
 // ... diğer importlar ...
 
 export default function RootLayout({ children, params }) {
-  const messages = useMessages();
+  const messages = use client();
   const locale = params?.locale || "tr";
 
   return (
