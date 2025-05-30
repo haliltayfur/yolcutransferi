@@ -1,15 +1,13 @@
 {
   "menu": {
     "home": "Anasayfa",
-    "services": "Hizmetlerimiz",
-    "cars": "Araçlar",
-    "reservation": "Rezervasyon",
-    "faq": "SSS",
+    "vipTransfer": "VIP Transfer",
+    "dronTransfer": "Dron Transferi",
+    "individualTransfers": "Bireysel Transfer",
+    "businessClass": "Business Class",
+    "familyPackages": "Aile Paketleri",
+    "airportTransfers": "Havalimanı Transferi",
     "contact": "İletişim"
   },
-  "login": "Giriş / Üye Ol",
-  "welcome": "YolcuTransferi.com'a Hoşgeldiniz!",
-  "slogan": "Türkiye'nin Lider VIP Transfer Ağı",
-  "desc": "Rakiplerine iş veren, her şehirde, 7/24 VIP transfer, drone taksi ve ultra lüks araçlar.",
-  "get_offer": "Şimdi Anında Fiyat Al!"
+  "login": "Giriş / Üye Ol"
 }
