@@ -1,0 +1,11 @@
+{
+  "menu": {
+    "home": "Home",
+    "services": "Services",
+    "cars": "Cars",
+    "reservation": "Reservation",
+    "faq": "FAQ",
+    "contact": "Contact"
+  },
+  "login": "Login / Sign Up"
+}
