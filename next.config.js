@@ -9,3 +9,9 @@ i18n: {
 };
 
 module.exports = nextConfig;
+module.exports = {
+  i18n: {
+    locales: ['tr', 'en', 'ar'],
+    defaultLocale: 'tr',
+  },
+};
