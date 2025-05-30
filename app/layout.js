@@ -7,7 +7,7 @@ import LanguageSelector from "../components/LanguageSelector";
 import { NextIntlClientProvider } from "next-intl"; // SADECE BU!
 
 export const metadata = {
-  title: "YolcuTransferi.com",
+  title: "YolcuTransferi.comssssssss",
   description: "VIP Transfer | Dron Transfer | Türkiye Geneli",
 };
 
