@@ -1,27 +1,21 @@
 "use client";
-import { useRouter, usePathname } from "next/navigation";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const LANGS = [
-  { code: "tr", img: "/flags/tr.svg", label: "Türkçe", path: "/" },
-  { code: "en", img: "/flags/gb.svg", label: "English", path: "/en" },
-  { code: "ar", img: "/flags/sa.svg", label: "Arabic", path: "/ar" },
+  { code: "tr", label: "Türkçe", url: "/", img: "https://flagcdn.com/tr.svg" },
+  { code: "en", label: "English", url: "/en", img: "https://flagcdn.com/gb.svg" },
+  { code: "ar", label: "Arabic", url: "/ar", img: "https://flagcdn.com/sa.svg" },
 ];
 
 export default function LanguageSelector() {
   const router = useRouter();
-  const pathname = usePathname();
 
   const handleLangClick = (lang) => {
-    if (lang.code === "tr") {
-      router.push("/");
-    } else {
-      router.push(`/${lang.code}`);
-    }
+    router.push(lang.url);
   };
 
   return (
-    <div className="flex gap-2 items-center px-2 py-1">
+    <div className="flex gap-2 items-center justify-center py-2">
       {LANGS.map((lang) => (
         <button
           key={lang.code}
@@ -30,10 +24,10 @@ export default function LanguageSelector() {
           onClick={() => handleLangClick(lang)}
           aria-label={lang.label}
         >
-          <Image
+          <img
             src={lang.img}
-            width={24}
-            height={16}
+            width={28}
+            height={20}
             alt={lang.label}
             className="rounded-sm border border-gray-300 shadow"
           />
