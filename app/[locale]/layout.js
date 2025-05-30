@@ -59,8 +59,12 @@ export default function LocaleLayout({ children, params }) {
           <footer className="w-full px-8 py-6 bg-black/90 flex flex-col md:flex-row items-center justify-between gap-3 mt-auto">
             <span className="text-sm text-gray-300">© 2025 YolcuTransferi.com</span>
             <div className="flex gap-6 items-center">
-              <Link href={`/${locale}/sozlesme`} className="text-sm underline">Sözleşme</Link>
-              <Link href={`/${locale}/gizlilik`} className="text-sm underline">Gizlilik</Link>
+              <Link href={`/${locale}/sozlesme`} className="text-sm underline">
+                {messages.menu.contract}
+              </Link>
+              <Link href={`/${locale}/gizlilik`} className="text-sm underline">
+                {messages.menu.privacy}
+              </Link>
             </div>
           </footer>
         </NextIntlClientProvider>
