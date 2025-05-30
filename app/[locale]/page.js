@@ -1,11 +1,12 @@
+"use client";
 import { useTranslations } from "next-intl";
-import { getDictionary } from "@/lib/getDictionary";
-export default async function HomePage({ params }) {
-  const dict = await getDictionary(params.locale);
 
+export default function Page() {
+  const t = useTranslations("menu");
   return (
     <main>
-      <h1>{dict.menu.home}</h1>
-      {/* Diğer içerikler */}
+      <h1>{t("home")}</h1>
+      {/* Diğer içerikler buraya yazılır */}
     </main>
   );
+}
