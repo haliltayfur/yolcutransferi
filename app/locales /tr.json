@@ -1,13 +1,13 @@
 {
   "menu": {
     "home": "Anasayfa",
-    "vipTransfer": "VIP Transfer",
-    "dronTransfer": "Dron Transferi",
-    "individualTransfers": "Bireysel Transfer",
-    "businessClass": "Business Class",
-    "familyPackages": "Aile Paketleri",
-    "airportTransfers": "Havalimanı Transferi",
-    "contact": "İletişim"
+    "services": "Hizmetler",
+    "cars": "Araçlar",
+    "reservation": "Rezervasyon",
+    "faq": "S.S.S.",
+    "contact": "İletişim",
+    "contract": "Sözleşme",
+    "privacy": "Gizlilik"
   },
   "login": "Giriş / Üye Ol"
 }
