@@ -1,17 +1,21 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const LANGS = [
-  { code: "tr", label: "Türkçe", url: "/", img: "https://flagcdn.com/tr.svg" },
-  { code: "en", label: "English", url: "/en", img: "https://flagcdn.com/gb.svg" },
-  { code: "ar", label: "Arabic", url: "/ar", img: "https://flagcdn.com/sa.svg" },
+  { code: "tr", img: "https://flagcdn.com/tr.svg", label: "Türkçe" },
+  { code: "en", img: "https://flagcdn.com/gb.svg", label: "English" },
+  { code: "ar", img: "https://flagcdn.com/sa.svg", label: "Arabic" },
 ];
 
 export default function LanguageSelector() {
   const router = useRouter();
+  const pathname = usePathname();
 
-  const handleLangClick = (lang) => {
-    router.push(lang.url);
+  const handleLangClick = (code) => {
+    // Şu anki sayfanın locale'sini değiştir
+    let segments = pathname.split("/");
+    segments[1] = code;
+    router.push(segments.join("/"));
   };
 
   return (
@@ -21,7 +25,7 @@ export default function LanguageSelector() {
           key={lang.code}
           className="hover:scale-110 transition"
           title={lang.label}
-          onClick={() => handleLangClick(lang)}
+          onClick={() => handleLangClick(lang.code)}
           aria-label={lang.label}
         >
           <img
