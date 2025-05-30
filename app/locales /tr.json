@@ -1,13 +1,13 @@
 {
   "menu": {
-    "home": "Anasayfa",
+    "home": "Ana Sayfa",
     "services": "Hizmetler",
     "cars": "Araçlar",
     "reservation": "Rezervasyon",
-    "faq": "S.S.S.",
+    "faq": "SSS",
     "contact": "İletişim",
     "contract": "Sözleşme",
     "privacy": "Gizlilik"
   },
-  "login": "Giriş / Üye Ol"
+  "login": "Giriş"
 }
