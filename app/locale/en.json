@@ -1,0 +1,15 @@
+{
+  "menu": {
+    "home": "Home",
+    "services": "Services",
+    "cars": "Cars",
+    "reservation": "Reservation",
+    "faq": "FAQ",
+    "contact": "Contact"
+  },
+  "login": "Login / Sign Up",
+  "welcome": "Welcome to YolcuTransferi.com!",
+  "slogan": "Turkey's Leading VIP Transfer Network",
+  "desc": "Empowering its competitors, VIP transfer, drone taxi and ultra luxury vehicles in every city, 24/7.",
+  "get_offer": "Get Instant Price Now!"
+}
