@@ -1,4 +1,4 @@
-import "../../globals.css";
+import "../globals.css";
 import Image from "next/image";
 import Link from "next/link";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
