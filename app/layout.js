@@ -1,9 +1,10 @@
 import "./globals.css";
 import Image from "next/image";
 import Link from "next/link";
-import LanguageSelector from "../components/LanguageSelector";
-import SocialMediaBar from "../components/SocialMediaBar";
-
+import { FaWhatsapp, FaInstagram } from "react-icons/fa";
+import { SiX } from "react-icons/si";
+import LanguageSelector from "../components/LanguageSelector"; // Varsa
+// Üyelik/Login dropdown için ekstra component gerekirse ekleyebiliriz
 
 export const metadata = {
   title: "YolcuTransferi.com",
@@ -14,15 +15,15 @@ export default function RootLayout({ children }) {
   return (
     <html lang="tr">
       <body className="bg-black text-white min-h-screen flex flex-col">
-        {/* HEADER */}
-        <header className="flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-4 bg-black/90 w-full z-40">
-          <div className="flex items-center gap-2 mb-2 md:mb-0">
+        {/* ORTAK ÜST BAR */}
+        <header className="flex items-center justify-between px-8 md:px-20 py-4 bg-black/95 shadow z-40 w-full">
+          <div className="flex items-center gap-2">
             <Link href="/">
               <Image src="/logo-vip.png" alt="Logo" width={42} height={42} className="mr-2" />
             </Link>
             <span className="text-2xl md:text-3xl font-bold text-yellow-400">YolcuTransferi.com</span>
           </div>
-          <nav className="flex flex-wrap items-center gap-5 text-base font-medium">
+          <nav className="flex items-center gap-6 text-base font-medium">
             <Link href="/">Anasayfa</Link>
             <Link href="/hizmetler">Hizmetlerimiz</Link>
             <Link href="/araclar">Araçlar</Link>
@@ -30,7 +31,18 @@ export default function RootLayout({ children }) {
             <Link href="/sss">SSS</Link>
             <Link href="/iletisim">İletişim</Link>
           </nav>
-          <div className="flex items-center gap-4 mt-2 md:mt-0">
+          <div className="flex items-center gap-4">
+            {/* Sosyal medya */}
+            <a href="https://wa.me/905395267569" target="_blank" aria-label="Whatsapp" rel="noopener noreferrer">
+              <FaWhatsapp className="w-6 h-6 text-green-400 hover:text-green-500" />
+            </a>
+            <a href="#" target="_blank" aria-label="Instagram" rel="noopener noreferrer">
+              <FaInstagram className="w-6 h-6 text-pink-500 hover:text-pink-600" />
+            </a>
+            <a href="#" target="_blank" aria-label="X (Twitter)" rel="noopener noreferrer">
+              <SiX className="w-6 h-6 text-white hover:text-gray-400" />
+            </a>
+            {/* Dil seçici */}
             <LanguageSelector />
             {/* Login / Üye Ol Dropdown */}
             <div className="relative group">
@@ -48,82 +60,15 @@ export default function RootLayout({ children }) {
             </div>
           </div>
         </header>
-
         <main className="flex-grow">
           {children}
         </main>
-
         {/* FOOTER */}
-        <footer className="w-full px-6 md:px-20 py-10 bg-gray-900/95 text-gray-200 mt-auto">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Explore</h2>
-              <ul className="space-y-1 text-sm">
-                <li>
-                  <Link href="/business-class" className="hover:underline">Business Class</Link>
-                </li>
-                <li>
-                  <Link href="/family-packages" className="hover:underline">Aile Paketleri</Link>
-                </li>
-                <li>
-                  <Link href="/airport-transfers" className="hover:underline">Havalimanı Transferi</Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Services</h2>
-              <ul className="space-y-1 text-sm">
-                <li>
-                  <Link href="/vip-transfer" className="hover:underline">VIP Transfer</Link>
-                </li>
-                <li>
-                  <Link href="/corporate-transfers" className="hover:underline">Kurumsal Transfer</Link>
-                </li>
-                <li>
-                  <Link href="/individual-transfers" className="hover:underline">Bireysel Transfer</Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold mb-2">İletişim</h2>
-              <p className="text-sm">info@yolcutransferi.com</p>
-              <p className="text-sm mt-2">
-                WhatsApp:{" "}
-                <a
-                  href="https://wa.me/905395267569"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  +90 539 526 75 69
-                </a>
-              </p>
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Bülten Aboneliği</h2>
-              <form className="flex">
-                <input
-                  type="email"
-                  placeholder="E-posta adresiniz"
-                  className="rounded-l px-3 py-1 w-full text-black"
-                />
-                <button
-                  type="submit"
-                  className="bg-yellow-400 text-black rounded-r px-4 font-semibold"
-                >
-                  Abone Ol
-                </button>
-              </form>
-            </div>
-          </div>
-          <div className="mt-8 border-t border-gray-700 pt-4 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-xs">© 2025 YolcuTransferi.com. Tüm hakları saklıdır.</p>
-            <div className="flex gap-3 mt-2 md:mt-0">
-              <Link href="/sozlesme" className="hover:underline text-xs">Sözleşme</Link>
-              <span>|</span>
-              <Link href="/gizlilik" className="hover:underline text-xs">Gizlilik</Link>
-            </div>
-            <SocialMediaBar />
+        <footer className="w-full px-8 py-6 bg-black/90 flex flex-col md:flex-row items-center justify-between gap-3 mt-auto">
+          <span className="text-sm text-gray-300">© 2025 YolcuTransferi.com</span>
+          <div className="flex gap-6 items-center">
+            <Link href="/sozlesme" className="text-sm underline">Sözleşme</Link>
+            <Link href="/gizlilik" className="text-sm underline">Gizlilik</Link>
           </div>
         </footer>
       </body>
