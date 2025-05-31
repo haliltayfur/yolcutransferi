@@ -31,27 +31,32 @@ export default function RootLayout({ children }) {
                 <Image
                   src="/LOGO.png"
                   alt="Logo"
-                  width={253} // 220 * 1.15 ≈ 253
-                  height={69} // 60 * 1.15 ≈ 69
+                  width={253}
+                  height={69}
                   className="mr-2"
                   priority
                 />
               </Link>
             </div>
-            {/* MENÜ: VIP modern cam efektli butonlar */}
-            <nav className="flex items-center gap-3 font-semibold text-[1.15rem] bg-gray-900 bg-opacity-30 rounded-xl px-5 py-3 shadow-lg backdrop-blur-md">
+
+            {/* MENÜ */}
+            <nav className="flex items-center gap-4 font-semibold text-[1.15rem]">
               {menuItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="relative px-4 py-2 rounded-lg text-white transition-all duration-300
-                             before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r before:from-yellow-400 before:via-yellow-300 before:to-yellow-400 before:opacity-0 before:blur-xl before:transition-opacity before:duration-300
-                             hover:before:opacity-70 hover:text-black"
+                  className="relative px-5 py-2 text-yellow-400 rounded-lg
+                             transition-colors duration-300
+                             hover:text-black hover:bg-gradient-to-r hover:from-yellow-400 hover:via-yellow-300 hover:to-yellow-400
+                             before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r before:from-yellow-300 before:via-yellow-100 before:to-yellow-300 before:opacity-0 before:blur-sm before:transition-opacity before:duration-300
+                             hover:before:opacity-50"
                 >
                   {item.name}
                 </Link>
               ))}
             </nav>
+
+            {/* SOSYAL İKONLAR + GİRİŞ BUTONU */}
             <div className="flex items-center gap-6">
               <a
                 href="https://wa.me/905395267569"
@@ -79,10 +84,18 @@ export default function RootLayout({ children }) {
               </a>
               <Link
                 href="/login"
-                className="relative inline-block px-6 py-2 rounded-xl font-semibold text-white
-                           bg-black bg-opacity-30 border-2 border-yellow-400 shadow-lg backdrop-blur-sm
-                           transition-all duration-300 hover:bg-yellow-400 hover:text-black hover:shadow-yellow-400/70
-                           focus:outline-none focus:ring-4 focus:ring-yellow-300"
+                className="relative inline-block px-8 py-3 rounded-2xl font-semibold text-yellow-400
+                           bg-gradient-to-r from-black via-yellow-900 to-black
+                           border-2 border-yellow-400
+                           shadow-[0_0_10px_rgba(255,215,0,0.7)]
+                           overflow-hidden
+                           transition-all duration-300
+                           hover:text-black hover:bg-gradient-to-r hover:from-yellow-400 hover:via-yellow-300 hover:to-yellow-400
+                           hover:shadow-[0_0_20px_rgba(255,215,0,0.9)]
+                           before:absolute before:top-0 before:left-[-75%] before:w-32 before:h-full before:bg-gradient-to-r before:from-transparent before:via-white before:to-transparent before:opacity-20 before:rotate-12 before:blur-md
+                           before:transition-transform before:duration-700 before:ease-in-out
+                           hover:before:translate-x-full
+                           focus:outline-none focus:ring-4 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black"
               >
                 Giriş Yap
               </Link>
