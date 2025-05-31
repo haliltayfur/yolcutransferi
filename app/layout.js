@@ -51,7 +51,14 @@ export default function RootLayout({ children }) {
               </a>
               <Link
                 href="/login"
-                className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-4 py-1.5 rounded-xl focus:outline-none"
+                className="
+                  px-4 py-1.5 rounded-xl border border-gray-600
+                  text-white font-semibold
+                  bg-transparent
+                  hover:bg-gray-800 hover:border-gray-400 hover:text-yellow-400
+                  transition-colors duration-200
+                  focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black
+                "
               >
                 Giriş Yap
               </Link>
