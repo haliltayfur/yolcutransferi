@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
             </div>
             {/* MENÜ: Modern arka plan ve hover */}
             <nav className="flex items-center gap-2 font-semibold text-[1.15rem] bg-gray-100 rounded-xl px-4 py-2 shadow-inner">
-              <Link href="/" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Anaasayfa</Link>
+              <Link href="/" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Anasayfa</Link>
               <Link href="/hizmetler" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Hizmetler</Link>
               <Link href="/araclar" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Araçlar</Link>
               <Link href="/rezervasyon" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Rezervasyon</Link>
