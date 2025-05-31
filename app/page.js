@@ -9,10 +9,7 @@ export default function Home() {
         <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow text-center mb-2">
           Türkiye'nin Lider <span className="text-gold">VIP Transfer Ağı</span>
         </h1>
-        <p className="text-base md:text-xl text-gray-100 text-center max-w-2xl">
-          Rakiplerine iş veren, her şehirde, 7/24 VIP transfer, drone taksi ve ultra lüks araçlar.<br />
-          <span className="text-gold font-semibold">Şimdi Anında Fiyat Al!</span>
-        </p>
+        {/* Alt slogan kaldırıldı */}
       </section>
 
       {/* HERO GÖRSELİ */}
