@@ -19,6 +19,7 @@ html {
 body {
   background-color: #111;
   color: #fff;
+  overflow-y: scroll;
 }
 .text-gold { color: #ffd700; }
 .bg-gold { background-color: #ffd700; }
