@@ -1,17 +1,17 @@
 {
   "menu": {
-    "home": "Home",
-    "services": "Services",
-    "cars": "Cars",
-    "reservation": "Reservation",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "contract": "Contract",
-    "privacy": "Privacy Policy"
+    "home": "Anasayfa",
+    "services": "Hizmetlerimiz",
+    "cars": "Araçlar",
+    "reservation": "Rezervasyon",
+    "faq": "SSS",
+    "contact": "İletişim",
+    "contract": "Sözleşme",
+    "privacy": "Gizlilik"
   },
-  "login": "Login / Sign Up",
-  "welcome": "Welcome to YolcuTransferi.com!",
-  "slogan": "Turkey's Leading VIP Transfer Network",
-  "desc": "Empowering its competitors, VIP transfer, drone taxi and ultra luxury vehicles in every city, 24/7.",
-  "get_offer": "Get Instant Price Now!"
+  "login": "Giriş / Üye Ol",
+  "welcome": "YolcuTransferi.com'a Hoşgeldiniz!",
+  "slogan": "Türkiye'nin Lider VIP Transfer Ağı",
+  "desc": "Rakiplerine iş veren, her şehirde, 7/24 VIP transfer, drone taksi ve ultra lüks araçlar.",
+  "get_offer": "Şimdi Anında Fiyat Al!"
 }
