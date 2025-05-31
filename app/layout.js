@@ -40,16 +40,15 @@ export default function RootLayout({ children }) {
             </div>
 
             {/* MENÜ */}
-            <nav className="flex items-center gap-2 font-semibold text-[1.15rem] bg-gray-100 rounded-xl px-4 py-2 shadow-inner">
+            <nav className="flex items-center gap-4 font-medium text-[1.1rem] text-white">
               {menuItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="relative px-3 py-1.5 rounded-lg text-black
+                  className="relative px-3 py-1
                              transition-colors duration-200
-                             hover:text-yellow-500
-                             after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-yellow-500 after:transition-[width] after:duration-300 hover:after:w-full
-                             hover:after:shadow-yellow-400/80"
+                             hover:text-yellow-400
+                             after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-yellow-400 after:transition-[width] after:duration-300 hover:after:w-full hover:after:shadow-yellow-400/70"
                 >
                   {item.name}
                 </Link>
@@ -57,13 +56,13 @@ export default function RootLayout({ children }) {
             </nav>
 
             {/* SOSYAL İKONLAR + GİRİŞ BUTONU */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-5">
               <a
                 href="https://wa.me/905395267569"
                 target="_blank"
                 aria-label="Whatsapp"
                 rel="noopener noreferrer"
-                className="text-yellow-500 hover:text-yellow-400 transition-colors duration-200"
+                className="text-white hover:text-yellow-400 transition-colors duration-200"
               >
                 <FaWhatsapp className="w-6 h-6" />
               </a>
@@ -72,7 +71,7 @@ export default function RootLayout({ children }) {
                 target="_blank"
                 aria-label="Instagram"
                 rel="noopener noreferrer"
-                className="text-yellow-500 hover:text-yellow-400 transition-colors duration-200"
+                className="text-white hover:text-yellow-400 transition-colors duration-200"
               >
                 <FaInstagram className="w-6 h-6" />
               </a>
@@ -81,21 +80,23 @@ export default function RootLayout({ children }) {
                 target="_blank"
                 aria-label="X (Twitter)"
                 rel="noopener noreferrer"
-                className="text-yellow-500 hover:text-yellow-400 transition-colors duration-200"
+                className="text-white hover:text-yellow-400 transition-colors duration-200"
               >
                 <SiX className="w-6 h-6" />
               </a>
               <Link
                 href="/login"
-                className="text-black font-semibold px-5 py-1.5 rounded-xl
+                className="text-black font-semibold px-5 py-1.5 rounded-lg
                            bg-yellow-400 hover:bg-yellow-500
-                           transition-colors duration-200
-                           shadow-md hover:shadow-yellow-400"
+                           transition-colors duration-200 shadow-sm hover:shadow-yellow-400"
               >
                 Giriş Yap
               </Link>
             </div>
           </div>
+
+          {/* LOGO ALTINDA 1PX BEYAZ ÇİZGİ */}
+          <div className="w-full border-b border-white mt-2"></div>
         </header>
 
         <main className="flex-grow">{children}</main>
