@@ -18,17 +18,26 @@ export default function RootLayout({ children }) {
           <div className="w-full flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Link href="/">
-                <Image src="/LOGO.png" alt="Logo" width={220} height={60} className="mr-2" priority />
+                {/* LOGO %15 daha büyük */}
+                <Image
+                  src="/LOGO.png"
+                  alt="Logo"
+                  width={253}  // 220 * 1.15 ≈ 253
+                  height={69}  // 60 * 1.15 ≈ 69
+                  className="mr-2"
+                  priority
+                />
               </Link>
               {/* <span className="text-2xl md:text-3xl font-bold text-yellow-400">YolcuTransferi.com</span> */}
             </div>
-            <nav className="flex items-center gap-6 text-base font-medium">
-              <Link href="/">Anasayfa</Link>
-              <Link href="/hizmetler">Hizmetler</Link>
-              <Link href="/araclar">Araçlar</Link>
-              <Link href="/rezervasyon">Rezervasyon</Link>
-              <Link href="/sss">S.S.S.</Link>
-              <Link href="/iletisim">İletişim</Link>
+            {/* MENÜ: Modern arka plan ve hover */}
+            <nav className="flex items-center gap-2 font-semibold text-[1.15rem] bg-gray-100 rounded-xl px-4 py-2 shadow-inner">
+              <Link href="/" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Anaasayfa</Link>
+              <Link href="/hizmetler" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Hizmetler</Link>
+              <Link href="/araclar" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Araçlar</Link>
+              <Link href="/rezervasyon" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Rezervasyon</Link>
+              <Link href="/sss" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">S.S.S.</Link>
+              <Link href="/iletisim" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">İletişim</Link>
             </nav>
             <div className="flex items-center gap-4">
               <a href="https://wa.me/905395267569" target="_blank" aria-label="Whatsapp" rel="noopener noreferrer">
