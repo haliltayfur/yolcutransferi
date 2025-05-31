@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 const menuItems = [
-  { name: "Anaasayfa", href: "/" },
+  { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
   { name: "Araçlar", href: "/araclar" },
   { name: "Rezervasyon", href: "/rezervasyon" },
@@ -44,13 +44,10 @@ export default function RootLayout({ children }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="relative px-3 py-1 transition-colors duration-200
-                             hover:text-white
-                             after:absolute after:left-0 after:-bottom-0.5
-                             after:h-[0.5px] after:w-0 after:bg-white after:transition-[width] after:duration-300
-                             hover:after:w-full"
+                  className="relative px-3 py-1 transition-colors duration-200 hover:text-white"
                 >
                   {item.name}
+                  <span className="absolute bottom-0 left-[10%] w-[80%] h-[1.5px] bg-white opacity-0 transition-opacity duration-300 hover:opacity-100"></span>
                 </Link>
               ))}
             </nav>
@@ -95,10 +92,10 @@ export default function RootLayout({ children }) {
             </div>
           </div>
 
-          {/* HEADER ALTINDA 0.5PX BEYAZ ÇİZGİ TAM GENİŞLİKTE */}
+          {/* HEADER ALTINDA 0.3PX YARI SAYDAM BEYAZ ÇİZGİ TAM GENİŞLİKTE */}
           <div
             className="w-full mt-2"
-            style={{ borderBottom: "0.5px solid white" }}
+            style={{ borderBottom: "0.3px solid rgba(255,255,255,0.2)" }}
           ></div>
         </header>
 
