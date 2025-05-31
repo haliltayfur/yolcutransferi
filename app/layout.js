@@ -1,4 +1,3 @@
-"use client";
 import "./globals.css";
 import Image from "next/image";
 import Link from "next/link";
@@ -45,15 +44,10 @@ export default function RootLayout({ children }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="relative px-3 py-1 transition-colors duration-300 hover:text-white"
+                  className="relative px-3 py-1 transition-colors duration-200 hover:text-white"
                 >
                   {item.name}
                   <span className="absolute bottom-0 left-[10%] w-[80%] h-[1.5px] bg-white opacity-0 transition-opacity duration-300 hover:opacity-100"></span>
-                  <style jsx>{`
-                    a:hover span {
-                      opacity: 1 !important;
-                    }
-                  `}</style>
                 </Link>
               ))}
             </nav>
@@ -65,7 +59,7 @@ export default function RootLayout({ children }) {
                 target="_blank"
                 aria-label="Whatsapp"
                 rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors duration-300"
+                className="text-gray-300 hover:text-white transition-colors duration-200"
               >
                 <FaWhatsapp className="w-6 h-6" />
               </a>
@@ -74,7 +68,7 @@ export default function RootLayout({ children }) {
                 target="_blank"
                 aria-label="Instagram"
                 rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors duration-300"
+                className="text-gray-300 hover:text-white transition-colors duration-200"
               >
                 <FaInstagram className="w-6 h-6" />
               </a>
@@ -83,18 +77,15 @@ export default function RootLayout({ children }) {
                 target="_blank"
                 aria-label="X (Twitter)"
                 rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors duration-300"
+                className="text-gray-300 hover:text-white transition-colors duration-200"
               >
                 <SiX className="w-6 h-6" />
               </a>
               <Link
                 href="/login"
-                className="text-yellow-900 font-semibold px-6 py-2 rounded-xl
-                           bg-yellow-400 shadow-inner shadow-yellow-300/60
-                           transition-all duration-300
-                           hover:bg-yellow-500 hover:shadow-yellow-400/80
-                           hover:shadow-lg hover:text-white"
-                style={{ fontFamily: "'Poppins', sans-serif" }}
+                className="text-black font-semibold px-5 py-1.5 rounded-lg
+                           bg-yellow-400 hover:bg-yellow-500
+                           transition-colors duration-200 shadow-sm hover:shadow-yellow-400"
               >
                 Giriş Yap
               </Link>
