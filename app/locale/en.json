@@ -5,7 +5,9 @@
     "cars": "Cars",
     "reservation": "Reservation",
     "faq": "FAQ",
-    "contact": "Contact"
+    "contact": "Contact",
+    "contract": "Contract",
+    "privacy": "Privacy Policy"
   },
   "login": "Login / Sign Up",
   "welcome": "Welcome to YolcuTransferi.com!",
