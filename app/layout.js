@@ -27,7 +27,6 @@ export default function RootLayout({ children }) {
           <div className="w-full flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Link href="/">
-                {/* LOGO %15 daha büyük */}
                 <Image
                   src="/LOGO.png"
                   alt="Logo"
@@ -40,15 +39,16 @@ export default function RootLayout({ children }) {
             </div>
 
             {/* MENÜ */}
-            <nav className="flex items-center gap-4 font-medium text-[1.1rem] text-white">
+            <nav className="flex items-center gap-6 font-medium text-[1.1rem] text-gray-300">
               {menuItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="relative px-3 py-1
-                             transition-colors duration-200
-                             hover:text-yellow-400
-                             after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-yellow-400 after:transition-[width] after:duration-300 hover:after:w-full hover:after:shadow-yellow-400/70"
+                  className="relative px-3 py-1 transition-colors duration-200
+                             hover:text-white
+                             after:absolute after:left-0 after:-bottom-0.5
+                             after:h-[0.5px] after:w-0 after:bg-white after:transition-[width] after:duration-300
+                             hover:after:w-full"
                 >
                   {item.name}
                 </Link>
@@ -62,7 +62,7 @@ export default function RootLayout({ children }) {
                 target="_blank"
                 aria-label="Whatsapp"
                 rel="noopener noreferrer"
-                className="text-white hover:text-yellow-400 transition-colors duration-200"
+                className="text-gray-300 hover:text-white transition-colors duration-200"
               >
                 <FaWhatsapp className="w-6 h-6" />
               </a>
@@ -71,7 +71,7 @@ export default function RootLayout({ children }) {
                 target="_blank"
                 aria-label="Instagram"
                 rel="noopener noreferrer"
-                className="text-white hover:text-yellow-400 transition-colors duration-200"
+                className="text-gray-300 hover:text-white transition-colors duration-200"
               >
                 <FaInstagram className="w-6 h-6" />
               </a>
@@ -80,7 +80,7 @@ export default function RootLayout({ children }) {
                 target="_blank"
                 aria-label="X (Twitter)"
                 rel="noopener noreferrer"
-                className="text-white hover:text-yellow-400 transition-colors duration-200"
+                className="text-gray-300 hover:text-white transition-colors duration-200"
               >
                 <SiX className="w-6 h-6" />
               </a>
@@ -95,8 +95,11 @@ export default function RootLayout({ children }) {
             </div>
           </div>
 
-          {/* LOGO ALTINDA 1PX BEYAZ ÇİZGİ */}
-          <div className="w-full border-b border-white mt-2"></div>
+          {/* HEADER ALTINDA 0.5PX BEYAZ ÇİZGİ TAM GENİŞLİKTE */}
+          <div
+            className="w-full mt-2"
+            style={{ borderBottom: "0.5px solid white" }}
+          ></div>
         </header>
 
         <main className="flex-grow">{children}</main>
