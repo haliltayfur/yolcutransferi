@@ -13,7 +13,9 @@ label {
   font-weight: bold;
   color: #333;
 }
-
+html {
+  scrollbar-gutter: stable;
+}
 body {
   background-color: #111;
   color: #fff;
