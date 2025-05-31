@@ -40,16 +40,16 @@ export default function RootLayout({ children }) {
             </div>
 
             {/* MENÜ */}
-            <nav className="flex items-center gap-4 font-semibold text-[1.15rem]">
+            <nav className="flex items-center gap-2 font-semibold text-[1.15rem] bg-gray-100 rounded-xl px-4 py-2 shadow-inner">
               {menuItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="relative px-5 py-2 text-yellow-400 rounded-lg
-                             transition-colors duration-300
-                             hover:text-black hover:bg-gradient-to-r hover:from-yellow-400 hover:via-yellow-300 hover:to-yellow-400
-                             before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r before:from-yellow-300 before:via-yellow-100 before:to-yellow-300 before:opacity-0 before:blur-sm before:transition-opacity before:duration-300
-                             hover:before:opacity-50"
+                  className="relative px-3 py-1.5 rounded-lg text-black
+                             transition-colors duration-200
+                             hover:text-yellow-500
+                             after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-yellow-500 after:transition-[width] after:duration-300 hover:after:w-full
+                             hover:after:shadow-yellow-400/80"
                 >
                   {item.name}
                 </Link>
@@ -57,45 +57,40 @@ export default function RootLayout({ children }) {
             </nav>
 
             {/* SOSYAL İKONLAR + GİRİŞ BUTONU */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
               <a
                 href="https://wa.me/905395267569"
                 target="_blank"
                 aria-label="Whatsapp"
                 rel="noopener noreferrer"
+                className="text-yellow-500 hover:text-yellow-400 transition-colors duration-200"
               >
-                <FaWhatsapp className="w-6 h-6 text-yellow-400 hover:text-yellow-300 transition-colors duration-200" />
+                <FaWhatsapp className="w-6 h-6" />
               </a>
               <a
                 href="#"
                 target="_blank"
                 aria-label="Instagram"
                 rel="noopener noreferrer"
+                className="text-yellow-500 hover:text-yellow-400 transition-colors duration-200"
               >
-                <FaInstagram className="w-6 h-6 text-yellow-400 hover:text-yellow-300 transition-colors duration-200" />
+                <FaInstagram className="w-6 h-6" />
               </a>
               <a
                 href="#"
                 target="_blank"
                 aria-label="X (Twitter)"
                 rel="noopener noreferrer"
+                className="text-yellow-500 hover:text-yellow-400 transition-colors duration-200"
               >
-                <SiX className="w-6 h-6 text-white hover:text-yellow-300 transition-colors duration-200" />
+                <SiX className="w-6 h-6" />
               </a>
               <Link
                 href="/login"
-                className="relative inline-block px-8 py-3 rounded-2xl font-semibold text-yellow-400
-                           bg-gradient-to-r from-black via-yellow-900 to-black
-                           border-2 border-yellow-400
-                           shadow-[0_0_10px_rgba(255,215,0,0.7)]
-                           overflow-hidden
-                           transition-all duration-300
-                           hover:text-black hover:bg-gradient-to-r hover:from-yellow-400 hover:via-yellow-300 hover:to-yellow-400
-                           hover:shadow-[0_0_20px_rgba(255,215,0,0.9)]
-                           before:absolute before:top-0 before:left-[-75%] before:w-32 before:h-full before:bg-gradient-to-r before:from-transparent before:via-white before:to-transparent before:opacity-20 before:rotate-12 before:blur-md
-                           before:transition-transform before:duration-700 before:ease-in-out
-                           hover:before:translate-x-full
-                           focus:outline-none focus:ring-4 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black"
+                className="text-black font-semibold px-5 py-1.5 rounded-xl
+                           bg-yellow-400 hover:bg-yellow-500
+                           transition-colors duration-200
+                           shadow-md hover:shadow-yellow-400"
               >
                 Giriş Yap
               </Link>
