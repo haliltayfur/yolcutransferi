@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 const menuItems = [
-  { name: "Anaasayfa", href: "/" },
+  { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
   { name: "Araçlar", href: "/araclar" },
   { name: "Rezervasyon", href: "/rezervasyon" },
@@ -44,10 +44,10 @@ export default function RootLayout({ children }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="relative px-3 py-1 transition-colors duration-300 hover:text-white"
+                  className="relative px-3 py-1 transition-colors duration-200 hover:text-gray-100"
                 >
                   {item.name}
-                  <span className="absolute bottom-0 left-[10%] w-[80%] h-[1.5px] bg-white opacity-0 transition-opacity duration-300 hover:opacity-100"></span>
+                  <span className="absolute bottom-0 left-[10%] w-[80%] h-[1px] bg-gray-100 opacity-0 transition-opacity duration-300 hover:opacity-100"></span>
                 </Link>
               ))}
             </nav>
@@ -59,7 +59,7 @@ export default function RootLayout({ children }) {
                 target="_blank"
                 aria-label="Whatsapp"
                 rel="noopener noreferrer"
-                className="text-white hover:text-yellow-400 transition-colors duration-300"
+                className="text-gray-300 hover:text-gray-100 transition-colors duration-200"
               >
                 <FaWhatsapp className="w-6 h-6" />
               </a>
@@ -68,7 +68,7 @@ export default function RootLayout({ children }) {
                 target="_blank"
                 aria-label="Instagram"
                 rel="noopener noreferrer"
-                className="text-white hover:text-yellow-400 transition-colors duration-300"
+                className="text-gray-300 hover:text-gray-100 transition-colors duration-200"
               >
                 <FaInstagram className="w-6 h-6" />
               </a>
@@ -77,17 +77,16 @@ export default function RootLayout({ children }) {
                 target="_blank"
                 aria-label="X (Twitter)"
                 rel="noopener noreferrer"
-                className="text-white hover:text-yellow-400 transition-colors duration-300"
+                className="text-gray-300 hover:text-gray-100 transition-colors duration-200"
               >
                 <SiX className="w-6 h-6" />
               </a>
               <Link
                 href="/login"
-                className="text-yellow-900 font-semibold px-6 py-2 rounded-xl
-                           bg-yellow-400 shadow-inner shadow-yellow-300/60
-                           transition-all duration-300
-                           hover:bg-yellow-500 hover:shadow-yellow-400/80
-                           hover:shadow-lg hover:text-white"
+                className="text-black font-semibold px-5 py-1.5 rounded-lg
+                           bg-yellow-400 hover:bg-yellow-450
+                           transition-colors duration-200 shadow-sm"
+                style={{ backgroundColor: "#FFD700" /* saf sarı */ }}
               >
                 Giriş Yap
               </Link>
@@ -97,19 +96,19 @@ export default function RootLayout({ children }) {
           {/* HEADER ALTINDA 0.3PX YARI SAYDAM BEYAZ ÇİZGİ TAM GENİŞLİKTE */}
           <div
             className="w-full mt-2"
-            style={{ borderBottom: "0.3px solid rgba(255,255,255,0.2)" }}
+            style={{ borderBottom: "0.3px solid rgba(255,255,255,0.15)" }}
           ></div>
         </header>
 
         <main className="flex-grow">{children}</main>
 
         <footer className="w-full px-8 py-6 bg-black/90 flex flex-col md:flex-row items-center justify-between gap-3 mt-auto">
-          <span className="text-sm text-gray-300">© 2025 YolcuTransferi.com</span>
+          <span className="text-sm text-gray-400">© 2025 YolcuTransferi.com</span>
           <div className="flex gap-6 items-center">
-            <Link href="/sozlesme" className="text-sm underline">
+            <Link href="/sozlesme" className="text-sm underline text-gray-400">
               Sözleşme
             </Link>
-            <Link href="/gizlilik" className="text-sm underline">
+            <Link href="/gizlilik" className="text-sm underline text-gray-400">
               Gizlilik
             </Link>
           </div>
