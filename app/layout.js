@@ -9,6 +9,15 @@ export const metadata = {
   description: "VIP Transfer | Dron Transfer | Türkiye Geneli",
 };
 
+const menuItems = [
+  { name: "Anaasayfa", href: "/" },
+  { name: "Hizmetler", href: "/hizmetler" },
+  { name: "Araçlar", href: "/araclar" },
+  { name: "Rezervasyon", href: "/rezervasyon" },
+  { name: "S.S.S.", href: "/sss" },
+  { name: "İletişim", href: "/iletisim" },
+];
+
 export default function RootLayout({ children }) {
   return (
     <html lang="tr">
@@ -22,43 +31,58 @@ export default function RootLayout({ children }) {
                 <Image
                   src="/LOGO.png"
                   alt="Logo"
-                  width={253}  // 220 * 1.15 ≈ 253
-                  height={69}  // 60 * 1.15 ≈ 69
+                  width={253} // 220 * 1.15 ≈ 253
+                  height={69} // 60 * 1.15 ≈ 69
                   className="mr-2"
                   priority
                 />
               </Link>
-              {/* <span className="text-2xl md:text-3xl font-bold text-yellow-400">YolcuTransferi.com</span> */}
             </div>
-            {/* MENÜ: Modern arka plan ve hover */}
-            <nav className="flex items-center gap-2 font-semibold text-[1.15rem] bg-gray-100 rounded-xl px-4 py-2 shadow-inner">
-              <Link href="/" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Anasayfa</Link>
-              <Link href="/hizmetler" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Hizmetler</Link>
-              <Link href="/araclar" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Araçlar</Link>
-              <Link href="/rezervasyon" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">Rezervasyon</Link>
-              <Link href="/sss" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">S.S.S.</Link>
-              <Link href="/iletisim" className="px-3 py-1.5 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700">İletişim</Link>
+            {/* MENÜ: VIP modern cam efektli butonlar */}
+            <nav className="flex items-center gap-3 font-semibold text-[1.15rem] bg-gray-900 bg-opacity-30 rounded-xl px-5 py-3 shadow-lg backdrop-blur-md">
+              {menuItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="relative px-4 py-2 rounded-lg text-white transition-all duration-300
+                             before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r before:from-yellow-400 before:via-yellow-300 before:to-yellow-400 before:opacity-0 before:blur-xl before:transition-opacity before:duration-300
+                             hover:before:opacity-70 hover:text-black"
+                >
+                  {item.name}
+                </Link>
+              ))}
             </nav>
-            <div className="flex items-center gap-4">
-              <a href="https://wa.me/905395267569" target="_blank" aria-label="Whatsapp" rel="noopener noreferrer">
-                <FaWhatsapp className="w-6 h-6 text-green-400 hover:text-green-500" />
+            <div className="flex items-center gap-6">
+              <a
+                href="https://wa.me/905395267569"
+                target="_blank"
+                aria-label="Whatsapp"
+                rel="noopener noreferrer"
+              >
+                <FaWhatsapp className="w-6 h-6 text-yellow-400 hover:text-yellow-300 transition-colors duration-200" />
               </a>
-              <a href="#" target="_blank" aria-label="Instagram" rel="noopener noreferrer">
-                <FaInstagram className="w-6 h-6 text-pink-500 hover:text-pink-600" />
+              <a
+                href="#"
+                target="_blank"
+                aria-label="Instagram"
+                rel="noopener noreferrer"
+              >
+                <FaInstagram className="w-6 h-6 text-yellow-400 hover:text-yellow-300 transition-colors duration-200" />
               </a>
-              <a href="#" target="_blank" aria-label="X (Twitter)" rel="noopener noreferrer">
-                <SiX className="w-6 h-6 text-white hover:text-gray-400" />
+              <a
+                href="#"
+                target="_blank"
+                aria-label="X (Twitter)"
+                rel="noopener noreferrer"
+              >
+                <SiX className="w-6 h-6 text-white hover:text-yellow-300 transition-colors duration-200" />
               </a>
               <Link
                 href="/login"
-                className="
-                  px-4 py-1.5 rounded-xl border border-gray-600
-                  text-white font-semibold
-                  bg-transparent
-                  hover:bg-gray-800 hover:border-gray-400 hover:text-yellow-400
-                  transition-colors duration-200
-                  focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black
-                "
+                className="relative inline-block px-6 py-2 rounded-xl font-semibold text-white
+                           bg-black bg-opacity-30 border-2 border-yellow-400 shadow-lg backdrop-blur-sm
+                           transition-all duration-300 hover:bg-yellow-400 hover:text-black hover:shadow-yellow-400/70
+                           focus:outline-none focus:ring-4 focus:ring-yellow-300"
               >
                 Giriş Yap
               </Link>
@@ -66,15 +90,17 @@ export default function RootLayout({ children }) {
           </div>
         </header>
 
-        <main className="flex-grow">
-          {children}
-        </main>
+        <main className="flex-grow">{children}</main>
 
         <footer className="w-full px-8 py-6 bg-black/90 flex flex-col md:flex-row items-center justify-between gap-3 mt-auto">
           <span className="text-sm text-gray-300">© 2025 YolcuTransferi.com</span>
           <div className="flex gap-6 items-center">
-            <Link href="/sozlesme" className="text-sm underline">Sözleşme</Link>
-            <Link href="/gizlilik" className="text-sm underline">Gizlilik</Link>
+            <Link href="/sozlesme" className="text-sm underline">
+              Sözleşme
+            </Link>
+            <Link href="/gizlilik" className="text-sm underline">
+              Gizlilik
+            </Link>
           </div>
         </footer>
       </body>
