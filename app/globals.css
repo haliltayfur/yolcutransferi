@@ -2,24 +2,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
 input, select, button {
   outline: none;
   font-size: 16px;
+  font-family: 'Poppins', sans-serif;
 }
+
 input:focus, select:focus {
   border: 2px solid #FFD700 !important;
 }
+
 label {
   font-weight: bold;
   color: #333;
+  font-family: 'Poppins', sans-serif;
 }
+
 html {
   scrollbar-gutter: stable;
 }
+
 body {
   background-color: #111;
   color: #fff;
   overflow-y: scroll;
+  font-family: 'Poppins', sans-serif;
 }
+
 .text-gold { color: #ffd700; }
 .bg-gold { background-color: #ffd700; }
