@@ -14,7 +14,7 @@ export default function Header() {
       {/* Menü kısmı: modern arka plan + hover */}
       <nav className="hidden md:flex gap-2 font-semibold text-base bg-gray-100 rounded-xl px-4 py-2 shadow-inner">
         {[
-          { label: "Anasayfa", href: "/" },
+          { label: "Anasayfaaaaa", href: "/" },
           { label: "VIP Transfer", href: "/vip-transfer" },
           { label: "Dron Transferi", href: "/dron-transferi" },
           { label: "Bireysel Transferler", href: "/individual-transfers" },
