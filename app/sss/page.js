@@ -21,6 +21,30 @@ const SORULAR = [
   {
     q: "İptal ve iade politikası nasıl?",
     a: "Transfer saatinden en az 6 saat önce iptal edilen rezervasyonlarda ücretin tamamı iade edilir. Daha geç iptallerde veya yolculuk başlamışsa ücret iadesi yapılmaz. Detaylar için İade Politikası sayfamıza bakınız."
+  },
+  {
+    q: "Havalimanında sizi nasıl bulabilirim?",
+    a: "Transfer tarihinden bir gün önce, havalimanı karşılama bilgileri size iletilecektir. Görevlimiz, isminizin yazılı olduğu bir tabela ile terminal çıkış kapısında sizi bekliyor olacaktır."
+  },
+  {
+    q: "Uçağım rötar yaparsa ne olur?",
+    a: "Rezervasyonunuza ekli uçuş numaranızdan uçuşunuzu takip ediyoruz. Bu nedenle bir gecikme durumunda endişelenmenize gerek yok; şoförümüz sizi yeni iniş saatinize göre karşılayacaktır."
+  },
+  {
+    q: "Araçlarda bebek veya çocuk koltuğu mevcut mu?",
+    a: "VIP araçlarımızda, isteğe bağlı olarak çocuk koltuğu sağlanmaktadır. Rezervasyon yaparken çocuk koltuğu ihtiyacınızı belirtirseniz, çocuğunuzun yaşına uygun bir koltuk temin edilecektir."
+  },
+  {
+    q: "Transfer ücretini nasıl ödeyebilirim?",
+    a: "Transfer ücretinizi araçta nakit veya kredi kartıyla ödeyebilirsiniz. Ön ödeme olarak banka havalesi/EFT de kabul ediyoruz."
+  },
+  {
+    q: "Rezervasyonumu ne kadar önceden yapmalıyım?",
+    a: "Transferinizden 24 saat öncesine kadar online rezervasyon yapabilirsiniz. Acil durumlar için telefonla iletişime geçmeniz yeterlidir."
+  },
+  {
+    q: "Evcil hayvanımla seyahat edebilir miyim?",
+    a: "Evcil hayvanla seyahat etmek isterseniz rezervasyon sırasında belirtmeniz yeterlidir. Taşıma kutusu/kafesi ile kabul edilir ve araç buna uygun seçilir."
   }
 ];
 
@@ -48,7 +72,7 @@ export default function SSS() {
         ))}
       </div>
       <div className="mt-10 text-center text-gray-400 text-xs">
-        Diğer sorularınız için bize <b>İletişim</b> menüsünden ulaşabilirsiniz.
+        
       </div>
     </main>
   );
