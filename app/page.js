@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white flex justify-center">
       {/* Sayfa genişliğini header altındaki çizgiye sabitlemek için container */}
-      <div className="w-full max-w-[1100px] px-4">
+      <div className="w-full max-w-[1400px] px-4">
 
         {/* HERO GÖRSELİ - HEADER ALT ÇİZGİSİ İLE HİZALI */}
         <div className="relative w-full h-[600px] mt-0">
