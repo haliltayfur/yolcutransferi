@@ -11,14 +11,35 @@ export default function Iletisim() {
     mesaj: "",
   });
   const [ok, setOk] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setOk(true);
-    setForm({ ad: "", telefon: "", email: "", konu: "Bilgi Talebi", mesaj: "" });
+    setError("");
+
+    try {
+      const res = await fetch("/api/iletisim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) throw new Error("Sunucu hatası");
+
+      setOk(true);
+      setForm({
+        ad: "",
+        telefon: "",
+        email: "",
+        konu: "Bilgi Talebi",
+        mesaj: "",
+      });
+    } catch (err) {
+      setError("Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.");
+    }
   };
 
   useEffect(() => {
@@ -116,6 +137,9 @@ export default function Iletisim() {
             <div className="text-green-400 mt-2">
               Mesajınız iletildi! En kısa sürede dönüş yapılacaktır.
             </div>
+          )}
+          {error && (
+            <div className="text-red-400 mt-2">{error}</div>
           )}
         </form>
       </div>
