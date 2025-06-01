@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { FaInstagram, FaXTwitter } from "react-icons/fa6";
+import { FaInstagram, FaXTwitter, FaWhatsapp } from "react-icons/fa6";
 
 export default function Header() {
   return (
@@ -36,9 +36,17 @@ export default function Header() {
         ))}
       </nav>
 
-      {/* Sosyal medya ve Giriş */}
+      {/* Sosyal medya ikonları ve Giriş */}
       <div className="flex items-center gap-4">
         <div className="hidden md:flex gap-3 items-center">
+          <a
+            href="https://wa.me/905395267569"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="WhatsApp"
+          >
+            <FaWhatsapp className="text-green-500 hover:text-green-600 text-xl transition" />
+          </a>
           <a
             href="https://www.instagram.com/yolcutransferi/"
             target="_blank"
@@ -57,6 +65,7 @@ export default function Header() {
           </a>
         </div>
 
+        {/* Giriş butonu */}
         <Link
           href="/login"
           className="bg-yellow-400 hover:bg-yellow-500 transition text-black px-5 py-2 rounded-xl font-semibold shadow text-lg"
