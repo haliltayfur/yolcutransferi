@@ -49,7 +49,7 @@ export default function Hizmetlerimiz() {
             key={item.title}
             className="flex flex-col items-center bg-black/70 rounded-2xl shadow-xl p-7 border border-gold/25 hover:border-gold hover:bg-black/90 transition-all cursor-pointer"
           >
-            <div className="w-[270px] h-[270px] mb-4 relative rounded-full overflow-hidden shadow-md border border-gold/10">
+            <div className="w-[270px] h-[270px] mb-6 relative rounded-full overflow-hidden border-4 border-gold/30 shadow-md">
               <Image
                 src={item.icon}
                 alt={item.title}
