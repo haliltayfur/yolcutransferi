@@ -5,9 +5,7 @@ import Link from "next/link";
 export default function VIPHavalimani() {
   return (
     <main className="max-w-3xl mx-auto px-4 py-12">
-
-      {/* SARİ ÇERÇEVE BAŞLANGIÇ */}
-      <div className="border-[3px] border-[#b8963e] rounded-[10px] bg-black/60 p-6 md:p-10 shadow-lg">
+      <div className="border-4 border-[#b8963e] rounded-[10px] bg-black/60 p-6 md:p-10 shadow-lg">
         <Image
           src="/vip-havalimani-banner.png"
           alt="VIP Havalimanı Transferi"
@@ -22,7 +20,6 @@ export default function VIPHavalimani() {
           Her yolculuk sigortalı, zamanında ve eğitimli şoförler eşliğinde gerçekleşir.  
           Bagaj yardımı, özel karşılama, uçuş takip ve 7/24 müşteri desteği ile havalimanı ulaşımını stressiz ve ayrıcalıklı hale getiriyoruz.
         </p>
-
         <p className="text-gray-300">
           <strong className="text-white">Neden YolcuTransferi?</strong><br />
           - Rakiplerimizden farklı olarak, filomuzdaki tüm araçlar yeni model ve lüks segmenttir.<br />
@@ -31,11 +28,8 @@ export default function VIPHavalimani() {
           - Çocuk koltuğu ve özel talepler ücretsiz sunulur.
         </p>
       </div>
-      {/* SARİ ÇERÇEVE BİTİŞ */}
-
-      {/* Buton dışarıda */}
       <Link href="https://yolcutransferi-halil-tayfurs-projects.vercel.app/rezervasyon">
-        <button className="bg-gold hover:bg-yellow-500 text-black font-bold py-3 px-8 rounded-xl mt-10 w-full text-lg shadow">
+        <button className="bg-[#b8963e] hover:bg-yellow-500 text-black font-bold py-3 px-8 rounded-xl mt-10 w-full text-lg shadow">
           Rezervasyon Yap
         </button>
       </Link>
