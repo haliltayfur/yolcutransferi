@@ -3,15 +3,22 @@ import { useState, useEffect } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 
 export default function Iletisim() {
-  const [form, setForm] = useState({ ad: "", email: "", mesaj: "" });
+  const [form, setForm] = useState({
+    ad: "",
+    telefon: "",
+    email: "",
+    konu: "Bilgi Talebi",
+    mesaj: "",
+  });
   const [ok, setOk] = useState(false);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setOk(true);
-    setForm({ ad: "", email: "", mesaj: "" });
+    setForm({ ad: "", telefon: "", email: "", konu: "Bilgi Talebi", mesaj: "" });
   };
 
   useEffect(() => {
@@ -42,7 +49,7 @@ export default function Iletisim() {
             <span>Whatsapp üzerinden 7/24 destek</span>
           </div>
           <a
-            href="https://www.instagram.com/yolcutransferi"
+            href="https://www.instagram.com/yolcutransferi/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 text-lg hover:underline"
@@ -63,6 +70,14 @@ export default function Iletisim() {
           />
           <input
             required
+            name="telefon"
+            value={form.telefon}
+            onChange={handleChange}
+            placeholder="Telefon Numaranız"
+            className="rounded px-4 py-2 bg-black/70 border border-gold/30 text-white focus:outline-none focus:ring-2 focus:ring-gold"
+          />
+          <input
+            required
             name="email"
             value={form.email}
             onChange={handleChange}
@@ -70,6 +85,18 @@ export default function Iletisim() {
             type="email"
             className="rounded px-4 py-2 bg-black/70 border border-gold/30 text-white focus:outline-none focus:ring-2 focus:ring-gold"
           />
+          <select
+            name="konu"
+            value={form.konu}
+            onChange={handleChange}
+            className="rounded px-4 py-2 bg-black/70 border border-gold/30 text-white focus:outline-none focus:ring-2 focus:ring-gold"
+          >
+            <option>Bilgi Talebi</option>
+            <option>Şikayet</option>
+            <option>Rezervasyon</option>
+            <option>İş Birliği</option>
+            <option>Diğer</option>
+          </select>
           <textarea
             required
             name="mesaj"
@@ -86,7 +113,9 @@ export default function Iletisim() {
             Gönder
           </button>
           {ok && (
-            <div className="text-green-400 mt-2">Mesajınız iletildi! En kısa sürede dönüş yapılacaktır.</div>
+            <div className="text-green-400 mt-2">
+              Mesajınız iletildi! En kısa sürede dönüş yapılacaktır.
+            </div>
           )}
         </form>
       </div>
@@ -99,7 +128,7 @@ export default function Iletisim() {
           style={{ border: 0 }}
           loading="lazy"
           allowFullScreen
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3010.1205014186815!2d29.12685391558869!3d41.01840137929839!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab739a5d23ad3%3A0x3f1c91c70d802fd5!2s%C3%9Cmraniye%20Plazalar%20B%C3%B6lgesi!5e0!3m2!1str!2str!4v1668011101234!5m2!1str!2str"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3010.4732351280533!2d29.12445547674763!3d41.01817201972074!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab71c6749eb7f%3A0x355d7b2a0dff30e5!2sAkyaka%20AVM!5e0!3m2!1str!2str!4v1717260141741!5m2!1str!2str"
         />
       </div>
 
