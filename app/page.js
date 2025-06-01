@@ -8,7 +8,7 @@ export default function Home() {
       <div className="w-full max-w-[1100px] px-4">
 
         {/* HERO GÖRSELİ - HEADER ALT ÇİZGİSİ İLE HİZALI */}
-        <div className="relative w-full h-full mt-0">
+        <div className="w-full max-w-[1100px] mt-0">
           <Image
             src="/Orta.jpg"
             alt="YolcuTransferi VIP Transfer"
