@@ -37,12 +37,21 @@ export default function Hizmetlerimiz() {
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
         {HIZMETLER.map(hizmet => (
-          <div key={hizmet.title} className="flex items-center bg-black/70 rounded-2xl shadow-lg p-6 border border-gold/25">
-            <Image src={hizmet.icon} alt={hizmet.title} width={54} height={54} className="mr-5" />
-            <div>
-              <h3 className="font-bold text-xl text-gold mb-2">{hizmet.title}</h3>
-              <p className="text-gray-200">{hizmet.desc}</p>
-            </div>
+          <div
+            key={hizmet.title}
+            className="flex flex-col items-center bg-black/70 rounded-2xl shadow-lg p-7 border border-gold/25"
+          >
+            {/* 2.5 kat büyük: 54x2.5 = 135px */}
+            <Image
+              src={hizmet.icon}
+              alt={hizmet.title}
+              width={135}
+              height={135}
+              className="mb-4"
+              style={{ objectFit: "contain" }}
+            />
+            <h3 className="font-bold text-xl text-gold mb-2 text-center">{hizmet.title}</h3>
+            <p className="text-gray-200 text-center">{hizmet.desc}</p>
           </div>
         ))}
       </div>
