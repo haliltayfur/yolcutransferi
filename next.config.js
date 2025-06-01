@@ -1,11 +1,10 @@
+// next.config.js
+const withNextIntl = require('next-intl/plugin')('./next-intl.config.js');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  i18n: {
-    locales: ['tr', 'en', 'ar'],
-    defaultLocale: 'tr',
-    localeDetection: false, // Tarayıcı dili algılamasını kapatır (önerilir)
-  },
-  reactStrictMode: true, // (opsiyonel ama tavsiye edilir)
+  reactStrictMode: true,
+  // diğer isteğe bağlı ayarlar burada olabilir
 };
 
-module.exports = nextConfig;
+module.exports = withNextIntl(nextConfig);
