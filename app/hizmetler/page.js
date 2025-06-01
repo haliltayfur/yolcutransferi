@@ -6,25 +6,25 @@ const HIZMETLER = [
   {
     title: "VIP Havalimanı Transferi",
     desc: "Türkiye’nin tüm havalimanlarında, Mercedes Maybach, Vito, lüks minivan ve özel araçlarla profesyonel, konforlu transfer.",
-    icon: "/icon-havalimani.png",
+    icon: "/vip-havalimani-banner.png",
     href: "/vip-havalimani",
   },
   {
     title: "Şehirler Arası Transfer",
     desc: "İstanbul, Bodrum, Antalya, İzmir ve tüm şehirler arası yolculuklarınızda güvenli ve sigortalı taşımacılık.",
-    icon: "/icon-sehir.png",
+    icon: "/sehirler-arasi-banner.png",
     href: "/sehirler-arasi",
   },
   {
     title: "Kurumsal & Toplu Transfer",
     desc: "Toplantı, seminer, fuar ve şirket organizasyonlarında filomuzla toplu taşıma çözümleri.",
-    icon: "/icon-kurumsal.png",
+    icon: "/kurumsal-banner.png",
     href: "/kurumsal",
   },
   {
     title: "Tur & Gezi Transferi",
     desc: "Tatil, şehir turu ve özel gezi planlarınızda profesyonel sürücülerimiz ve lüks araçlarımızla hizmetinizdeyiz.",
-    icon: "/icon-tur.png",
+    icon: "/tur-gezi-banner.png",
     href: "/tur-gezi",
   },
   {
