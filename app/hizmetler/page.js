@@ -49,12 +49,11 @@ export default function Hizmetlerimiz() {
             key={item.title}
             className="flex flex-col items-center bg-black/70 rounded-2xl shadow-xl p-7 border border-gold/25 hover:border-gold hover:bg-black/90 transition-all cursor-pointer"
           >
-            <div className="w-[270px] h-[270px] mb-6 relative overflow-hidden border-4 border-gold/50 rounded-[10px] shadow-md">
+            <div className="w-[270px] h-[270px] mb-6 relative rounded-[10px] overflow-hidden border-4 border-gold/50 shadow-md">
               <Image
                 src={item.icon}
                 alt={item.title}
-                width={270}
-                height={270}
+                fill
                 className="object-cover"
               />
             </div>
