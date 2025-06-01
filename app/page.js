@@ -17,7 +17,7 @@ export default function Home() {
         {/* HERO GÖRSELİ */}
         <div className="relative w-full h-[540px] md:h-[600px] mt-0">
           <Image
-            src="/hero-bg.jpg"
+            src="/Orta.jpg"
             alt="YolcuTransferi VIP Transfer"
             fill
             style={{ objectFit: "cover", objectPosition: "center" }}
