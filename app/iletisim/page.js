@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 export default function Iletisim() {
   const [form, setForm] = useState({
@@ -65,10 +66,15 @@ export default function Iletisim() {
             <FaMapMarkerAlt className="text-gold" />
             <span>Ümraniye Plazalar Bölgesi, İstanbul, Türkiye</span>
           </div>
-          <div className="flex items-center gap-3 text-lg">
+          <a
+            href="https://wa.me/905395267569"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 text-lg hover:underline"
+          >
             <FaWhatsapp className="text-green-400" />
             <span>Whatsapp üzerinden 7/24 destek</span>
-          </div>
+          </a>
           <a
             href="https://www.instagram.com/yolcutransferi/"
             target="_blank"
@@ -76,7 +82,16 @@ export default function Iletisim() {
             className="flex items-center gap-3 text-lg hover:underline"
           >
             <FaInstagram className="text-pink-500" />
-            <span>Instagram: @yolcutransferi</span>
+            <span>yolcutransferi</span>
+          </a>
+          <a
+            href="https://twitter.com/yolcutransferi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 text-lg hover:underline"
+          >
+            <FaXTwitter className="text-white" />
+            <span>yolcutransferi</span>
           </a>
         </div>
 
@@ -135,7 +150,7 @@ export default function Iletisim() {
           </button>
           {ok && (
             <div className="text-green-400 mt-2">
-              Mesajınız iletildi! En kısa sürede dönüş yapılacaktır.
+              Teşekkür ederiz. Mesajınız başarıyla alınmıştır. En kısa sürede sizinle iletişime geçilecektir.
             </div>
           )}
           {error && (
