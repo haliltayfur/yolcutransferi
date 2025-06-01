@@ -49,7 +49,11 @@ const SORULAR = [
 ];
 
 export default function SSS() {
-  const [acik, setAcik] = useState(null);
+  const [acik, setAcik] = useState([0, 1]); // İlk 2 açık başlar
+
+  const toggle = (i) => {
+    setAcik(acik.includes(i) ? [] : [i]); // Tıklanan dışında hepsini kapat
+  };
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-14">
@@ -60,12 +64,19 @@ export default function SSS() {
         {SORULAR.map((item, i) => (
           <div key={i} className="bg-black/70 border border-gold/20 rounded-xl shadow px-5 py-4">
             <button
-              className="w-full text-left text-lg text-gold font-semibold focus:outline-none"
-              onClick={() => setAcik(acik === i ? null : i)}
+              className="w-full text-left text-lg text-gold font-semibold focus:outline-none flex justify-between items-center"
+              onClick={() => toggle(i)}
             >
               {item.q}
+              <span
+                className={`transform transition-transform duration-200 ${
+                  acik.includes(i) ? "rotate-180" : ""
+                }`}
+              >
+                ▼
+              </span>
             </button>
-            {acik === i && (
+            {acik.includes(i) && (
               <div className="mt-2 text-gray-200 text-base">{item.a}</div>
             )}
           </div>
