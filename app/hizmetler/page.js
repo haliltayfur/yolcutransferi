@@ -53,8 +53,9 @@ export default function Hizmetlerimiz() {
               <Image
                 src={item.icon}
                 alt={item.title}
-                fill
-                className="object-cover"
+                width={270}
+                height={270}
+                className="object-cover rounded-full"
               />
             </div>
             <h3 className="font-bold text-xl text-gold mb-2 text-center">{item.title}</h3>
