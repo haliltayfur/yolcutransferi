@@ -23,7 +23,7 @@ export default function Home() {
       </div>
 
       {/* REZERVASYON FORMU */}
-      <div className="flex justify-center z-10 relative mt-10">
+      <div className="flex justify-center z-80 relative mt30">
         <div className="bg-white rounded-2xl shadow-2xl px-7 py-5 max-w-3xl w-full flex flex-col md:flex-row md:items-end gap-4 border border-gray-200">
           {/* ... rezervasyon inputların */}
         </div>
