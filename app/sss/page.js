@@ -48,7 +48,7 @@ export default function SSS() {
         ))}
       </div>
       <div className="mt-10 text-center text-gray-400 text-xs">
-        Diğer sorularınız için bize <b>info@yolcutransferi.com</b> adresinden ulaşabilirsiniz.
+        Diğer sorularınız için bize <b>İletişim</b> menüsünden ulaşabilirsiniz.
       </div>
     </main>
   );
