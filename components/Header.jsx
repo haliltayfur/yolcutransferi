@@ -1,5 +1,6 @@
+"use client";
 import Link from "next/link";
-import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
+import { FaWhatsapp, FaInstagram, FaXTwitter } from "react-icons/fa6";
 
 export default function Header() {
   return (
@@ -35,18 +36,33 @@ export default function Header() {
         ))}
       </nav>
 
-      {/* Sosyal medya ikonları ve Giriş/Üyelik butonu */}
+      {/* Sosyal medya + Giriş */}
       <div className="flex items-center gap-4">
         {/* Sosyal medya ikonları */}
-        <div className="flex gap-3">
-          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
-            <FaFacebookF className="text-gray-700 hover:text-blue-600 transition text-xl" />
+        <div className="hidden md:flex gap-3 items-center">
+          <a
+            href="https://wa.me/905395267569"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="WhatsApp"
+          >
+            <FaWhatsapp className="text-green-500 hover:text-green-600 text-xl transition" />
           </a>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-            <FaInstagram className="text-gray-700 hover:text-pink-500 transition text-xl" />
+          <a
+            href="https://www.instagram.com/yolcutransferi/"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Instagram"
+          >
+            <FaInstagram className="text-pink-500 hover:text-pink-600 text-xl transition" />
           </a>
-          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-            <FaTwitter className="text-gray-700 hover:text-blue-400 transition text-xl" />
+          <a
+            href="https://twitter.com/yolcutransferi"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="X (Twitter)"
+          >
+            <FaXTwitter className="text-black hover:text-gray-700 text-xl transition" />
           </a>
         </div>
 
