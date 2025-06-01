@@ -1,11 +1,11 @@
 import createMiddleware from 'next-intl/middleware';
-import { locales, defaultLocale } from './next-intl.config';
 
 export default createMiddleware({
-  locales,
-  defaultLocale,
+  locales: ['tr', 'en', 'ar'],      // Dil seçeneklerin
+  defaultLocale: 'tr',              // Varsayılan dil
+  localeDetection: true             // Otomatik algılamayı aç
 });
 
 export const config = {
-  matcher: ['/', '/(tr|en|ar)/:path*'],
+  matcher: ['/((?!api|_next|favicon.ico|robots.txt).*)']  // API ve static dosyalar hariç
 };
