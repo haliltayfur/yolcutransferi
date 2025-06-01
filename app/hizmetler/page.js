@@ -42,19 +42,19 @@ export default function Hizmetlerimiz() {
         Hizmetlerimiz
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-7 justify-center">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 justify-center">
         {HIZMETLER.map((item) => (
           <Link
             href={item.href}
             key={item.title}
-            className="flex flex-col items-center bg-black/70 rounded-2xl shadow-lg p-7 border border-gold/25 hover:border-gold hover:bg-black/90 transition-all cursor-pointer"
+            className="flex flex-col items-center bg-black/70 rounded-2xl shadow-xl p-7 border border-gold/25 hover:border-gold hover:bg-black/90 transition-all cursor-pointer"
           >
-            <div className="w-[135px] h-[135px] mb-4 relative">
+            <div className="w-[270px] h-[270px] mb-4 relative rounded-full overflow-hidden shadow-md border border-gold/10">
               <Image
                 src={item.icon}
                 alt={item.title}
                 fill
-                className="object-contain"
+                className="object-cover"
               />
             </div>
             <h3 className="font-bold text-xl text-gold mb-2 text-center">{item.title}</h3>
