@@ -1,10 +1,11 @@
-// next.config.js
-const withNextIntl = require('next-intl/plugin')('./next-intl.config.js');
+const createNextIntlPlugin = require('next-intl/plugin');
 
-/** @type {import('next').NextConfig} */
+const withNextIntl = createNextIntlPlugin();
+
 const nextConfig = {
-  reactStrictMode: true,
-  // diğer isteğe bağlı ayarlar burada olabilir
+  experimental: {
+    appDir: true,
+  },
 };
 
 module.exports = withNextIntl(nextConfig);
