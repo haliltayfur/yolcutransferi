@@ -37,7 +37,7 @@ const HIZMETLER = [
 
 export default function Hizmetlerimiz() {
   return (
-    <main className="max-w-6xl mx-auto px-4 py-14">
+    <main className="max-w-7xl mx-auto px-4 py-14">
       <h2 className="text-3xl md:text-4xl font-extrabold text-gold mb-6 text-center">
         Hizmetlerimiz
       </h2>
@@ -47,7 +47,7 @@ export default function Hizmetlerimiz() {
           <Link
             href={item.href}
             key={item.title}
-            className="flex flex-col items-center bg-black/70 rounded-2xl shadow-xl p-7 border border-gold/25 hover:border-gold hover:bg-black/90 transition-all cursor-pointer"
+            className="flex flex-col items-center bg-black/70 rounded-2xl shadow-xl px-8 py-10 border border-gold/25 hover:border-gold hover:bg-black/90 transition-all cursor-pointer"
           >
             <div className="w-[360px] h-[240px] mb-6 relative overflow-hidden rounded-[10px] border-4 border-gold/50 shadow-md">
               <Image
