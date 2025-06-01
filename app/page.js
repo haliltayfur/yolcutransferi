@@ -10,7 +10,7 @@ export default function Home() {
         {/* HERO GÖRSELİ - HEADER ALT ÇİZGİSİ İLE HİZALI */}
         <div className="relative w-full h-[600px] mt-0">
           <Image
-            src="/hero-bg.jpg"
+            src="/Orta.jpg"
             alt="YolcuTransferi VIP Transfer"
             fill
             style={{ objectFit: "cover", objectPosition: "center" }}
