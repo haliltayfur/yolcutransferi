@@ -30,33 +30,43 @@ const HIZMETLER = [
 ];
 
 export default function Hizmetlerimiz() {
+  const grupSayisi = Math.ceil(HIZMETLER.length / 3);
+  const gruplar = Array.from({ length: grupSayisi }, (_, i) =>
+    HIZMETLER.slice(i * 3, i * 3 + 3)
+  );
+
   return (
-    <main className="max-w-4xl mx-auto px-4 py-14">
+    <main className="max-w-6xl mx-auto px-4 py-14">
       <h2 className="text-3xl md:text-4xl font-extrabold text-gold mb-6 text-center">
         Hizmetlerimiz
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-        {HIZMETLER.map(hizmet => (
-          <Link
-            href={hizmet.href}
-            key={hizmet.title}
-            className="flex flex-col items-center bg-black/70 rounded-2xl shadow-lg p-7 border border-gold/25 hover:border-gold hover:bg-black/90 transition-all cursor-pointer"
-          >
-            <Image
-              src={hizmet.icon}
-              alt={hizmet.title}
-              width={135}
-              height={135}
-              className="mb-4"
-              style={{ objectFit: "contain" }}
-            />
-            <h3 className="font-bold text-xl text-gold mb-2 text-center">{hizmet.title}</h3>
-            <p className="text-gray-200 text-center">{hizmet.desc}</p>
-          </Link>
+
+      <div className="space-y-7">
+        {gruplar.map((grup, index) => (
+          <div key={index} className="flex flex-col md:flex-row justify-center gap-7">
+            {grup.map(hizmet => (
+              <Link
+                href={hizmet.href}
+                key={hizmet.title}
+                className="flex-1 flex flex-col items-center bg-black/70 rounded-2xl shadow-lg p-7 border border-gold/25 hover:border-gold hover:bg-black/90 transition-all cursor-pointer"
+              >
+                <Image
+                  src={hizmet.icon}
+                  alt={hizmet.title}
+                  width={135}
+                  height={135}
+                  className="mb-4"
+                  style={{ objectFit: "contain" }}
+                />
+                <h3 className="font-bold text-xl text-gold mb-2 text-center">{hizmet.title}</h3>
+                <p className="text-gray-200 text-center">{hizmet.desc}</p>
+              </Link>
+            ))}
+          </div>
         ))}
       </div>
 
-      {/* Dron Yolcu Transferi ayrı ve en altta, pek yakında ibaresiyle */}
+      {/* Dron Yolcu Transferi */}
       <div className="mt-9 flex justify-center">
         <Link
           href="/dron"
@@ -83,7 +93,7 @@ export default function Hizmetlerimiz() {
       </div>
 
       <div className="mt-12 text-center text-gray-400 text-sm">
-        Tüm transferlerimiz sigortalı, lisanslı ve müşteri memnuniyeti odaklıdır.
+        Türkiye genelinde her bütçeye uygun, esnek ve kişiye özel VIP transfer çözümleri sunuyoruz.
       </div>
     </main>
   );
