@@ -1,0 +1,157 @@
+.
+├── .gitignore
+├── .next
+│   ├── cache
+│   │   ├── config.json
+│   │   └── webpack
+│   │       └── server-production
+│   │           ├── 0.pack
+│   │           └── index.pack
+│   ├── package.json
+│   ├── prerender-manifest.js
+│   ├── routes-manifest.json
+│   ├── server
+│   │   ├── app
+│   │   │   ├── _not-found.js
+│   │   │   ├── _not-found.js.nft.json
+│   │   │   ├── page.js
+│   │   │   └── page.js.nft.json
+│   │   ├── app-paths-manifest.json
+│   │   ├── chunks
+│   │   │   ├── 22.js
+│   │   │   ├── 72.js
+│   │   │   └── font-manifest.json
+│   │   ├── font-manifest.json
+│   │   ├── pages
+│   │   │   ├── _app.js
+│   │   │   ├── _app.js.nft.json
+│   │   │   ├── _document.js
+│   │   │   ├── _document.js.nft.json
+│   │   │   ├── _error.js
+│   │   │   └── _error.js.nft.json
+│   │   ├── pages-manifest.json
+│   │   ├── server-reference-manifest.js
+│   │   ├── server-reference-manifest.json
+│   │   └── webpack-runtime.js
+│   ├── trace
+│   └── types
+│       ├── app
+│       │   ├── layout.ts
+│       │   └── page.ts
+│       └── package.json
+├── app
+│   ├── [locale]
+│   │   ├── araclar
+│   │   │   ├── page.js
+│   │   │   └── rezervasyon
+│   │   │       └── page.js
+│   │   ├── gizlilik
+│   │   │   └── page.js
+│   │   ├── hizmetler
+│   │   │   └── page.js
+│   │   ├── iletisim
+│   │   │   └── page.js
+│   │   ├── layout.js
+│   │   ├── login
+│   │   │   └── page.js
+│   │   ├── page.js
+│   │   ├── sozlesme
+│   │   │   └── page.js
+│   │   └── sss
+│   │       └── page.js
+│   ├── admin
+│   │   └── page.js
+│   ├── api
+│   │   ├── get-euro
+│   │   │   └── route.js
+│   │   └── teklif
+│   │       └── route.js
+│   ├── api-kur.js
+│   ├── ar
+│   │   └── page.js
+│   ├── araclar
+│   │   └── page.js
+│   ├── blog
+│   │   └── page.js
+│   ├── cerez
+│   │   └── page.js
+│   ├── en
+│   │   └── page.js
+│   ├── fiyatgoster.js
+│   ├── gizlilik
+│   │   └── page.js
+│   ├── globals.css
+│   ├── hakkimizda
+│   │   └── page.js
+│   ├── harita.js
+│   ├── hizmetler
+│   │   └── page.js
+│   ├── iade
+│   │   └── page.js
+│   ├── iletisim
+│   │   ├── iletisim.tsx
+│   │   └── page.js
+│   ├── layout.js
+│   ├── locale
+│   │   ├── ar.json
+│   │   ├── en.json
+│   │   └── tr.json
+│   ├── locales 
+│   │   ├── ar.json
+│   │   ├── en.json
+│   │   └── tr.json
+│   ├── login
+│   │   └── page.js
+│   ├── page.js
+│   ├── rezervasyon
+│   │   └── page.js
+│   ├── sofor-basvuru
+│   │   └── page.js
+│   ├── sozlesme
+│   │   └── page.js
+│   └── sss
+│       └── page.js
+├── components
+│   ├── Footer.jsx
+│   ├── Header.jsx
+│   ├── LanguageSelector.jsx
+│   ├── LocationAutocomplete.js
+│   ├── Navbar.js
+│   ├── SocialMediaBar.jsx
+│   ├── airports.js
+│   └── ss.ll
+├── data
+│   ├── locations.json
+│   └── ss.ll
+├── lib
+│   └── getDictionary.js
+├── messages
+│   ├── ar.json
+│   ├── en.json
+│   └── tr.json
+├── next-intl.config.js
+├── next.config.js
+├── package.json
+├── postcss.config.js
+├── project-structure.txt
+├── public
+│   ├── .gitkeep
+│   ├── 1hero-bg.jpg
+│   ├── LOGO.png
+│   ├── Orta.jpg
+│   ├── favicon.ico
+│   ├── hero-bg (2).jpg
+│   ├── maybach.png
+│   ├── minibus-1.png
+│   ├── robots.txt
+│   ├── s.txt
+│   ├── sedan.png
+│   ├── sitemap.xml
+│   ├── vip-transfer.jpg
+│   ├── vito.png
+│   └── vito2.png
+├── styles
+│   └── globals.css
+└── tailwind.config.js
+
+47 directories, 107 files
