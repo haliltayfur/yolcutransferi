@@ -53,14 +53,14 @@ export default function SSS() {
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-14">
-      <h2 className="text-3xl md:text-4xl font-extrabold text-[#6e5a1e] mb-7 text-center">
+      <h2 className="text-3xl md:text-4xl font-extrabold text-gold mb-7 text-center">
         Sıkça Sorulan Sorular
       </h2>
       <div className="space-y-5">
         {SORULAR.map((item, i) => (
-          <div key={i} className="bg-black/70 border border-[#6e5a1e]/40 rounded-xl shadow px-5 py-4">
+          <div key={i} className="bg-black/70 border border-gold/20 rounded-xl shadow px-5 py-4">
             <button
-              className="w-full text-left text-lg text-[#6e5a1e] font-semibold focus:outline-none"
+              className="w-full text-left text-lg text-gold font-semibold focus:outline-none"
               onClick={() => setAcik(acik === i ? null : i)}
             >
               {item.q}
