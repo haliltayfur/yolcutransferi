@@ -14,7 +14,7 @@ const HIZMETLER = [
   },
   {
     title: "Dron Yolcu Transferi",
-    desc: "Dron ile kısa mesafe VIP taşımacılık: geleceğin ulaşımıyla tanışın.",
+    desc: "Pek Yakında ! Dron ile kısa mesafe VIP taşımacılık: geleceğin ulaşımıyla tanışın.",
     icon: "/icon-dron.png"
   },
   {
