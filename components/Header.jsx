@@ -45,7 +45,7 @@ export default function Header() {
             rel="noopener noreferrer"
             title="WhatsApp"
           >
-            <FaWhatsapp className="text-green-500 hover:text-green-600 text-xl transition" />
+            <FaWhatsapp className="text-green-400" />
           </a>
           <a
             href="https://www.instagram.com/yolcutransferi/"
@@ -53,15 +53,15 @@ export default function Header() {
             rel="noopener noreferrer"
             title="Instagram"
           >
-            <FaInstagram className="text-pink-500 hover:text-pink-600 text-xl transition" />
+            <FaInstagram className="text-pink-500" />
           </a>
           <a
-            href="https://x.com/yolcutransferi"
+            href="https://twitter.com/yolcutransferi"
             target="_blank"
             rel="noopener noreferrer"
             title="X"
           >
-            <FaXTwitter className="text-black hover:text-gray-700 text-xl transition" />
+            <FaXTwitter className="text-white" />
           </a>
         </div>
 
