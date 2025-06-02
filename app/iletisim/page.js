@@ -1,181 +1,119 @@
-"use client";
-import { useState, useEffect } from "react";
-import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
-import { FaXTwitter } from "react-icons/fa6";
+import "./globals.css";
+import Image from "next/image";
+import Link from "next/link";
+import { FaWhatsapp, FaInstagram } from "react-icons/fa";
+import { SiX } from "react-icons/si";
 
-export default function Iletisim() {
-  const [form, setForm] = useState({
-    ad: "",
-    telefon: "",
-    email: "",
-    konu: "Bilgi Talebi",
-    mesaj: "",
-  });
-  const [ok, setOk] = useState(false);
-  const [error, setError] = useState("");
+export const metadata = {
+  title: "YolcuTransferi.com",
+  description: "VIP Transfer | Dron Transfer | Türkiye Geneli",
+};
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+const menuItems = [
+  { name: "Anasayfa", href: "/" },
+  { name: "Hizmetler", href: "/hizmetler" },
+  { name: "Araçlar", href: "/araclar" },
+  { name: "Rezervasyon", href: "/rezervasyon" },
+  { name: "S.S.S.", href: "/sss" },
+  { name: "İletişim", href: "/iletisim" },
+];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    try {
-      const res = await fetch("/api/iletisim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) throw new Error("Sunucu hatası");
-
-      setOk(true);
-      setForm({
-        ad: "",
-        telefon: "",
-        email: "",
-        konu: "Bilgi Talebi",
-        mesaj: "",
-      });
-    } catch (err) {
-      setError("Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.");
-    }
-  };
-
-  useEffect(() => {
-    if (ok) {
-      const timer = setTimeout(() => setOk(false), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [ok]);
-
+export default function RootLayout({ children }) {
   return (
-    <main className="max-w-3xl mx-auto px-4 py-14">
-      <h2 className="text-4xl font-extrabold text-gold mb-8 text-center">İletişim</h2>
-
-      <div className="flex flex-col md:flex-row gap-8 bg-black/80 border border-gold/30 rounded-xl shadow-lg p-7 mb-10">
-        <div className="flex-1 space-y-5 text-gray-200">
-          <div className="flex items-center gap-3 text-lg">
-            <FaPhone className="text-gold" /> <span>+90 539 526 75 69</span>
-          </div>
-          <div className="flex items-center gap-3 text-lg">
-            <FaEnvelope className="text-gold" /> <span>info@yolcutransferi.com</span>
-          </div>
-          <div className="flex items-center gap-3 text-lg">
-            <FaMapMarkerAlt className="text-gold" />
-            <span>Ümraniye Plazalar Bölgesi, İstanbul, Türkiye</span>
-          </div>
-          <a
-            href="https://wa.me/905395267569"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 text-lg hover:underline"
-          >
-            <FaWhatsapp className="text-green-400" />
-            <span>Whatsapp üzerinden 7/24 destek</span>
-          </a>
-          <a
-            href="https://www.instagram.com/yolcutransferi/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 text-lg hover:underline"
-          >
-            <FaInstagram className="text-pink-500" />
-            <span>yolcutransferi</span>
-          </a>
-          <a
-            href="https://twitter.com/yolcutransferi"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 text-lg hover:underline"
-          >
-            <FaXTwitter className="text-white" />
-            <span>yolcutransferi</span>
-          </a>
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4">
-          <input
-            required
-            name="ad"
-            value={form.ad}
-            onChange={handleChange}
-            placeholder="Adınız"
-            className="rounded px-4 py-2 bg-black/70 border border-gold/30 text-white focus:outline-none focus:ring-2 focus:ring-gold"
-          />
-          <input
-            required
-            name="telefon"
-            value={form.telefon}
-            onChange={handleChange}
-            placeholder="Telefon Numaranız"
-            className="rounded px-4 py-2 bg-black/70 border border-gold/30 text-white focus:outline-none focus:ring-2 focus:ring-gold"
-          />
-          <input
-            required
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            placeholder="E-posta"
-            type="email"
-            className="rounded px-4 py-2 bg-black/70 border border-gold/30 text-white focus:outline-none focus:ring-2 focus:ring-gold"
-          />
-          <select
-            name="konu"
-            value={form.konu}
-            onChange={handleChange}
-            className="rounded px-4 py-2 bg-black/70 border border-gold/30 text-white focus:outline-none focus:ring-2 focus:ring-gold"
-          >
-            <option>Bilgi Talebi</option>
-            <option>Şikayet</option>
-            <option>Rezervasyon</option>
-            <option>İş Birliği</option>
-            <option>Diğer</option>
-          </select>
-          <textarea
-            required
-            name="mesaj"
-            value={form.mesaj}
-            onChange={handleChange}
-            placeholder="Mesajınız"
-            rows={4}
-            className="rounded px-4 py-2 bg-black/70 border border-gold/30 text-white focus:outline-none focus:ring-2 focus:ring-gold"
-          />
-          <button
-            type="submit"
-            className="bg-gold text-black font-semibold py-2 px-8 rounded-xl text-lg shadow hover:bg-white transition-all duration-200"
-          >
-            Gönder
-          </button>
-          {ok && (
-            <div className="text-green-400 mt-2">
-              Teşekkür ederiz. Mesajınız başarıyla alınmıştır. En kısa sürede sizinle iletişime geçilecektir.
+    <html lang="tr">
+      <body className="bg-black text-white min-h-screen flex flex-col font-poppins">
+        {/* HEADER */}
+        <header className="flex flex-col items-end px-8 md:px-20 py-4 bg-black/95 shadow z-40 w-full">
+          <div className="w-full flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Link href="/">
+                <Image
+                  src="/LOGO.png"
+                  alt="Logo"
+                  width={253}
+                  height={69}
+                  className="mr-2"
+                  priority
+                />
+              </Link>
             </div>
-          )}
-          {error && (
-            <div className="text-red-400 mt-2">{error}</div>
-          )}
-        </form>
-      </div>
-      <div className="mt-7 text-center text-xs text-gray-400">
-        Tüm verileriniz gizli tutulur, üçüncü kişilerle paylaşılmaz.
 
-          
-      </div>
-      <div className="w-full h-64 rounded-xl overflow-hidden shadow-lg">
-        <iframe
-          title="Harita"
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
-          loading="lazy"
-          allowFullScreen
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3010.4732351280533!2d29.12445547674763!3d41.01817201972074!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab71c6749eb7f%3A0x355d7b2a0dff30e5!2sAkyaka%20AVM!5e0!3m2!1str!2str!4v1717260141741!5m2!1str!2str"
-        />
-      </div>
+            {/* MENÜ */}
+            <nav className="flex items-center gap-6 font-medium text-[1.1rem] text-gray-300">
+              {menuItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="relative px-3 py-1 transition-colors duration-200 hover:text-gray-100"
+                >
+                  {item.name}
+                  <span className="absolute bottom-0 left-[10%] w-[80%] h-[1px] bg-gray-100 opacity-0 transition-opacity duration-300 hover:opacity-100"></span>
+                </Link>
+              ))}
+            </nav>
 
+            {/* SOSYAL İKONLAR + GİRİŞ BUTONU */}
+            <div className="flex items-center gap-5">
+              <a
+                href="https://wa.me/905395267569"
+                target="_blank"
+                aria-label="Whatsapp"
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-gray-100 transition-colors duration-200"
+              >
+                <FaWhatsapp className="w-6 h-6 text-green-400" />
+              </a>
+              <a
+                href="https://www.instagram.com/yolcutransferi/"
+                target="_blank"
+                aria-label="Instagram"
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-gray-100 transition-colors duration-200"
+              >
+                <FaInstagram className="w-6 h-6 text-pink-500" />
+              </a>
+              <a
+                href="https://x.com/yolcutransferi"
+                target="_blank"
+                aria-label="X (Twitter)"
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-gray-100 transition-colors duration-200"
+              >
+                <SiX className="w-6 h-6 text-white" />
+              </a>
+              <Link
+                href="/login"
+                className="text-black font-semibold px-5 py-1.5 rounded-lg
+                           bg-yellow-400 hover:bg-yellow-450
+                           transition-colors duration-200 shadow-sm"
+                style={{ backgroundColor: "#FFD700" /* saf sarı */ }}
+              >
+                Giriş Yap
+              </Link>
+            </div>
+          </div>
 
-    </main>
+          {/* HEADER ALTINDA 0.3PX YARI SAYDAM BEYAZ ÇİZGİ TAM GENİŞLİKTE */}
+          <div
+            className="w-full mt-2"
+            style={{ borderBottom: "0.3px solid rgba(255,255,255,0.15)" }}
+          ></div>
+        </header>
+
+        <main className="flex-grow">{children}</main>
+
+        <footer className="w-full px-8 py-6 bg-black/90 flex flex-col md:flex-row items-center justify-between gap-3 mt-auto">
+          <span className="text-sm text-gray-400">© 2025 YolcuTransferi.com</span>
+          <div className="flex gap-6 items-center">
+            <Link href="/sozlesme" className="text-sm underline text-gray-400">
+              Sözleşme
+            </Link>
+            <Link href="/gizlilik" className="text-sm underline text-gray-400">
+              Gizlilik
+            </Link>
+          </div>
+        </footer>
+      </body>
+    </html>
   );
 }
