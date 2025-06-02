@@ -105,9 +105,7 @@ export default function Iletisim() {
         />
       </div>
 
-      <div className="mt-7 text-center text-xs text-gray-400">
-        Tüm verileriniz gizli tutulur, üçüncü kişilerle paylaşılmaz.
-      </div>
+
     </main>
   );
 }
