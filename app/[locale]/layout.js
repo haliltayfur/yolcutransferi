@@ -2,7 +2,7 @@ import "../globals.css";
 import Image from "next/image";
 import Link from "next/link";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
-import { SiX } from "react-icons/si";
+import { FaXTwitter } from "react-icons/fa6"; // <-- BURAYI EKLE
 import LanguageSelector from "../../components/LanguageSelector";
 import { NextIntlClientProvider, useMessages } from "next-intl";
 
@@ -35,15 +35,17 @@ export default function LocaleLayout({ children, params }) {
                 <Link href={`/${locale}/iletisim`}>{getMenu("contact")}</Link>
               </nav>
               <div className="flex items-center gap-4">
+                {/* SOSYAL MEDYA LİNKLERİ - Doğru ikonlar ve doğru linkler */}
                 <a href="https://wa.me/905395267569" target="_blank" aria-label="Whatsapp" rel="noopener noreferrer">
                   <FaWhatsapp className="w-6 h-6 text-green-400 hover:text-green-500" />
                 </a>
-                <a href="#" target="_blank" aria-label="Instagram" rel="noopener noreferrer">
+                <a href="https://www.instagram.com/yolcutransferi/" target="_blank" aria-label="Instagram" rel="noopener noreferrer">
                   <FaInstagram className="w-6 h-6 text-pink-500 hover:text-pink-600" />
                 </a>
-                <a href="#" target="_blank" aria-label="X (Twitter)" rel="noopener noreferrer">
-                  <SiX className="w-6 h-6 text-white hover:text-gray-400" />
+                <a href="https://x.com/yolcutransferi" target="_blank" aria-label="X (Twitter)" rel="noopener noreferrer">
+                  <FaXTwitter className="w-6 h-6 text-white hover:text-gray-400" />
                 </a>
+                {/* Giriş butonu */}
                 <Link
                   href={`/${locale}/login`}
                   className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-4 py-1.5 rounded-xl focus:outline-none"
