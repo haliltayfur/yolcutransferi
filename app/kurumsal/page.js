@@ -11,7 +11,7 @@ export default function KurumsalTransfer() {
           Eğer public/images/ klasöründeyse src="/images/kurumsal-transfer-banner.png" yaz
         */}
         <Image
-          src="/kurumsal-transfer-banner.png"
+          src="/kurumsal-banner.png"
           // src="/images/kurumsal-transfer-banner.png"
           alt="Kurumsal ve Toplu Transfer"
           width={900}
