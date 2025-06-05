@@ -13,7 +13,7 @@ const tours = [
       "Sadece size özel, Mercedes Vito veya lüks sedan araçlarla İstanbul’un kalbinde muazzam bir gün geçirin. Rehberli tur, ikonik duraklar, ihtişamlı saraylar ve İstanbul’un gizli güzellikleri. Eşsiz bir VIP konfor, her detayı size göre.",
     price: 8450,
     discount: 18,
-    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=500&q=85", // İstanbul
+    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=700&q=85",
   },
   {
     title: "Kapadokya Eşsiz VIP Balon & Tur Transferi",
@@ -21,7 +21,7 @@ const tours = [
       "Hayatınızda bir kez yaşayacağınız, nefes kesici Kapadokya turu. VIP araçlarla tam konforlu transfer, balon kalkış alanına ayrıcalıklı ulaşım, muazzam vadilerde fotoğraf molası. Gerçekten unutulmaz bir gün.",
     price: 9600,
     discount: 17,
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=500&q=85", // Kapadokya
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=700&q=85",
   },
   {
     title: "Antalya Ultra Lüks Sahil & Şehir Transferi",
@@ -29,7 +29,7 @@ const tours = [
       "Antalya’da VIP ayrıcalık! Konyaaltı, Lara, Kaleiçi gibi noktalarda size özel Mercedes veya lüks minibüs ile, Akdeniz’in tadını elit bir deneyimle çıkarın. Tatilde üst düzey huzur ve güvenlik.",
     price: 7800,
     discount: 17,
-    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=500&q=85", // Antalya
+    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=700&q=85",
   },
   {
     title: "Pamukkale & Hierapolis Executive Günübirlik",
@@ -37,7 +37,7 @@ const tours = [
       "Pamukkale’nin beyaz travertenlerinde ve Hierapolis’in antik atmosferinde, sizin için özel tahsis edilmiş lüks araçla, rahat bir yolculuk ve tamamen kişisel bir rota. Türkiye’de bir ilk VIP hizmet standardı.",
     price: 9100,
     discount: 15,
-    image: "https://upload.wikimedia.org/wikipedia/commons/6/6d/Pamukkale_%2844716188992%29.jpg", // Pamukkale
+    image: "https://upload.wikimedia.org/wikipedia/commons/6/6d/Pamukkale_%2844716188992%29.jpg",
   },
   {
     title: "Ege Koyları Arası Lüks Araç Transferi",
@@ -45,7 +45,7 @@ const tours = [
       "Bodrum, Alaçatı, Çeşme, Didim veya dilediğiniz Ege destinasyonu arasında, tamamen size özel şoförlü VIP araçlarla güvenli, hızlı ve ayrıcalıklı transfer. Ege’de bir adım önde, yol boyunca lüks ve konfor.",
     price: 15000,
     discount: 18,
-    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=500&q=85", // Ege kıyı
+    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=700&q=85",
   },
   {
     title: "Dron ile Özel Şehir Turu (Türkiye’de İlk!)",
@@ -53,7 +53,7 @@ const tours = [
       "Dronla görüntülü şehir turu ve özel VIP transfer hizmeti bir arada! Türkiye’de bir ilk: Hem seyahat edin, hem de yolculuğunuzun eşsiz anlarını profesyonel dron çekimleriyle ölümsüzleştirin. Sadece size özel prodüksiyon.",
     price: 12500,
     discount: 20,
-    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=500&q=85", // Dron görüntüsü
+    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=700&q=85",
   },
 ];
 
@@ -64,7 +64,6 @@ function oldPrice(price, discount) {
 export default function TurGezi() {
   return (
     <main className="max-w-5xl mx-auto px-2 sm:px-6 py-7 sm:py-12">
-      {/* Başlık ve açıklama */}
       <div
         className="border-4 rounded-[18px] bg-black/75 p-4 sm:p-10 shadow-2xl mb-8 sm:mb-12"
         style={{ borderColor }}
@@ -90,7 +89,6 @@ export default function TurGezi() {
           YolcuTransferi, ekonomik ve ultra lüks transfer seçenekleriyle VIP hizmetin yeni standardını sunar. Tatil, şehir turu ve özel gezi organizasyonlarınızda, profesyonel sürücülerimiz ve geniş araç filomuzla konforlu ve güvenli ulaşım sağlıyoruz.
         </p>
       </div>
-      {/* Tur grid */}
       <div className="mb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {tours.map((tour, idx) => {
@@ -98,18 +96,25 @@ export default function TurGezi() {
             return (
               <div
                 key={idx}
-                className="border-4 rounded-2xl bg-black/80 p-5 shadow-xl flex flex-col min-w-[240px] max-w-[370px] mx-auto h-full"
+                className="border-4 rounded-2xl bg-black/80 p-5 shadow-xl flex flex-col min-w-[240px] max-w-[450px] mx-auto h-full"
                 style={{ borderColor }}
               >
-                <img
-                  src={tour.image}
-                  alt={tour.title}
-                  width={220}
-                  height={150}
-                  className="rounded-xl mb-3 object-cover shadow-lg border-2 w-[220px] h-[150px]"
-                  style={{ borderColor, objectFit: "cover" }}
-                  loading="lazy"
-                />
+                <div className="w-full flex justify-center items-center mb-3">
+                  <img
+                    src={tour.image}
+                    alt={tour.title}
+                    style={{
+                      height: "160px",
+                      width: "90%",
+                      maxWidth: "380px",
+                      borderRadius: "18px",
+                      objectFit: "cover",
+                      display: "block",
+                      margin: "0 auto",
+                      border: `2px solid ${borderColor}`,
+                    }}
+                  />
+                </div>
                 <h3
                   className="text-xl font-bold mb-2 text-left"
                   style={{ color: borderColor, minHeight: 50 }}
@@ -168,7 +173,6 @@ export default function TurGezi() {
           })}
         </div>
       </div>
-      {/* Genel rezervasyon butonu */}
       <Link href="https://yolcutransferi.com/rezervasyon">
         <button
           className="font-bold py-3 px-8 rounded-2xl w-full text-lg shadow transition mt-6"
