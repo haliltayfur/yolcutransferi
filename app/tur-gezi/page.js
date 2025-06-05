@@ -2,49 +2,58 @@
 import Image from "next/image";
 import Link from "next/link";
 
-// Tur verileri
 const tours = [
   {
     title: "İstanbul Boğazı Turu (VIP Minibüs)",
     description:
-      "Lüks VIP araçlarımızla otelinizden alınış, rehberli Boğaz turu, önemli noktalarda fotoğraf molası, dilediğiniz restoranda öğle yemeği. 6 saatlik özel hizmet.",
+      "Lüks VIP araçlarımızla rehberli Boğaz turu, fotoğraf molası, dilediğiniz restoranda yemek. 6 saatlik özel hizmet.",
     price: "8.450 TL",
-    image: "/images/bosphorus-tour.jpg", // Görsel dosyasını projenize ekleyin
+    image:
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80", // Boğaz görseli
+    tag: "En Popüler",
   },
   {
     title: "Kapadokya Balon Turu (Şoförlü Transfer)",
     description:
-      "Sabah erken saatlerde şoförlü özel araçla otelinizden alınış, balon kalkış alanına transfer ve turun bitiminde dönüş. Konforlu ve güvenli ulaşım.",
+      "Şoförlü özel araçla balon kalkış alanına transfer ve turun bitiminde dönüş. Konforlu, güvenli ulaşım.",
     price: "6.500 TL",
-    image: "/images/cappadocia-balloon.jpg",
+    image:
+      "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80", // Kapadokya balon
+    tag: "En Özel",
   },
   {
     title: "Antalya Şehir Turu & D400 Sahil Rotası",
     description:
-      "Geniş araç filosuyla Antalya merkez çıkışlı; Kaleiçi, Konyaaltı, Lara, Duden şelaleleri, Manavgat ve plajlarda duraklamalı 8 saatlik tur.",
+      "Antalya merkez çıkışlı, Kaleiçi, Konyaaltı, Lara, şelaleler, Manavgat, plajlarda 8 saatlik tur.",
     price: "7.800 TL",
-    image: "/images/antalya-d400.jpg",
+    image:
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80", // Antalya sahil
+    tag: "En Çok Tercih",
   },
   {
     title: "Pamukkale & Hierapolis Günübirlik Transfer",
     description:
-      "Şoförlü araç ile otelinizden alınış, Pamukkale travertenleri ve Hierapolis antik kent ziyareti. Giriş ve rehberlik isteğe bağlı eklenir.",
+      "Pamukkale travertenleri ve Hierapolis antik kent ziyareti. Giriş ve rehberlik isteğe bağlı.",
     price: "9.100 TL",
-    image: "/images/pamukkale-hierapolis.jpg",
+    image:
+      "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=400&q=80", // Pamukkale
+    tag: "En Önemli",
   },
   {
     title: "Ege Koyları VIP Sahil Turu",
     description:
-      "Bodrum, Çeşme, Alaçatı, Didim gibi popüler koylarda tam gün VIP tur. Araç ve rehber dahil, rotanız size özel hazırlanır.",
+      "Bodrum, Çeşme, Alaçatı, Didim gibi koylarda tam gün VIP tur. Araç ve rehber dahil.",
     price: "12.350 TL",
-    image: "/images/aegean-coast.jpg",
+    image:
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80", // Ege koyları
+    tag: "En Lüks",
   },
 ];
 
 export default function TurGezi() {
   return (
     <main className="max-w-7xl mx-auto px-4 py-12">
-      {/* Ana başlık ve açıklama */}
+      {/* Üstte başlık ve açıklama */}
       <div className="border-4 border-[#6e5a1e] rounded-[10px] bg-black/60 p-6 md:p-10 shadow-lg mb-10">
         <Image
           src="/tur-gezi-banner.png"
@@ -66,29 +75,31 @@ export default function TurGezi() {
         </p>
       </div>
 
-      {/* Tur kartları */}
+      {/* Tur kutucukları */}
       <div className="mb-10">
-        <h2 className="text-2xl font-bold text-[#6e5a1e] mb-6">
-          En Çok Tercih Edilen Turlar
-        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {tours.map((tour, idx) => (
             <div
               key={idx}
-              className="border-4 border-[#6e5a1e] bg-black/60 rounded-[10px] p-4 shadow-lg flex flex-col items-center"
+              className="relative border-4 border-[#6e5a1e] bg-black/60 rounded-[10px] p-4 shadow-lg flex flex-col items-center"
             >
-              <Image
+              {/* Etiket */}
+              <span className="absolute left-2 top-2 bg-[#e4c785] text-black px-3 py-1 rounded-full text-xs font-bold shadow z-10">
+                {tour.tag}
+              </span>
+              <img
                 src={tour.image}
                 alt={tour.title}
-                width={300}
-                height={300}
-                className="rounded-[6px] mb-4 object-cover"
+                width={200}
+                height={200}
+                className="rounded-[6px] mb-4 object-cover w-[200px] h-[200px] border border-[#e4c785]"
+                style={{ objectFit: "cover" }}
               />
-              <h3 className="text-lg font-bold text-yellow-400 mb-2 text-center">
+              <h3 className="text-base font-bold text-yellow-400 mb-2 text-center">
                 {tour.title}
               </h3>
               <p className="text-gray-200 mb-2 text-center">{tour.description}</p>
-              <span className="font-semibold text-lg text-[#e4c785]">
+              <span className="font-semibold text-lg text-[#e4c785] mt-2">
                 {tour.price}
               </span>
             </div>
