@@ -2,64 +2,64 @@
 import Image from "next/image";
 import Link from "next/link";
 
-// Çerçeve ve buton rengi
+// Çerçeve ve buton renkleri
 const borderColor = "#6e5a1e";
 const buttonBg = "#6e5a1e";
 const buttonHover = "#8c7327";
 
-// % indirim hesapla (int)
-function discountPercent(oldPrice, newPrice) {
-  return Math.round((1 - newPrice / oldPrice) * 100);
-}
-
-// VIP turlar - Tüm resimler alakalı ve açılır
 const tours = [
   {
     title: "İstanbul Boğazı Lüks Tekne & VIP Araç Turu",
     description:
       "Boğaz'da özel tekne ve lüks araç ile Asya ve Avrupa yakasında 6 saat rehberli tur. Prestijli fotoğraf molaları ve boğaz yalılarında duraklama.",
     price: 8450,
-    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=500&q=85", // Boğaz/tekne
+    discount: 18, // %
+    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=500&q=85",
   },
   {
     title: "Kapadokya VIP Balon Deneyimi",
     description:
       "Gün doğumunda premium balon turu ve özel araç transferiyle peribacaları üzerinde büyülü uçuş. Kişiye özel fotoğraf ve kutlama.",
     price: 9600,
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=500&q=85", // Kapadokya/balon
+    discount: 17,
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=500&q=85",
   },
   {
     title: "Antalya Lüks Sahil ve Kaleiçi Turu",
     description:
       "VIP araçla Kaleiçi, Konyaaltı ve Düden Şelalesi. Akdeniz'in en seçkin restoranlarında mola, 8 saat üst düzey şehir ve sahil keyfi.",
     price: 7800,
-    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=500&q=85", // Antalya/kaleiçi/sahil
+    discount: 17,
+    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=500&q=85",
   },
   {
     title: "Pamukkale & Hierapolis Executive Günübirlik",
     description:
       "Pamukkale travertenleri ve antik Hierapolis gezisi, şoförlü Mercedes Vito ile, dilediğiniz noktadan alınıp bırakılma.",
     price: 9100,
-    image: "https://upload.wikimedia.org/wikipedia/commons/6/6d/Pamukkale_%2844716188992%29.jpg", // Pamukkale traverten
+    discount: 15,
+    image: "https://upload.wikimedia.org/wikipedia/commons/6/6d/Pamukkale_%2844716188992%29.jpg",
   },
   {
     title: "Ege Koyları Ultra Lüks Sahil Turu",
     description:
       "Bodrum, Göcek, Çeşme ve Alaçatı'da mega yat veya VIP araç ile tam gün ayrıcalık. Platin müşteri hizmeti.",
     price: 15000,
-    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=500&q=85", // Ege koyu/yat
+    discount: 18,
+    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=500&q=85",
   },
   {
     title: "Efes & Şirince Premium Kültür Turu",
     description:
       "Efes antik kenti ve Şirince köyünde gurme tadımlar. VIP transfer ve özel rehber eşliğinde kültür dolu bir gün.",
     price: 7200,
-    image: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Celsus_Library%2C_Ephesus%2C_Turkey.jpg", // Efes Celsus
+    discount: 16,
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Celsus_Library%2C_Ephesus%2C_Turkey.jpg",
   },
 ];
 
-function oldPrice(price) {
-  return Math.round(price * 1.18 / 50) * 50; // %18 daha pahalı (yuvarlanmış)
+function oldPrice(price, discount) {
+  return Math.round(price * (1 + discount / 100) / 50) * 50;
 }
 
 export default function TurGezi() {
@@ -84,19 +84,18 @@ export default function TurGezi() {
         >
           Tur & Gezi Transferi
         </h1>
-        <p className="mb-4 text-gray-100 font-medium text-base sm:text-lg">
+        <p className="mb-4 text-white font-medium text-base sm:text-lg">
           Kendinize özel bir tur planı oluşturabilir veya aşağıdaki seçkin turlardan birini tercih edebilirsiniz.
         </p>
-        <p className="mb-1 text-gray-300 font-normal text-base sm:text-lg">
-          YolcuTransferi, <span className="font-semibold" style={{ color: borderColor }}>ekonomik</span> ve <span className="font-semibold" style={{ color: borderColor }}>ultra lüks</span> transfer seçenekleriyle <span className="font-semibold" style={{ color: borderColor }}>VIP hizmetin yeni standardını</span> sunar. Tatil, şehir turu ve özel gezi organizasyonlarınızda, profesyonel sürücülerimiz ve geniş araç filomuzla konforlu ve güvenli ulaşım sağlıyoruz.
+        <p className="mb-1 text-white font-normal text-base sm:text-lg">
+          YolcuTransferi, ekonomik ve ultra lüks transfer seçenekleriyle VIP hizmetin yeni standardını sunar. Tatil, şehir turu ve özel gezi organizasyonlarınızda, profesyonel sürücülerimiz ve geniş araç filomuzla konforlu ve güvenli ulaşım sağlıyoruz.
         </p>
       </div>
       {/* Tur grid */}
       <div className="mb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {tours.map((tour, idx) => {
-            const eski = oldPrice(tour.price);
-            const indirim = discountPercent(eski, tour.price);
+            const eski = oldPrice(tour.price, tour.discount);
             return (
               <div
                 key={idx}
@@ -118,35 +117,49 @@ export default function TurGezi() {
                 >
                   {tour.title}
                 </h3>
-                <p className="text-gray-200 mb-3 text-center text-[15px] leading-relaxed min-h-[56px]">
+                <p className="text-white mb-3 text-center text-[15px] leading-relaxed min-h-[56px]">
                   {tour.description}
                 </p>
-                <div className="flex flex-col items-center mt-auto mb-0">
+                {/* Fiyat Kutusu */}
+                <div
+                  className="flex flex-col items-center justify-center mt-auto mb-0 px-4 py-2 rounded-xl border-2"
+                  style={{
+                    borderColor,
+                    background: "#18160c",
+                    minWidth: 160,
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span
+                      className="text-xs text-gray-400"
+                      style={{
+                        textDecoration: "line-through",
+                        textDecorationThickness: "1px",
+                        fontWeight: 500,
+                        marginRight: 2,
+                      }}
+                    >
+                      {eski.toLocaleString("tr-TR")} TL
+                    </span>
+                    <span
+                      className="text-xs font-semibold"
+                      style={{
+                        color: "#2de186",
+                        letterSpacing: "0.2px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      %{tour.discount} indirim
+                    </span>
+                  </div>
                   <span
-                    className="line-through text-gray-400 text-[16px]"
-                    style={{ letterSpacing: "0.2px" }}
-                  >
-                    {eski.toLocaleString("tr-TR")} TL
-                  </span>
-                  <span
-                    className="font-bold text-xl px-5 py-2 rounded-xl mt-1 mb-0"
+                    className="font-bold text-2xl"
                     style={{
                       color: borderColor,
-                      background: "#fff2",
                       letterSpacing: "0.5px",
                     }}
                   >
                     {tour.price.toLocaleString("tr-TR")} TL
-                  </span>
-                  <span
-                    className="text-sm mt-1"
-                    style={{
-                      color: "#28ea7a",
-                      fontWeight: 700,
-                      letterSpacing: ".3px",
-                    }}
-                  >
-                    %{indirim} İNDİRİM!
                   </span>
                 </div>
               </div>
