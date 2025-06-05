@@ -17,12 +17,15 @@ export default function SehirlerArasi() {
         />
         <h1 className="text-3xl font-extrabold text-[#6e5a1e] mb-4">Şehirler Arası Transfer</h1>
         <p className="mb-6 text-gray-200">
-          İstanbul, Bodrum, Antalya, İzmir ve Türkiye’nin dört bir yanında şehirler arası yolculuklarınızda, konforlu ve sigortalı taşımacılık sunuyoruz. 
-          YolcuTransferi ile uzun mesafeler artık lüks ve güvenli!
+          İstanbul, Bodrum, Antalya, İzmir ve Türkiye'nin dört bir yanında; iş, tatil veya özel yolculuklarınız için güvenilir, konforlu ve sigortalı şehirler arası transfer hizmeti sunuyoruz.
         </p>
-        <p className="text-gray-300">
-          Rakip firmaların aksine, araçlarımızda yüksek güvenlik, wi-fi, mini ikramlar ve dinamik fiyat avantajı standarttır.
-          Uzun yolculuklarda sürücü değişimi, ek sigorta ve yolculuk boyunca canlı destekle yanınızdayız.
+        <p className="mb-6 text-gray-200">
+          YolcuTransferi ile<br />
+          - Kişiye özel araç ve profesyonel sürücü ayrıcalığı<br />
+          - Kapıdan kapıya, kesintisiz ve zamanında ulaşım<br />
+          - Tüm ek hizmetleri rezervasyon sırasında seçebilme kolaylığı<br />
+          - 7/24 canlı destek ve yolculuk boyunca güvence<br />
+          Sizi ve sevdiklerinizi Türkiye’nin her noktasına rahatça ulaştırıyoruz.
         </p>
       </div>
 
