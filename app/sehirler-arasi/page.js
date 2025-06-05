@@ -17,13 +17,22 @@ export default function SehirlerArasi() {
         />
         <h1 className="text-3xl font-extrabold text-[#6e5a1e] mb-4">Şehirler Arası Transfer</h1>
         <p className="mb-6 text-gray-200">
-          <strong>İş, tatil ya da özel anlar için konforlu ve güvenli şehirler arası yolculuklar…</strong><br /><br />
-          YolcuTransferi, İstanbul’dan Bodrum’a, Antalya’dan İzmir’e ve Türkiye’nin dört bir yanına; size özel araç ve deneyimli sürücülerle zahmetsiz ulaşım sağlar. 
-          Kalabalık otobüsleri, yorucu aktarmaları unutun. Dilediğiniz saatte, dilediğiniz adresten alınır, kapınıza kadar konforla ulaştırılırsınız.
+          İstanbul, Bodrum, Antalya, İzmir ve Türkiye'nin dört bir yanında; iş, tatil veya özel yolculuklarınız için güvenilir, konforlu ve sigortalı şehirler arası transfer hizmeti sunuyoruz.
         </p>
         <p className="mb-6 text-gray-200">
-          Yolculuğunuzun her detayı sizin isteğinize göre şekillenir. Wi-fi, mini ikramlar, çocuk koltuğu, ek sigorta ve daha fazlası, rezervasyon sırasında tercihinize sunulur. 
-          Tüm transferlerimiz sigortalı olup, yolculuk boyunca 7/24 destek hattımız ile her zaman yanınızdayız.
+          Her yolculuk; dilediğiniz adresten alım, tam istediğiniz saatte hareket, kişiye özel araç seçimi ve profesyonel sürücü ayrıcalığıyla planlanır. Toplu taşıma ve aktarma derdi olmadan, kapıdan kapıya konforu yaşayın.
         </p>
-        <p className="text-gray-300">
-          <
+        <p className="mb-6 text-gray-200">
+          Rezervasyon sırasında Wi-fi, mini ikramlar, çocuk koltuğu, ek sigorta gibi tüm ek hizmetleri tercihinize göre seçebilirsiniz. 
+          Transfer süresince 7/24 canlı destek ve tam güvenceyle her adımda yanınızdayız.
+        </p>
+      </div>
+
+      <Link href="https://yolcutransferi-halil-tayfurs-projects.vercel.app/rezervasyon">
+        <button className="bg-[#6e5a1e] hover:bg-[#8c7327] text-white font-bold py-3 px-8 rounded-xl mt-10 w-full text-lg shadow">
+          Rezervasyon Yap
+        </button>
+      </Link>
+    </main>
+  );
+}
