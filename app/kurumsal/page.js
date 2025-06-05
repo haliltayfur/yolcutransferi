@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -6,8 +6,13 @@ export default function KurumsalTransfer() {
   return (
     <main className="max-w-3xl mx-auto px-4 py-12">
       <div className="border-4 border-[#6e5a1e] rounded-[10px] bg-black/60 p-6 md:p-10 shadow-lg">
+        {/* 
+          Eğer görselin public/ klasöründe ise src="/kurumsal-transfer-banner.png" 
+          Eğer public/images/ klasöründeyse src="/images/kurumsal-transfer-banner.png" yaz
+        */}
         <Image
           src="/kurumsal-transfer-banner.png"
+          // src="/images/kurumsal-transfer-banner.png"
           alt="Kurumsal ve Toplu Transfer"
           width={900}
           height={320}
@@ -20,7 +25,7 @@ export default function KurumsalTransfer() {
           Talebinize göre araç tipi ve hizmet seçeneklerini kolayca belirleyebilir, personeliniz ve misafirleriniz için konforlu ulaşım sağlayabilirsiniz.
         </p>
         <p className="mb-6 text-gray-200">
-          Tüm transfer süreçleri, sektörde deneyimli iş ortaklarımız tarafından yasal mevzuata uygun, sigortalı ve gizlilik esaslı şekilde organize edilir. 
+          Tüm transfer süreçleri, sektörde deneyimli iş ortaklarımız tarafından yasal mevzuata uygun, sigortalı ve gizlilik esaslı şekilde organize edilir.
           Zamanında ulaşım, rezervasyon sırasında seçilebilen ek hizmetler ve 7/24 destek ile, kurumsal ihtiyaçlarınıza en uygun çözümü üretiyoruz.
         </p>
       </div>
