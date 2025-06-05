@@ -16,16 +16,19 @@ export default function VIPHavalimani() {
         />
         <h1 className="text-3xl font-extrabold text-[#6e5a1e] mb-4">VIP Havalimanı Transferi</h1>
         <p className="mb-6 text-gray-200">
-          YolcuTransferi olarak Türkiye'nin tüm havalimanlarında, Mercedes Maybach, Vito, lüks minivan ve özel araçlarla profesyonel ve konforlu VIP transfer hizmeti sunuyoruz. 
-          Her yolculuk sigortalı, zamanında ve eğitimli şoförler eşliğinde gerçekleşir.  
-          Bagaj yardımı, özel karşılama, uçuş takip ve 7/24 müşteri desteği ile havalimanı ulaşımını stressiz ve ayrıcalıklı hale getiriyoruz.
+          YolcuTransferi olarak Türkiye'nin tüm havalimanlarında güvenilir, konforlu ve esnek VIP transfer hizmetleri sunuyoruz. 
+          Rezervasyon sırasında bütçenize ve ihtiyaçlarınıza uygun araç ve hizmet seçeneklerini kolayca belirleyebilirsiniz.
+          Transfer talepleriniz, sektörde deneyimli iş ortaklarımız aracılığıyla karşılanır ve yolculuğunuz sigortalı, zamanında ve profesyonel sürücülerle gerçekleşir.
+        </p>
+        <p className="mb-6 text-gray-200">
+          <strong className="text-white">Ekstra Hizmetler:</strong><br />
+          Bagaj yardımı, özel karşılama, çocuk koltuğu, evcil hayvan taşıma kutusu gibi ek hizmetlerin tümü rezervasyon sırasında tercihinize sunulur.
         </p>
         <p className="text-gray-300">
           <strong className="text-white">Neden YolcuTransferi?</strong><br />
-          - Rakiplerimizden farklı olarak, filomuzdaki tüm araçlar yeni model ve lüks segmenttir.<br />
-          - Fiyatlarımız nettir, yolculuk sonrası ekstra ücret sürprizi yoktur.<br />
-          - Havalimanı giriş kartları ve özel izinler ile hızlı, beklemesiz çıkış sağlar.<br />
-          - Çocuk koltuğu ve özel talepler ücretsiz sunulur.
+          - Fiyatlar nettir; rezervasyon öncesinde tüm seçenekler ve ek hizmetler açıkça belirtilir, yolculuk sonrası sürpriz ücret çıkmaz.<br />
+          - Havalimanı giriş kartı ve özel izin gerektiren hizmetler, talebinize göre organize edilir.<br />
+          - 7/24 müşteri desteği ve uçuş takibiyle her zaman yanınızdayız.<br />
         </p>
       </div>
 
