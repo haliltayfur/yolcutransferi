@@ -102,4 +102,63 @@ export default function Iletisim() {
         </div>
         {/* Sağ: Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-black/40 rounded-2xl p-6 shadow-xl w-full md:w-1/2">
-          <div className="flex fl
+          <div className="flex flex-col md:flex-row gap-4">
+            <input
+              type="text"
+              name="ad"
+              placeholder="Adınız Soyadınız"
+              value={form.ad}
+              onChange={handleChange}
+              className="p-3 rounded border bg-black/60 w-full"
+              required
+            />
+            <input
+              type="tel"
+              name="telefon"
+              placeholder="Telefon Numaranız"
+              value={form.telefon}
+              onChange={handleChange}
+              className="p-3 rounded border bg-black/60 w-full"
+              required
+            />
+          </div>
+          <input
+            type="email"
+            name="email"
+            placeholder="E-posta Adresiniz"
+            value={form.email}
+            onChange={handleChange}
+            className="p-3 rounded border bg-black/60"
+            required
+          />
+          <select
+            name="neden"
+            value={form.neden}
+            onChange={handleChange}
+            className="p-3 rounded border bg-black/60"
+            required
+          >
+            <option value="">Lütfen bir iletişim nedeni seçiniz</option>
+            {ILETISIM_NEDENLERI.map((neden) => (
+              <option key={neden} value={neden}>{neden}</option>
+            ))}
+          </select>
+          <textarea
+            name="mesaj"
+            placeholder="Mesajınız"
+            value={form.mesaj}
+            onChange={handleChange}
+            className="p-3 rounded border bg-black/60"
+            required
+          />
+          <button
+            type="submit"
+            className="bg-yellow-500 text-black font-bold py-3 px-8 rounded-2xl text-lg hover:bg-yellow-600 transition shadow"
+          >
+            Mesajı Gönder
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
