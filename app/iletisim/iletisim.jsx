@@ -21,12 +21,12 @@ const ILETISIM_NEDENLERI = [
 ];
 
 const messages = [
-  "YolcuTransferi.com olarak, deneyimli ekibimizle sizlere lüks ve güvenli bir yolculuk deneyimi yaşatmak için buradayız.",
+  "YolcuTransferi.com olarak, deneyimli ekibimizle sizlere lüks ve güvenli bir yolculuk yaşatmak için buradayız.",
   "Her türlü talebiniz, rezervasyonunuz veya iş birliği teklifiniz için bizimle çekinmeden iletişime geçebilirsiniz.",
   "İhtiyacınıza en uygun çözümü, en hızlı şekilde sunabilmek için profesyonel destek ekibimiz sizinle.",
   "VIP standartlarında hizmet için, bize ulaşmanız yeterli. Sizi dinlemek ve en iyi deneyimi yaşatmak önceliğimiz.",
   "Bize ilettiğiniz her mesaj titizlikle incelenir; ilgili ekibimiz en kısa sürede size dönüş sağlar.",
-  "YolcuTransferi.com — Sadece bir transfer değil, bir ayrıcalık..."
+  "YolcuTransferi.com  Sadece bir transfer değil, bir ayrıcalık..."
 ];
 
 export default function Iletisim() {
