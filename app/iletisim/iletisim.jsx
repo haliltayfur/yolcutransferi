@@ -4,21 +4,9 @@ import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "re
 import { SiX } from "react-icons/si";
 
 const SOCIALS = [
-  {
-    icon: <FaWhatsapp size={22} />,
-    name: "WhatsApp",
-    url: "https://wa.me/905395267569"
-  },
-  {
-    icon: <FaInstagram size={22} />,
-    name: "Instagram",
-    url: "https://instagram.com/yolcutransferi"
-  },
-  {
-    icon: <SiX size={22} />,
-    name: "X (Twitter)",
-    url: "https://x.com/yolcutransferi"
-  }
+  { icon: <FaWhatsapp size={22} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
+  { icon: <FaInstagram size={22} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
+  { icon: <SiX size={22} />, name: "X (Twitter)", url: "https://x.com/yolcutransferi" }
 ];
 
 const ILETISIM_NEDENLERI = [
@@ -56,7 +44,7 @@ export default function Iletisim() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setSent(true);
-    setTimeout(() => setSent(false), 8000);
+    setTimeout(() => setSent(false), 7000);
     setForm({
       ad: "",
       soyad: "",
@@ -68,28 +56,26 @@ export default function Iletisim() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-3">
-      <h1 className="text-3xl font-bold mb-8 text-center">İletişim</h1>
-      <div className="border-4 border-[#bfa658] rounded-2xl p-6 bg-black/60 shadow-xl">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 mb-8">
-          <div className="flex-1 space-y-4">
-            <div className="flex items-center gap-3 text-base">
-              <FaPhone /> <span className="font-medium">+90 539 526 75 69</span>
+    <div className="flex flex-col items-center min-h-[calc(100vh-150px)] py-10 px-2 bg-black">
+      <h1 className="text-4xl font-bold mb-8 text-center tracking-tight">İletişim</h1>
+      <div className="w-full max-w-5xl bg-black/70 rounded-2xl border-4 border-[#bfa658] shadow-2xl px-8 py-10 flex flex-col gap-10">
+        {/* İçerik: Bilgiler ve Form Yan Yana */}
+        <div className="flex flex-col md:flex-row gap-8 w-full">
+          {/* İletişim Bilgileri */}
+          <div className="flex-1 flex flex-col gap-6 justify-between">
+            <div className="space-y-4 text-base">
+              <div className="flex items-center gap-3"><FaPhone /> <span className="font-medium">+90 539 526 75 69</span></div>
+              <div className="flex items-center gap-3"><FaEnvelope /> <span className="font-medium">info@yolcutransferi.com</span></div>
+              <div className="flex items-center gap-3"><FaMapMarkerAlt /> <span className="font-medium">Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span></div>
             </div>
-            <div className="flex items-center gap-3 text-base">
-              <FaEnvelope /> <span className="font-medium">info@yolcutransferi.com</span>
-            </div>
-            <div className="flex items-center gap-3 text-base">
-              <FaMapMarkerAlt /> <span className="font-medium">Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span>
-            </div>
-            <div className="flex flex-row gap-5 pt-2">
+            <div className="flex flex-row gap-6 pt-2">
               {SOCIALS.map(({ icon, url, name }) => (
                 <a
                   key={name}
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center p-3 rounded-full bg-black/60 hover:bg-[#bfa658] transition shadow"
+                  className="flex items-center justify-center p-3 rounded-full bg-black/70 hover:bg-[#bfa658] transition shadow"
                   title={name}
                 >
                   {icon}
@@ -97,7 +83,8 @@ export default function Iletisim() {
               ))}
             </div>
           </div>
-          <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-3">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4">
             <div className="flex gap-3">
               <input
                 type="text"
@@ -105,7 +92,7 @@ export default function Iletisim() {
                 placeholder="Adınız"
                 value={form.ad}
                 onChange={handleChange}
-                className="p-3 rounded border bg-black/60 w-1/2"
+                className="p-3 rounded border bg-black/60 w-1/2 focus:outline-[#bfa658]"
                 required
               />
               <input
@@ -114,7 +101,7 @@ export default function Iletisim() {
                 placeholder="Soyadınız"
                 value={form.soyad}
                 onChange={handleChange}
-                className="p-3 rounded border bg-black/60 w-1/2"
+                className="p-3 rounded border bg-black/60 w-1/2 focus:outline-[#bfa658]"
                 required
               />
             </div>
@@ -127,7 +114,7 @@ export default function Iletisim() {
                   placeholder="5xx xxx xx xx"
                   value={form.telefon}
                   onChange={handleChange}
-                  className="p-3 rounded-r border-l-0 border bg-black/60 w-full"
+                  className="p-3 rounded-r border-l-0 border bg-black/60 w-full focus:outline-[#bfa658]"
                   maxLength={10}
                   pattern="\d{10}"
                   required
@@ -139,7 +126,7 @@ export default function Iletisim() {
                 placeholder="E-posta Adresiniz"
                 value={form.email}
                 onChange={handleChange}
-                className="p-3 rounded border bg-black/60 w-1/2"
+                className="p-3 rounded border bg-black/60 w-1/2 focus:outline-[#bfa658]"
                 required
               />
             </div>
@@ -147,7 +134,7 @@ export default function Iletisim() {
               name="neden"
               value={form.neden}
               onChange={handleChange}
-              className="p-3 rounded border bg-black/60"
+              className="p-3 rounded border bg-black/60 focus:outline-[#bfa658]"
               required
             >
               <option value="">Lütfen iletişim nedeninizi seçiniz</option>
@@ -160,7 +147,7 @@ export default function Iletisim() {
               placeholder="Mesajınız"
               value={form.mesaj}
               onChange={handleChange}
-              className="p-3 rounded border bg-black/60"
+              className="p-3 rounded border bg-black/60 focus:outline-[#bfa658]"
               required
             />
             <button
@@ -170,14 +157,15 @@ export default function Iletisim() {
               Mesajı Gönder
             </button>
             {sent && (
-              <div className="mt-3 p-3 rounded-xl text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-500 shadow">
+              <div className="mt-2 p-3 rounded-xl text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-500 shadow">
                 Mesajınız alınmıştır. İlgili ekiplerimiz en kısa sürede sizinle iletişime geçecektir.
               </div>
             )}
           </form>
         </div>
-        <div className="flex justify-center mt-8">
-          <div style={{ width: "900px", maxWidth: "100%", height: "200px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg">
+        {/* Harita en altta, tam genişlikte */}
+        <div className="flex justify-center">
+          <div style={{ width: "100%", maxWidth: "900px", height: "200px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg">
             <iframe
               title="YolcuTransferi.com Konum"
               width="100%"
