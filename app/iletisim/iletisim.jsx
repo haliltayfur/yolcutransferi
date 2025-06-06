@@ -1,4 +1,5 @@
 // ... (importlar aynı)
+"use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
