@@ -1,4 +1,3 @@
-// ... (importlar aynı)
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -12,8 +11,8 @@ const SOCIALS = [
 ];
 
 const ILETISIM_NEDENLERI = [
-  "Transfer Rezervasyonu",
   "Bilgi Talebi",
+  "Transfer Rezervasyonu",
   "Teklif Almak İstiyorum",
   "İş Birliği / Ortaklık",
   "Geri Bildirim / Öneri",
@@ -22,12 +21,12 @@ const ILETISIM_NEDENLERI = [
 ];
 
 const messages = [
-  "YolcuTransferi.com Olarak, Deneyimli Ekibimizle Sizlere Lüks Ve Güvenli Bir Yolculuk Deneyimi Yaşatmak İçin Buradayız.",
-  "Her Türlü Talebiniz, Rezervasyonunuz Veya İş Birliği Teklifiniz İçin Bizimle Çekinmeden İletişime Geçebilirsiniz.",
-  "İhtiyacınıza En Uygun Çözümü, En Hızlı Şekilde Sunabilmek İçin Profesyonel Destek Ekibimiz Sizinle.",
-  "VIP Standartlarında Hizmet İçin, Bize Ulaşmanız Yeterli. Sizi Dinlemek Ve En İyi Deneyimi Yaşatmak Önceliğimiz.",
-  "Bize İlettiğiniz Her Mesaj Titizlikle İncelenir; İlgili Ekibimiz En Kısa Sürede Size Dönüş Sağlar.",
-  "YolcuTransferi.com — Sadece Bir Transfer Değil, Bir Ayrıcalık..."
+  "YolcuTransferi.com olarak, deneyimli ekibimizle sizlere lüks ve güvenli bir yolculuk deneyimi yaşatmak için buradayız.",
+  "Her türlü talebiniz, rezervasyonunuz veya iş birliği teklifiniz için bizimle çekinmeden iletişime geçebilirsiniz.",
+  "İhtiyacınıza en uygun çözümü, en hızlı şekilde sunabilmek için profesyonel destek ekibimiz sizinle.",
+  "VIP standartlarında hizmet için, bize ulaşmanız yeterli. Sizi dinlemek ve en iyi deneyimi yaşatmak önceliğimiz.",
+  "Bize ilettiğiniz her mesaj titizlikle incelenir; ilgili ekibimiz en kısa sürede size dönüş sağlar.",
+  "YolcuTransferi.com — Sadece bir transfer değil, bir ayrıcalık..."
 ];
 
 export default function Iletisim() {
@@ -36,7 +35,7 @@ export default function Iletisim() {
     soyad: "",
     telefon: "",
     email: "",
-    neden: "",
+    neden: ILETISIM_NEDENLERI[0], // "Bilgi Talebi"
     mesaj: ""
   });
   const [sent, setSent] = useState(false);
@@ -68,63 +67,42 @@ export default function Iletisim() {
       soyad: "",
       telefon: "",
       email: "",
-      neden: "",
+      neden: ILETISIM_NEDENLERI[0],
       mesaj: ""
     });
   };
 
   return (
     <div className="w-full flex justify-center bg-black min-h-[calc(100vh-150px)] py-10 px-2">
-      <div className="w-full max-w-4xl bg-[#191714]/90 border-[3px] border-[#bfa658] rounded-2xl shadow-2xl px-8 py-10 flex flex-col gap-8">
-        <h1 className="text-4xl font-bold mb-2 text-center tracking-tight text-[#bfa658] drop-shadow-lg">İletişim</h1>
-        <div className="flex flex-col md:flex-row gap-10">
-          {/* Bilgi ve Sosyal Alan */}
-          <div className="flex-1 flex flex-col justify-start gap-6">
-            <div className="space-y-3 text-base text-gray-100">
-              <div className="flex items-center gap-3"><FaPhone /> <span>+90 539 526 75 69</span></div>
-              <div className="flex items-center gap-3"><FaEnvelope /> <span>info@yolcutransferi.com</span></div>
-              <div className="flex items-center gap-3"><FaMapMarkerAlt /> <span>Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span></div>
-            </div>
-            <div className="flex flex-row gap-4 pt-6">
-              {SOCIALS.map(({ icon, url, name }) => (
-                <a
-                  key={name}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center w-10 h-10 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition"
-                  title={name}
-                >
-                  {icon}
-                </a>
-              ))}
-            </div>
-            {/* Dönen Bilboard Mesaj Alanı */}
-            <div className="w-full flex justify-center py-4">
-              <div
-                className="relative w-full max-w-xl bg-[#181611] border border-[#bfa658] rounded-xl shadow flex items-center justify-center transition-all duration-500 overflow-hidden"
-                style={{ height: 92 }} // KUTU YÜKSEKLİĞİ ARTIRILDI!
+      <div className="w-full max-w-4xl bg-[#191714]/90 border-[3px] border-[#bfa658] rounded-2xl shadow-2xl px-8 py-10 flex flex-col gap-10">
+        {/* Bilboard EN ÜSTTE */}
+        <div className="w-full flex justify-center mb-6">
+          <div
+            className="relative w-full max-w-3xl bg-black border border-[#bfa658] rounded-xl shadow flex items-center justify-center transition-all duration-500 overflow-hidden"
+            style={{ height: 62, minHeight: 62 }}
+          >
+            {activeIndex < messages.length ? (
+              <span className="text-base text-gray-100 text-center px-6 py-2 font-medium animate-fade-in leading-normal truncate-message"
+                style={{ whiteSpace: "normal", width: "100%", overflowWrap: "break-word" }}
               >
-                {activeIndex < messages.length ? (
-                  <span className="text-[1.18rem] text-gray-200 text-center px-7 py-2 font-semibold leading-snug animate-fade-in capitalize">
-                    {messages[activeIndex]}
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center w-full h-full py-2 animate-fade-in">
-                    <Image
-                      src="/LOGO.png"
-                      alt="YolcuTransferi.com"
-                      width={180}
-                      height={54}
-                      priority
-                      className="mx-auto"
-                    />
-                  </span>
-                )}
-              </div>
-            </div>
+                {messages[activeIndex]}
+              </span>
+            ) : (
+              <span className="flex items-center justify-center w-full h-full py-2 animate-fade-in">
+                <Image
+                  src="/LOGO.png"
+                  alt="YolcuTransferi.com"
+                  width={270} // LOGO %50 büyütülmüş
+                  height={81}
+                  priority
+                  className="mx-auto"
+                />
+              </span>
+            )}
           </div>
-          {/* Form */}
+        </div>
+        {/* Form */}
+        <div className="flex flex-col md:flex-row gap-10">
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4">
             <div className="flex gap-3">
               <input
@@ -175,8 +153,7 @@ export default function Iletisim() {
               className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white focus:border-[#bfa658] transition"
               required
             >
-              <option value="">Lütfen iletişim nedeninizi seçiniz</option>
-              {ILETISIM_NEDENLERI.map((neden) => (
+              {ILETISIM_NEDENLERI.map((neden, i) => (
                 <option key={neden} value={neden}>{neden}</option>
               ))}
             </select>
@@ -201,6 +178,28 @@ export default function Iletisim() {
               </div>
             )}
           </form>
+          {/* Adres & Sosyal Medya */}
+          <div className="flex-1 flex flex-col justify-start gap-7">
+            <div className="space-y-3 text-base text-gray-100">
+              <div className="flex items-center gap-3"><FaPhone /> <span>+90 539 526 75 69</span></div>
+              <div className="flex items-center gap-3"><FaEnvelope /> <span>info@yolcutransferi.com</span></div>
+              <div className="flex items-center gap-3"><FaMapMarkerAlt /> <span>Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span></div>
+            </div>
+            <div className="flex flex-row gap-4 pt-6">
+              {SOCIALS.map(({ icon, url, name }) => (
+                <a
+                  key={name}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition"
+                  title={name}
+                >
+                  {icon}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
         {/* Harita */}
         <div className="w-full flex justify-center">
@@ -226,8 +225,13 @@ export default function Iletisim() {
           0% { opacity: 0; transform: translateY(15px);}
           100% { opacity: 1; transform: translateY(0);}
         }
-        .capitalize {
-          text-transform: capitalize;
+        .truncate-message {
+          display: block;
+          width: 100%;
+          overflow-wrap: break-word;
+          white-space: normal;
+          line-height: 1.5;
+          font-size: 1rem;
         }
       `}</style>
     </div>
