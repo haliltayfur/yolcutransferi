@@ -4,9 +4,9 @@ import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "re
 import { SiX } from "react-icons/si";
 
 const SOCIALS = [
-  { icon: <FaWhatsapp size={22} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
-  { icon: <FaInstagram size={22} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
-  { icon: <SiX size={22} />, name: "X (Twitter)", url: "https://x.com/yolcutransferi" }
+  { icon: <FaWhatsapp size={20} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
+  { icon: <FaInstagram size={20} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
+  { icon: <SiX size={20} />, name: "X (Twitter)", url: "https://x.com/yolcutransferi" }
 ];
 
 const ILETISIM_NEDENLERI = [
@@ -33,8 +33,7 @@ export default function Iletisim() {
   const handleChange = (e) => {
     if (e.target.name === "telefon") {
       let val = e.target.value.replace(/\D/g, "");
-      if (val.startsWith("0")) val = val.substring(1);
-      if (val.length > 10) val = val.slice(0, 10);
+      if (val.length > 11) val = val.slice(0, 11);
       setForm({ ...form, [e.target.name]: val });
     } else {
       setForm({ ...form, [e.target.name]: e.target.value });
@@ -56,26 +55,25 @@ export default function Iletisim() {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-[calc(100vh-150px)] py-10 px-2 bg-black">
-      <h1 className="text-4xl font-bold mb-8 text-center tracking-tight">İletişim</h1>
-      <div className="w-full max-w-5xl bg-black/70 rounded-2xl border-4 border-[#bfa658] shadow-2xl px-8 py-10 flex flex-col gap-10">
-        {/* İçerik: Bilgiler ve Form Yan Yana */}
-        <div className="flex flex-col md:flex-row gap-8 w-full">
-          {/* İletişim Bilgileri */}
-          <div className="flex-1 flex flex-col gap-6 justify-between">
-            <div className="space-y-4 text-base">
-              <div className="flex items-center gap-3"><FaPhone /> <span className="font-medium">+90 539 526 75 69</span></div>
-              <div className="flex items-center gap-3"><FaEnvelope /> <span className="font-medium">info@yolcutransferi.com</span></div>
-              <div className="flex items-center gap-3"><FaMapMarkerAlt /> <span className="font-medium">Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span></div>
+    <div className="w-full flex justify-center bg-black min-h-[calc(100vh-150px)] py-10 px-2">
+      <div className="w-full max-w-4xl bg-[#191714]/90 border-[3px] border-[#bfa658] rounded-2xl shadow-2xl px-8 py-10 flex flex-col gap-8">
+        <h1 className="text-4xl font-bold mb-2 text-center tracking-tight text-[#bfa658] drop-shadow-lg">İletişim</h1>
+        <div className="flex flex-col md:flex-row gap-10">
+          {/* Bilgi ve Sosyal Alan */}
+          <div className="flex-1 flex flex-col justify-start gap-6">
+            <div className="space-y-3 text-base text-gray-100">
+              <div className="flex items-center gap-3"><FaPhone /> <span>+90 539 526 75 69</span></div>
+              <div className="flex items-center gap-3"><FaEnvelope /> <span>info@yolcutransferi.com</span></div>
+              <div className="flex items-center gap-3"><FaMapMarkerAlt /> <span>Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span></div>
             </div>
-            <div className="flex flex-row gap-6 pt-2">
+            <div className="flex flex-row gap-4 pt-6">
               {SOCIALS.map(({ icon, url, name }) => (
                 <a
                   key={name}
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center p-3 rounded-full bg-black/70 hover:bg-[#bfa658] transition shadow"
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition"
                   title={name}
                 >
                   {icon}
@@ -89,44 +87,41 @@ export default function Iletisim() {
               <input
                 type="text"
                 name="ad"
-                placeholder="Adınız"
+                placeholder="Ad"
                 value={form.ad}
                 onChange={handleChange}
-                className="p-3 rounded border bg-black/60 w-1/2 focus:outline-[#bfa658]"
+                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition"
                 required
               />
               <input
                 type="text"
                 name="soyad"
-                placeholder="Soyadınız"
+                placeholder="Soyad"
                 value={form.soyad}
                 onChange={handleChange}
-                className="p-3 rounded border bg-black/60 w-1/2 focus:outline-[#bfa658]"
+                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition"
                 required
               />
             </div>
             <div className="flex gap-3">
-              <div className="flex items-center w-1/2">
-                <span className="bg-black/40 rounded-l px-3 py-2 border border-r-0 border-gray-700 text-gray-400 select-none">0</span>
-                <input
-                  type="tel"
-                  name="telefon"
-                  placeholder="5xx xxx xx xx"
-                  value={form.telefon}
-                  onChange={handleChange}
-                  className="p-3 rounded-r border-l-0 border bg-black/60 w-full focus:outline-[#bfa658]"
-                  maxLength={10}
-                  pattern="\d{10}"
-                  required
-                />
-              </div>
+              <input
+                type="tel"
+                name="telefon"
+                placeholder="05xx xxx xx xx"
+                value={form.telefon}
+                onChange={handleChange}
+                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition"
+                maxLength={11}
+                pattern="\d{11}"
+                required
+              />
               <input
                 type="email"
                 name="email"
-                placeholder="E-posta Adresiniz"
+                placeholder="E-posta"
                 value={form.email}
                 onChange={handleChange}
-                className="p-3 rounded border bg-black/60 w-1/2 focus:outline-[#bfa658]"
+                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition"
                 required
               />
             </div>
@@ -134,7 +129,7 @@ export default function Iletisim() {
               name="neden"
               value={form.neden}
               onChange={handleChange}
-              className="p-3 rounded border bg-black/60 focus:outline-[#bfa658]"
+              className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white focus:border-[#bfa658] transition"
               required
             >
               <option value="">Lütfen iletişim nedeninizi seçiniz</option>
@@ -147,29 +142,30 @@ export default function Iletisim() {
               placeholder="Mesajınız"
               value={form.mesaj}
               onChange={handleChange}
-              className="p-3 rounded border bg-black/60 focus:outline-[#bfa658]"
+              className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white focus:border-[#bfa658] transition"
               required
+              rows={3}
             />
             <button
               type="submit"
-              className="bg-[#bfa658] text-black font-bold py-3 px-8 rounded-2xl text-lg hover:bg-yellow-600 transition shadow mt-2"
+              className="bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full"
             >
               Mesajı Gönder
             </button>
             {sent && (
-              <div className="mt-2 p-3 rounded-xl text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-500 shadow">
+              <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-400 shadow">
                 Mesajınız alınmıştır. İlgili ekiplerimiz en kısa sürede sizinle iletişime geçecektir.
               </div>
             )}
           </form>
         </div>
-        {/* Harita en altta, tam genişlikte */}
-        <div className="flex justify-center">
-          <div style={{ width: "100%", maxWidth: "900px", height: "200px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg">
+        {/* Harita en altta, kutu içinde ve büyük */}
+        <div className="w-full flex justify-center">
+          <div style={{ width: "100%", maxWidth: "900px", height: "210px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
             <iframe
               title="YolcuTransferi.com Konum"
               width="100%"
-              height="200"
+              height="210"
               frameBorder="0"
               style={{ border: 0 }}
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d24081.262044014337!2d29.0903967!3d41.0319917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac9cd7fd8d1ef%3A0xf6f8ff72b91ed1db!2sENPLAZA!5e0!3m2!1str!2str!4v1717693329992!5m2!1str!2str"
