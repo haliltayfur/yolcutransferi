@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
+import clsx from "clsx";
 
 const SOCIALS = [
   {
@@ -34,21 +35,33 @@ const ILETISIM_NEDENLERI = [
 export default function Iletisim() {
   const [form, setForm] = useState({
     ad: "",
+    soyad: "",
     telefon: "",
     email: "",
     neden: "",
     mesaj: ""
   });
+  const [sent, setSent] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    // Telefon alanı: sadece rakam, ilk karakter 0 ise ekleme
+    if (e.target.name === "telefon") {
+      let val = e.target.value.replace(/\D/g, ""); // sadece sayı
+      if (val.startsWith("0")) val = val.substring(1);
+      if (val.length > 10) val = val.slice(0, 10);
+      setForm({ ...form, [e.target.name]: val });
+    } else {
+      setForm({ ...form, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert("Mesajınız başarıyla gönderildi!");
+    setSent(true);
+    setTimeout(() => setSent(false), 8000);
     setForm({
       ad: "",
+      soyad: "",
       telefon: "",
       email: "",
       neden: "",
@@ -57,29 +70,29 @@ export default function Iletisim() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-10 px-4">
-      <h1 className="text-3xl font-bold mb-10 text-center">İletişim</h1>
-      <div className="flex flex-col md:flex-row gap-12">
-        {/* Sol: İletişim Bilgileri */}
-        <div className="w-full md:w-1/2 flex flex-col justify-between">
-          <div className="space-y-6 text-base bg-black/40 rounded-2xl p-6 mb-6">
-            <div className="flex items-center gap-3">
+    <div className="max-w-3xl mx-auto py-12 px-3">
+      <h1 className="text-3xl font-bold mb-8 text-center">İletişim</h1>
+      <div className="border-4 border-[#bfa658] rounded-2xl p-6 bg-black/60 shadow-xl">
+        {/* İletişim Bilgileri */}
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 mb-8">
+          <div className="flex-1 space-y-4">
+            <div className="flex items-center gap-3 text-base">
               <FaPhone /> <span className="font-medium">+90 539 526 75 69</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 text-base">
               <FaEnvelope /> <span className="font-medium">info@yolcutransferi.com</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 text-base">
               <FaMapMarkerAlt /> <span className="font-medium">Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span>
             </div>
-            <div className="flex flex-row gap-5 pt-3">
+            <div className="flex flex-row gap-5 pt-2">
               {SOCIALS.map(({ icon, url, name }) => (
                 <a
                   key={name}
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center p-3 rounded-full bg-black/60 hover:bg-yellow-500 transition shadow"
+                  className="flex items-center justify-center p-3 rounded-full bg-black/60 hover:bg-[#bfa658] transition shadow"
                   title={name}
                 >
                   {icon}
@@ -87,77 +100,101 @@ export default function Iletisim() {
               ))}
             </div>
           </div>
-          {/* Google Maps */}
-          <div className="rounded-2xl overflow-hidden shadow-lg h-[240px]">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-3">
+            <div className="flex gap-3">
+              <input
+                type="text"
+                name="ad"
+                placeholder="Adınız"
+                value={form.ad}
+                onChange={handleChange}
+                className="p-3 rounded border bg-black/60 w-1/2"
+                required
+              />
+              <input
+                type="text"
+                name="soyad"
+                placeholder="Soyadınız"
+                value={form.soyad}
+                onChange={handleChange}
+                className="p-3 rounded border bg-black/60 w-1/2"
+                required
+              />
+            </div>
+            <div className="flex gap-3">
+              <div className="flex items-center w-1/2">
+                <span className="bg-black/40 rounded-l px-3 py-2 border border-r-0 border-gray-700 text-gray-400 select-none">0</span>
+                <input
+                  type="tel"
+                  name="telefon"
+                  placeholder="5xx xxx xx xx"
+                  value={form.telefon}
+                  onChange={handleChange}
+                  className="p-3 rounded-r border-l-0 border bg-black/60 w-full"
+                  maxLength={10}
+                  pattern="\d{10}"
+                  required
+                />
+              </div>
+              <input
+                type="email"
+                name="email"
+                placeholder="E-posta Adresiniz"
+                value={form.email}
+                onChange={handleChange}
+                className="p-3 rounded border bg-black/60 w-1/2"
+                required
+              />
+            </div>
+            <select
+              name="neden"
+              value={form.neden}
+              onChange={handleChange}
+              className="p-3 rounded border bg-black/60"
+              required
+            >
+              <option value="">Lütfen iletişim nedeninizi seçiniz</option>
+              {ILETISIM_NEDENLERI.map((neden) => (
+                <option key={neden} value={neden}>{neden}</option>
+              ))}
+            </select>
+            <textarea
+              name="mesaj"
+              placeholder="Mesajınız"
+              value={form.mesaj}
+              onChange={handleChange}
+              className="p-3 rounded border bg-black/60"
+              required
+            />
+            <button
+              type="submit"
+              className="bg-[#bfa658] text-black font-bold py-3 px-8 rounded-2xl text-lg hover:bg-yellow-600 transition shadow mt-2"
+            >
+              Mesajı Gönder
+            </button>
+            {sent && (
+              <div className="mt-3 p-3 rounded-xl text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-500 shadow">
+                Mesajınız alınmıştır. İlgili ekiplerimiz en kısa sürede sizinle iletişime geçecektir.
+              </div>
+            )}
+          </form>
+        </div>
+        {/* Harita */}
+        <div className="flex justify-center mt-8">
+          <div style={{ width: "900px", maxWidth: "100%", height: "200px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg">
             <iframe
               title="YolcuTransferi.com Konum"
               width="100%"
-              height="100%"
+              height="200"
               frameBorder="0"
               style={{ border: 0 }}
-              src="https://www.google.com/maps?q=İnkılap%20Mahallesi,%20Ümraniye%20Plazalar%20Bölgesi,%20İstanbul&output=embed"
+              // Google Maps Embed → Özel bir plaza için örnek pin + etiketli
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d24081.262044014337!2d29.0903967!3d41.0319917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac9cd7fd8d1ef%3A0xf6f8ff72b91ed1db!2sENPLAZA!5e0!3m2!1str!2str!4v1717693329992!5m2!1str!2str"
               allowFullScreen
             ></iframe>
           </div>
         </div>
-        {/* Sağ: Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-black/40 rounded-2xl p-6 shadow-xl w-full md:w-1/2">
-          <div className="flex flex-col md:flex-row gap-4">
-            <input
-              type="text"
-              name="ad"
-              placeholder="Adınız Soyadınız"
-              value={form.ad}
-              onChange={handleChange}
-              className="p-3 rounded border bg-black/60 w-full"
-              required
-            />
-            <input
-              type="tel"
-              name="telefon"
-              placeholder="Telefon Numaranız"
-              value={form.telefon}
-              onChange={handleChange}
-              className="p-3 rounded border bg-black/60 w-full"
-              required
-            />
-          </div>
-          <input
-            type="email"
-            name="email"
-            placeholder="E-posta Adresiniz"
-            value={form.email}
-            onChange={handleChange}
-            className="p-3 rounded border bg-black/60"
-            required
-          />
-          <select
-            name="neden"
-            value={form.neden}
-            onChange={handleChange}
-            className="p-3 rounded border bg-black/60"
-            required
-          >
-            <option value="">Lütfen bir iletişim nedeni seçiniz</option>
-            {ILETISIM_NEDENLERI.map((neden) => (
-              <option key={neden} value={neden}>{neden}</option>
-            ))}
-          </select>
-          <textarea
-            name="mesaj"
-            placeholder="Mesajınız"
-            value={form.mesaj}
-            onChange={handleChange}
-            className="p-3 rounded border bg-black/60"
-            required
-          />
-          <button
-            type="submit"
-            className="bg-yellow-500 text-black font-bold py-3 px-8 rounded-2xl text-lg hover:bg-yellow-600 transition shadow"
-          >
-            Mesajı Gönder
-          </button>
-        </form>
       </div>
     </div>
   );
