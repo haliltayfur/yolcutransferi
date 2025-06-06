@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
@@ -19,6 +20,15 @@ const ILETISIM_NEDENLERI = [
   "Diğer"
 ];
 
+const messages = [
+  "YolcuTransferi.com olarak, deneyimli ekibimizle sizlere lüks ve güvenli bir yolculuk deneyimi yaşatmak için buradayız.",
+  "Her türlü talebiniz, rezervasyonunuz veya iş birliği teklifiniz için bizimle çekinmeden iletişime geçebilirsiniz.",
+  "İhtiyacınıza en uygun çözümü, en hızlı şekilde sunabilmek için profesyonel destek ekibimiz sizinle.",
+  "VIP standartlarında hizmet için, bize ulaşmanız yeterli. Sizi dinlemek ve en iyi deneyimi yaşatmak önceliğimiz.",
+  "Bize ilettiğiniz her mesaj titizlikle incelenir; ilgili ekibimiz en kısa sürede size dönüş sağlar.",
+  "YolcuTransferi.com — Sadece bir transfer değil, bir ayrıcalık..."
+];
+
 export default function Iletisim() {
   const [form, setForm] = useState({
     ad: "",
@@ -29,6 +39,15 @@ export default function Iletisim() {
     mesaj: ""
   });
   const [sent, setSent] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Bilboard mesajları döndür
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % (messages.length + 1));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleChange = (e) => {
     if (e.target.name === "telefon") {
@@ -79,6 +98,27 @@ export default function Iletisim() {
                   {icon}
                 </a>
               ))}
+            </div>
+            {/* Dönen Bilboard Mesaj Alanı */}
+            <div className="w-full flex justify-center py-4">
+              <div className="relative min-h-[58px] w-full max-w-xl bg-[#181611] border border-[#bfa658] rounded-xl shadow flex items-center justify-center transition-all duration-500 overflow-hidden" style={{ height: 68 }}>
+                {activeIndex < messages.length ? (
+                  <span className="text-[1.13rem] text-gray-200 text-center px-7 py-2 font-medium leading-relaxed animate-fade-in">
+                    {messages[activeIndex]}
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center w-full h-full py-2 animate-fade-in">
+                    <Image
+                      src="/LOGO.png"
+                      alt="YolcuTransferi.com"
+                      width={180}
+                      height={54}
+                      priority
+                      className="mx-auto"
+                    />
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           {/* Form */}
@@ -159,7 +199,7 @@ export default function Iletisim() {
             )}
           </form>
         </div>
-        {/* Harita en altta, kutu içinde ve büyük */}
+        {/* Harita */}
         <div className="w-full flex justify-center">
           <div style={{ width: "100%", maxWidth: "900px", height: "210px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
             <iframe
@@ -174,6 +214,16 @@ export default function Iletisim() {
           </div>
         </div>
       </div>
+      {/* Animasyon için gerekli CSS */}
+      <style>{`
+        .animate-fade-in {
+          animation: fadeIn .7s;
+        }
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: translateY(15px);}
+          100% { opacity: 1; transform: translateY(0);}
+        }
+      `}</style>
     </div>
   );
 }
