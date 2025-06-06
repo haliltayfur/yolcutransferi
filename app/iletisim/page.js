@@ -1,5 +1,4 @@
-"use client";
-import Iletisim from "./Iletisim";
+import Iletisim from "./iletisim";
 
 export default function Page() {
   return <Iletisim />;
