@@ -73,45 +73,57 @@ export default function Iletisim() {
   };
 
   return (
-    <div className="w-full flex justify-center bg-black min-h-[calc(100vh-150px)] py-10 px-2">
-      <div className="w-full max-w-4xl bg-[#191714]/90 border-[3px] border-[#bfa658] rounded-2xl shadow-2xl px-8 py-10 flex flex-col gap-10">
+    <div className="w-full flex justify-center bg-black min-h-[calc(100vh-150px)] py-6 px-2">
+      <div className="w-full max-w-4xl bg-[#191714]/90 border-[3px] border-[#bfa658] rounded-2xl shadow-2xl px-2 sm:px-6 py-6 flex flex-col gap-6">
         {/* Bilboard EN ÜSTTE */}
-        <div className="w-full flex justify-center mb-6">
+        <div className="w-full flex justify-center mb-2">
           <div
             className="relative w-full max-w-3xl bg-black border border-[#bfa658] rounded-xl shadow flex items-center justify-center transition-all duration-500 overflow-hidden"
-            style={{ height: 62, minHeight: 62 }}
+            style={{
+              minHeight: 62,
+              padding: "10px 8px",
+              height: "auto"
+            }}
           >
             {activeIndex < messages.length ? (
-              <span className="text-base text-gray-100 text-center px-6 py-2 font-medium animate-fade-in leading-normal truncate-message"
-                style={{ whiteSpace: "normal", width: "100%", overflowWrap: "break-word" }}
+              <span
+                className="text-base sm:text-lg text-gray-100 text-center font-medium animate-fade-in leading-normal truncate-message"
+                style={{
+                  whiteSpace: "normal",
+                  width: "100%",
+                  wordBreak: "break-word",
+                  fontSize: "1.04rem",
+                  lineHeight: "1.4"
+                }}
               >
                 {messages[activeIndex]}
               </span>
             ) : (
-              <span className="flex items-center justify-center w-full h-full py-2 animate-fade-in">
+              <span className="flex items-center justify-center w-full h-full py-1 animate-fade-in">
                 <Image
                   src="/LOGO.png"
                   alt="YolcuTransferi.com"
-                  width={270} // LOGO %50 büyütülmüş
-                  height={81}
+                  width={320}
+                  height={100}
                   priority
-                  className="mx-auto"
+                  className="mx-auto max-h-24 object-contain"
+                  style={{ width: "auto", maxWidth: "90%", height: "60px" }}
                 />
               </span>
             )}
           </div>
         </div>
         {/* Form */}
-        <div className="flex flex-col md:flex-row gap-10">
-          <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4">
-            <div className="flex gap-3">
+        <div className="flex flex-col md:flex-row gap-6">
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-3">
+            <div className="flex gap-2">
               <input
                 type="text"
                 name="ad"
                 placeholder="Ad"
                 value={form.ad}
                 onChange={handleChange}
-                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition"
+                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition text-base"
                 required
               />
               <input
@@ -120,18 +132,18 @@ export default function Iletisim() {
                 placeholder="Soyad"
                 value={form.soyad}
                 onChange={handleChange}
-                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition"
+                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition text-base"
                 required
               />
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <input
                 type="tel"
                 name="telefon"
                 placeholder="05xx xxx xx xx"
                 value={form.telefon}
                 onChange={handleChange}
-                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition"
+                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition text-base"
                 maxLength={11}
                 pattern="\d{11}"
                 required
@@ -142,7 +154,7 @@ export default function Iletisim() {
                 placeholder="E-posta"
                 value={form.email}
                 onChange={handleChange}
-                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition"
+                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition text-base"
                 required
               />
             </div>
@@ -150,7 +162,7 @@ export default function Iletisim() {
               name="neden"
               value={form.neden}
               onChange={handleChange}
-              className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white focus:border-[#bfa658] transition"
+              className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white focus:border-[#bfa658] transition text-base"
               required
             >
               {ILETISIM_NEDENLERI.map((neden, i) => (
@@ -162,7 +174,7 @@ export default function Iletisim() {
               placeholder="Mesajınız"
               value={form.mesaj}
               onChange={handleChange}
-              className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white focus:border-[#bfa658] transition"
+              className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white focus:border-[#bfa658] transition text-base"
               required
               rows={3}
             />
@@ -179,13 +191,13 @@ export default function Iletisim() {
             )}
           </form>
           {/* Adres & Sosyal Medya */}
-          <div className="flex-1 flex flex-col justify-start gap-7">
-            <div className="space-y-3 text-base text-gray-100">
-              <div className="flex items-center gap-3"><FaPhone /> <span>+90 539 526 75 69</span></div>
-              <div className="flex items-center gap-3"><FaEnvelope /> <span>info@yolcutransferi.com</span></div>
-              <div className="flex items-center gap-3"><FaMapMarkerAlt /> <span>Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span></div>
+          <div className="flex-1 flex flex-col justify-start gap-5 mt-2">
+            <div className="space-y-2 text-base text-gray-100">
+              <div className="flex items-center gap-2"><FaPhone /> <span>+90 539 526 75 69</span></div>
+              <div className="flex items-center gap-2"><FaEnvelope /> <span>info@yolcutransferi.com</span></div>
+              <div className="flex items-center gap-2"><FaMapMarkerAlt /> <span>Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span></div>
             </div>
-            <div className="flex flex-row gap-4 pt-6">
+            <div className="flex flex-row gap-4 pt-4">
               {SOCIALS.map(({ icon, url, name }) => (
                 <a
                   key={name}
@@ -230,8 +242,16 @@ export default function Iletisim() {
           width: 100%;
           overflow-wrap: break-word;
           white-space: normal;
-          line-height: 1.5;
+          line-height: 1.4;
           font-size: 1rem;
+        }
+        @media (max-width: 640px) {
+          .truncate-message {
+            font-size: 0.97rem;
+          }
+          .max-w-3xl {
+            max-width: 99vw !important;
+          }
         }
       `}</style>
     </div>
