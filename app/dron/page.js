@@ -16,13 +16,11 @@ export default function Dron() {
           priority
         />
         <h1 className="text-3xl font-extrabold text-[#6e5a1e] mb-4">Dron Yolcu Transferi</h1>
-        <p className="mb-6 text-gray-200">
-          Türkiye’de bir ilk! Dron ile kısa mesafe VIP taşımacılık hizmetimiz, şehir içi ve çevresinde zaman kazandıran ayrıcalıklar sunuyor. 
-          Elektrikli dron filomuz çevreci, sessiz ve tam güvenlikli.
+        <p className="mb-6 text-gray-200 text-left">
+          Türkiye'de bir ilk: Dron ile kısa mesafe VIP taşımacılık hizmetimiz, şehir içi ve çevresinde zaman kazandıran ayrıcalıklar sunuyor. Elektrikli dron filomuz çevreci, sessiz ve tam güvenlikli.
         </p>
-        <p className="text-gray-300">
-          Rakiplerden ayrıştığımız noktalar: Rezervasyon önceliği, hava trafik izinleri ve yolcu sigortası ile tam emniyet. 
-          Modern ve yenilikçi transfer deneyimi arayanlar için mükemmel çözüm.
+        <p className="text-gray-300 text-left">
+          Hava trafik izinleri, yolcu sigortası ve öncelikli rezervasyon imkanlarıyla, modern ve yenilikçi bir transfer deneyimi arayanlar için mükemmel bir çözüm sunuyoruz. Bu hizmet, şehir içi ulaşımda devrim niteliğinde bir adım olarak öne çıkıyor.
         </p>
       </div>
 
