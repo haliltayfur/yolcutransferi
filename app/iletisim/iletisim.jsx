@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
-import clsx from "clsx";
 
 const SOCIALS = [
   {
@@ -44,9 +43,8 @@ export default function Iletisim() {
   const [sent, setSent] = useState(false);
 
   const handleChange = (e) => {
-    // Telefon alanı: sadece rakam, ilk karakter 0 ise ekleme
     if (e.target.name === "telefon") {
-      let val = e.target.value.replace(/\D/g, ""); // sadece sayı
+      let val = e.target.value.replace(/\D/g, "");
       if (val.startsWith("0")) val = val.substring(1);
       if (val.length > 10) val = val.slice(0, 10);
       setForm({ ...form, [e.target.name]: val });
@@ -73,7 +71,6 @@ export default function Iletisim() {
     <div className="max-w-3xl mx-auto py-12 px-3">
       <h1 className="text-3xl font-bold mb-8 text-center">İletişim</h1>
       <div className="border-4 border-[#bfa658] rounded-2xl p-6 bg-black/60 shadow-xl">
-        {/* İletişim Bilgileri */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 mb-8">
           <div className="flex-1 space-y-4">
             <div className="flex items-center gap-3 text-base">
@@ -100,7 +97,6 @@ export default function Iletisim() {
               ))}
             </div>
           </div>
-          {/* Form */}
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-3">
             <div className="flex gap-3">
               <input
@@ -180,7 +176,6 @@ export default function Iletisim() {
             )}
           </form>
         </div>
-        {/* Harita */}
         <div className="flex justify-center mt-8">
           <div style={{ width: "900px", maxWidth: "100%", height: "200px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg">
             <iframe
@@ -189,7 +184,6 @@ export default function Iletisim() {
               height="200"
               frameBorder="0"
               style={{ border: 0 }}
-              // Google Maps Embed → Özel bir plaza için örnek pin + etiketli
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d24081.262044014337!2d29.0903967!3d41.0319917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac9cd7fd8d1ef%3A0xf6f8ff72b91ed1db!2sENPLAZA!5e0!3m2!1str!2str!4v1717693329992!5m2!1str!2str"
               allowFullScreen
             ></iframe>
