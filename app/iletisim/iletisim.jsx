@@ -1,4 +1,4 @@
-"use client";
+// ... (importlar aynı)
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
@@ -21,12 +21,12 @@ const ILETISIM_NEDENLERI = [
 ];
 
 const messages = [
-  "YolcuTransferi.com olarak, deneyimli ekibimizle sizlere lüks ve güvenli bir yolculuk deneyimi yaşatmak için buradayız.",
-  "Her türlü talebiniz, rezervasyonunuz veya iş birliği teklifiniz için bizimle çekinmeden iletişime geçebilirsiniz.",
-  "İhtiyacınıza en uygun çözümü, en hızlı şekilde sunabilmek için profesyonel destek ekibimiz sizinle.",
-  "VIP standartlarında hizmet için, bize ulaşmanız yeterli. Sizi dinlemek ve en iyi deneyimi yaşatmak önceliğimiz.",
-  "Bize ilettiğiniz her mesaj titizlikle incelenir; ilgili ekibimiz en kısa sürede size dönüş sağlar.",
-  "YolcuTransferi.com — Sadece bir transfer değil, bir ayrıcalık..."
+  "YolcuTransferi.com Olarak, Deneyimli Ekibimizle Sizlere Lüks Ve Güvenli Bir Yolculuk Deneyimi Yaşatmak İçin Buradayız.",
+  "Her Türlü Talebiniz, Rezervasyonunuz Veya İş Birliği Teklifiniz İçin Bizimle Çekinmeden İletişime Geçebilirsiniz.",
+  "İhtiyacınıza En Uygun Çözümü, En Hızlı Şekilde Sunabilmek İçin Profesyonel Destek Ekibimiz Sizinle.",
+  "VIP Standartlarında Hizmet İçin, Bize Ulaşmanız Yeterli. Sizi Dinlemek Ve En İyi Deneyimi Yaşatmak Önceliğimiz.",
+  "Bize İlettiğiniz Her Mesaj Titizlikle İncelenir; İlgili Ekibimiz En Kısa Sürede Size Dönüş Sağlar.",
+  "YolcuTransferi.com — Sadece Bir Transfer Değil, Bir Ayrıcalık..."
 ];
 
 export default function Iletisim() {
@@ -41,7 +41,6 @@ export default function Iletisim() {
   const [sent, setSent] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Bilboard mesajları döndür
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % (messages.length + 1));
@@ -101,9 +100,12 @@ export default function Iletisim() {
             </div>
             {/* Dönen Bilboard Mesaj Alanı */}
             <div className="w-full flex justify-center py-4">
-              <div className="relative min-h-[58px] w-full max-w-xl bg-[#181611] border border-[#bfa658] rounded-xl shadow flex items-center justify-center transition-all duration-500 overflow-hidden" style={{ height: 68 }}>
+              <div
+                className="relative w-full max-w-xl bg-[#181611] border border-[#bfa658] rounded-xl shadow flex items-center justify-center transition-all duration-500 overflow-hidden"
+                style={{ height: 92 }} // KUTU YÜKSEKLİĞİ ARTIRILDI!
+              >
                 {activeIndex < messages.length ? (
-                  <span className="text-[1.13rem] text-gray-200 text-center px-7 py-2 font-medium leading-relaxed animate-fade-in">
+                  <span className="text-[1.18rem] text-gray-200 text-center px-7 py-2 font-semibold leading-snug animate-fade-in capitalize">
                     {messages[activeIndex]}
                   </span>
                 ) : (
@@ -222,6 +224,9 @@ export default function Iletisim() {
         @keyframes fadeIn {
           0% { opacity: 0; transform: translateY(15px);}
           100% { opacity: 1; transform: translateY(0);}
+        }
+        .capitalize {
+          text-transform: capitalize;
         }
       `}</style>
     </div>
