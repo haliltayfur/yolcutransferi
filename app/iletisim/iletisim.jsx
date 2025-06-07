@@ -4,11 +4,132 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// ... (Kısa tutmak için: useRateLimit, formatDuration, getBlockedWords, isRealEmail, isRealName, isRealPhone, isRealMsg, parseMessage)
-// Buradaki fonksiyonları doğrudan eski koddan al ve aşağıya yerleştir. Aynen bırakabilirsin.
+// --- Rate Limit Fonksiyonu ---
+function useRateLimit() {
+  const key = "yt_contact_rate";
+  const [blocked, setBlocked] = useState(false);
+  const [remaining, setRemaining] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      let data = JSON.parse(localStorage.getItem(key) || "{}");
+      // Temizle: 24 saat öncesini sil
+      for (const k in data) if (now - k > 24 * 60 * 60 * 1000) delete data[k];
+      localStorage.setItem(key, JSON.stringify(data));
+      let times = Object.values(data).map(Number).sort();
+      let total = times.length;
+      let isBlocked = false;
+      let enYakin = 0;
+      if (total >= 10) {
+        // 10 veya daha fazla: 1 saat bekle
+        let lastTime = times[total - 1];
+        let wait = 60 * 60 * 1000 - (now - lastTime);
+        if (wait > 0) {
+          isBlocked = true;
+          enYakin = wait;
+        }
+      } else if (total >= 2) {
+        // 3. ve sonraki: 5 dk bekle
+        let lastTime = times[total - 1];
+        let secondLastTime = times[total - 2];
+        let wait = 5 * 60 * 1000 - (now - lastTime);
+        if (wait > 0 && (now - secondLastTime < 5 * 60 * 1000)) {
+          isBlocked = true;
+          enYakin = wait;
+        }
+      }
+      setBlocked(isBlocked);
+      setRemaining(enYakin > 0 ? enYakin : 0);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  function kaydet() {
+    const now = Date.now();
+    let data = JSON.parse(localStorage.getItem(key) || "{}");
+    data[now] = now;
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+  return [blocked, kaydet, remaining];
+}
+
+function formatDuration(ms) {
+  if (!ms || ms < 1000) return "1 sn";
+  const totalSec = Math.ceil(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return `${min > 0 ? min + "dk " : ""}${sec}sn`;
+}
+
+const BASE64_BLOCKED_WORDS = "YW1rLHF3cSxhbWssaWJuZSxzaWt0aXIsb3Jvc3B1LHNpazgsdGFxLGJvayxwZXpldmVua3xib2ssc2FsYWssZ2VyaXpla2FsacOnLGFwdGFsLHNoZXJlZnNizeixtYWwsw7x5bGUsYmtsLHNpY2sseyJjdWt1ciI6IH0=";
+
+function getBlockedWords() {
+  try {
+    if (typeof window !== "undefined" && window.atob)
+      return window.atob(BASE64_BLOCKED_WORDS).split(",");
+    return Buffer.from(BASE64_BLOCKED_WORDS, "base64").toString().split(",");
+  } catch (e) {
+    return [];
+  }
+}
+
+function isRealEmail(val) {
+  if (!val) return false;
+  const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
+  return regex.test(val);
+}
+function isRealName(val) {
+  if (!val || val.length < 3) return false;
+  if (!/^[a-zA-ZığüşöçİĞÜŞÖÇ ]+$/.test(val)) return false;
+  let v = val.trim().toLowerCase();
+  if (["asd", "qwe", "poi", "test", "xxx", "zzz", "klm", "asdf", "deneme"].includes(v)) return false;
+  if (/^([a-zA-ZğüşöçİĞÜŞÖÇ])\1+$/.test(v)) return false;
+  return true;
+}
+function isRealPhone(val) {
+  if (!val) return false;
+  return /^05\d{9}$/.test(val);
+}
+function isRealMsg(val) {
+  if (!val || val.length < 15) return false;
+  let wordCount = val.trim().split(/\s+/).length;
+  if (wordCount < 3) return false;
+  if (/([a-z])\1{3,}/.test(val.toLowerCase())) return false;
+  return true;
+}
+
+function parseMessage(msg, blockedWords) {
+  if (!msg) return { parsed: "", hasBlocked: false, blockedWords: [] };
+  let parts = msg.split(/(\s+)/);
+  let hasBlocked = false;
+  let blocked = [];
+  const censored = parts.map((p, i) => {
+    let w = p.toLowerCase().replace(/[^\wğüşöçıİĞÜŞÖÇ]/g, "");
+    if (blockedWords.includes(w)) {
+      hasBlocked = true;
+      blocked.push(p);
+      return (
+        <span
+          key={i}
+          style={{
+            textDecoration: "underline wavy red",
+            color: "#c0392b",
+            fontWeight: "bold",
+            background: "#fff2",
+            cursor: "pointer"
+          }}
+          title="Bu kelimeyi kullanamazsınız."
+        >{p}</span>
+      );
+    }
+    return p;
+  });
+  return { parsed: censored, hasBlocked, blockedWords: blocked };
+}
 
 ////////////////////////////////////////////////////////////////
-// --- BURADAN İTİBAREN YENİ TASARIM --- ///////////////////////
+// --- Tasarımda kullanılacak sabitler --- /////////////////////
 ////////////////////////////////////////////////////////////////
 
 const SOCIALS = [
@@ -40,11 +161,11 @@ const messages = [
   "YolcuTransferi.com Sadece bir transfer değil, size özel bir ayrıcalık yaşatır..."
 ];
 
-export default function Iletisim() {
-  // Buraya eski kodundaki state/fonksiyonları al ve kullan.
-  // (useRateLimit, formatDuration, getBlockedWords, ... fonksiyonları olduğu gibi)
+////////////////////////////////////////////////////////////////
+// --- ANA COMPONENT --- ///////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
-  //--- Aşağıdan itibaren yeni ve sadeleştirilmiş kurumsal şık tasarım ---
+export default function Iletisim() {
   const blockedWords = getBlockedWords();
   const [form, setForm] = useState({
     ad: "",
@@ -152,7 +273,6 @@ export default function Iletisim() {
         <div className="text-center mb-1">
           <span className="inline-block bg-[#FFD700] text-black font-bold text-xs px-4 py-1 rounded-full">7/24 VIP Müşteri Hattı • Kişiye özel ayrıcalık</span>
         </div>
-
         {/* FORM */}
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3 bg-black/60 rounded-2xl p-4 border border-[#bfa658]/60 shadow" autoComplete="on">
           <div className="flex gap-2">
@@ -202,103 +322,67 @@ export default function Iletisim() {
                   className="hidden"
                 />
                 <span className="mr-1">{item.icon}</span>
-                <span>{item.label}</span>
+                <span className="font-semibold">{item.label}</span>
               </label>
             ))}
           </div>
-          {/* KVKK Sözleşme checkbox'ı */}
-          <label className="flex items-center gap-2 text-xs mt-1 select-none">
-            <input type="checkbox" required className="accent-[#FFD700] scale-110" style={{ accentColor: "#FFD700" }} />
-            <span>
-              <a href="/gizlilik" target="_blank" className="underline text-[#FFD700]">KVKK & Gizlilik Sözleşmesi</a>'ni okudum, kabul ediyorum.
+          {/* KVKK kutusu */}
+          <div className="flex items-center gap-2 mt-1">
+            <input type="checkbox" required className="accent-[#FFD700] w-4 h-4" />
+            <span className="text-xs text-gray-200">
+              <a href="/gizlilik" className="underline text-[#FFD700]" target="_blank" rel="noopener noreferrer">KVKK & Gizlilik Sözleşmesi'ni</a> okudum, kabul ediyorum.
             </span>
-          </label>
-          {/* Hatalar ve Uyarılar */}
-          {blocked && (
-            <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-bold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
-              Güvenlik nedeniyle arka arkaya gönderimlerde kısa bir bekleme uygulanmaktadır.
-              <span className="ml-2 text-yellow-200 font-bold">
-                ⏳ {formatDuration(remaining)} sonra tekrar deneyebilirsiniz.
-              </span>
-            </div>
-          )}
-          {!blocked && (
-            <>
-              {(errors.ad || errors.soyad || errors.telefon || errors.email || errors.mesaj) && (
-                <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-bold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
-                  <ul className="list-disc list-inside text-left">
-                    {errors.ad && <li>{errors.ad}</li>}
-                    {errors.soyad && <li>{errors.soyad}</li>}
-                    {errors.telefon && <li>{errors.telefon}</li>}
-                    {errors.email && <li>{errors.email}</li>}
-                    {errors.mesaj && <li>{errors.mesaj}</li>}
-                  </ul>
-                </div>
-              )}
-            </>
-          )}
-          {/* Mesaj gönder butonu */}
-          <button type="submit"
+          </div>
+          {/* GÖNDER Butonu */}
+          <button
+            type="submit"
             className="bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full"
-            disabled={blocked}>
+          >
             Mesajı Gönder
           </button>
         </form>
-        {/* --- BİLBOARD: Mesajı Gönder Butonunun ALTINDA --- */}
-        <div className="w-full flex flex-col items-stretch mt-3">
+        {/* --- Bilboard aşağıda, buton ile aynı genişlikte ve sabit yükseklikte --- */}
+        <div className="w-full mx-auto flex flex-col mt-1 mb-2">
           <div
-            className="w-full rounded-xl bg-black border border-[#bfa658] shadow py-4 px-5 min-h-[58px] flex items-center justify-start transition-all"
-            style={{ minHeight: 58, maxWidth: "100%", margin: "0 auto" }}
+            className="bg-black border border-[#bfa658] rounded-xl shadow flex items-center px-4"
+            style={{ minHeight: 56, maxHeight: 72, height: 60, overflow: "hidden" }}
           >
             <span
-              className="text-base sm:text-lg text-gray-100 font-medium animate-fade-in leading-normal truncate-message"
-              style={{
-                whiteSpace: "normal",
-                width: "100%",
-                wordBreak: "break-word",
-                fontSize: "1.08rem",
-                lineHeight: "1.4",
-                textAlign: "left"
-              }}
+              className="text-base sm:text-lg text-gray-100 font-medium animate-fade-in truncate-message text-left"
+              style={{ whiteSpace: "normal", width: "100%", wordBreak: "break-word", fontSize: "1.08rem", lineHeight: "1.4" }}
             >
               {messages[activeIndex]}
             </span>
           </div>
-          {/* Sosyal medya ikonları */}
-          <div className="flex gap-3 pt-3 pl-2">
+          {/* Sosyal Medya İkonları - Bilboard altında, sola yaslı */}
+          <div className="flex flex-row gap-4 pt-2 pl-1">
             {SOCIALS.map(({ icon, url, name }) => (
               <a
                 key={name}
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-9 h-9 rounded-full bg-[#181611] border border-[#bfa658] hover:bg-[#FFD700] hover:text-black text-white transition shadow"
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition"
                 title={name}
               >
                 {icon}
               </a>
             ))}
           </div>
-          {/* İletişim Bilgileri */}
-          <div className="flex flex-col sm:flex-row gap-2 pt-3 pl-2 items-start sm:items-center">
-            <div className="flex items-center gap-2 text-base text-gray-100">
-              <FaPhone /> <span>+90 539 526 75 69</span>
-            </div>
-            <div className="flex items-center gap-2 text-base text-gray-100">
-              <FaEnvelope /> <span>info@yolcutransferi.com</span>
-            </div>
-            <div className="flex items-center gap-2 text-base text-gray-100">
-              <FaMapMarkerAlt /> <span>Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span>
-            </div>
+          {/* Telefon, mail, adres - yan yana */}
+          <div className="flex flex-wrap gap-4 pt-2 pl-1 items-center">
+            <span className="flex items-center gap-1 text-base text-gray-100"><FaPhone /> <span className="font-semibold">+90 539 526 75 69</span></span>
+            <span className="flex items-center gap-1 text-base text-gray-100"><FaEnvelope /> <span className="font-semibold">info@yolcutransferi.com</span></span>
+            <span className="flex items-center gap-1 text-base text-gray-100"><FaMapMarkerAlt /> <span className="font-semibold">Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span></span>
           </div>
         </div>
-        {/* Harita */}
-        <div className="w-full flex justify-center mt-4">
-          <div style={{ width: "100%", maxWidth: "100%", height: "180px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
+        {/* --- Harita --- */}
+        <div className="w-full flex justify-center mt-1">
+          <div style={{ width: "100%", maxWidth: "900px", height: "210px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
             <iframe
               title="YolcuTransferi.com Konum"
               width="100%"
-              height="180"
+              height="210"
               frameBorder="0"
               style={{ border: 0 }}
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d24081.262044014337!2d29.0903967!3d41.0319917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac9cd7fd8d1ef%3A0xf6f8ff72b91ed1db!2sENPLAZA!5e0!3m2!1str!2str!4v1717693329992!5m2!1str!2str"
@@ -327,5 +411,3 @@ export default function Iletisim() {
     </div>
   );
 }
-
-// Not: Fonksiyonların tamamı (useRateLimit, parseMessage vs.) yukarıdaki ilk kodlarından **hiç değiştirmeden** kullanmalısın.
