@@ -20,22 +20,21 @@ const ILETISIM_NEDENLERI = [
   "Diğer"
 ];
 
-// İletişim tercihleri
 const ILETISIM_TERCIHLERI = [
   {
-    label: "WhatsApp ile Dönüş",
+    label: "WhatsApp",
     value: "WhatsApp",
-    icon: <FaWhatsapp className="text-[#25d366] mr-2" size={18} />
+    icon: <FaWhatsapp className="text-[#25d366] mr-1" size={16} />
   },
   {
-    label: "Telefon ile Arama",
+    label: "Telefon",
     value: "Telefon",
-    icon: <FaPhone className="text-[#51A5FB] mr-2" size={18} />
+    icon: <FaPhone className="text-[#51A5FB] mr-1" size={16} />
   },
   {
-    label: "E-posta ile Yanıt",
+    label: "E-posta",
     value: "E-posta",
-    icon: <FaEnvelope className="text-[#FFA500] mr-2" size={18} />
+    icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} />
   }
 ];
 
@@ -56,7 +55,7 @@ export default function Iletisim() {
     email: "",
     neden: ILETISIM_NEDENLERI[0],
     mesaj: "",
-    iletisimTercihi: ILETISIM_TERCIHLERI[0].value // Varsayılan: WhatsApp
+    iletisimTercihi: ILETISIM_TERCIHLERI[0].value
   });
   const [sent, setSent] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -84,12 +83,7 @@ export default function Iletisim() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Burada mail gönderen backend fonksiyonu güncellenmeli:
-    // form.iletisimTercihi de gönderilmeli!
-    // info@yolcutransferi.com adresine iletilen mailde:
-    // "İletişim tercihi: ..."
-
+    // Mail gönderim backendinde "form.iletisimTercihi" alanını da mail içeriğine ekle!
     setSent(true);
     setTimeout(() => setSent(false), 7000);
     setForm({
@@ -111,7 +105,7 @@ export default function Iletisim() {
           <div
             className="relative w-full max-w-3xl bg-black border border-[#bfa658] rounded-xl shadow flex items-center justify-center transition-all duration-500 overflow-hidden"
             style={{
-              height: 78, // Sabit yükseklik, yazı çok kısa bile olsa değişmez
+              height: 78,
               minHeight: 78,
               padding: "0 12px"
             }}
@@ -210,22 +204,20 @@ export default function Iletisim() {
               rows={3}
             />
 
-            {/* İletişim tercihi kutucukları */}
-            <div className="mt-3">
-              <div className="mb-1 text-sm font-semibold text-gray-200">
-                Sizinle nasıl iletişime geçmemizi istersiniz?
-              </div>
-              <div className="flex flex-row gap-3">
+            {/* Minimal iletişim tercihi chipleri */}
+            <div className="mt-2 flex flex-col items-start gap-1">
+              <span className="text-sm text-gray-400 font-semibold mb-1 ml-1">Dönüş yöntemi:</span>
+              <div className="flex flex-row gap-2 w-full">
                 {ILETISIM_TERCIHLERI.map((item) => (
                   <label
                     key={item.value}
-                    className={`flex items-center gap-1 px-4 py-2 rounded-lg border cursor-pointer text-sm font-medium
-                    transition
-                    ${
-                      form.iletisimTercihi === item.value
-                        ? "bg-[#bfa658] border-[#bfa658] text-black shadow"
-                        : "bg-[#181611] border-[#423c1c] text-white hover:border-[#bfa658]"
+                    className={`flex items-center gap-1 px-3 py-1 rounded-full border text-xs cursor-pointer
+                    transition select-none shadow-sm
+                    ${form.iletisimTercihi === item.value
+                      ? "bg-[#bfa658] border-[#bfa658] text-black"
+                      : "bg-[#191714] border-[#423c1c] text-gray-300 hover:border-[#bfa658]"
                     }`}
+                    style={{ minWidth: 70, justifyContent: 'center' }}
                   >
                     <input
                       type="radio"
