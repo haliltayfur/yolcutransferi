@@ -14,7 +14,6 @@ function useRateLimit() {
     const interval = setInterval(() => {
       const now = Date.now();
       let data = JSON.parse(localStorage.getItem(key) || "{}");
-      // Temizle: 24 saat öncesini sil
       for (const k in data) if (now - k > 24 * 60 * 60 * 1000) delete data[k];
       localStorage.setItem(key, JSON.stringify(data));
       let times = Object.values(data).map(Number).sort();
@@ -22,7 +21,6 @@ function useRateLimit() {
       let isBlocked = false;
       let enYakin = 0;
       if (total >= 10) {
-        // 10 veya daha fazla: 1 saat bekle
         let lastTime = times[total - 1];
         let wait = 60 * 60 * 1000 - (now - lastTime);
         if (wait > 0) {
@@ -30,7 +28,6 @@ function useRateLimit() {
           enYakin = wait;
         }
       } else if (total >= 2) {
-        // 3. ve sonraki: 5 dk bekle
         let lastTime = times[total - 1];
         let secondLastTime = times[total - 2];
         let wait = 5 * 60 * 1000 - (now - lastTime);
@@ -98,7 +95,6 @@ function isRealMsg(val) {
   if (/([a-z])\1{3,}/.test(val.toLowerCase())) return false;
   return true;
 }
-
 function parseMessage(msg, blockedWords) {
   if (!msg) return { parsed: "", hasBlocked: false, blockedWords: [] };
   let parts = msg.split(/(\s+)/);
@@ -128,16 +124,12 @@ function parseMessage(msg, blockedWords) {
   return { parsed: censored, hasBlocked, blockedWords: blocked };
 }
 
-////////////////////////////////////////////////////////////////
-// --- Tasarımda kullanılacak sabitler --- /////////////////////
-////////////////////////////////////////////////////////////////
-
+// --- Sabitler
 const SOCIALS = [
-  { icon: <FaWhatsapp size={20} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
-  { icon: <FaInstagram size={20} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
-  { icon: <SiX size={20} />, name: "X (Twitter)", url: "https://x.com/yolcutransferi" }
+  { icon: <FaWhatsapp size={19} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
+  { icon: <FaInstagram size={19} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
+  { icon: <SiX size={19} />, name: "X (Twitter)", url: "https://x.com/yolcutransferi" }
 ];
-
 const ILETISIM_NEDENLERI = [
   "Bilgi Talebi",
   "Transfer Rezervasyonu",
@@ -147,23 +139,11 @@ const ILETISIM_NEDENLERI = [
   "Şikayet Bildirimi",
   "Diğer"
 ];
-
 const ILETISIM_TERCIHLERI = [
   { label: "WhatsApp", value: "WhatsApp", icon: <FaWhatsapp className="text-[#25d366] mr-1" size={16} /> },
   { label: "Telefon", value: "Telefon", icon: <FaPhone className="text-[#51A5FB] mr-1" size={16} /> },
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
-
-const messages = [
-  "YolcuTransferi.com olarak, alanında uzman ve profesyonel ekibimizle ihtiyacınıza en uygun çözümleri sunuyoruz.",
-  "Talep, rezervasyon ve iş ortaklığı süreçlerinde çözüm odaklı destek sağlıyoruz.",
-  "Her mesajınız, deneyimli ekiplerimiz tarafından hızla değerlendirilir ve çözüme ulaştırılır.",
-  "YolcuTransferi.com Sadece bir transfer değil, size özel bir ayrıcalık yaşatır..."
-];
-
-////////////////////////////////////////////////////////////////
-// --- ANA COMPONENT --- ///////////////////////////////////////
-////////////////////////////////////////////////////////////////
 
 export default function Iletisim() {
   const blockedWords = getBlockedWords();
@@ -174,21 +154,21 @@ export default function Iletisim() {
     email: "",
     neden: ILETISIM_NEDENLERI[0],
     mesaj: "",
-    iletisimTercihi: ILETISIM_TERCIHLERI[2].value,
+    iletisimTercihi: "",
     honeypot: ""
   });
   const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
   const [sendInfo, setSendInfo] = useState("");
+  const [buttonStatus, setButtonStatus] = useState("normal"); // normal, success, error
+  const [buttonMsg, setButtonMsg] = useState("Mesajı Gönder");
   const [activeIndex, setActiveIndex] = useState(0);
   const [blocked, kaydet, remaining] = useRateLimit();
   const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % (messages.length));
-    }, 6000);
-    return () => clearInterval(interval);
+    setButtonMsg("Mesajı Gönder");
+    setButtonStatus("normal");
   }, []);
 
   useEffect(() => {
@@ -196,14 +176,22 @@ export default function Iletisim() {
     if (f) f.focus();
   }, []);
 
+  // Buton mesajını geri çevir
+  function resetButton() {
+    setTimeout(() => {
+      setButtonMsg("Mesajı Gönder");
+      setButtonStatus("normal");
+    }, 10000);
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
     setErrors({ ...errors, [name]: undefined });
   };
-
   const handleIletisimTercihiChange = (value) => {
     setForm({ ...form, iletisimTercihi: value });
+    setErrors({ ...errors, iletisimTercihi: undefined });
   };
 
   const adValid = isRealName(form.ad);
@@ -227,20 +215,26 @@ export default function Iletisim() {
     if (!emailValid) newErrors.email = "Lütfen geçerli bir e-posta adresi giriniz.";
     if (!msgValid) newErrors.mesaj = "Mesajınızı daha açık ve anlamlı yazınız.";
     if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz veya argo kelime var. Lütfen değiştirin.";
+    if (!form.iletisimTercihi) newErrors.iletisimTercihi = "Lütfen ulaşım tercihinizi seçin.";
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
-      setSubmitError("");
+      setButtonStatus("error");
+      setButtonMsg("Lütfen eksik alanları doldurun");
+      resetButton();
       return;
     }
     let infoMsg = "";
     if (form.iletisimTercihi === "E-posta") {
-      infoMsg = "Teşekkürler, mesajınız bize ulaştı. Size <b>info@yolcutransferi.com</b> adresinden dönüş yapacağız.";
+      infoMsg = "Teşekkürler, mesajınız bize ulaştı. Size info@yolcutransferi.com adresinden dönüş yapacağız.";
     } else {
-      infoMsg = `Teşekkürler, mesajınız bize ulaştı. Size <b>0539 526 75 69</b> ${form.iletisimTercihi.toLowerCase()} hattımızdan ulaşacağız.`;
+      infoMsg = `Teşekkürler, mesajınız bize ulaştı. Size 0539 526 75 69 ${form.iletisimTercihi.toLowerCase()} hattımızdan ulaşacağız.`;
     }
     setSendInfo(infoMsg);
     setSent(true);
+    setButtonStatus("success");
+    setButtonMsg(infoMsg);
+    resetButton();
     kaydet();
     try {
       await fetch("/api/iletisim", {
@@ -249,9 +243,10 @@ export default function Iletisim() {
         body: JSON.stringify(form),
       });
     } catch (error) {
-      setSubmitError("Sunucu hatası, lütfen tekrar deneyin.");
+      setButtonStatus("error");
+      setButtonMsg("Sunucu hatası, lütfen tekrar deneyin.");
+      resetButton();
     }
-    setTimeout(() => setSent(false), 7000);
     setForm({
       ad: "",
       soyad: "",
@@ -259,12 +254,11 @@ export default function Iletisim() {
       email: "",
       neden: ILETISIM_NEDENLERI[0],
       mesaj: "",
-      iletisimTercihi: ILETISIM_TERCIHLERI[2].value,
+      iletisimTercihi: "",
       honeypot: ""
     });
   };
 
-  // --- BAŞLANGIÇ ---
   return (
     <div className="w-full flex justify-center bg-black min-h-[calc(100vh-150px)] py-6 px-2">
       <div className="w-full max-w-2xl rounded-2xl shadow-2xl px-1 sm:px-4 py-6 flex flex-col gap-4" style={{ border: "2.5px solid #bfa658", background: "rgba(25, 23, 20, 0.98)" }}>
@@ -299,8 +293,9 @@ export default function Iletisim() {
           </select>
           <textarea name="mesaj" placeholder="Mesajınız" value={form.mesaj} onChange={handleChange}
             className={`p-3 rounded-lg border ${msgValid && !censored.hasBlocked ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white focus:border-[#bfa658] transition text-base`} minLength={15} required rows={3} />
-          {/* --- Size nasıl ulaşalım --- */}
-          <span className="text-sm text-gray-300 font-bold ml-1 mt-2">Size nasıl ulaşalım?</span>
+          
+          {/* --- Ulaşım Tercihiniz --- */}
+          <span className="text-sm text-gray-300 font-bold ml-1 mt-2">Ulaşım tercihiniz</span>
           <div className="flex flex-row gap-3 w-full mb-2">
             {ILETISIM_TERCIHLERI.map((item) => (
               <label
@@ -320,64 +315,65 @@ export default function Iletisim() {
                   checked={form.iletisimTercihi === item.value}
                   onChange={() => handleIletisimTercihiChange(item.value)}
                   className="hidden"
+                  required
                 />
                 <span className="mr-1">{item.icon}</span>
                 <span className="font-semibold">{item.label}</span>
               </label>
             ))}
           </div>
-          {/* KVKK kutusu */}
+          {errors.iletisimTercihi && <span className="text-xs text-red-400 font-bold pl-2">{errors.iletisimTercihi}</span>}
+          
+          {/* KVKK */}
           <div className="flex items-center gap-2 mt-1">
             <input type="checkbox" required className="accent-[#FFD700] w-4 h-4" />
             <span className="text-xs text-gray-200">
               <a href="/gizlilik" className="underline text-[#FFD700]" target="_blank" rel="noopener noreferrer">KVKK & Gizlilik Sözleşmesi'ni</a> okudum, kabul ediyorum.
             </span>
           </div>
-          {/* GÖNDER Butonu */}
+          {/* GÖNDER BUTONU */}
           <button
             type="submit"
-            className="bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full"
+            className={`font-bold py-3 px-8 rounded-xl text-lg mt-2 w-full shadow transition 
+              ${buttonStatus === "success"
+                ? "bg-green-600 text-white"
+                : buttonStatus === "error"
+                ? "bg-red-600 text-white"
+                : "bg-[#bfa658] text-black hover:bg-yellow-600"}`}
+            style={{ minHeight: 50 }}
           >
-            Mesajı Gönder
+            {buttonMsg}
           </button>
         </form>
-        {/* --- Bilboard aşağıda, buton ile aynı genişlikte ve sabit yükseklikte --- */}
-        <div className="w-full mx-auto flex flex-col mt-1 mb-2">
-          <div
-            className="bg-black border border-[#bfa658] rounded-xl shadow flex items-center px-4"
-            style={{ minHeight: 56, maxHeight: 72, height: 60, overflow: "hidden" }}
-          >
-            <span
-              className="text-base sm:text-lg text-gray-100 font-medium animate-fade-in truncate-message text-left"
-              style={{ whiteSpace: "normal", width: "100%", wordBreak: "break-word", fontSize: "1.08rem", lineHeight: "1.4" }}
-            >
-              {messages[activeIndex]}
-            </span>
-          </div>
-          {/* Sosyal Medya İkonları - Bilboard altında, sola yaslı */}
-          <div className="flex flex-row gap-4 pt-2 pl-1">
+        {/* Telefon / Mail / Adres (yan yana ve sade) */}
+        <div className="flex flex-wrap gap-x-8 gap-y-2 justify-center items-center px-2 pt-2 pb-1">
+          <span className="flex items-center gap-1 text-base text-gray-100">
+            <FaPhone /><span className="font-semibold">+90 539 526 75 69</span>
+          </span>
+          <span className="flex items-center gap-1 text-base text-gray-100">
+            <FaEnvelope /><span className="font-semibold">info@yolcutransferi.com</span>
+          </span>
+          <span className="flex items-center gap-1 text-base text-gray-100">
+            <FaMapMarkerAlt /><span className="font-semibold">Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span>
+          </span>
+          {/* Sosyal Medya */}
+          <span className="flex gap-2 ml-2">
             {SOCIALS.map(({ icon, url, name }) => (
               <a
                 key={name}
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-9 h-9 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition"
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition"
                 title={name}
               >
                 {icon}
               </a>
             ))}
-          </div>
-          {/* Telefon, mail, adres - yan yana */}
-          <div className="flex flex-wrap gap-4 pt-2 pl-1 items-center">
-            <span className="flex items-center gap-1 text-base text-gray-100"><FaPhone /> <span className="font-semibold">+90 539 526 75 69</span></span>
-            <span className="flex items-center gap-1 text-base text-gray-100"><FaEnvelope /> <span className="font-semibold">info@yolcutransferi.com</span></span>
-            <span className="flex items-center gap-1 text-base text-gray-100"><FaMapMarkerAlt /> <span className="font-semibold">Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span></span>
-          </div>
+          </span>
         </div>
-        {/* --- Harita --- */}
-        <div className="w-full flex justify-center mt-1">
+        {/* HARİTA */}
+        <div className="w-full flex justify-center mt-2">
           <div style={{ width: "100%", maxWidth: "900px", height: "210px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
             <iframe
               title="YolcuTransferi.com Konum"
@@ -390,15 +386,6 @@ export default function Iletisim() {
             ></iframe>
           </div>
         </div>
-        {/* Gönderildi / Başarı mesajı */}
-        {sent && (
-          <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-400 shadow" dangerouslySetInnerHTML={{ __html: sendInfo }} />
-        )}
-        {submitError && (
-          <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
-            {submitError}
-          </div>
-        )}
       </div>
       <style>{`
         .animate-fade-in { animation: fadeIn .7s; }
