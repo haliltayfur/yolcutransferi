@@ -4,19 +4,15 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// Base64 olarak encode edilmiş küfür/argo/çocukça kelimeler — kodda asla açık yok!
-const BASE64_BLOCKED_WORDS =
-  "YW1rLHF3cSxhbWssaWJuZSxzaWt0aXIsb3Jvc3B1LHNpazgsdGFxLGJvayxwZXpldmVua3xib2ssc2FsYWssZ2VyaXpla2FsacOnLGFwdGFsLHNoZXJlZnNpeixtYWwsw7x5bGUsYmtsLHNpY2sseyJjdWt1ciI6IH0=";
+// SEO güvenli — Base64 encode
+const BASE64_BLOCKED_WORDS = "YW1rLHF3cSxhbWssaWJuZSxzaWt0aXIsb3Jvc3B1LHNpazgsdGFxLGJvayxwZXpldmVua3xib2ssc2FsYWssZ2VyaXpla2FsacOnLGFwdGFsLHNoZXJlZnNizeixtYWwsw7x5bGUsYmtsLHNpY2sseyJjdWt1ciI6IH0=";
 
 function getBlockedWords() {
-  // Çözüm: Base64 decode (window.atob yoksa Buffer ile çöz)
   try {
     if (typeof window !== "undefined" && window.atob)
       return window.atob(BASE64_BLOCKED_WORDS).split(",");
-    // SSR için fallback:
     return Buffer.from(BASE64_BLOCKED_WORDS, "base64").toString().split(",");
   } catch (e) {
-    // Kırılırsa boş listeye düş
     return [];
   }
 }
@@ -46,7 +42,7 @@ function isRealMsg(val) {
   return true;
 }
 
-// Argo/küfür/çocukça kelimeyi input içinde sadece işaretle
+// Argo kelime işaretleme (input üstü, sadece görünür)
 function parseMessage(msg, blockedWords) {
   if (!msg) return { parsed: "", hasBlocked: false, blockedWords: [] };
   let parts = msg.split(/(\s+)/);
@@ -98,7 +94,6 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// Kurumsal elit metinlerle güncel
 const messages = [
   "YolcuTransferi.com olarak, alanında uzman ve profesyonel ekiplerimizle her transferinizde kusursuz hizmet sunuyoruz.",
   "Talep, rezervasyon ve iş ortaklığı süreçlerinde, ayrıcalıklı müşteri deneyimiyle çözüm odaklı destek veriyoruz.",
@@ -194,16 +189,14 @@ export default function Iletisim() {
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
-    // Dinamik iletişim bilgisi
+    // Kısa, net, tekrar etmeyen kurumsal mesaj
     let infoMsg = "";
     if (form.iletisimTercihi === "E-posta")
-      infoMsg = `Mesajınızı aldık, seçtiğiniz iletişim yöntemiyle size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.`;
-    else if (form.iletisimTercihi === "Telefon")
-      infoMsg = `Mesajınızı aldık, size <b>0539 526 75 69</b> kurumsal telefon numaramızdan ulaşacağız.`;
-    else if (form.iletisimTercihi === "WhatsApp")
-      infoMsg = `Mesajınızı aldık, size <b>0539 526 75 69</b> kurumsal WhatsApp hattımızdan ulaşacağız.`;
-    setSendInfo(infoMsg);
+      infoMsg = `Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.`;
+    else
+      infoMsg = `Teşekkürler. Mesajınız alınmıştır. Size <b>0539 526 75 69</b> kurumsal ${form.iletisimTercihi.toLowerCase()} kanalımızdan ulaşacağız.`;
 
+    setSendInfo(infoMsg);
     kaydet();
     setSent(true);
     setTimeout(() => setSent(false), 7000);
@@ -404,17 +397,14 @@ export default function Iletisim() {
             {errors.global && <div className="text-red-500 text-sm font-bold px-2 py-1">{errors.global}</div>}
             <button
               type="submit"
-              className={`bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full ${blocked ? "opacity-50 cursor-not-allowed" : ""}`}
-              disabled={blocked}
+              className={`bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full ${blocked || censored.hasBlocked ? "opacity-50 cursor-not-allowed" : ""}`}
+              disabled={blocked || censored.hasBlocked}
             >
               Mesajı Gönder
             </button>
             {sent && (
               <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-400 shadow" dangerouslySetInnerHTML={{
-                __html: `
-                  Mesajınız alınmıştır. İlgili <b>ekiplerimiz</b> en kısa sürede sizinle iletişime geçecektir.<br>
-                  ${sendInfo}
-                `
+                __html: sendInfo
               }} />
             )}
           </form>
