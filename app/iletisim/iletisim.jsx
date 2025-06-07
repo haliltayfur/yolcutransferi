@@ -83,7 +83,7 @@ export default function Iletisim() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Mail gönderim backendinde "form.iletisimTercihi" alanını da mail içeriğine ekle!
+    // Backend'de "form.iletisimTercihi" alanı da mail içeriğine eklensin!
     setSent(true);
     setTimeout(() => setSent(false), 7000);
     setForm({
@@ -194,19 +194,10 @@ export default function Iletisim() {
                 <option key={neden} value={neden}>{neden}</option>
               ))}
             </select>
-            <textarea
-              name="mesaj"
-              placeholder="Mesajınız"
-              value={form.mesaj}
-              onChange={handleChange}
-              className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white focus:border-[#bfa658] transition text-base"
-              required
-              rows={3}
-            />
 
-            {/* Minimal iletişim tercihi chipleri */}
+            {/* Size nasıl ulaşalım kutucukları */}
             <div className="mt-2 flex flex-col items-start gap-1">
-              <span className="text-sm text-gray-400 font-semibold mb-1 ml-1">Dönüş yöntemi:</span>
+              <span className="text-sm text-gray-400 font-semibold mb-1 ml-1">Size nasıl ulaşalım?</span>
               <div className="flex flex-row gap-2 w-full">
                 {ILETISIM_TERCIHLERI.map((item) => (
                   <label
@@ -234,6 +225,16 @@ export default function Iletisim() {
               </div>
             </div>
 
+            <textarea
+              name="mesaj"
+              placeholder="Mesajınız"
+              value={form.mesaj}
+              onChange={handleChange}
+              className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white focus:border-[#bfa658] transition text-base"
+              required
+              rows={3}
+            />
+
             <button
               type="submit"
               className="bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full"
@@ -247,13 +248,13 @@ export default function Iletisim() {
             )}
           </form>
           {/* Adres & Sosyal Medya */}
-          <div className="flex-1 flex flex-col justify-start gap-5 mt-2">
+          <div className="flex-1 flex flex-col justify-start gap-4 mt-2">
             <div className="space-y-2 text-base text-gray-100">
               <div className="flex items-center gap-2"><FaPhone /> <span>+90 539 526 75 69</span></div>
               <div className="flex items-center gap-2"><FaEnvelope /> <span>info@yolcutransferi.com</span></div>
-              <div className="flex items-center gap-2"><FaMapMarkerAlt /> <span>Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span></div>
             </div>
-            <div className="flex flex-row gap-4 pt-4">
+            {/* Sosyal medya butonları burada! */}
+            <div className="flex flex-row gap-4 pt-1">
               {SOCIALS.map(({ icon, url, name }) => (
                 <a
                   key={name}
@@ -266,6 +267,9 @@ export default function Iletisim() {
                   {icon}
                 </a>
               ))}
+            </div>
+            <div className="flex items-center gap-2 text-base text-gray-100 pt-2">
+              <FaMapMarkerAlt /> <span>Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span>
             </div>
           </div>
         </div>
