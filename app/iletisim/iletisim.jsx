@@ -176,71 +176,69 @@ export default function Iletisim() {
   const censored = parseMessage(form.mesaj, blockedWords);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitError(""); // Önceki hata temizlenir
-    let newErrors = {};
-    setSendInfo("");
-    if (blocked) newErrors.global = "Çok sık mesaj gönderildi, lütfen biraz bekleyiniz.";
-    if (form.honeypot && form.honeypot.length > 0) return;
-    if (!adValid) newErrors.ad = "Lütfen gerçek adınızı giriniz.";
-    if (!soyadValid) newErrors.soyad = "Lütfen gerçek soyadınızı giriniz.";
-    if (!phoneValid) newErrors.telefon = "Telefon numarası hatalı (05xx xxx xx xx formatında).";
-    if (!emailValid) newErrors.email = "Lütfen geçerli bir e-posta adresi giriniz.";
-    if (!msgValid) newErrors.mesaj = "Lütfen açık, anlaşılır ve anlamlı bir mesaj yazınız.";
-    if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz/argo kelime var. Lütfen değiştirin.";
-    setErrors(newErrors);
+  e.preventDefault();
+  setSubmitError(""); // Hata sıfırlanır
+  let newErrors = {};
+  setSendInfo("");
+  if (blocked) newErrors.global = "Çok sık mesaj gönderildi, lütfen biraz bekleyiniz.";
+  if (form.honeypot && form.honeypot.length > 0) return;
+  if (!adValid) newErrors.ad = "Lütfen gerçek adınızı giriniz.";
+  if (!soyadValid) newErrors.soyad = "Lütfen gerçek soyadınızı giriniz.";
+  if (!phoneValid) newErrors.telefon = "Telefon numarası hatalı (05xx xxx xx xx formatında).";
+  if (!emailValid) newErrors.email = "Lütfen geçerli bir e-posta adresi giriniz.";
+  if (!msgValid) newErrors.mesaj = "Lütfen açık, anlaşılır ve anlamlı bir mesaj yazınız.";
+  if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz/argo kelime var. Lütfen değiştirin.";
+  setErrors(newErrors);
 
-    // Hataları topluca, açıklamalı şekilde göster
-    if (Object.keys(newErrors).length > 0) {
-      let msg = "Mesajınız iletilemedi. ";
-      if (newErrors.ad || newErrors.soyad || newErrors.telefon || newErrors.email) {
-        msg += "Lütfen tüm bilgileri eksiksiz ve doğru şekilde doldurun. ";
-      }
-      if (newErrors.mesaj) {
-        msg += "Mesaj içeriğinde uygunsuz kelime, eksik veya anlamsız ifade tespit edildi. ";
-      }
-      if (newErrors.global) {
-        msg += "Çok fazla deneme yaptınız, lütfen 1 dakika sonra tekrar deneyin.";
-      }
-      setSubmitError(msg.trim());
-      return;
+  if (Object.keys(newErrors).length > 0) {
+    let msg = "Mesajınız iletilemedi. ";
+    if (newErrors.ad || newErrors.soyad || newErrors.telefon || newErrors.email) {
+      msg += "Lütfen tüm bilgileri eksiksiz ve doğru şekilde doldurun. ";
     }
-
-    // Kısa, net, tekrar etmeyen kurumsal mesaj
-    let infoMsg = "";
-    if (form.iletisimTercihi === "E-posta") {
-      infoMsg = "Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.";
-    } else {
-      infoMsg = `Teşekkürler. Mesajınız alınmıştır. Size <b>0539 526 75 69</b> kurumsal ${form.iletisimTercihi.toLowerCase()} kanalımızdan ulaşacağız.`;
+    if (newErrors.mesaj) {
+      msg += "Mesaj içeriğinde uygunsuz kelime, eksik veya anlamsız ifade tespit edildi. ";
     }
-
-    setSendInfo(infoMsg);
-    kaydet();
-    setSent(true);
-
-    // Formu backend'e gönder
-    try {
-      await fetch("/api/iletisim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-    } catch (error) {
-      // isteğe bağlı: hata logu
+    if (newErrors.global) {
+      msg += "Çok fazla deneme yaptınız, lütfen 1 dakika sonra tekrar deneyin.";
     }
-
-    setTimeout(() => setSent(false), 7000);
-    setForm({
-      ad: "",
-      soyad: "",
-      telefon: "",
-      email: "",
-      neden: ILETISIM_NEDENLERI[0],
-      mesaj: "",
-      iletisimTercihi: ILETISIM_TERCIHLERI[2].value,
-      honeypot: ""
+    setSubmitError(msg.trim());
+    console.log("GÖNDERİLEMEDİ:", msg.trim());
+    return;
+  }
+  // Buradan sonrası başarılı gönderimdir
+  let infoMsg = "";
+  if (form.iletisimTercihi === "E-posta") {
+    infoMsg = "Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.";
+  } else {
+    infoMsg = `Teşekkürler. Mesajınız alınmıştır. Size <b>0539 526 75 69</b> kurumsal ${form.iletisimTercihi.toLowerCase()} kanalımızdan ulaşacağız.`;
+  }
+  setSendInfo(infoMsg);
+  setSent(true);
+  kaydet();
+  // isteği yolla
+  try {
+    await fetch("/api/iletisim", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
     });
-  };
+    console.log("GÖNDERİLDİ:", form);
+  } catch (error) {
+    setSubmitError("Sunucu hatası, lütfen tekrar deneyin.");
+  }
+  setTimeout(() => setSent(false), 7000);
+  setForm({
+    ad: "",
+    soyad: "",
+    telefon: "",
+    email: "",
+    neden: ILETISIM_NEDENLERI[0],
+    mesaj: "",
+    iletisimTercihi: ILETISIM_TERCIHLERI[2].value,
+    honeypot: ""
+  });
+};
+
 
   return (
     <div className="w-full flex justify-center bg-black min-h-[calc(100vh-150px)] py-6 px-2">
