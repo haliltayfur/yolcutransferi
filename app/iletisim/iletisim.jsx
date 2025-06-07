@@ -175,7 +175,7 @@ export default function Iletisim() {
 
   const censored = parseMessage(form.mesaj, blockedWords);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError(""); // Gönder denemesinde hata alanı temizlenir
     let newErrors = {};
@@ -208,14 +208,27 @@ export default function Iletisim() {
 
     // Kısa, net, tekrar etmeyen kurumsal mesaj
     let infoMsg = "";
-    if (form.iletisimTercihi === "E-posta")
-      infoMsg = Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.;
-    else
-      infoMsg = Teşekkürler. Mesajınız alınmıştır. Size <b>0539 526 75 69</b> kurumsal ${form.iletisimTercihi.toLowerCase()} kanalımızdan ulaşacağız.;
+    if (form.iletisimTercihi === "E-posta") {
+      infoMsg = "Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.";
+    } else {
+      infoMsg = `Teşekkürler. Mesajınız alınmıştır. Size <b>0539 526 75 69</b> kurumsal ${form.iletisimTercihi.toLowerCase()} kanalımızdan ulaşacağız.`;
+    }
 
     setSendInfo(infoMsg);
     kaydet();
     setSent(true);
+
+    // Formu backend'e gönder
+    try {
+      await fetch("/api/iletisim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+    } catch (error) {
+      // isteğe bağlı: hata logu
+    }
+
     setTimeout(() => setSent(false), 7000);
     setForm({
       ad: "",
@@ -275,7 +288,7 @@ export default function Iletisim() {
                   placeholder="Ad"
                   value={form.ad}
                   onChange={handleChange}
-                  className={p-3 rounded-lg border ${adValid ? "border-green-500" : form.ad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base}
+                  className={`p-3 rounded-lg border ${adValid ? "border-green-500" : form.ad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base`}
                   minLength={3}
                   required
                 />
@@ -289,7 +302,7 @@ export default function Iletisim() {
                   placeholder="Soyad"
                   value={form.soyad}
                   onChange={handleChange}
-                  className={p-3 rounded-lg border ${soyadValid ? "border-green-500" : form.soyad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base}
+                  className={`p-3 rounded-lg border ${soyadValid ? "border-green-500" : form.soyad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base`}
                   minLength={3}
                   required
                 />
@@ -305,9 +318,9 @@ export default function Iletisim() {
                   placeholder="05xx xxx xx xx"
                   value={form.telefon}
                   onChange={handleChange}
-                  className={p-3 rounded-lg border ${phoneValid ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base}
+                  className={`p-3 rounded-lg border ${phoneValid ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base`}
                   maxLength={11}
-                  pattern="05\d{9}"
+                  pattern="05\\d{9}"
                   required
                 />
                 {errors.telefon && <span className="text-red-500 text-xs px-1 pt-1">{errors.telefon}</span>}
@@ -320,7 +333,7 @@ export default function Iletisim() {
                   placeholder="E-posta"
                   value={form.email}
                   onChange={handleChange}
-                  className={p-3 rounded-lg border ${emailValid ? "border-green-500" : form.email ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base}
+                  className={`p-3 rounded-lg border ${emailValid ? "border-green-500" : form.email ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base`}
                   required
                 />
                 {errors.email && <span className="text-red-500 text-xs px-1 pt-1">{errors.email}</span>}
@@ -344,12 +357,12 @@ export default function Iletisim() {
                 {ILETISIM_TERCIHLERI.map((item) => (
                   <label
                     key={item.value}
-                    className={flex items-center gap-1 px-4 py-1 rounded-full border font-bold text-xs cursor-pointer
+                    className={`flex items-center gap-1 px-4 py-1 rounded-full border font-bold text-xs cursor-pointer
                     transition select-none shadow-md
                     ${form.iletisimTercihi === item.value
                       ? "bg-[#e5b646] border-[#e5b646] text-black scale-105"
                       : "bg-[#322f2b] border-[#bfa658] text-[#fff] hover:bg-[#bfa658] hover:text-black"}
-                    }
+                    `}
                     style={{ minWidth: 82, justifyContent: 'center', opacity: form.iletisimTercihi === item.value ? 1 : 0.92 }}
                   >
                     <input
@@ -373,7 +386,7 @@ export default function Iletisim() {
                   placeholder="Mesajınız"
                   value={form.mesaj}
                   onChange={handleChange}
-                  className={p-3 rounded-lg border ${msgValid && !censored.hasBlocked ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base}
+                  className={`p-3 rounded-lg border ${msgValid && !censored.hasBlocked ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base`}
                   minLength={15}
                   required
                   rows={3}
@@ -414,7 +427,7 @@ export default function Iletisim() {
 
             <button
               type="submit"
-              className={bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full ${blocked || censored.hasBlocked || Object.keys(errors).length > 0 ? "opacity-50 cursor-not-allowed" : ""}}
+              className={`bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full ${blocked || censored.hasBlocked || Object.keys(errors).length > 0 ? "opacity-50 cursor-not-allowed" : ""}`}
               disabled={blocked || censored.hasBlocked || Object.keys(errors).length > 0}
             >
               Mesajı Gönder
@@ -472,12 +485,12 @@ export default function Iletisim() {
           </div>
         </div>
       </div>
-      <style>{
+      <style>{`
         .animate-fade-in { animation: fadeIn .7s; }
         @keyframes fadeIn { 0% { opacity: 0; transform: translateY(15px);} 100% { opacity: 1; transform: translateY(0);} }
         .truncate-message { display: block; width: 100%; overflow-wrap: break-word; white-space: normal; line-height: 1.4; font-size: 1rem;}
         @media (max-width: 640px) { .truncate-message { font-size: 0.97rem; } .max-w-3xl { max-width: 99vw !important; } }
-      }</style>
+      `}</style>
     </div>
   );
 }
