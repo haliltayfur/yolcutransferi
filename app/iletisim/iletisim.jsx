@@ -4,7 +4,7 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// --- Rate Limit Fonksiyonu ve yardımcı fonksiyonlar ---
+// -- yardımcı fonksiyonlar (rate limit vs. -- aynı şekilde kalabilir)
 function useRateLimit() {
   const key = "yt_contact_rate";
   const [blocked, setBlocked] = useState(false);
@@ -50,7 +50,6 @@ function useRateLimit() {
   }
   return [blocked, kaydet, remaining];
 }
-
 function formatDuration(ms) {
   if (!ms || ms < 1000) return "1 sn";
   const totalSec = Math.ceil(ms / 1000);
@@ -58,7 +57,6 @@ function formatDuration(ms) {
   const sec = totalSec % 60;
   return `${min > 0 ? min + "dk " : ""}${sec}sn`;
 }
-
 const BASE64_BLOCKED_WORDS = "YW1rLHF3cSxhbWssaWJuZSxzaWt0aXIsb3Jvc3B1LHNpazgsdGFxLGJvayxwZXpldmVua3xib2ssc2FsYWssZ2VyaXpla2FsacOnLGFwdGFsLHNoZXJlZnNizeixtYWwsw7x5bGUsYmtsLHNpY2sseyJjdWt1ciI6IH0=";
 function getBlockedWords() {
   try {
@@ -123,9 +121,9 @@ function parseMessage(msg, blockedWords) {
 }
 
 const SOCIALS = [
-  { icon: <FaWhatsapp size={24} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
-  { icon: <FaInstagram size={24} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
-  { icon: <SiX size={24} />, name: "X (Twitter)", url: "https://x.com/yolcutransferi" }
+  { icon: <FaWhatsapp size={28} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
+  { icon: <FaInstagram size={28} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
+  { icon: <SiX size={28} />, name: "X (Twitter)", url: "https://x.com/yolcutransferi" }
 ];
 const ILETISIM_NEDENLERI = [
   "Bilgi Talebi", "Transfer Rezervasyonu", "Teklif Almak İstiyorum",
@@ -280,31 +278,48 @@ export default function Iletisim() {
             type="submit"
             className={`font-bold py-3 px-8 rounded-xl text-lg mt-2 w-full shadow transition text-black
               ${buttonStatus === "success"
-                ? "bg-green-600 text-white"
+                ? "bg-green-500"
                 : buttonStatus === "error"
-                  ? "bg-red-600 text-white"
-                  : "bg-[#bfa658] hover:bg-yellow-600"}`}
+                  ? "bg-red-600"
+                  : "bg-[#bfa658] hover:bg-yellow-600"}
+            `}
             style={{ minHeight: 50, minWidth: 180 }}
+            disabled={blocked}
           >
-            {buttonMsg}
+            {blocked
+              ? `Güvenlik nedeniyle kısa süreli bekleme. ${formatDuration(remaining)} sonra tekrar deneyebilirsiniz.`
+              : buttonMsg}
           </button>
+          {/* Hata mesajı */}
+          {Object.keys(errors).length > 0 && (
+            <div className="mt-2 flex flex-col gap-1">
+              {Object.values(errors).map((err, i) => (
+                <span key={i} className="text-xs text-red-400 pl-2 font-bold">{err}</span>
+              ))}
+            </div>
+          )}
         </form>
         {/* --- Sosyal Medya, Telefon, Mail, Adres --- */}
-        <div className="w-full flex flex-col gap-1 mt-2 mb-2">
-          <div className="flex flex-row gap-3 items-center mb-1 pl-2">
+        <div className="w-full flex flex-col gap-0 mt-2 mb-2">
+          {/* Sosyal ikonlar sola yaslı */}
+          <div className="flex flex-row gap-3 items-center mb-1 pl-1">
             {SOCIALS.map(({ icon, url, name }) => (
               <a key={name} href={url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center w-11 h-11 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition"
+                className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition"
                 title={name}>
                 {icon}
               </a>
             ))}
           </div>
-          {/* Telefon, Mail ve Adres */}
-          <div className="flex flex-row gap-3 items-center text-[1rem] font-semibold text-[#e7e7e7] flex-wrap pl-2">
+          {/* Telefon ve mail yan yana sola yaslı */}
+          <div className="flex flex-row gap-4 items-center text-[1rem] font-semibold text-[#e7e7e7] flex-wrap pl-1 mb-1">
             <span className={`flex items-center gap-1 ${boxFont}`}><FaPhone className="opacity-80" />+90 539 526 75 69</span>
             <span className={`flex items-center gap-1 ${boxFont}`}><FaEnvelope className="opacity-80" />info@yolcutransferi.com</span>
-            <span className={`flex items-center gap-1 ${boxFont}`}><FaMapMarkerAlt className="opacity-80 mr-1" />Ümraniye, İnkılap Mah. Plazalar Bölgesi</span>
+          </div>
+          {/* Adres sola yaslı tek satır */}
+          <div className="flex items-center text-[1rem] font-semibold text-[#e7e7e7] pl-1">
+            <FaMapMarkerAlt className="opacity-80 mr-1" />
+            <span className={boxFont}>Ümraniye, İnkılap Mah. Plazalar Bölgesi</span>
           </div>
         </div>
         {/* HARİTA */}
@@ -333,10 +348,6 @@ export default function Iletisim() {
         }
         .animate-fade-in { animation: fadeIn .7s; }
         @keyframes fadeIn { 0% { opacity: 0; transform: translateY(15px);} 100% { opacity: 1; transform: translateY(0);} }
-        @media (max-width: 640px) {
-          .w-full .flex-row { flex-direction: column !important; gap: 0.5rem !important;}
-          .w-full .flex-row > span, .w-full .flex-row > a { margin-left: 0 !important; margin-bottom: 4px !important;}
-        }
       `}</style>
     </div>
   );
