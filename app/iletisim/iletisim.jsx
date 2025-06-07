@@ -177,7 +177,7 @@ export default function Iletisim() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitError(""); // Gönder denemesinde hata alanı temizlenir
+    setSubmitError(""); // Önceki hata temizlenir
     let newErrors = {};
     setSendInfo("");
     if (blocked) newErrors.global = "Çok sık mesaj gönderildi, lütfen biraz bekleyiniz.";
@@ -190,7 +190,7 @@ export default function Iletisim() {
     if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz/argo kelime var. Lütfen değiştirin.";
     setErrors(newErrors);
 
-    // Hata varsa burada kurumsal hata mesajı oluştur ve göster
+    // Hataları topluca, açıklamalı şekilde göster
     if (Object.keys(newErrors).length > 0) {
       let msg = "Mesajınız iletilemedi. ";
       if (newErrors.ad || newErrors.soyad || newErrors.telefon || newErrors.email) {
@@ -320,7 +320,7 @@ export default function Iletisim() {
                   onChange={handleChange}
                   className={`p-3 rounded-lg border ${phoneValid ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base`}
                   maxLength={11}
-                  pattern="05\\d{9}"
+                  pattern="05\d{9}"
                   required
                 />
                 {errors.telefon && <span className="text-red-500 text-xs px-1 pt-1">{errors.telefon}</span>}
