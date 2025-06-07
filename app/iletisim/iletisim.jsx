@@ -4,6 +4,41 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
+// KÜFÜR/ARGO/ÇOCUKÇA SÖZLERİN LİSTESİ — istersen genişletirsin
+const BLOCKED_WORDS = [
+  "amk","aq","yarrak","siktir","orospu","salak","salaq","ananı","annenizi","ananı","sikik","piç","gerizekalı","aptal",
+  "mal","şerefsiz","göt","kahpe","pezevenk","bok","çocukça","çocuk", "hıyar", "b.k", "mk", "çüş","vay","oç","sg","lavuk","daşak",
+  "aptal","embesil","angut","dangalak","dangalaq","puşt","yavşak","ibne","ibine","çük","çükü","taşak","tasak","taşağını","tasşağını",
+  "aq", "amcık", "yarak", "got", "sik", "sikerim", "sikeyim", "sikey", "götveren","götlek","anan"
+];
+
+// E-posta validasyonu (tüm yaygın sağlayıcıları kapsar)
+function isRealEmail(val) {
+  if (!val) return false;
+  const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
+  return regex.test(val);
+}
+function isRealName(val) {
+  if (!val || val.length < 3) return false;
+  if (!/^[a-zA-ZığüşöçİĞÜŞÖÇ ]+$/.test(val)) return false;
+  let v = val.trim().toLowerCase();
+  if (["asd", "qwe", "poi", "test", "xxx", "zzz", "klm", "asdf", "deneme"].includes(v)) return false;
+  if (/^([a-zA-ZğüşöçİĞÜŞÖÇ])\1+$/.test(v)) return false;
+  return true;
+}
+function isRealPhone(val) {
+  if (!val) return false;
+  return /^05\d{9}$/.test(val);
+}
+function isRealMsg(val) {
+  if (!val || val.length < 15) return false;
+  let wordCount = val.trim().split(/\s+/).length;
+  if (wordCount < 3) return false;
+  if (/([a-z])\1{3,}/.test(val.toLowerCase())) return false;
+  // Argo/küfür/çocukça söz kontrolü burada da olacak, ayrıca visual olarak da gösterilecek
+  return true;
+}
+
 const SOCIALS = [
   { icon: <FaWhatsapp size={20} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
   { icon: <FaInstagram size={20} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
@@ -26,48 +61,20 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
+// Güncellenmiş, kurumsal, elit ve güçlü cümlelerle metinler
 const messages = [
-  "YolcuTransferi.com olarak, deneyimli ekibimizle sizlere lüks ve güvenli bir yolculuk deneyimi yaşatmak için buradayız.",
-  "Her türlü talebiniz, rezervasyonunuz veya iş birliği teklifiniz için bizimle çekinmeden iletişime geçebilirsiniz.",
-  "İhtiyacınıza en uygun çözümü, en hızlı şekilde sunabilmek için profesyonel destek ekibimiz sizinle.",
-  "VIP standartlarında hizmet için, bize ulaşmanız yeterli. Sizi dinlemek ve en iyi deneyimi yaşatmak önceliğimiz.",
-  "Bize ilettiğiniz her mesaj titizlikle incelenir; ilgili ekibimiz en kısa sürede size dönüş sağlar.",
-  "YolcuTransferi.com — Sadece bir transfer değil, bir ayrıcalık..."
+  "YolcuTransferi.com olarak, alanında uzman ve profesyonel ekiplerimizle her transferinizde kusursuz hizmet sunuyoruz.",
+  "Talep, rezervasyon ve iş ortaklığı süreçlerinde, ayrıcalıklı müşteri deneyimiyle çözüm odaklı destek veriyoruz.",
+  "İhtiyacınıza en uygun çözümleri, en hızlı şekilde sunmak için profesyonel ekiplerimiz hizmetinizde.",
+  "VIP standartlarında güven, lüks ve prestij sunuyoruz. Seçkin müşterilerimize, sadece transfer değil; kişiye özel bir ayrıcalık sağlıyoruz.",
+  "Her mesajınız, deneyimli müşteri ilişkileri ekiplerimiz tarafından hızla değerlendirilir ve çözüme ulaştırılır.",
+  "YolcuTransferi.com Sadece bir transfer değil, size özel bir ayrıcalık yaşatır..."
 ];
 
-// E-posta validasyonu (tüm yaygın e-posta sağlayıcılarını destekler)
-function isRealEmail(val) {
-  if (!val) return false;
-  const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
-  // Basit şekilde hotmail, gmail, yahoo, outlook, protonmail vs. hepsini kapsar.
-  return regex.test(val);
-}
-
-function isRealName(val) {
-  if (!val || val.length < 3) return false;
-  if (!/^[a-zA-ZığüşöçİĞÜŞÖÇ ]+$/.test(val)) return false;
-  let v = val.trim().toLowerCase();
-  if (["asd", "qwe", "poi", "test", "xxx", "zzz", "klm", "asdf", "deneme"].includes(v)) return false;
-  if (/^([a-zA-ZğüşöçİĞÜŞÖÇ])\1+$/.test(v)) return false;
-  return true;
-}
-function isRealPhone(val) {
-  if (!val) return false;
-  return /^05\d{9}$/.test(val);
-}
-function isRealMsg(val) {
-  if (!val || val.length < 15) return false;
-  let wordCount = val.trim().split(/\s+/).length;
-  if (wordCount < 3) return false;
-  if (/([a-z])\1{3,}/.test(val.toLowerCase())) return false;
-  return true;
-}
-
-// Rate limit sadece örnek amaçlı, backend tarafı şart!
+// Rate limit sadece örnek amaçlı, backendde şart!
 function useRateLimit() {
   const key = "yt_contact_rate";
   const [blocked, setBlocked] = useState(false);
-
   useEffect(() => {
     const now = Date.now();
     let data = JSON.parse(localStorage.getItem(key) || "{}");
@@ -78,7 +85,6 @@ function useRateLimit() {
     if (sonDakika >= 2 || sonSaat >= 5) setBlocked(true);
     else setBlocked(false);
   }, []);
-
   function kaydet() {
     const now = Date.now();
     let data = JSON.parse(localStorage.getItem(key) || "{}");
@@ -86,6 +92,36 @@ function useRateLimit() {
     localStorage.setItem(key, JSON.stringify(data));
   }
   return [blocked, kaydet];
+}
+
+// Mesaj içindeki yasak kelimeleri tespit ve işaretleme (altı kırmızı çizgi ve tooltip!)
+function getCensoredMessage(msg) {
+  if (!msg) return { parsed: "", hasBlocked: false, blockedWords: [] };
+  let parts = msg.split(/(\s+)/);
+  let hasBlocked = false;
+  let blockedWords = [];
+  const censored = parts.map((p, i) => {
+    let w = p.toLowerCase().replace(/[^\wğüşöçıİĞÜŞÖÇ]/g, "");
+    if (BLOCKED_WORDS.includes(w)) {
+      hasBlocked = true;
+      blockedWords.push(p);
+      return (
+        <span
+          key={i}
+          style={{
+            textDecoration: "underline wavy red",
+            color: "#c0392b",
+            fontWeight: "bold",
+            background: "#fff2",
+            cursor: "pointer"
+          }}
+          title="Bu kelimeyi kullanamazsınız."
+        >{p}</span>
+      );
+    }
+    return p;
+  });
+  return { parsed: censored, hasBlocked, blockedWords };
 }
 
 export default function Iletisim() {
@@ -101,6 +137,7 @@ export default function Iletisim() {
   });
   const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
+  const [sendInfo, setSendInfo] = useState(""); // Gönderdikten sonra iletişim bilgisi
   const [activeIndex, setActiveIndex] = useState(0);
   const [blocked, kaydet] = useRateLimit();
 
@@ -111,7 +148,7 @@ export default function Iletisim() {
     return () => clearInterval(interval);
   }, []);
 
-  // Tarayıcıya otomatik doldurma şansı vermek için autoComplete + ilk inputa focus
+  // Autofill için ilk inputa focus
   useEffect(() => {
     const f = document.querySelector('input[autoComplete="given-name"]');
     if (f) f.focus();
@@ -133,18 +170,33 @@ export default function Iletisim() {
   const emailValid = isRealEmail(form.email);
   const msgValid = isRealMsg(form.mesaj);
 
+  const censored = getCensoredMessage(form.mesaj);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     let newErrors = {};
+    setSendInfo("");
     if (blocked) newErrors.global = "Çok sık mesaj gönderildi, lütfen biraz bekleyiniz.";
     if (form.honeypot && form.honeypot.length > 0) return; // Bot ise iptal et
     if (!adValid) newErrors.ad = "Lütfen gerçek adınızı giriniz.";
     if (!soyadValid) newErrors.soyad = "Lütfen gerçek soyadınızı giriniz.";
     if (!phoneValid) newErrors.telefon = "Telefon numarası hatalı (05xx xxx xx xx formatında).";
     if (!emailValid) newErrors.email = "Lütfen geçerli bir e-posta adresi giriniz.";
-    if (!msgValid) newErrors.mesaj = "Sizi anlayamadık. Lütfen gerçekten iletmek istediğiniz mesajı yazınız.";
+    if (!msgValid) newErrors.mesaj = "Lütfen açık, anlaşılır ve anlamlı bir mesaj yazınız.";
+    if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz/argo kelimeler tespit edildi. Lütfen çıkarınız.";
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
+
+    // Dinamik iletişim bilgisi
+    let infoMsg = "";
+    if (form.iletisimTercihi === "E-posta")
+      infoMsg = `Mesajınızı aldık, seçtiğiniz iletişim yöntemiyle size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.`;
+    else if (form.iletisimTercihi === "Telefon")
+      infoMsg = `Mesajınızı aldık, size <b>0539 526 75 69</b> kurumsal telefon numaramızdan ulaşacağız.`;
+    else if (form.iletisimTercihi === "WhatsApp")
+      infoMsg = `Mesajınızı aldık, size <b>0539 526 75 69</b> kurumsal WhatsApp hattımızdan ulaşacağız.`;
+    setSendInfo(infoMsg);
+
     kaydet();
     setSent(true);
     setTimeout(() => setSent(false), 7000);
@@ -169,22 +221,12 @@ export default function Iletisim() {
         <div className="w-full flex justify-center mb-2">
           <div
             className="relative w-full max-w-3xl bg-black border border-[#bfa658] rounded-xl shadow flex items-center justify-center transition-all duration-500 overflow-hidden"
-            style={{
-              height: 78,
-              minHeight: 78,
-              padding: "0 12px"
-            }}
+            style={{ height: 78, minHeight: 78, padding: "0 12px" }}
           >
             {activeIndex < messages.length ? (
               <span
                 className="text-base sm:text-lg text-gray-100 text-center font-medium animate-fade-in leading-normal truncate-message"
-                style={{
-                  whiteSpace: "normal",
-                  width: "100%",
-                  wordBreak: "break-word",
-                  fontSize: "1.08rem",
-                  lineHeight: "1.4"
-                }}
+                style={{ whiteSpace: "normal", width: "100%", wordBreak: "break-word", fontSize: "1.08rem", lineHeight: "1.4" }}
               >
                 {messages[activeIndex]}
               </span>
@@ -314,11 +356,26 @@ export default function Iletisim() {
                 placeholder="Mesajınız"
                 value={form.mesaj}
                 onChange={handleChange}
-                className={`p-3 rounded-lg border ${msgValid ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white focus:border-[#bfa658] transition text-base`}
+                className={`p-3 rounded-lg border ${msgValid && !censored.hasBlocked ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white focus:border-[#bfa658] transition text-base`}
                 minLength={15}
                 required
                 rows={3}
               />
+              {/* Mesajda uygunsuz kelime varsa vurgulu şekilde göster */}
+              <div className="mt-1 text-sm leading-relaxed" style={{ minHeight: 26 }}>
+                {censored.hasBlocked && (
+                  <span className="text-red-500 font-bold">
+                    Uygunsuz veya argo kelime tespit edildi: {censored.blockedWords.map((w, i) => <span key={i} style={{textDecoration:'underline wavy red',margin:'0 4px'}}>{w}</span>)} <br/>
+                    Bu kelimeyi kullanamazsınız.
+                  </span>
+                )}
+              </div>
+              {/* Preview: mesaj kutusunun altında, uygun şekilde göster */}
+              {form.mesaj && (
+                <div className="text-gray-400 text-xs mt-1 flex flex-wrap items-center" style={{wordBreak:'break-word'}}>
+                  <b>Yazdığınız:</b>&nbsp;{censored.parsed}
+                </div>
+              )}
               {errors.mesaj && <span className="text-red-500 text-xs px-1 pt-1">{errors.mesaj}</span>}
             </div>
             {errors.global && <div className="text-red-500 text-sm font-bold px-2 py-1">{errors.global}</div>}
@@ -330,9 +387,12 @@ export default function Iletisim() {
               Mesajı Gönder
             </button>
             {sent && (
-              <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-400 shadow">
-                Mesajınız alınmıştır. İlgili ekiplerimiz en kısa sürede sizinle iletişime geçecektir.
-              </div>
+              <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-400 shadow" dangerouslySetInnerHTML={{
+                __html: `
+                  Mesajınız alınmıştır. İlgili <b>ekiplerimiz</b> en kısa sürede sizinle iletişime geçecektir.<br>
+                  ${sendInfo}
+                `
+              }} />
             )}
           </form>
           {/* Adres & Sosyal Medya */}
