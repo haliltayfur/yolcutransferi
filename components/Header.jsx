@@ -1,120 +1,117 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
-import { FaInstagram, FaXTwitter, FaWhatsapp } from "react-icons/fa6";
+import { FaWhatsapp, FaInstagram } from "react-icons/fa";
+import { SiX } from "react-icons/si";
 
-const menuLinks = [
-  { label: "Ana Sayfa", href: "/" },
-  { label: "VIP Transfer", href: "/vip-transfer" },
-  { label: "Dron Transferi", href: "/dron-transferi" },
-  { label: "Bireysel Transferler", href: "/individual-transfers" },
-  { label: "Business Class", href: "/business-class" },
-  { label: "Aile Paketleri", href: "/family-packages" },
-  { label: "Havalimanı Transferi", href: "/airport-transfers" },
-  { label: "İletişim", href: "/contact" }
+const menuItems = [
+  { name: "AnasayfaAAA", href: "/" },
+  { name: "Hizmetler", href: "/hizmetler" },
+  { name: "Araçlar", href: "/araclar" },
+  { name: "Rezervasyon", href: "/rezervasyon" },
+  { name: "S.S.S.", href: "/sss" },
+  { name: "İletişim", href: "/iletisim" },
 ];
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="bg-white shadow z-50 w-full sticky top-0">
-      <div className="flex items-center justify-between px-4 md:px-20 py-4">
+    <header className="w-full bg-black/95 shadow z-40 relative">
+      <div className="w-full flex items-center justify-between px-3 sm:px-6 md:px-16 py-3">
         {/* Logo */}
         <Link href="/">
-          <span className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
-            YolcuTransferi
-          </span>
+          <Image
+            src="/LOGO.png"
+            alt="Logo"
+            width={180}
+            height={50}
+            className="mr-2"
+            priority
+            style={{ height: 44, width: "auto" }}
+          />
         </Link>
-
-        {/* Masaüstü Menü */}
-        <nav className="hidden md:flex gap-3 font-semibold text-lg bg-gray-100 rounded-xl px-5 py-2 shadow-inner">
-          {menuLinks.map(({ label, href }) => (
+        {/* Desktop Menü */}
+        <nav className="hidden md:flex items-center gap-5 font-medium text-[1.1rem] text-gray-300 flex-wrap">
+          {menuItems.map((item) => (
             <Link
-              key={href}
-              href={href}
-              className="px-4 py-2 rounded-lg transition bg-white/0 hover:bg-yellow-100 hover:text-yellow-700"
+              key={item.href}
+              href={item.href}
+              className="relative px-3 py-1 transition-colors duration-200 hover:text-gray-100"
             >
-              {label}
+              {item.name}
+              <span className="absolute bottom-0 left-[10%] w-[80%] h-[1px] bg-gray-100 opacity-0 transition-opacity duration-300 hover:opacity-100"></span>
             </Link>
           ))}
         </nav>
-
-        {/* Sosyal ve giriş (desktop) */}
+        {/* Desktop: Sosyal ikonlar + Giriş */}
         <div className="hidden md:flex items-center gap-4">
-          <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" title="WhatsApp">
-            <FaWhatsapp className="text-green-400 text-xl" />
+          <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer"
+             className="text-gray-300 hover:text-gray-100 transition-colors duration-200">
+            <FaWhatsapp className="w-6 h-6" />
           </a>
-          <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" title="Instagram">
-            <FaInstagram className="text-pink-500 text-xl" />
+          <a href="#" target="_blank" rel="noopener noreferrer"
+             className="text-gray-300 hover:text-gray-100 transition-colors duration-200">
+            <FaInstagram className="w-6 h-6" />
           </a>
-          <a href="https://twitter.com/yolcutransferi" target="_blank" rel="noopener noreferrer" title="X">
-            <FaXTwitter className="text-black text-xl" />
+          <a href="#" target="_blank" rel="noopener noreferrer"
+             className="text-gray-300 hover:text-gray-100 transition-colors duration-200">
+            <SiX className="w-6 h-6" />
           </a>
           <Link
             href="/login"
-            className="bg-yellow-400 hover:bg-yellow-500 transition text-black px-5 py-2 rounded-xl font-semibold shadow text-lg"
+            className="text-black font-semibold px-4 py-1.5 rounded-lg bg-yellow-400 hover:bg-yellow-450 transition-colors duration-200 shadow-sm text-sm"
+            style={{ backgroundColor: "#FFD700" }}
           >
-            Giriş / Üyelik
+            Giriş Yap
           </Link>
         </div>
-
-        {/* Mobil hamburger */}
+        {/* Mobil Hamburger */}
         <button
-          className="md:hidden flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-white/90 focus:outline-none"
-          onClick={() => setMenuOpen(val => !val)}
+          className="md:hidden flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 focus:outline-none"
+          onClick={() => setMenuOpen((val) => !val)}
           aria-label="Menü"
         >
-          <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
-          <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
-          <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
+          <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
+          <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
+          <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
         </button>
       </div>
-
       {/* Mobil Menü Açılır */}
       {menuOpen && (
-        <div className="md:hidden fixed inset-0 bg-black/60 z-50" onClick={() => setMenuOpen(false)}>
-          <nav
-            className="absolute top-0 left-0 w-3/4 max-w-xs h-full bg-white shadow-2xl px-6 py-8 flex flex-col gap-4 animate-fade-in"
-            onClick={e => e.stopPropagation()}
-          >
-            <button className="ml-auto mb-4 text-gray-600 text-2xl" onClick={() => setMenuOpen(false)}>×</button>
-            {menuLinks.map(({ label, href }) => (
+        <nav className="md:hidden absolute top-full left-0 w-full bg-black/95 px-6 py-5 z-50 shadow-xl animate-fade-in">
+          <div className="flex flex-col gap-2 text-lg font-semibold">
+            {menuItems.map((item) => (
               <Link
-                key={href}
-                href={href}
-                className="block py-3 px-2 rounded-lg text-lg font-semibold text-gray-800 hover:bg-yellow-100 transition"
+                key={item.href}
+                href={item.href}
+                className="py-2 border-b border-[#bfa658] block"
                 onClick={() => setMenuOpen(false)}
               >
-                {label}
+                {item.name}
               </Link>
             ))}
             <div className="flex gap-4 pt-2">
-              <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" title="WhatsApp">
-                <FaWhatsapp className="text-green-400 text-2xl" />
-              </a>
-              <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" title="Instagram">
-                <FaInstagram className="text-pink-500 text-2xl" />
-              </a>
-              <a href="https://twitter.com/yolcutransferi" target="_blank" rel="noopener noreferrer" title="X">
-                <FaXTwitter className="text-black text-2xl" />
-              </a>
+              <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer"><FaWhatsapp className="text-2xl text-[#25d366]" /></a>
+              <a href="#" target="_blank" rel="noopener noreferrer"><FaInstagram className="text-2xl text-[#e4405f]" /></a>
+              <a href="#" target="_blank" rel="noopener noreferrer"><SiX className="text-2xl text-white" /></a>
             </div>
             <Link
               href="/login"
-              className="bg-yellow-400 hover:bg-yellow-500 transition text-black px-5 py-2 rounded-xl font-semibold shadow text-lg mt-4 text-center"
+              className="mt-3 px-4 py-2 rounded-xl bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition text-base shadow text-center"
               onClick={() => setMenuOpen(false)}
             >
-              Giriş / Üyelik
+              Giriş Yap
             </Link>
-          </nav>
-        </div>
+          </div>
+        </nav>
       )}
-
-      {/* Küçük fade animasyon */}
+      {/* Alt Çizgi */}
+      <div className="w-full mt-2" style={{ borderBottom: "0.3px solid rgba(255,255,255,0.15)" }}></div>
       <style jsx>{`
-        .animate-fade-in { animation: fadeIn .25s;}
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-24px);} to { opacity: 1; transform: none;} }
+        .animate-fade-in { animation: fadeIn .4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px);} to { opacity: 1; transform: translateY(0);} }
       `}</style>
     </header>
   );
