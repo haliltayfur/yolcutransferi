@@ -143,6 +143,7 @@ export default function Iletisim() {
   const [sendInfo, setSendInfo] = useState(""); // Gönderdikten sonra iletişim bilgisi
   const [activeIndex, setActiveIndex] = useState(0);
   const [blocked, kaydet] = useRateLimit();
+  const [submitError, setSubmitError] = useState(""); // <-- Yeni eklendi
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -176,6 +177,7 @@ export default function Iletisim() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setSubmitError(""); // Gönder denemesinde hata alanı temizlenir
     let newErrors = {};
     setSendInfo("");
     if (blocked) newErrors.global = "Çok sık mesaj gönderildi, lütfen biraz bekleyiniz.";
@@ -187,14 +189,29 @@ export default function Iletisim() {
     if (!msgValid) newErrors.mesaj = "Lütfen açık, anlaşılır ve anlamlı bir mesaj yazınız.";
     if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz/argo kelime var. Lütfen değiştirin.";
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+
+    // Hata varsa burada kurumsal hata mesajı oluştur ve göster
+    if (Object.keys(newErrors).length > 0) {
+      let msg = "Mesajınız iletilemedi. ";
+      if (newErrors.ad || newErrors.soyad || newErrors.telefon || newErrors.email) {
+        msg += "Lütfen tüm bilgileri eksiksiz ve doğru şekilde doldurun. ";
+      }
+      if (newErrors.mesaj) {
+        msg += "Mesaj içeriğinde uygunsuz kelime, eksik veya anlamsız ifade tespit edildi. ";
+      }
+      if (newErrors.global) {
+        msg += "Çok fazla deneme yaptınız, lütfen 1 dakika sonra tekrar deneyin.";
+      }
+      setSubmitError(msg.trim());
+      return;
+    }
 
     // Kısa, net, tekrar etmeyen kurumsal mesaj
     let infoMsg = "";
     if (form.iletisimTercihi === "E-posta")
-      infoMsg = `Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.`;
+      infoMsg = Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.;
     else
-      infoMsg = `Teşekkürler. Mesajınız alınmıştır. Size <b>0539 526 75 69</b> kurumsal ${form.iletisimTercihi.toLowerCase()} kanalımızdan ulaşacağız.`;
+      infoMsg = Teşekkürler. Mesajınız alınmıştır. Size <b>0539 526 75 69</b> kurumsal ${form.iletisimTercihi.toLowerCase()} kanalımızdan ulaşacağız.;
 
     setSendInfo(infoMsg);
     kaydet();
@@ -258,7 +275,7 @@ export default function Iletisim() {
                   placeholder="Ad"
                   value={form.ad}
                   onChange={handleChange}
-                  className={`p-3 rounded-lg border ${adValid ? "border-green-500" : form.ad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base`}
+                  className={p-3 rounded-lg border ${adValid ? "border-green-500" : form.ad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base}
                   minLength={3}
                   required
                 />
@@ -272,7 +289,7 @@ export default function Iletisim() {
                   placeholder="Soyad"
                   value={form.soyad}
                   onChange={handleChange}
-                  className={`p-3 rounded-lg border ${soyadValid ? "border-green-500" : form.soyad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base`}
+                  className={p-3 rounded-lg border ${soyadValid ? "border-green-500" : form.soyad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base}
                   minLength={3}
                   required
                 />
@@ -288,7 +305,7 @@ export default function Iletisim() {
                   placeholder="05xx xxx xx xx"
                   value={form.telefon}
                   onChange={handleChange}
-                  className={`p-3 rounded-lg border ${phoneValid ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base`}
+                  className={p-3 rounded-lg border ${phoneValid ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base}
                   maxLength={11}
                   pattern="05\d{9}"
                   required
@@ -303,7 +320,7 @@ export default function Iletisim() {
                   placeholder="E-posta"
                   value={form.email}
                   onChange={handleChange}
-                  className={`p-3 rounded-lg border ${emailValid ? "border-green-500" : form.email ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base`}
+                  className={p-3 rounded-lg border ${emailValid ? "border-green-500" : form.email ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base}
                   required
                 />
                 {errors.email && <span className="text-red-500 text-xs px-1 pt-1">{errors.email}</span>}
@@ -327,12 +344,12 @@ export default function Iletisim() {
                 {ILETISIM_TERCIHLERI.map((item) => (
                   <label
                     key={item.value}
-                    className={`flex items-center gap-1 px-4 py-1 rounded-full border font-bold text-xs cursor-pointer
+                    className={flex items-center gap-1 px-4 py-1 rounded-full border font-bold text-xs cursor-pointer
                     transition select-none shadow-md
                     ${form.iletisimTercihi === item.value
                       ? "bg-[#e5b646] border-[#e5b646] text-black scale-105"
                       : "bg-[#322f2b] border-[#bfa658] text-[#fff] hover:bg-[#bfa658] hover:text-black"}
-                    `}
+                    }
                     style={{ minWidth: 82, justifyContent: 'center', opacity: form.iletisimTercihi === item.value ? 1 : 0.92 }}
                   >
                     <input
@@ -356,7 +373,7 @@ export default function Iletisim() {
                   placeholder="Mesajınız"
                   value={form.mesaj}
                   onChange={handleChange}
-                  className={`p-3 rounded-lg border ${msgValid && !censored.hasBlocked ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base`}
+                  className={p-3 rounded-lg border ${msgValid && !censored.hasBlocked ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base}
                   minLength={15}
                   required
                   rows={3}
@@ -395,35 +412,24 @@ export default function Iletisim() {
               {errors.mesaj && <span className="text-red-500 text-xs px-1 pt-1">{errors.mesaj}</span>}
             </div>
 
-            {/* --- UYARI BLOĞU (GÖNDER BUTONU ÜSTÜNE) --- */}
-            {(blocked || censored.hasBlocked || Object.keys(errors).length > 0) && (
-              <div
-                className="mt-2 mb-2 p-2 rounded-lg text-base font-semibold text-center border-2"
-                style={{
-                  color: "#fff",
-                  background: blocked ? "#d97706" : "#dc2626",
-                  borderColor: blocked ? "#fbbf24" : "#ef4444"
-                }}
-              >
-                {blocked && "Çok fazla deneme yaptınız, lütfen 1 dakika sonra tekrar deneyin."}
-                {censored.hasBlocked && "Mesajınızda uygunsuz veya argo kelime var. Lütfen çıkarın."}
-                {Object.keys(errors).length > 0 && !blocked && !censored.hasBlocked &&
-                  Object.values(errors).map((v, i) => <div key={i}>{v}</div>)
-                }
-              </div>
-            )}
-
             <button
               type="submit"
-              className={`bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full ${blocked || censored.hasBlocked || Object.keys(errors).length > 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full ${blocked || censored.hasBlocked || Object.keys(errors).length > 0 ? "opacity-50 cursor-not-allowed" : ""}}
               disabled={blocked || censored.hasBlocked || Object.keys(errors).length > 0}
             >
               Mesajı Gönder
             </button>
+            {/* Başarı mesajı */}
             {sent && (
               <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-400 shadow" dangerouslySetInnerHTML={{
                 __html: sendInfo
               }} />
+            )}
+            {/* Kurumsal uyarı mesajı sadece gönder tuşuna basıldıktan sonra ve hata olursa */}
+            {submitError && (
+              <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
+                {submitError}
+              </div>
             )}
           </form>
           {/* Adres & Sosyal Medya */}
@@ -466,12 +472,12 @@ export default function Iletisim() {
           </div>
         </div>
       </div>
-      <style>{`
+      <style>{
         .animate-fade-in { animation: fadeIn .7s; }
         @keyframes fadeIn { 0% { opacity: 0; transform: translateY(15px);} 100% { opacity: 1; transform: translateY(0);} }
         .truncate-message { display: block; width: 100%; overflow-wrap: break-word; white-space: normal; line-height: 1.4; font-size: 1rem;}
         @media (max-width: 640px) { .truncate-message { font-size: 0.97rem; } .max-w-3xl { max-width: 99vw !important; } }
-      `}</style>
+      }</style>
     </div>
   );
 }
