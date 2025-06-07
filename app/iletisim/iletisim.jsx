@@ -4,7 +4,7 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// Rate Limit — SADECE 1 DAKİKA
+// --- Rate Limit ---
 function useRateLimit() {
   const key = "yt_contact_rate";
   const [blocked, setBlocked] = useState(false);
@@ -14,7 +14,7 @@ function useRateLimit() {
     const interval = setInterval(() => {
       const now = Date.now();
       let data = JSON.parse(localStorage.getItem(key) || "{}");
-      // Temizle: 24 saat öncesini sil (hafıza temizliği)
+      // Temizle: 24 saat öncesini sil
       for (const k in data) if (now - k > 24 * 60 * 60 * 1000) delete data[k];
       localStorage.setItem(key, JSON.stringify(data));
 
@@ -33,7 +33,7 @@ function useRateLimit() {
           enYakin = wait;
         }
       } else if (total >= 2) {
-        // 3. ve sonraki: 5 dk bekle
+        // 3. ve sonrası: 5 dk bekle
         let lastTime = times[total - 1];
         let secondLastTime = times[total - 2];
         let wait = 5 * 60 * 1000 - (now - lastTime);
@@ -57,7 +57,6 @@ function useRateLimit() {
   return [blocked, kaydet, remaining];
 }
 
-
 function formatDuration(ms) {
   if (!ms || ms < 1000) return "1 sn";
   const totalSec = Math.ceil(ms / 1000);
@@ -67,7 +66,6 @@ function formatDuration(ms) {
 }
 
 const BASE64_BLOCKED_WORDS = "YW1rLHF3cSxhbWssaWJuZSxzaWt0aXIsb3Jvc3B1LHNpazgsdGFxLGJvayxwZXpldmVua3xib2ssc2FsYWssZ2VyaXpla2FsacOnLGFwdGFsLHNoZXJlZnNizeixtYWwsw7x5bGUsYmtsLHNpY2sseyJjdWt1ciI6IH0=";
-
 function getBlockedWords() {
   try {
     if (typeof window !== "undefined" && window.atob)
@@ -77,7 +75,6 @@ function getBlockedWords() {
     return [];
   }
 }
-
 function isRealEmail(val) {
   if (!val) return false;
   const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
@@ -102,7 +99,6 @@ function isRealMsg(val) {
   if (/([a-z])\1{3,}/.test(val.toLowerCase())) return false;
   return true;
 }
-
 function parseMessage(msg, blockedWords) {
   if (!msg) return { parsed: "", hasBlocked: false, blockedWords: [] };
   let parts = msg.split(/(\s+)/);
@@ -215,7 +211,7 @@ export default function Iletisim() {
     setSubmitError("");
     let newErrors = {};
     setSendInfo("");
-    if (blocked) newErrors.global = "Çok sık mesaj gönderdiniz, lütfen 1 dakika sonra tekrar deneyin.";
+    if (blocked) newErrors.global = "Çok sık mesaj gönderdiniz, lütfen bekleyin.";
     if (form.honeypot && form.honeypot.length > 0) return;
     if (!adValid) newErrors.ad = "Lütfen adınızı en az 3 karakter olacak şekilde doldurun.";
     if (!soyadValid) newErrors.soyad = "Lütfen soyadınızı en az 3 karakter olacak şekilde doldurun.";
@@ -226,6 +222,7 @@ export default function Iletisim() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
+      setSent(false);
       setSubmitError(""); // Çünkü alan alan gösterilecek!
       return;
     }
@@ -265,6 +262,11 @@ export default function Iletisim() {
       <div className="w-full max-w-4xl rounded-2xl shadow-2xl px-2 sm:px-6 py-6 flex flex-col gap-6"
         style={{ border: "2.5px solid #bfa658", background: "rgba(25, 23, 20, 0.98)" }}
       >
+        {/* --- BAŞLIK --- */}
+        <h1 className="text-center text-3xl md:text-4xl font-extrabold text-[#FFD700] mb-3 mt-2 tracking-tight drop-shadow">
+          İletişim
+        </h1>
+
         {/* Bilboard */}
         <div className="w-full flex justify-center mb-2">
           <div
@@ -442,8 +444,8 @@ export default function Iletisim() {
               </div>
               {errors.mesaj && <span className="text-red-500 text-xs px-1 pt-1">{errors.mesaj}</span>}
             </div>
-            {/* Hatalar */}
-            {blocked && (
+            {/* Hatalar/başarı mesajı (Aynı anda çıkmaz!) */}
+            {blocked && !sent && (
               <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-bold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
                 Güvenlik nedeniyle arka arkaya gönderimlerde kısa bir bekleme uygulanmaktadır.
                 <span className="ml-2 text-yellow-200 font-bold">
@@ -451,11 +453,15 @@ export default function Iletisim() {
                 </span>
               </div>
             )}
+            {sent && !blocked && (
+              <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-400 shadow" dangerouslySetInnerHTML={{
+                __html: sendInfo
+              }} />
+            )}
             {!blocked && (
               <>
                 {(errors.ad || errors.soyad || errors.telefon || errors.email || errors.mesaj) && (
                   <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-bold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
-                    {/* Tüm alanlara tek mesaj yerine, alan hatalarını tek tek göster */}
                     <ul className="list-disc list-inside text-left">
                       {errors.ad && <li>{errors.ad}</li>}
                       {errors.soyad && <li>{errors.soyad}</li>}
@@ -467,18 +473,12 @@ export default function Iletisim() {
                 )}
               </>
             )}
-           <button
-  type="submit"
-  className="bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full"
-  // disabled={blocked || censored.hasBlocked || Object.keys(errors).length > 0}
->
-  Mesajı Gönder
-</button>
-            {sent && (
-              <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-400 shadow" dangerouslySetInnerHTML={{
-                __html: sendInfo
-              }} />
-            )}
+            <button
+              type="submit"
+              className="bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full"
+            >
+              Mesajı Gönder
+            </button>
             {submitError && (
               <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
                 {submitError}
