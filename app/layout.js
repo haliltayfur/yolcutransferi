@@ -1,5 +1,5 @@
 import "./globals.css";
-import Header from "./components/Header"; // Bu dosya: app/components/Header.jsx
+import Header from "../components/Header"; // BİR ÜST dizinden çek
 
 export const metadata = {
   title: "YolcuTransferi.com",
