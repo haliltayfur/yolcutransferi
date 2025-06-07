@@ -17,9 +17,9 @@ export default function Header() {
 
   return (
     <header className="w-full bg-black/95 shadow z-40 relative">
-      {/* Üst satır: Logo (sol), Sosyal Medya (sağ) */}
-      <div className="flex items-center justify-between px-3 sm:px-6 md:px-16 pt-3 pb-1">
-        <Link href="/" className="flex items-center">
+      {/* Üst Satır: Logo sola, sosyal sağa */}
+      <div className="flex items-center justify-between px-3 sm:px-6 md:px-16 pt-3 pb-1 w-full">
+        <Link href="/" className="flex items-center min-w-0">
           <Image
             src="/LOGO.png"
             alt="Logo"
@@ -27,17 +27,17 @@ export default function Header() {
             height={110}
             priority
             className="mr-2"
-            // Logo %20 büyütülmüş
             style={{
-              width: "264px", // 220px * 1.2 = 264px
-              maxHeight: "105px", // Yine %20 artış
+              width: "264px", // %20 büyütülmüş
+              maxWidth: "70vw",
+              maxHeight: "105px",
               height: "auto",
               objectFit: "contain",
             }}
-            sizes="(max-width: 600px) 140px, 264px"
+            sizes="(max-width: 600px) 160px, 264px"
           />
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-shrink-0">
           <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-gray-100 transition-colors duration-200">
             <FaWhatsapp className="w-6 h-6" />
           </a>
@@ -50,19 +50,20 @@ export default function Header() {
         </div>
       </div>
       {/* Alt satır: Menü ve hamburger */}
-      <div className="flex items-center justify-between px-3 sm:px-6 md:px-16 pb-2 pt-1">
-        <nav className="flex-1 flex items-center gap-2 justify-start">
+      <div className="flex items-center justify-between px-3 sm:px-6 md:px-16 pb-2 pt-1 w-full">
+        <nav className="flex-1 flex flex-wrap items-center gap-2 justify-start overflow-x-auto">
           {menuItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-gray-300 px-3 py-1 font-medium text-base hover:text-yellow-400 transition-colors rounded-lg"
+              className="text-gray-300 px-3 py-1 font-medium text-base hover:text-yellow-400 transition-colors rounded-lg whitespace-nowrap"
+              style={{ minWidth: 80, textAlign: "center" }}
             >
               {item.name}
             </Link>
           ))}
         </nav>
-        {/* Hamburger Menü Sadece Mobilde */}
+        {/* Hamburger Menü */}
         <button
           className="flex md:hidden flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 ml-2"
           onClick={() => setMenuOpen((val) => !val)}
@@ -73,24 +74,13 @@ export default function Header() {
           <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
         </button>
       </div>
-      {/* Mobilde açılır menü */}
+      {/* Hamburger açılır menü: sadece giriş */}
       {menuOpen && (
         <nav className="md:hidden absolute top-full left-0 w-full bg-black/95 px-6 py-5 z-50 shadow-xl animate-fade-in">
           <div className="flex flex-col gap-2 text-lg font-semibold">
-            {menuItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="py-2 border-b border-[#bfa658] block"
-                onClick={() => setMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
-            {/* Giriş butonu menünün en altına tek başına */}
             <Link
               href="/login"
-              className="mt-5 px-4 py-2 rounded-xl bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition text-base shadow text-center"
+              className="px-4 py-2 rounded-xl bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition text-base shadow text-center"
               onClick={() => setMenuOpen(false)}
             >
               Giriş Yap
@@ -98,7 +88,7 @@ export default function Header() {
           </div>
         </nav>
       )}
-      {/* Alt Çizgi */}
+      {/* Alt çizgi */}
       <div className="w-full mt-2" style={{ borderBottom: "0.3px solid rgba(255,255,255,0.15)" }}></div>
       <style jsx>{`
         .animate-fade-in { animation: fadeIn .4s; }
