@@ -1,8 +1,20 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
+
+// Simple word blacklist, uzantı blacklist ve sahte ad-soyad tespit listesi
+const FAKE_EMAILS = [
+  "asd@ss.com", "aaa@bbb.com", "test@test.com", "asdasd@asdasd.com", "qwe@qwe.com",
+  "mail@mail.com", "mail@domain.com", "deneme@deneme.com", "abc@abc.com", "abc@xyz.com"
+];
+const FAKE_DOMAINS = [
+  "ss.com", "bbb.com", "asdasd.com", "qwe.com", "mail.com", "domain.com", "deneme.com", "abc.com"
+];
+const FAKE_NAMES = [
+  "asd", "qwe", "poi", "test", "xxx", "zzz", "klm", "asdf", "qaz", "poiuy", "asdşl", "qwpoq", "sll"
+];
 
 const SOCIALS = [
   { icon: <FaWhatsapp size={20} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
@@ -47,6 +59,69 @@ const messages = [
   "YolcuTransferi.com — Sadece bir transfer değil, bir ayrıcalık..."
 ];
 
+// Simple spam/rate limiter (client-side)
+function useRateLimit() {
+  const key = "yt_contact_rate";
+  const [blocked, setBlocked] = useState(false);
+
+  useEffect(() => {
+    const now = Date.now();
+    let data = JSON.parse(localStorage.getItem(key) || "{}");
+    // Temizle eski kayıtları
+    for (const k in data) if (now - k > 60 * 60 * 1000) delete data[k];
+    localStorage.setItem(key, JSON.stringify(data));
+    // Kontrol et: dakikada 2, saatte 5
+    let sonDakika = Object.values(data).filter((t) => now - t < 60 * 1000).length;
+    let sonSaat = Object.values(data).filter((t) => now - t < 60 * 60 * 1000).length;
+    if (sonDakika >= 2 || sonSaat >= 5) setBlocked(true);
+    else setBlocked(false);
+  }, []);
+
+  function kaydet() {
+    const now = Date.now();
+    let data = JSON.parse(localStorage.getItem(key) || "{}");
+    data[now] = now;
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+  return [blocked, kaydet];
+}
+
+// Akıllı doğrulama fonksiyonları
+function isRealName(val) {
+  if (!val || val.length < 3) return false;
+  let v = val.toLowerCase().replace(/[^a-zA-ZığüşöçİĞÜŞÖÇ]/g, "");
+  if (FAKE_NAMES.includes(v)) return false;
+  // Sadece ünlü veya sessiz harf tekrarı (aaa, qqqq) engelle
+  if (/^([a-zA-ZğüşöçİĞÜŞÖÇ])\1+$/.test(v)) return false;
+  return true;
+}
+function isRealEmail(val) {
+  if (!val) return false;
+  if (FAKE_EMAILS.includes(val.trim().toLowerCase())) return false;
+  let parts = val.split("@");
+  if (parts.length !== 2) return false;
+  let [user, domain] = parts;
+  if (!user || !domain || domain.length < 5) return false;
+  if (FAKE_DOMAINS.some((d) => domain.endsWith(d))) return false;
+  // Email format ve uzantı kontrolü (yaygın tld: com, com.tr, net, org, edu, gov)
+  if (!/^[\w\.\-]+@([\w\-]+\.)+(com|net|org|com\.tr|gov|edu|io|co|info)$/i.test(val)) return false;
+  return true;
+}
+function isRealPhone(val) {
+  if (!val) return false;
+  // Türk GSM formatı: 05xx xxx xx xx
+  return /^05\d{9}$/.test(val);
+}
+function isRealMsg(val) {
+  if (!val || val.length < 10) return false;
+  let v = val.toLowerCase();
+  if (v.length < 10 || v === "asd" || v === "qwe" || /^(a|q|w|z|x|s|d){3,}$/.test(v)) return false;
+  if (/^\d+$/.test(v)) return false;
+  // Çok fazla tekrar/benzer karakter içeriyorsa
+  if (/([a-z])\1{3,}/.test(v)) return false;
+  return true;
+}
+
 export default function Iletisim() {
   const [form, setForm] = useState({
     ad: "",
@@ -55,10 +130,18 @@ export default function Iletisim() {
     email: "",
     neden: ILETISIM_NEDENLERI[0],
     mesaj: "",
-    iletisimTercihi: ILETISIM_TERCIHLERI[0].value
+    iletisimTercihi: ILETISIM_TERCIHLERI[2].value // "E-posta" default seçili
   });
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [blocked, kaydet] = useRateLimit();
+
+  // Autofill için inputlarda autoComplete eklendi
+  const adRef = useRef();
+  const soyadRef = useRef();
+  const emailRef = useRef();
+  const telRef = useRef();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -67,23 +150,41 @@ export default function Iletisim() {
     return () => clearInterval(interval);
   }, []);
 
+  // Tarayıcı AutoFill tetikleme (focus on mount)
+  useEffect(() => {
+    adRef.current && adRef.current.focus();
+  }, []);
+
   const handleChange = (e) => {
-    if (e.target.name === "telefon") {
-      let val = e.target.value.replace(/\D/g, "");
-      if (val.length > 11) val = val.slice(0, 11);
-      setForm({ ...form, [e.target.name]: val });
-    } else {
-      setForm({ ...form, [e.target.name]: e.target.value });
-    }
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
   };
 
   const handleIletisimTercihiChange = (value) => {
     setForm({ ...form, iletisimTercihi: value });
   };
 
+  // Her input için validasyon flagi
+  const adValid = isRealName(form.ad);
+  const soyadValid = isRealName(form.soyad);
+  const phoneValid = isRealPhone(form.telefon);
+  const emailValid = isRealEmail(form.email);
+  const msgValid = isRealMsg(form.mesaj);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Backend'de "form.iletisimTercihi" alanı da mail içeriğine eklensin!
+    setError("");
+    if (blocked) {
+      setError("Çok sık mesaj gönderildi, lütfen biraz bekleyiniz.");
+      return;
+    }
+    if (!adValid) { setError("Lütfen gerçek adınızı giriniz."); return; }
+    if (!soyadValid) { setError("Lütfen gerçek soyadınızı giriniz."); return; }
+    if (!phoneValid) { setError("Telefon numarası hatalı (05xx xxx xx xx formatında)."); return; }
+    if (!emailValid) { setError("Lütfen geçerli bir e-posta adresi giriniz."); return; }
+    if (!msgValid) { setError("Sizi anlayamadık. Lütfen gerçekten iletmek istediğiniz mesajı yazınız."); return; }
+
+    kaydet();
     setSent(true);
     setTimeout(() => setSent(false), 7000);
     setForm({
@@ -93,14 +194,14 @@ export default function Iletisim() {
       email: "",
       neden: ILETISIM_NEDENLERI[0],
       mesaj: "",
-      iletisimTercihi: ILETISIM_TERCIHLERI[0].value
+      iletisimTercihi: ILETISIM_TERCIHLERI[2].value
     });
   };
 
   return (
     <div className="w-full flex justify-center bg-black min-h-[calc(100vh-150px)] py-6 px-2">
       <div className="w-full max-w-4xl bg-[#191714]/90 border-[3px] border-[#bfa658] rounded-2xl shadow-2xl px-2 sm:px-6 py-6 flex flex-col gap-6">
-        {/* Bilboard EN ÜSTTE */}
+        {/* Bilboard */}
         <div className="w-full flex justify-center mb-2">
           <div
             className="relative w-full max-w-3xl bg-black border border-[#bfa658] rounded-xl shadow flex items-center justify-center transition-all duration-500 overflow-hidden"
@@ -140,24 +241,30 @@ export default function Iletisim() {
         </div>
         {/* Form */}
         <div className="flex flex-col md:flex-row gap-6">
-          <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-3">
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-3" autoComplete="on">
             <div className="flex gap-2">
               <input
                 type="text"
                 name="ad"
+                ref={adRef}
+                autoComplete="given-name"
                 placeholder="Ad"
                 value={form.ad}
                 onChange={handleChange}
-                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition text-base"
+                className={`p-3 rounded-lg border ${adValid ? "border-green-500" : form.ad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition text-base`}
+                minLength={3}
                 required
               />
               <input
                 type="text"
                 name="soyad"
+                ref={soyadRef}
+                autoComplete="family-name"
                 placeholder="Soyad"
                 value={form.soyad}
                 onChange={handleChange}
-                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition text-base"
+                className={`p-3 rounded-lg border ${soyadValid ? "border-green-500" : form.soyad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition text-base`}
+                minLength={3}
                 required
               />
             </div>
@@ -165,21 +272,25 @@ export default function Iletisim() {
               <input
                 type="tel"
                 name="telefon"
+                ref={telRef}
+                autoComplete="tel"
                 placeholder="05xx xxx xx xx"
                 value={form.telefon}
                 onChange={handleChange}
-                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition text-base"
+                className={`p-3 rounded-lg border ${phoneValid ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition text-base`}
                 maxLength={11}
-                pattern="\d{11}"
+                pattern="05\d{9}"
                 required
               />
               <input
                 type="email"
                 name="email"
+                ref={emailRef}
+                autoComplete="email"
                 placeholder="E-posta"
                 value={form.email}
                 onChange={handleChange}
-                className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition text-base"
+                className={`p-3 rounded-lg border ${emailValid ? "border-green-500" : form.email ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-1/2 focus:border-[#bfa658] transition text-base`}
                 required
               />
             </div>
@@ -203,12 +314,12 @@ export default function Iletisim() {
                   <label
                     key={item.value}
                     className={`flex items-center gap-1 px-3 py-1 rounded-full border text-xs cursor-pointer
-                    transition select-none shadow-sm
+                    transition select-none shadow-sm font-semibold
                     ${form.iletisimTercihi === item.value
                       ? "bg-[#bfa658] border-[#bfa658] text-black"
-                      : "bg-[#191714] border-[#423c1c] text-gray-300 hover:border-[#bfa658]"
-                    }`}
-                    style={{ minWidth: 70, justifyContent: 'center' }}
+                      : "bg-[#25221d] border-[#423c1c] text-gray-100 hover:border-[#bfa658]"}
+                    `}
+                    style={{ minWidth: 70, justifyContent: 'center', opacity: form.iletisimTercihi === item.value ? 1 : 0.92 }}
                   >
                     <input
                       type="radio"
@@ -230,14 +341,18 @@ export default function Iletisim() {
               placeholder="Mesajınız"
               value={form.mesaj}
               onChange={handleChange}
-              className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white focus:border-[#bfa658] transition text-base"
+              className={`p-3 rounded-lg border ${msgValid ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white focus:border-[#bfa658] transition text-base`}
+              minLength={10}
               required
               rows={3}
             />
 
+            {error && <div className="text-red-500 text-sm font-bold px-2 py-1">{error}</div>}
+
             <button
               type="submit"
-              className="bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full"
+              className={`bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full ${blocked ? "opacity-50 cursor-not-allowed" : ""}`}
+              disabled={blocked}
             >
               Mesajı Gönder
             </button>
