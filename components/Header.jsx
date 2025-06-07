@@ -21,19 +21,25 @@ export default function Header() {
     <header className="w-full bg-black/95 shadow z-40 relative">
       <div className="w-full flex items-center justify-between px-3 sm:px-6 md:px-16 py-3">
         {/* Logo */}
-        <Link href="/" className="flex items-center">
+        <Link href="/" className="flex items-center min-w-[100px]">
           <Image
             src="/LOGO.png"
             alt="Logo"
-            width={180}
-            height={50}
-            className="mr-2"
+            width={140}
+            height={40}
             priority
-            style={{ height: 44, width: "auto" }}
+            className="object-contain"
+            style={{
+              width: "auto",
+              height: 40,
+              maxHeight: 48,
+              minWidth: 92,
+              minHeight: 28,
+            }}
           />
         </Link>
-        {/* Desktop Menü ve Sosyal/Giriş */}
-        <nav className="hidden md:flex items-center gap-5 font-medium text-[1.1rem] text-gray-300 flex-wrap">
+        {/* Desktop Menü ve Sosyal/Giriş/Üye Ol */}
+        <nav className="hidden md:flex items-center gap-4 font-medium text-[1.1rem] text-gray-300 flex-wrap">
           {menuItems.map((item) => (
             <Link
               key={item.href}
@@ -44,30 +50,61 @@ export default function Header() {
               <span className="absolute bottom-0 left-[10%] w-[80%] h-[1px] bg-gray-100 opacity-0 transition-opacity duration-300 hover:opacity-100"></span>
             </Link>
           ))}
-        </nav>
-        <div className="hidden md:flex items-center gap-4 ml-4">
-          <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer"
-            className="text-gray-300 hover:text-[#25d366] transition-colors duration-200">
+          <a
+            href="https://wa.me/905395267569"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-3 text-gray-300 hover:text-[#25d366] transition-colors duration-200"
+          >
             <FaWhatsapp className="w-6 h-6" />
           </a>
-          <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer"
-            className="text-gray-300 hover:text-pink-400 transition-colors duration-200">
+          <a
+            href="https://www.instagram.com/yolcutransferi/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-300 hover:text-pink-400 transition-colors duration-200"
+          >
             <FaInstagram className="w-6 h-6" />
           </a>
-          <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer"
-            className="text-gray-300 hover:text-white transition-colors duration-200">
+          <a
+            href="https://x.com/yolcutransferi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-300 hover:text-white transition-colors duration-200"
+          >
             <SiX className="w-6 h-6" />
           </a>
           <Link
             href="/login"
-            className="text-black font-semibold px-4 py-1.5 rounded-lg bg-yellow-400 hover:bg-yellow-500 transition-colors duration-200 shadow-sm text-sm"
+            className="ml-3 text-black font-semibold px-4 py-1.5 rounded-lg bg-yellow-400 hover:bg-yellow-500 transition-colors duration-200 shadow-sm text-sm"
             style={{ backgroundColor: "#FFD700" }}
           >
-            Giriş / Üye Ol
+            Giriş Yap
           </Link>
-        </div>
-        {/* Mobil Menü */}
+          <Link
+            href="/register"
+            className="ml-2 text-black font-semibold px-4 py-1.5 rounded-lg bg-white hover:bg-gray-200 transition-colors duration-200 shadow-sm text-sm border border-[#FFD700]"
+            style={{}}
+          >
+            Üye Ol
+          </Link>
+        </nav>
+        {/* Mobilde Giriş & Üye Ol Butonları */}
         <div className="md:hidden flex items-center gap-2">
+          <Link
+            href="/login"
+            className="text-black font-semibold px-3 py-1 rounded-lg bg-yellow-400 hover:bg-yellow-500 transition-colors duration-200 shadow-sm text-xs"
+            style={{ backgroundColor: "#FFD700" }}
+          >
+            Giriş
+          </Link>
+          <Link
+            href="/register"
+            className="text-black font-semibold px-3 py-1 rounded-lg bg-white hover:bg-gray-200 transition-colors duration-200 shadow-sm text-xs border border-[#FFD700]"
+            style={{}}
+          >
+            Üye Ol
+          </Link>
           <button
             className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 focus:outline-none"
             onClick={() => setMenuOpen((val) => !val)}
@@ -93,18 +130,12 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
+            {/* Sosyal Medya Mobil Menüde */}
             <div className="flex gap-4 pt-3">
               <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer"><FaWhatsapp className="text-2xl text-[#25d366]" /></a>
               <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer"><FaInstagram className="text-2xl text-[#e4405f]" /></a>
               <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer"><SiX className="text-2xl text-white" /></a>
             </div>
-            <Link
-              href="/login"
-              className="mt-3 px-4 py-2 rounded-xl bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition text-base shadow text-center"
-              onClick={() => setMenuOpen(false)}
-            >
-              Giriş / Üye Ol
-            </Link>
           </div>
         </nav>
       )}
