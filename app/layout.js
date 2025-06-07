@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 const menuItems = [
-  { name: "Anasayfa", href: "/" },
+  { name: "AnasayfaAAA", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
   { name: "Araçlar", href: "/araclar" },
   { name: "Rezervasyon", href: "/rezervasyon" },
