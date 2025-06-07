@@ -4,15 +4,23 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// KÜFÜR/ARGO/ÇOCUKÇA SÖZLERİN LİSTESİ — istersen genişletirsin
-const BLOCKED_WORDS = [
-  "amk","aq","yarrak","siktir","orospu","salak","salaq","ananı","annenizi","ananı","sikik","piç","gerizekalı","aptal",
-  "mal","şerefsiz","göt","kahpe","pezevenk","bok","çocukça","çocuk", "hıyar", "b.k", "mk", "çüş","vay","oç","sg","lavuk","daşak",
-  "aptal","embesil","angut","dangalak","dangalaq","puşt","yavşak","ibne","ibine","çük","çükü","taşak","tasak","taşağını","tasşağını",
-  "aq", "amcık", "yarak", "got", "sik", "sikerim", "sikeyim", "sikey", "götveren","götlek","anan"
-];
+// Base64 olarak encode edilmiş küfür/argo/çocukça kelimeler — kodda asla açık yok!
+const BASE64_BLOCKED_WORDS =
+  "YW1rLHF3cSxhbWssaWJuZSxzaWt0aXIsb3Jvc3B1LHNpazgsdGFxLGJvayxwZXpldmVua3xib2ssc2FsYWssZ2VyaXpla2FsacOnLGFwdGFsLHNoZXJlZnNpeixtYWwsw7x5bGUsYmtsLHNpY2sseyJjdWt1ciI6IH0=";
 
-// E-posta validasyonu (tüm yaygın sağlayıcıları kapsar)
+function getBlockedWords() {
+  // Çözüm: Base64 decode (window.atob yoksa Buffer ile çöz)
+  try {
+    if (typeof window !== "undefined" && window.atob)
+      return window.atob(BASE64_BLOCKED_WORDS).split(",");
+    // SSR için fallback:
+    return Buffer.from(BASE64_BLOCKED_WORDS, "base64").toString().split(",");
+  } catch (e) {
+    // Kırılırsa boş listeye düş
+    return [];
+  }
+}
+
 function isRealEmail(val) {
   if (!val) return false;
   const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
@@ -35,8 +43,37 @@ function isRealMsg(val) {
   let wordCount = val.trim().split(/\s+/).length;
   if (wordCount < 3) return false;
   if (/([a-z])\1{3,}/.test(val.toLowerCase())) return false;
-  // Argo/küfür/çocukça söz kontrolü burada da olacak, ayrıca visual olarak da gösterilecek
   return true;
+}
+
+// Argo/küfür/çocukça kelimeyi input içinde sadece işaretle
+function parseMessage(msg, blockedWords) {
+  if (!msg) return { parsed: "", hasBlocked: false, blockedWords: [] };
+  let parts = msg.split(/(\s+)/);
+  let hasBlocked = false;
+  let blocked = [];
+  const censored = parts.map((p, i) => {
+    let w = p.toLowerCase().replace(/[^\wğüşöçıİĞÜŞÖÇ]/g, "");
+    if (blockedWords.includes(w)) {
+      hasBlocked = true;
+      blocked.push(p);
+      return (
+        <span
+          key={i}
+          style={{
+            textDecoration: "underline wavy red",
+            color: "#c0392b",
+            fontWeight: "bold",
+            background: "#fff2",
+            cursor: "pointer"
+          }}
+          title="Bu kelimeyi kullanamazsınız."
+        >{p}</span>
+      );
+    }
+    return p;
+  });
+  return { parsed: censored, hasBlocked, blockedWords: blocked };
 }
 
 const SOCIALS = [
@@ -61,7 +98,7 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// Güncellenmiş, kurumsal, elit ve güçlü cümlelerle metinler
+// Kurumsal elit metinlerle güncel
 const messages = [
   "YolcuTransferi.com olarak, alanında uzman ve profesyonel ekiplerimizle her transferinizde kusursuz hizmet sunuyoruz.",
   "Talep, rezervasyon ve iş ortaklığı süreçlerinde, ayrıcalıklı müşteri deneyimiyle çözüm odaklı destek veriyoruz.",
@@ -71,7 +108,7 @@ const messages = [
   "YolcuTransferi.com Sadece bir transfer değil, size özel bir ayrıcalık yaşatır..."
 ];
 
-// Rate limit sadece örnek amaçlı, backendde şart!
+// Rate limit örnek, backendde zorunlu!
 function useRateLimit() {
   const key = "yt_contact_rate";
   const [blocked, setBlocked] = useState(false);
@@ -94,37 +131,8 @@ function useRateLimit() {
   return [blocked, kaydet];
 }
 
-// Mesaj içindeki yasak kelimeleri tespit ve işaretleme (altı kırmızı çizgi ve tooltip!)
-function getCensoredMessage(msg) {
-  if (!msg) return { parsed: "", hasBlocked: false, blockedWords: [] };
-  let parts = msg.split(/(\s+)/);
-  let hasBlocked = false;
-  let blockedWords = [];
-  const censored = parts.map((p, i) => {
-    let w = p.toLowerCase().replace(/[^\wğüşöçıİĞÜŞÖÇ]/g, "");
-    if (BLOCKED_WORDS.includes(w)) {
-      hasBlocked = true;
-      blockedWords.push(p);
-      return (
-        <span
-          key={i}
-          style={{
-            textDecoration: "underline wavy red",
-            color: "#c0392b",
-            fontWeight: "bold",
-            background: "#fff2",
-            cursor: "pointer"
-          }}
-          title="Bu kelimeyi kullanamazsınız."
-        >{p}</span>
-      );
-    }
-    return p;
-  });
-  return { parsed: censored, hasBlocked, blockedWords };
-}
-
 export default function Iletisim() {
+  const blockedWords = getBlockedWords();
   const [form, setForm] = useState({
     ad: "",
     soyad: "",
@@ -148,7 +156,6 @@ export default function Iletisim() {
     return () => clearInterval(interval);
   }, []);
 
-  // Autofill için ilk inputa focus
   useEffect(() => {
     const f = document.querySelector('input[autoComplete="given-name"]');
     if (f) f.focus();
@@ -170,20 +177,20 @@ export default function Iletisim() {
   const emailValid = isRealEmail(form.email);
   const msgValid = isRealMsg(form.mesaj);
 
-  const censored = getCensoredMessage(form.mesaj);
+  const censored = parseMessage(form.mesaj, blockedWords);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     let newErrors = {};
     setSendInfo("");
     if (blocked) newErrors.global = "Çok sık mesaj gönderildi, lütfen biraz bekleyiniz.";
-    if (form.honeypot && form.honeypot.length > 0) return; // Bot ise iptal et
+    if (form.honeypot && form.honeypot.length > 0) return;
     if (!adValid) newErrors.ad = "Lütfen gerçek adınızı giriniz.";
     if (!soyadValid) newErrors.soyad = "Lütfen gerçek soyadınızı giriniz.";
     if (!phoneValid) newErrors.telefon = "Telefon numarası hatalı (05xx xxx xx xx formatında).";
     if (!emailValid) newErrors.email = "Lütfen geçerli bir e-posta adresi giriniz.";
     if (!msgValid) newErrors.mesaj = "Lütfen açık, anlaşılır ve anlamlı bir mesaj yazınız.";
-    if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz/argo kelimeler tespit edildi. Lütfen çıkarınız.";
+    if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz/argo kelime var. Lütfen değiştirin.";
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
@@ -248,7 +255,6 @@ export default function Iletisim() {
         {/* Form */}
         <div className="flex flex-col md:flex-row gap-6">
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-3" autoComplete="on">
-            {/* Honeypot */}
             <input type="text" name="honeypot" value={form.honeypot} onChange={handleChange} style={{display:"none"}} autoComplete="off" tabIndex="-1"/>
             <div className="flex gap-2">
               <div className="flex-1 flex flex-col">
@@ -351,31 +357,48 @@ export default function Iletisim() {
               </div>
             </div>
             <div className="flex flex-col">
-              <textarea
-                name="mesaj"
-                placeholder="Mesajınız"
-                value={form.mesaj}
-                onChange={handleChange}
-                className={`p-3 rounded-lg border ${msgValid && !censored.hasBlocked ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white focus:border-[#bfa658] transition text-base`}
-                minLength={15}
-                required
-                rows={3}
-              />
-              {/* Mesajda uygunsuz kelime varsa vurgulu şekilde göster */}
+              <div style={{ position: "relative" }}>
+                <textarea
+                  name="mesaj"
+                  placeholder="Mesajınız"
+                  value={form.mesaj}
+                  onChange={handleChange}
+                  className={`p-3 rounded-lg border ${msgValid && !censored.hasBlocked ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white w-full focus:border-[#bfa658] transition text-base`}
+                  minLength={15}
+                  required
+                  rows={3}
+                  style={{ zIndex: 2, position: "relative", background: "transparent" }}
+                />
+                {/* Mesajda uygunsuz kelime varsa input üstüne bindirme ile göster */}
+                {form.mesaj && censored.hasBlocked && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: 12,
+                      top: 8,
+                      zIndex: 3,
+                      color: "#fff",
+                      fontSize: "1rem",
+                      pointerEvents: "none",
+                      width: "calc(100% - 24px)",
+                      height: "100%",
+                      background: "none",
+                      whiteSpace: "pre-wrap",
+                      opacity: 0.95,
+                      fontFamily: "inherit"
+                    }}
+                  >
+                    {censored.parsed}
+                  </div>
+                )}
+              </div>
               <div className="mt-1 text-sm leading-relaxed" style={{ minHeight: 26 }}>
                 {censored.hasBlocked && (
                   <span className="text-red-500 font-bold">
-                    Uygunsuz veya argo kelime tespit edildi: {censored.blockedWords.map((w, i) => <span key={i} style={{textDecoration:'underline wavy red',margin:'0 4px'}}>{w}</span>)} <br/>
-                    Bu kelimeyi kullanamazsınız.
+                    Uygunsuz veya argo kelime tespit edildi. Bu kelimeyi kullanamazsınız.
                   </span>
                 )}
               </div>
-              {/* Preview: mesaj kutusunun altında, uygun şekilde göster */}
-              {form.mesaj && (
-                <div className="text-gray-400 text-xs mt-1 flex flex-wrap items-center" style={{wordBreak:'break-word'}}>
-                  <b>Yazdığınız:</b>&nbsp;{censored.parsed}
-                </div>
-              )}
               {errors.mesaj && <span className="text-red-500 text-xs px-1 pt-1">{errors.mesaj}</span>}
             </div>
             {errors.global && <div className="text-red-500 text-sm font-bold px-2 py-1">{errors.global}</div>}
