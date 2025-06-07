@@ -1,20 +1,8 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
-
-// Basit blacklist ve bot kelimeler
-const FAKE_EMAILS = [
-  "asd@ss.com", "aaa@bbb.com", "test@test.com", "asdasd@asdasd.com", "qwe@qwe.com",
-  "mail@mail.com", "mail@domain.com", "deneme@deneme.com", "abc@abc.com", "abc@xyz.com"
-];
-const FAKE_DOMAINS = [
-  "ss.com", "bbb.com", "asdasd.com", "qwe.com", "mail.com", "domain.com", "deneme.com", "abc.com"
-];
-const FAKE_NAMES = [
-  "asd", "qwe", "poi", "test", "xxx", "zzz", "klm", "asdf", "qaz", "poiuy", "asdşl", "qwpoq", "sll", "deneme"
-];
 
 const SOCIALS = [
   { icon: <FaWhatsapp size={20} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
@@ -33,21 +21,9 @@ const ILETISIM_NEDENLERI = [
 ];
 
 const ILETISIM_TERCIHLERI = [
-  {
-    label: "WhatsApp",
-    value: "WhatsApp",
-    icon: <FaWhatsapp className="text-[#25d366] mr-1" size={16} />
-  },
-  {
-    label: "Telefon",
-    value: "Telefon",
-    icon: <FaPhone className="text-[#51A5FB] mr-1" size={16} />
-  },
-  {
-    label: "E-posta",
-    value: "E-posta",
-    icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} />
-  }
+  { label: "WhatsApp", value: "WhatsApp", icon: <FaWhatsapp className="text-[#25d366] mr-1" size={16} /> },
+  { label: "Telefon", value: "Telefon", icon: <FaPhone className="text-[#51A5FB] mr-1" size={16} /> },
+  { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
 const messages = [
@@ -59,7 +35,35 @@ const messages = [
   "YolcuTransferi.com — Sadece bir transfer değil, bir ayrıcalık..."
 ];
 
-// Spam/rate limit (localStorage ile front-endde)
+// E-posta validasyonu (tüm yaygın e-posta sağlayıcılarını destekler)
+function isRealEmail(val) {
+  if (!val) return false;
+  const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
+  // Basit şekilde hotmail, gmail, yahoo, outlook, protonmail vs. hepsini kapsar.
+  return regex.test(val);
+}
+
+function isRealName(val) {
+  if (!val || val.length < 3) return false;
+  if (!/^[a-zA-ZığüşöçİĞÜŞÖÇ ]+$/.test(val)) return false;
+  let v = val.trim().toLowerCase();
+  if (["asd", "qwe", "poi", "test", "xxx", "zzz", "klm", "asdf", "deneme"].includes(v)) return false;
+  if (/^([a-zA-ZğüşöçİĞÜŞÖÇ])\1+$/.test(v)) return false;
+  return true;
+}
+function isRealPhone(val) {
+  if (!val) return false;
+  return /^05\d{9}$/.test(val);
+}
+function isRealMsg(val) {
+  if (!val || val.length < 15) return false;
+  let wordCount = val.trim().split(/\s+/).length;
+  if (wordCount < 3) return false;
+  if (/([a-z])\1{3,}/.test(val.toLowerCase())) return false;
+  return true;
+}
+
+// Rate limit sadece örnek amaçlı, backend tarafı şart!
 function useRateLimit() {
   const key = "yt_contact_rate";
   const [blocked, setBlocked] = useState(false);
@@ -84,41 +88,6 @@ function useRateLimit() {
   return [blocked, kaydet];
 }
 
-// Modern ve sıkı validasyon fonksiyonları
-function isRealName(val) {
-  if (!val || val.length < 3) return false;
-  if (!/^[a-zA-ZığüşöçİĞÜŞÖÇ ]+$/.test(val)) return false;
-  let v = val.trim().toLowerCase();
-  if (FAKE_NAMES.includes(v)) return false;
-  if (/^([a-zA-ZğüşöçİĞÜŞÖÇ])\1+$/.test(v)) return false;
-  if (v.match(/^(asd|qwe|poi|klm|xyz|zzz|www|qqq|ooo|uuu)$/)) return false;
-  return true;
-}
-function isRealEmail(val) {
-  if (!val) return false;
-  if (FAKE_EMAILS.includes(val.trim().toLowerCase())) return false;
-  let parts = val.split("@");
-  if (parts.length !== 2) return false;
-  let [user, domain] = parts;
-  if (!user || !domain || domain.length < 5) return false;
-  if (FAKE_DOMAINS.some((d) => domain.endsWith(d))) return false;
-  if (!/^[\w\.\-]+@([\w\-]+\.)+(com|net|org|com\.tr|gov|edu|io|co|info)$/i.test(val)) return false;
-  return true;
-}
-function isRealPhone(val) {
-  if (!val) return false;
-  return /^05\d{9}$/.test(val);
-}
-function isRealMsg(val) {
-  if (!val || val.length < 15) return false;
-  if (/^(a|q|w|z|x|s|d|\d){5,}$/.test(val)) return false;
-  let wordCount = val.trim().split(/\s+/).length;
-  if (wordCount < 3) return false;
-  if (/([a-z])\1{3,}/.test(val.toLowerCase())) return false;
-  if (/^(asd|qwe|poi|klm|zzz|xxx|deneme|test)$/i.test(val.toLowerCase())) return false;
-  return true;
-}
-
 export default function Iletisim() {
   const [form, setForm] = useState({
     ad: "",
@@ -140,6 +109,12 @@ export default function Iletisim() {
       setActiveIndex((prev) => (prev + 1) % (messages.length + 1));
     }, 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Tarayıcıya otomatik doldurma şansı vermek için autoComplete + ilk inputa focus
+  useEffect(() => {
+    const f = document.querySelector('input[autoComplete="given-name"]');
+    if (f) f.focus();
   }, []);
 
   const handleChange = (e) => {
@@ -187,7 +162,9 @@ export default function Iletisim() {
 
   return (
     <div className="w-full flex justify-center bg-black min-h-[calc(100vh-150px)] py-6 px-2">
-      <div className="w-full max-w-4xl bg-[#191714]/90 border-[3px] border-[#bfa658] rounded-2xl shadow-2xl px-2 sm:px-6 py-6 flex flex-col gap-6">
+      <div className="w-full max-w-4xl rounded-2xl shadow-2xl px-2 sm:px-6 py-6 flex flex-col gap-6"
+        style={{ border: "2.5px solid #bfa658", background: "rgba(25, 23, 20, 0.98)" }}
+      >
         {/* Bilboard */}
         <div className="w-full flex justify-center mb-2">
           <div
