@@ -25,11 +25,11 @@ export default function Header() {
           <Image
             src="/LOGO.png"
             alt="Logo"
-            width={360}
+            width={360}        // 2 kat büyük
             height={100}
             className="mr-2"
             priority
-            style={{ height: 88, width: "auto" }}
+            style={{ height: 88, width: "auto" }} // 2 kat yüksek
           />
         </Link>
         {/* --- Mobilde --- Sosyal ve Giriş butonu hamburgerin solunda */}
@@ -65,25 +65,30 @@ export default function Header() {
           >
             Giriş Yap
           </Link>
-          {/* Hamburger */}
-          <button
-            className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 focus:outline-none"
-            onClick={() => setMenuOpen((val) => !val)}
-            aria-label="Menü"
-          >
-            <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
-            <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
-            <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
-          </button>
         </div>
-        {/* --- Desktop Menü --- */}
-        <nav className="hidden md:flex items-center gap-5 font-medium text-[1.1rem] text-gray-300 flex-wrap">
-          {menuItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="relative px-3 py-1 transition-colors duration-200 hover:text-gray-100"
-            >
+        {/* Hamburger Menü */}
+        <button
+          className="md:hidden flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 focus:outline-none"
+          onClick={() => setMenuOpen((val) => !val)}
+          aria-label="Menü"
+        >
+          <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
+          <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
+          <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
+        </button>
+        {/* Masaüstü sosyal ve giriş burada yok, onlar yukarıda */}
+      </div>
+      {/* Hamburger Menü İçeriği (sadece menü itemleri) */}
+      {menuOpen && (
+        <nav className="md:hidden absolute top-full left-0 w-full bg-black/95 px-6 py-5 z-50 shadow-xl animate-fade-in">
+          <div className="flex flex-col gap-2 text-lg font-semibold">
+            {menuItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="py-2 border-b border-[#bfa658] block"
+                onClick={() => setMenuOpen(false)}
+              >
               {item.name}
               <span className="absolute bottom-0 left-[10%] w-[80%] h-[1px] bg-gray-100 opacity-0 transition-opacity duration-300 hover:opacity-100"></span>
             </Link>
