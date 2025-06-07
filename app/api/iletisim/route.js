@@ -206,13 +206,13 @@ export default function Iletisim() {
       return;
     }
 
-    // Kısa, net, tekrar etmeyen kurumsal mesaj
-    let infoMsg = "";
-    if (form.iletisimTercihi === "E-posta")
-      infoMsg = "Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.";
-    else
-      infoMsg = `Teşekkürler. Mesajınız alınmıştır. Size <b>0539 526 75 69</b> kurumsal ${form.iletisimTercihi.toLowerCase()} kanalımızdan ulaşacağız.`;
-
+    /// Kısa, net, tekrar etmeyen kurumsal mesaj
+let infoMsg = "";
+if (form.iletisimTercihi === "E-posta") {
+  infoMsg = "Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.";
+} else {
+  infoMsg = `Teşekkürler. Mesajınız alınmıştır. Size <b>0539 526 75 69</b> kurumsal ${form.iletisimTercihi.toLowerCase()} kanalımızdan ulaşacağız.`;
+}
     setSendInfo(infoMsg);
     kaydet();
     setSent(true);
