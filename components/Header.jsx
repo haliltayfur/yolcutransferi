@@ -1,11 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// Desktop menü
+// Menü tanımları
 const desktopMenu = [
   { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
@@ -21,7 +21,6 @@ const desktopBurger = [
   { name: "Aracı Başvurusu", href: "/araci-basvuru" },
   { name: "Kurumsal", href: "/kurumsal" },
 ];
-// Mobil menü
 const mobileMenu = [
   { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
@@ -39,6 +38,8 @@ const mobileBurger = [
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(true);
+  const burgerRef = useRef(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 220 });
 
   useEffect(() => {
     const checkScreen = () => setIsDesktop(window.innerWidth >= 1024);
@@ -47,24 +48,34 @@ export default function Header() {
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
 
+  useEffect(() => {
+    // Hamburger açılırsa pozisyonunu al
+    if (menuOpen && burgerRef.current) {
+      const rect = burgerRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width > 200 ? rect.width : 220,
+      });
+    }
+  }, [menuOpen, isDesktop]);
+
   return (
     <header className="w-full bg-black/95 shadow z-40 relative">
       {isDesktop ? (
         <div className="flex items-center justify-between gap-2 px-2 sm:px-6 md:px-10 lg:px-16 py-2 w-full">
           {/* Logo */}
-          <Link href="/" className="flex items-center min-w-0">
+          <Link href="/" className="flex items-center min-w-0" style={{height: '90px'}}>
             <Image
               src="/LOGO.png"
               alt="Logo"
-              width={240}
-              height={80}
+              width={230}
+              height={90}
               priority
-              className="mr-2"
               style={{
-                width: "220px",
-                maxWidth: "220px",
-                maxHeight: "80px",
-                height: "auto",
+                width: "auto",
+                height: "75px", // Logo orantılı ve estetik görünsün
+                maxHeight: "88px",
                 objectFit: "contain",
               }}
             />
@@ -83,7 +94,8 @@ export default function Header() {
           </nav>
           {/* Hamburger */}
           <button
-            className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 ml-2"
+            ref={burgerRef}
+            className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 ml-2 relative"
             onClick={() => setMenuOpen((val) => !val)}
             aria-label="Menü"
           >
@@ -125,16 +137,15 @@ export default function Header() {
                 <Image
                   src="/LOGO.png"
                   alt="Logo"
-                  width={120}
-                  height={48}
+                  width={200}
+                  height={90}
                   priority
-                  className="mr-2"
                   style={{
-                    width: "32vw",
-                    minWidth: "80px",
-                    maxWidth: "160px",
-                    maxHeight: "48px",
-                    height: "auto",
+                    width: "auto",
+                    height: "60px",
+                    minWidth: "90px",
+                    maxWidth: "90vw",
+                    maxHeight: "64px",
                     objectFit: "contain",
                   }}
                 />
@@ -171,7 +182,8 @@ export default function Header() {
             </nav>
             {/* Hamburger */}
             <button
-              className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 ml-2"
+              ref={burgerRef}
+              className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 ml-2 relative"
               onClick={() => setMenuOpen((val) => !val)}
               aria-label="Menü"
             >
@@ -182,15 +194,25 @@ export default function Header() {
           </div>
         </>
       )}
-      {/* Hamburger açılır menü */}
+
+      {/* Hamburger açılır menü - sadece hamburgerin altında, sağa hizalı kutu */}
       {menuOpen && (
-        <nav className="absolute top-full left-0 w-full bg-black/95 px-6 py-5 z-50 shadow-xl animate-fade-in">
-          <div className="flex flex-col gap-2 text-lg font-semibold">
+        <nav
+          className="absolute bg-black/97 z-50 shadow-xl animate-fade-in border border-[#bfa658] rounded-xl"
+          style={{
+            top: menuPosition.top,
+            left: menuPosition.left,
+            width: menuPosition.width,
+            minWidth: 200,
+            maxWidth: 260,
+          }}
+        >
+          <div className="flex flex-col gap-2 text-lg font-semibold p-3">
             {(isDesktop ? desktopBurger : mobileBurger).map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="py-2 border-b border-[#bfa658] block"
+                className="py-2 border-b border-[#bfa658] block last:border-0"
                 onClick={() => setMenuOpen(false)}
               >
                 {item.name}
@@ -201,10 +223,10 @@ export default function Header() {
       )}
       <div className="w-full mt-2" style={{ borderBottom: "0.3px solid rgba(255,255,255,0.15)" }}></div>
       <style jsx>{`
-        .animate-fade-in { animation: fadeIn .4s; }
+        .animate-fade-in { animation: fadeIn .3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px);} to { opacity: 1; transform: translateY(0);} }
         @media (max-width: 600px) {
-          img[alt="Logo"] { width: 32vw !important; min-width: 60px !important; max-height: 44px !important; }
+          img[alt="Logo"] { width: auto !important; height: 60px !important; min-width: 60px !important; max-height: 64px !important; }
         }
       `}</style>
     </header>
