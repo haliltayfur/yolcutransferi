@@ -5,8 +5,6 @@ import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "re
 import { SiX } from "react-icons/si";
 
 // --- Rate Limit Fonksiyonu ve yardımcı fonksiyonlar ---
-// (Bu kısmı önceki tam kodundan kopyala veya yukarıdan al, değişiklik yok)
-
 function useRateLimit() {
   const key = "yt_contact_rate";
   const [blocked, setBlocked] = useState(false);
@@ -124,11 +122,10 @@ function parseMessage(msg, blockedWords) {
   return { parsed: censored, hasBlocked, blockedWords: blocked };
 }
 
-// --- DİĞER CONSTANTLAR ---
 const SOCIALS = [
-  { icon: <FaWhatsapp size={18} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
-  { icon: <FaInstagram size={18} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
-  { icon: <SiX size={18} />, name: "X (Twitter)", url: "https://x.com/yolcutransferi" }
+  { icon: <FaWhatsapp size={24} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
+  { icon: <FaInstagram size={24} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
+  { icon: <SiX size={24} />, name: "X (Twitter)", url: "https://x.com/yolcutransferi" }
 ];
 const ILETISIM_NEDENLERI = [
   "Bilgi Talebi", "Transfer Rezervasyonu", "Teklif Almak İstiyorum",
@@ -293,23 +290,21 @@ export default function Iletisim() {
           </button>
         </form>
         {/* --- Sosyal Medya, Telefon, Mail, Adres --- */}
-        <div className="w-full flex flex-col items-center gap-1 mt-2 mb-2">
-          <div className="flex flex-row gap-2 justify-center items-center mb-1">
+        <div className="w-full flex flex-col gap-1 mt-2 mb-2">
+          <div className="flex flex-row gap-3 items-center mb-1 pl-2">
             {SOCIALS.map(({ icon, url, name }) => (
               <a key={name} href={url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition"
+                className="flex items-center justify-center w-11 h-11 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition"
                 title={name}>
                 {icon}
               </a>
             ))}
           </div>
-          <div className="flex flex-row gap-2 justify-center items-center text-[1rem] font-semibold text-[#d9d9d9] flex-wrap">
+          {/* Telefon, Mail ve Adres */}
+          <div className="flex flex-row gap-3 items-center text-[1rem] font-semibold text-[#e7e7e7] flex-wrap pl-2">
             <span className={`flex items-center gap-1 ${boxFont}`}><FaPhone className="opacity-80" />+90 539 526 75 69</span>
             <span className={`flex items-center gap-1 ${boxFont}`}><FaEnvelope className="opacity-80" />info@yolcutransferi.com</span>
-          </div>
-          <div className={`flex justify-center items-center text-[0.98rem] font-semibold text-[#e0e0e0] mt-1 ${boxFont}`}>
-            <FaMapMarkerAlt className="opacity-80 mr-1" />
-            Ümraniye, İnkılap Mah. Plazalar Bölgesi
+            <span className={`flex items-center gap-1 ${boxFont}`}><FaMapMarkerAlt className="opacity-80 mr-1" />Ümraniye, İnkılap Mah. Plazalar Bölgesi</span>
           </div>
         </div>
         {/* HARİTA */}
@@ -338,6 +333,10 @@ export default function Iletisim() {
         }
         .animate-fade-in { animation: fadeIn .7s; }
         @keyframes fadeIn { 0% { opacity: 0; transform: translateY(15px);} 100% { opacity: 1; transform: translateY(0);} }
+        @media (max-width: 640px) {
+          .w-full .flex-row { flex-direction: column !important; gap: 0.5rem !important;}
+          .w-full .flex-row > span, .w-full .flex-row > a { margin-left: 0 !important; margin-bottom: 4px !important;}
+        }
       `}</style>
     </div>
   );
