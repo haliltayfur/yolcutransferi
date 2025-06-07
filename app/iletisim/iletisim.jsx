@@ -14,16 +14,33 @@ function useRateLimit() {
     const interval = setInterval(() => {
       const now = Date.now();
       let data = JSON.parse(localStorage.getItem(key) || "{}");
-      // SADECE 1 DAKİKA
-      for (const k in data) if (now - k > 60 * 1000) delete data[k];
+      // Temizle: 24 saat öncesini sil (hafıza temizliği)
+      for (const k in data) if (now - k > 24 * 60 * 60 * 1000) delete data[k];
       localStorage.setItem(key, JSON.stringify(data));
+
       let times = Object.values(data).map(Number).sort();
-      let sonBirDakika = times.filter((t) => now - t < 60 * 1000).length;
+      let total = times.length;
+
       let isBlocked = false;
       let enYakin = 0;
-      if (sonBirDakika >= 2 && times.length > 1) {
-        isBlocked = true;
-        enYakin = 60 * 1000 - (now - times[times.length - 2]);
+
+      if (total >= 10) {
+        // 10 veya daha fazla: 1 saat bekle
+        let lastTime = times[total - 1];
+        let wait = 60 * 60 * 1000 - (now - lastTime);
+        if (wait > 0) {
+          isBlocked = true;
+          enYakin = wait;
+        }
+      } else if (total >= 2) {
+        // 3. ve sonraki: 5 dk bekle
+        let lastTime = times[total - 1];
+        let secondLastTime = times[total - 2];
+        let wait = 5 * 60 * 1000 - (now - lastTime);
+        if (wait > 0 && (now - secondLastTime < 5 * 60 * 1000)) {
+          isBlocked = true;
+          enYakin = wait;
+        }
       }
       setBlocked(isBlocked);
       setRemaining(enYakin > 0 ? enYakin : 0);
@@ -39,6 +56,7 @@ function useRateLimit() {
   }
   return [blocked, kaydet, remaining];
 }
+
 
 function formatDuration(ms) {
   if (!ms || ms < 1000) return "1 sn";
@@ -427,7 +445,7 @@ export default function Iletisim() {
             {/* Hatalar */}
             {blocked && (
               <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-bold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
-                Yoğun talep nedeniyle mesajınız alınamadı. 
+                Güvenlik nedeniyle arka arkaya gönderimlerde kısa bir bekleme uygulanmaktadır.
                 <span className="ml-2 text-yellow-200 font-bold">
                   ⏳ {formatDuration(remaining)} sonra tekrar deneyebilirsiniz.
                 </span>
