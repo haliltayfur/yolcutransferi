@@ -6,7 +6,7 @@ import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
 const menuItems = [
-  { name: "AnasayfaAAA", href: "/" },
+  { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
   { name: "Araçlar", href: "/araclar" },
   { name: "Rezervasyon", href: "/rezervasyon" },
