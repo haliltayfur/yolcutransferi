@@ -72,6 +72,59 @@ function parseMessage(msg, blockedWords) {
   return { parsed: censored, hasBlocked, blockedWords: blocked };
 }
 
+// --- SÜRELİ RATE LIMIT HOOK ---
+function useRateLimit() {
+  const key = "yt_contact_rate";
+  const [blocked, setBlocked] = useState(false);
+  const [remaining, setRemaining] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      let data = JSON.parse(localStorage.getItem(key) || "{}");
+      // Sadece 10 dakika tutulacak
+      for (const k in data) if (now - k > 10 * 60 * 1000) delete data[k];
+      localStorage.setItem(key, JSON.stringify(data));
+      let sonDakika = Object.values(data).filter((t) => now - t < 60 * 1000).length;
+      let sonOnDakika = Object.values(data).filter((t) => now - t < 10 * 60 * 1000).length;
+
+      let isBlocked = false;
+      let enYakin = 0;
+      let times = Object.values(data).map(Number).sort();
+
+      if (sonDakika >= 2 && times.length > 1) {
+        // 1 dakikada 2 sınırı (kısa bekleme)
+        isBlocked = true;
+        enYakin = 60 * 1000 - (now - times[times.length - 2]);
+      } else if (sonOnDakika >= 5 && times.length >= 5) {
+        // 10 dakikada 5 sınırı (uzun bekleme)
+        isBlocked = true;
+        enYakin = 10 * 60 * 1000 - (now - times[times.length - 5]);
+      }
+      setBlocked(isBlocked);
+      setRemaining(enYakin > 0 ? enYakin : 0);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  function kaydet() {
+    const now = Date.now();
+    let data = JSON.parse(localStorage.getItem(key) || "{}");
+    data[now] = now;
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+  return [blocked, kaydet, remaining];
+}
+
+// SÜREYİ GÖRSEL OLARAK GÖSTEREN FONKSİYON
+function formatDuration(ms) {
+  if (!ms || ms < 1000) return "1 sn";
+  const totalSec = Math.ceil(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return `${min > 0 ? min + "dk " : ""}${sec}sn`;
+}
+
 const SOCIALS = [
   { icon: <FaWhatsapp size={20} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
   { icon: <FaInstagram size={20} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
@@ -103,29 +156,6 @@ const messages = [
   "YolcuTransferi.com Sadece bir transfer değil, size özel bir ayrıcalık yaşatır..."
 ];
 
-// Rate limit örnek, backendde zorunlu!
-function useRateLimit() {
-  const key = "yt_contact_rate";
-  const [blocked, setBlocked] = useState(false);
-  useEffect(() => {
-    const now = Date.now();
-    let data = JSON.parse(localStorage.getItem(key) || "{}");
-    for (const k in data) if (now - k > 60 * 60 * 1000) delete data[k];
-    localStorage.setItem(key, JSON.stringify(data));
-    let sonDakika = Object.values(data).filter((t) => now - t < 60 * 1000).length;
-    let sonSaat = Object.values(data).filter((t) => now - t < 60 * 60 * 1000).length;
-    if (sonDakika >= 2 || sonSaat >= 5) setBlocked(true);
-    else setBlocked(false);
-  }, []);
-  function kaydet() {
-    const now = Date.now();
-    let data = JSON.parse(localStorage.getItem(key) || "{}");
-    data[now] = now;
-    localStorage.setItem(key, JSON.stringify(data));
-  }
-  return [blocked, kaydet];
-}
-
 export default function Iletisim() {
   const blockedWords = getBlockedWords();
   const [form, setForm] = useState({
@@ -142,7 +172,7 @@ export default function Iletisim() {
   const [sent, setSent] = useState(false);
   const [sendInfo, setSendInfo] = useState(""); // Gönderdikten sonra iletişim bilgisi
   const [activeIndex, setActiveIndex] = useState(0);
-  const [blocked, kaydet] = useRateLimit();
+  const [blocked, kaydet, remaining] = useRateLimit();
   const [submitError, setSubmitError] = useState(""); // <-- Yeni eklendi
 
   useEffect(() => {
@@ -176,69 +206,64 @@ export default function Iletisim() {
   const censored = parseMessage(form.mesaj, blockedWords);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setSubmitError(""); // Hata sıfırlanır
-  let newErrors = {};
-  setSendInfo("");
-  if (blocked) newErrors.global = "Çok sık mesaj gönderildi, lütfen biraz bekleyiniz.";
-  if (form.honeypot && form.honeypot.length > 0) return;
-  if (!adValid) newErrors.ad = "Lütfen gerçek adınızı giriniz.";
-  if (!soyadValid) newErrors.soyad = "Lütfen gerçek soyadınızı giriniz.";
-  if (!phoneValid) newErrors.telefon = "Telefon numarası hatalı (05xx xxx xx xx formatında).";
-  if (!emailValid) newErrors.email = "Lütfen geçerli bir e-posta adresi giriniz.";
-  if (!msgValid) newErrors.mesaj = "Lütfen açık, anlaşılır ve anlamlı bir mesaj yazınız.";
-  if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz/argo kelime var. Lütfen değiştirin.";
-  setErrors(newErrors);
+    e.preventDefault();
+    setSubmitError(""); // Hata sıfırlanır
+    let newErrors = {};
+    setSendInfo("");
+    if (blocked) newErrors.global = "Çok sık mesaj gönderildi, lütfen biraz bekleyiniz.";
+    if (form.honeypot && form.honeypot.length > 0) return;
+    if (!adValid) newErrors.ad = "Lütfen gerçek adınızı giriniz.";
+    if (!soyadValid) newErrors.soyad = "Lütfen gerçek soyadınızı giriniz.";
+    if (!phoneValid) newErrors.telefon = "Telefon numarası hatalı (05xx xxx xx xx formatında).";
+    if (!emailValid) newErrors.email = "Lütfen geçerli bir e-posta adresi giriniz.";
+    if (!msgValid) newErrors.mesaj = "Lütfen açık, anlaşılır ve anlamlı bir mesaj yazınız.";
+    if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz/argo kelime var. Lütfen değiştirin.";
+    setErrors(newErrors);
 
-  if (Object.keys(newErrors).length > 0) {
-    let msg = "Mesajınız iletilemedi. ";
-    if (newErrors.ad || newErrors.soyad || newErrors.telefon || newErrors.email) {
-      msg += "Lütfen tüm bilgileri eksiksiz ve doğru şekilde doldurun. ";
+    if (Object.keys(newErrors).length > 0) {
+      let msg = "Mesajınız iletilemedi. ";
+      if (newErrors.ad || newErrors.soyad || newErrors.telefon || newErrors.email) {
+        msg += "Lütfen tüm bilgileri eksiksiz ve doğru şekilde doldurun. ";
+      }
+      if (newErrors.mesaj) {
+        msg += "Mesaj içeriğinde uygunsuz kelime, eksik veya anlamsız ifade tespit edildi. ";
+      }
+      if (newErrors.global) {
+        msg += "Çok fazla deneme yaptınız, lütfen birazdan tekrar deneyin.";
+      }
+      setSubmitError(msg.trim());
+      return;
     }
-    if (newErrors.mesaj) {
-      msg += "Mesaj içeriğinde uygunsuz kelime, eksik veya anlamsız ifade tespit edildi. ";
+    let infoMsg = "";
+    if (form.iletisimTercihi === "E-posta") {
+      infoMsg = "Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.";
+    } else {
+      infoMsg = `Teşekkürler. Mesajınız alınmıştır. Size <b>0539 526 75 69</b> kurumsal ${form.iletisimTercihi.toLowerCase()} kanalımızdan ulaşacağız.`;
     }
-    if (newErrors.global) {
-      msg += "Çok fazla deneme yaptınız, lütfen 1 dakika sonra tekrar deneyin.";
+    setSendInfo(infoMsg);
+    setSent(true);
+    kaydet();
+    try {
+      await fetch("/api/iletisim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+    } catch (error) {
+      setSubmitError("Sunucu hatası, lütfen tekrar deneyin.");
     }
-    setSubmitError(msg.trim());
-    console.log("GÖNDERİLEMEDİ:", msg.trim());
-    return;
-  }
-  // Buradan sonrası başarılı gönderimdir
-  let infoMsg = "";
-  if (form.iletisimTercihi === "E-posta") {
-    infoMsg = "Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.";
-  } else {
-    infoMsg = `Teşekkürler. Mesajınız alınmıştır. Size <b>0539 526 75 69</b> kurumsal ${form.iletisimTercihi.toLowerCase()} kanalımızdan ulaşacağız.`;
-  }
-  setSendInfo(infoMsg);
-  setSent(true);
-  kaydet();
-  // isteği yolla
-  try {
-    await fetch("/api/iletisim", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+    setTimeout(() => setSent(false), 7000);
+    setForm({
+      ad: "",
+      soyad: "",
+      telefon: "",
+      email: "",
+      neden: ILETISIM_NEDENLERI[0],
+      mesaj: "",
+      iletisimTercihi: ILETISIM_TERCIHLERI[2].value,
+      honeypot: ""
     });
-    console.log("GÖNDERİLDİ:", form);
-  } catch (error) {
-    setSubmitError("Sunucu hatası, lütfen tekrar deneyin.");
-  }
-  setTimeout(() => setSent(false), 7000);
-  setForm({
-    ad: "",
-    soyad: "",
-    telefon: "",
-    email: "",
-    neden: ILETISIM_NEDENLERI[0],
-    mesaj: "",
-    iletisimTercihi: ILETISIM_TERCIHLERI[2].value,
-    honeypot: ""
-  });
-};
-
+  };
 
   return (
     <div className="w-full flex justify-center bg-black min-h-[calc(100vh-150px)] py-6 px-2">
@@ -423,13 +448,30 @@ export default function Iletisim() {
               {errors.mesaj && <span className="text-red-500 text-xs px-1 pt-1">{errors.mesaj}</span>}
             </div>
 
+            {/* Rate limit veya diğer hatalar varsa üstte */}
+            {blocked && (
+              <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-semibold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
+                <span>Çok sık mesaj gönderdiniz.</span>
+                <span className="inline-flex items-center text-yellow-200 font-bold ml-2">
+                  ⏳ {formatDuration(remaining)} sonra tekrar gönderebilirsiniz.
+                </span>
+              </div>
+            )}
+
             <button
               type="submit"
               className={`bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full ${blocked || censored.hasBlocked || Object.keys(errors).length > 0 ? "opacity-50 cursor-not-allowed" : ""}`}
               disabled={blocked || censored.hasBlocked || Object.keys(errors).length > 0}
             >
               Mesajı Gönder
+              {/* Butonun yanında geri sayım */}
+              {blocked && (
+                <span className="inline-flex items-center ml-2 text-yellow-800 font-bold">
+                  ⏳ {formatDuration(remaining)}
+                </span>
+              )}
             </button>
+
             {/* Başarı mesajı */}
             {sent && (
               <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-400 shadow" dangerouslySetInnerHTML={{
