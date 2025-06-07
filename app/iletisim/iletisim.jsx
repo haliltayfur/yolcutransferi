@@ -394,11 +394,29 @@ export default function Iletisim() {
               </div>
               {errors.mesaj && <span className="text-red-500 text-xs px-1 pt-1">{errors.mesaj}</span>}
             </div>
-            {errors.global && <div className="text-red-500 text-sm font-bold px-2 py-1">{errors.global}</div>}
+
+            {/* --- UYARI BLOĞU (GÖNDER BUTONU ÜSTÜNE) --- */}
+            {(blocked || censored.hasBlocked || Object.keys(errors).length > 0) && (
+              <div
+                className="mt-2 mb-2 p-2 rounded-lg text-base font-semibold text-center border-2"
+                style={{
+                  color: "#fff",
+                  background: blocked ? "#d97706" : "#dc2626",
+                  borderColor: blocked ? "#fbbf24" : "#ef4444"
+                }}
+              >
+                {blocked && "Çok fazla deneme yaptınız, lütfen 1 dakika sonra tekrar deneyin."}
+                {censored.hasBlocked && "Mesajınızda uygunsuz veya argo kelime var. Lütfen çıkarın."}
+                {Object.keys(errors).length > 0 && !blocked && !censored.hasBlocked &&
+                  Object.values(errors).map((v, i) => <div key={i}>{v}</div>)
+                }
+              </div>
+            )}
+
             <button
               type="submit"
-              className={`bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full ${blocked || censored.hasBlocked ? "opacity-50 cursor-not-allowed" : ""}`}
-              disabled={blocked || censored.hasBlocked}
+              className={`bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full ${blocked || censored.hasBlocked || Object.keys(errors).length > 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+              disabled={blocked || censored.hasBlocked || Object.keys(errors).length > 0}
             >
               Mesajı Gönder
             </button>
