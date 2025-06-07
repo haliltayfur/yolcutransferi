@@ -4,7 +4,50 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// SEO güvenli — Base64 encode
+// Rate Limit — SADECE 1 DAKİKA
+function useRateLimit() {
+  const key = "yt_contact_rate";
+  const [blocked, setBlocked] = useState(false);
+  const [remaining, setRemaining] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      let data = JSON.parse(localStorage.getItem(key) || "{}");
+      // SADECE 1 DAKİKA
+      for (const k in data) if (now - k > 60 * 1000) delete data[k];
+      localStorage.setItem(key, JSON.stringify(data));
+      let times = Object.values(data).map(Number).sort();
+      let sonBirDakika = times.filter((t) => now - t < 60 * 1000).length;
+      let isBlocked = false;
+      let enYakin = 0;
+      if (sonBirDakika >= 2 && times.length > 1) {
+        isBlocked = true;
+        enYakin = 60 * 1000 - (now - times[times.length - 2]);
+      }
+      setBlocked(isBlocked);
+      setRemaining(enYakin > 0 ? enYakin : 0);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  function kaydet() {
+    const now = Date.now();
+    let data = JSON.parse(localStorage.getItem(key) || "{}");
+    data[now] = now;
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+  return [blocked, kaydet, remaining];
+}
+
+function formatDuration(ms) {
+  if (!ms || ms < 1000) return "1 sn";
+  const totalSec = Math.ceil(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return `${min > 0 ? min + "dk " : ""}${sec}sn`;
+}
+
 const BASE64_BLOCKED_WORDS = "YW1rLHF3cSxhbWssaWJuZSxzaWt0aXIsb3Jvc3B1LHNpazgsdGFxLGJvayxwZXpldmVua3xib2ssc2FsYWssZ2VyaXpla2FsacOnLGFwdGFsLHNoZXJlZnNizeixtYWwsw7x5bGUsYmtsLHNpY2sseyJjdWt1ciI6IH0=";
 
 function getBlockedWords() {
@@ -42,7 +85,6 @@ function isRealMsg(val) {
   return true;
 }
 
-// Argo kelime işaretleme (input üstü, sadece görünür)
 function parseMessage(msg, blockedWords) {
   if (!msg) return { parsed: "", hasBlocked: false, blockedWords: [] };
   let parts = msg.split(/(\s+)/);
@@ -72,56 +114,6 @@ function parseMessage(msg, blockedWords) {
   return { parsed: censored, hasBlocked, blockedWords: blocked };
 }
 
-// --- SÜRELİ RATE LIMIT HOOK ---
-function useRateLimit() {
-  const key = "yt_contact_rate";
-  const [blocked, setBlocked] = useState(false);
-  const [remaining, setRemaining] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = Date.now();
-      let data = JSON.parse(localStorage.getItem(key) || "{}");
-      for (const k in data) if (now - k > 10 * 60 * 1000) delete data[k];
-      localStorage.setItem(key, JSON.stringify(data));
-      let sonDakika = Object.values(data).filter((t) => now - t < 60 * 1000).length;
-      let sonOnDakika = Object.values(data).filter((t) => now - t < 10 * 60 * 1000).length;
-
-      let isBlocked = false;
-      let enYakin = 0;
-      let times = Object.values(data).map(Number).sort();
-
-      if (sonDakika >= 2 && times.length > 1) {
-        isBlocked = true;
-        enYakin = 60 * 1000 - (now - times[times.length - 2]);
-      } else if (sonOnDakika >= 5 && times.length >= 5) {
-        isBlocked = true;
-        enYakin = 10 * 60 * 1000 - (now - times[times.length - 5]);
-      }
-      setBlocked(isBlocked);
-      setRemaining(enYakin > 0 ? enYakin : 0);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  function kaydet() {
-    const now = Date.now();
-    let data = JSON.parse(localStorage.getItem(key) || "{}");
-    data[now] = now;
-    localStorage.setItem(key, JSON.stringify(data));
-  }
-  return [blocked, kaydet, remaining];
-}
-
-// SÜREYİ GÖSTEREN FONKSİYON
-function formatDuration(ms) {
-  if (!ms || ms < 1000) return "1 sn";
-  const totalSec = Math.ceil(ms / 1000);
-  const min = Math.floor(totalSec / 60);
-  const sec = totalSec % 60;
-  return `${min > 0 ? min + "dk " : ""}${sec}sn`;
-}
-
 const SOCIALS = [
   { icon: <FaWhatsapp size={20} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
   { icon: <FaInstagram size={20} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
@@ -145,11 +137,9 @@ const ILETISIM_TERCIHLERI = [
 ];
 
 const messages = [
-  "YolcuTransferi.com olarak, alanında uzman ve profesyonel ekiplerimizle her transferinizde kusursuz hizmet sunuyoruz.",
-  "Talep, rezervasyon ve iş ortaklığı süreçlerinde, ayrıcalıklı müşteri deneyimiyle çözüm odaklı destek veriyoruz.",
-  "İhtiyacınıza en uygun çözümleri, en hızlı şekilde sunmak için profesyonel ekiplerimiz hizmetinizde.",
-  "VIP standartlarında güven, lüks ve prestij sunuyoruz. Seçkin müşterilerimize, sadece transfer değil; kişiye özel bir ayrıcalık sağlıyoruz.",
-  "Her mesajınız, deneyimli müşteri ilişkileri ekiplerimiz tarafından hızla değerlendirilir ve çözüme ulaştırılır.",
+  "YolcuTransferi.com olarak, alanında uzman ve profesyonel ekibimizle ihtiyacınıza en uygun çözümleri sunuyoruz.",
+  "Talep, rezervasyon ve iş ortaklığı süreçlerinde çözüm odaklı destek sağlıyoruz.",
+  "Her mesajınız, deneyimli ekiplerimiz tarafından hızla değerlendirilir ve çözüme ulaştırılır.",
   "YolcuTransferi.com Sadece bir transfer değil, size özel bir ayrıcalık yaşatır..."
 ];
 
@@ -207,35 +197,25 @@ export default function Iletisim() {
     setSubmitError("");
     let newErrors = {};
     setSendInfo("");
-    if (blocked) newErrors.global = "Çok sık mesaj gönderildi, lütfen biraz bekleyiniz.";
+    if (blocked) newErrors.global = "Çok sık mesaj gönderdiniz, lütfen 1 dakika sonra tekrar deneyin.";
     if (form.honeypot && form.honeypot.length > 0) return;
-    if (!adValid) newErrors.ad = "Lütfen gerçek adınızı giriniz.";
-    if (!soyadValid) newErrors.soyad = "Lütfen gerçek soyadınızı giriniz.";
-    if (!phoneValid) newErrors.telefon = "Telefon numarası hatalı (05xx xxx xx xx formatında).";
+    if (!adValid) newErrors.ad = "Lütfen adınızı en az 3 karakter olacak şekilde doldurun.";
+    if (!soyadValid) newErrors.soyad = "Lütfen soyadınızı en az 3 karakter olacak şekilde doldurun.";
+    if (!phoneValid) newErrors.telefon = "Telefon numarası hatalı (05xx xxx xx xx).";
     if (!emailValid) newErrors.email = "Lütfen geçerli bir e-posta adresi giriniz.";
-    if (!msgValid) newErrors.mesaj = "Lütfen açık, anlaşılır ve anlamlı bir mesaj yazınız.";
-    if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz/argo kelime var. Lütfen değiştirin.";
+    if (!msgValid) newErrors.mesaj = "Mesajınızı daha açık ve anlamlı yazınız.";
+    if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz veya argo kelime var. Lütfen değiştirin.";
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
-      let msg = "Mesajınız iletilemedi. ";
-      if (newErrors.ad || newErrors.soyad || newErrors.telefon || newErrors.email) {
-        msg += "Lütfen tüm bilgileri eksiksiz ve doğru şekilde doldurun. ";
-      }
-      if (newErrors.mesaj) {
-        msg += "Mesaj içeriğinde uygunsuz kelime, eksik veya anlamsız ifade tespit edildi. ";
-      }
-      if (newErrors.global) {
-        msg += "Çok fazla deneme yaptınız, lütfen birazdan tekrar deneyin.";
-      }
-      setSubmitError(msg.trim());
+      setSubmitError(""); // Çünkü alan alan gösterilecek!
       return;
     }
     let infoMsg = "";
     if (form.iletisimTercihi === "E-posta") {
-      infoMsg = "Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.";
+      infoMsg = "Teşekkürler, mesajınız bize ulaştı. Size <b>info@yolcutransferi.com</b> adresinden dönüş yapacağız.";
     } else {
-      infoMsg = `Teşekkürler. Mesajınız alınmıştır. Size <b>0539 526 75 69</b> kurumsal ${form.iletisimTercihi.toLowerCase()} kanalımızdan ulaşacağız.`;
+      infoMsg = `Teşekkürler, mesajınız bize ulaştı. Size <b>0539 526 75 69</b> ${form.iletisimTercihi.toLowerCase()} hattımızdan ulaşacağız.`;
     }
     setSendInfo(infoMsg);
     setSent(true);
@@ -444,22 +424,31 @@ export default function Iletisim() {
               </div>
               {errors.mesaj && <span className="text-red-500 text-xs px-1 pt-1">{errors.mesaj}</span>}
             </div>
-
-            {/* Rate limit VEYA input hatası açık şekilde */}
+            {/* Hatalar */}
             {blocked && (
               <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-bold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
-                Çok sık mesaj gönderdiniz.
+                Yoğun talep nedeniyle mesajınız alınamadı. 
                 <span className="ml-2 text-yellow-200 font-bold">
-                  ⏳ {formatDuration(remaining)} sonra tekrar deneyin.
+                  ⏳ {formatDuration(remaining)} sonra tekrar deneyebilirsiniz.
                 </span>
               </div>
             )}
-            {!blocked && Object.values(errors).length > 0 && (
-              <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-bold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
-                Lütfen tüm alanları doğru ve eksiksiz doldurun.
-              </div>
+            {!blocked && (
+              <>
+                {(errors.ad || errors.soyad || errors.telefon || errors.email || errors.mesaj) && (
+                  <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-bold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
+                    {/* Tüm alanlara tek mesaj yerine, alan hatalarını tek tek göster */}
+                    <ul className="list-disc list-inside text-left">
+                      {errors.ad && <li>{errors.ad}</li>}
+                      {errors.soyad && <li>{errors.soyad}</li>}
+                      {errors.telefon && <li>{errors.telefon}</li>}
+                      {errors.email && <li>{errors.email}</li>}
+                      {errors.mesaj && <li>{errors.mesaj}</li>}
+                    </ul>
+                  </div>
+                )}
+              </>
             )}
-
             <button
               type="submit"
               className={`bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full ${blocked || censored.hasBlocked || Object.keys(errors).length > 0 ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -472,7 +461,6 @@ export default function Iletisim() {
                 </span>
               )}
             </button>
-
             {sent && (
               <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-400 shadow" dangerouslySetInnerHTML={{
                 __html: sendInfo
