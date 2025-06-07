@@ -20,13 +20,32 @@ const ILETISIM_NEDENLERI = [
   "Diğer"
 ];
 
+// İletişim tercihleri
+const ILETISIM_TERCIHLERI = [
+  {
+    label: "WhatsApp ile Dönüş",
+    value: "WhatsApp",
+    icon: <FaWhatsapp className="text-[#25d366] mr-2" size={18} />
+  },
+  {
+    label: "Telefon ile Arama",
+    value: "Telefon",
+    icon: <FaPhone className="text-[#51A5FB] mr-2" size={18} />
+  },
+  {
+    label: "E-posta ile Yanıt",
+    value: "E-posta",
+    icon: <FaEnvelope className="text-[#FFA500] mr-2" size={18} />
+  }
+];
+
 const messages = [
-  "YolcuTransferi.com olarak, deneyimli ekibimizle sizlere lüks ve güvenli bir yolculuk yaşatmak için buradayız.",
+  "YolcuTransferi.com olarak, deneyimli ekibimizle sizlere lüks ve güvenli bir yolculuk deneyimi yaşatmak için buradayız.",
   "Her türlü talebiniz, rezervasyonunuz veya iş birliği teklifiniz için bizimle çekinmeden iletişime geçebilirsiniz.",
   "İhtiyacınıza en uygun çözümü, en hızlı şekilde sunabilmek için profesyonel destek ekibimiz sizinle.",
   "VIP standartlarında hizmet için, bize ulaşmanız yeterli. Sizi dinlemek ve en iyi deneyimi yaşatmak önceliğimiz.",
   "Bize ilettiğiniz her mesaj titizlikle incelenir; ilgili ekibimiz en kısa sürede size dönüş sağlar.",
-  "YolcuTransferi.com  Sadece bir transfer değil, bir ayrıcalık..."
+  "YolcuTransferi.com — Sadece bir transfer değil, bir ayrıcalık..."
 ];
 
 export default function Iletisim() {
@@ -35,8 +54,9 @@ export default function Iletisim() {
     soyad: "",
     telefon: "",
     email: "",
-    neden: ILETISIM_NEDENLERI[0], // "Bilgi Talebi"
-    mesaj: ""
+    neden: ILETISIM_NEDENLERI[0],
+    mesaj: "",
+    iletisimTercihi: ILETISIM_TERCIHLERI[0].value // Varsayılan: WhatsApp
   });
   const [sent, setSent] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -58,8 +78,18 @@ export default function Iletisim() {
     }
   };
 
+  const handleIletisimTercihiChange = (value) => {
+    setForm({ ...form, iletisimTercihi: value });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Burada mail gönderen backend fonksiyonu güncellenmeli:
+    // form.iletisimTercihi de gönderilmeli!
+    // info@yolcutransferi.com adresine iletilen mailde:
+    // "İletişim tercihi: ..."
+
     setSent(true);
     setTimeout(() => setSent(false), 7000);
     setForm({
@@ -68,7 +98,8 @@ export default function Iletisim() {
       telefon: "",
       email: "",
       neden: ILETISIM_NEDENLERI[0],
-      mesaj: ""
+      mesaj: "",
+      iletisimTercihi: ILETISIM_TERCIHLERI[0].value
     });
   };
 
@@ -80,9 +111,9 @@ export default function Iletisim() {
           <div
             className="relative w-full max-w-3xl bg-black border border-[#bfa658] rounded-xl shadow flex items-center justify-center transition-all duration-500 overflow-hidden"
             style={{
-              minHeight: 62,
-              padding: "10px 8px",
-              height: "auto"
+              height: 78, // Sabit yükseklik, yazı çok kısa bile olsa değişmez
+              minHeight: 78,
+              padding: "0 12px"
             }}
           >
             {activeIndex < messages.length ? (
@@ -92,7 +123,7 @@ export default function Iletisim() {
                   whiteSpace: "normal",
                   width: "100%",
                   wordBreak: "break-word",
-                  fontSize: "1.04rem",
+                  fontSize: "1.08rem",
                   lineHeight: "1.4"
                 }}
               >
@@ -178,6 +209,39 @@ export default function Iletisim() {
               required
               rows={3}
             />
+
+            {/* İletişim tercihi kutucukları */}
+            <div className="mt-3">
+              <div className="mb-1 text-sm font-semibold text-gray-200">
+                Sizinle nasıl iletişime geçmemizi istersiniz?
+              </div>
+              <div className="flex flex-row gap-3">
+                {ILETISIM_TERCIHLERI.map((item) => (
+                  <label
+                    key={item.value}
+                    className={`flex items-center gap-1 px-4 py-2 rounded-lg border cursor-pointer text-sm font-medium
+                    transition
+                    ${
+                      form.iletisimTercihi === item.value
+                        ? "bg-[#bfa658] border-[#bfa658] text-black shadow"
+                        : "bg-[#181611] border-[#423c1c] text-white hover:border-[#bfa658]"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="iletisimTercihi"
+                      value={item.value}
+                      checked={form.iletisimTercihi === item.value}
+                      onChange={() => handleIletisimTercihiChange(item.value)}
+                      className="hidden"
+                    />
+                    {item.icon}
+                    {item.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <button
               type="submit"
               className="bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full"
