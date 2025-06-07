@@ -449,18 +449,13 @@ export default function Iletisim() {
                 )}
               </>
             )}
-            <button
-              type="submit"
-              className={`bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full ${blocked || censored.hasBlocked || Object.keys(errors).length > 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-              disabled={blocked || censored.hasBlocked || Object.keys(errors).length > 0}
-            >
-              Mesajı Gönder
-              {blocked && (
-                <span className="inline-flex items-center ml-2 text-yellow-900 font-bold">
-                  ⏳ {formatDuration(remaining)}
-                </span>
-              )}
-            </button>
+           <button
+  type="submit"
+  className="bg-[#bfa658] text-black font-bold py-3 px-8 rounded-xl text-lg hover:bg-yellow-600 transition shadow mt-2 w-full"
+  // disabled={blocked || censored.hasBlocked || Object.keys(errors).length > 0}
+>
+  Mesajı Gönder
+</button>
             {sent && (
               <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-400 shadow" dangerouslySetInnerHTML={{
                 __html: sendInfo
