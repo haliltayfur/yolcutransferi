@@ -82,7 +82,6 @@ function useRateLimit() {
     const interval = setInterval(() => {
       const now = Date.now();
       let data = JSON.parse(localStorage.getItem(key) || "{}");
-      // Sadece 10 dakika tutulacak
       for (const k in data) if (now - k > 10 * 60 * 1000) delete data[k];
       localStorage.setItem(key, JSON.stringify(data));
       let sonDakika = Object.values(data).filter((t) => now - t < 60 * 1000).length;
@@ -93,11 +92,9 @@ function useRateLimit() {
       let times = Object.values(data).map(Number).sort();
 
       if (sonDakika >= 2 && times.length > 1) {
-        // 1 dakikada 2 sınırı (kısa bekleme)
         isBlocked = true;
         enYakin = 60 * 1000 - (now - times[times.length - 2]);
       } else if (sonOnDakika >= 5 && times.length >= 5) {
-        // 10 dakikada 5 sınırı (uzun bekleme)
         isBlocked = true;
         enYakin = 10 * 60 * 1000 - (now - times[times.length - 5]);
       }
@@ -116,7 +113,7 @@ function useRateLimit() {
   return [blocked, kaydet, remaining];
 }
 
-// SÜREYİ GÖRSEL OLARAK GÖSTEREN FONKSİYON
+// SÜREYİ GÖSTEREN FONKSİYON
 function formatDuration(ms) {
   if (!ms || ms < 1000) return "1 sn";
   const totalSec = Math.ceil(ms / 1000);
@@ -170,10 +167,10 @@ export default function Iletisim() {
   });
   const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
-  const [sendInfo, setSendInfo] = useState(""); // Gönderdikten sonra iletişim bilgisi
+  const [sendInfo, setSendInfo] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [blocked, kaydet, remaining] = useRateLimit();
-  const [submitError, setSubmitError] = useState(""); // <-- Yeni eklendi
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -207,7 +204,7 @@ export default function Iletisim() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitError(""); // Hata sıfırlanır
+    setSubmitError("");
     let newErrors = {};
     setSendInfo("");
     if (blocked) newErrors.global = "Çok sık mesaj gönderildi, lütfen biraz bekleyiniz.";
@@ -448,13 +445,18 @@ export default function Iletisim() {
               {errors.mesaj && <span className="text-red-500 text-xs px-1 pt-1">{errors.mesaj}</span>}
             </div>
 
-            {/* Rate limit veya diğer hatalar varsa üstte */}
+            {/* Rate limit VEYA input hatası açık şekilde */}
             {blocked && (
-              <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-semibold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
-                <span>Çok sık mesaj gönderdiniz.</span>
-                <span className="inline-flex items-center text-yellow-200 font-bold ml-2">
-                  ⏳ {formatDuration(remaining)} sonra tekrar gönderebilirsiniz.
+              <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-bold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
+                Çok sık mesaj gönderdiniz.
+                <span className="ml-2 text-yellow-200 font-bold">
+                  ⏳ {formatDuration(remaining)} sonra tekrar deneyin.
                 </span>
+              </div>
+            )}
+            {!blocked && Object.values(errors).length > 0 && (
+              <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-bold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
+                Lütfen tüm alanları doğru ve eksiksiz doldurun.
               </div>
             )}
 
@@ -464,21 +466,18 @@ export default function Iletisim() {
               disabled={blocked || censored.hasBlocked || Object.keys(errors).length > 0}
             >
               Mesajı Gönder
-              {/* Butonun yanında geri sayım */}
               {blocked && (
-                <span className="inline-flex items-center ml-2 text-yellow-800 font-bold">
+                <span className="inline-flex items-center ml-2 text-yellow-900 font-bold">
                   ⏳ {formatDuration(remaining)}
                 </span>
               )}
             </button>
 
-            {/* Başarı mesajı */}
             {sent && (
               <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-green-700/90 text-white text-center border-2 border-green-400 shadow" dangerouslySetInnerHTML={{
                 __html: sendInfo
               }} />
             )}
-            {/* Kurumsal uyarı mesajı sadece gönder tuşuna basıldıktan sonra ve hata olursa */}
             {submitError && (
               <div className="mt-2 p-3 rounded-lg text-base font-semibold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
                 {submitError}
