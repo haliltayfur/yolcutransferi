@@ -55,7 +55,7 @@ export default function Header() {
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
 
-  // Hamburger pozisyonu
+  // Hamburger pozisyonu (ikonun altı)
   useEffect(() => {
     if (menuOpen && burgerRef.current) {
       const rect = burgerRef.current.getBoundingClientRect();
@@ -157,7 +157,7 @@ export default function Header() {
               <SiX className="w-7 h-7" />
             </a>
           </div>
-          {/* Hamburger açılır menü */}
+          {/* Hamburger açılır menü (header ile birebir aynı font, boyut, spacing) */}
           {menuOpen && (
             <nav
               ref={menuBoxRef}
@@ -170,12 +170,16 @@ export default function Header() {
                 zIndex: 99,
               }}
             >
-              <div className="flex flex-col gap-0 text-base font-semibold py-2">
+              <div className="flex flex-col gap-0 py-2">
                 {desktopBurger.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="py-2 px-4 border-b border-[#bfa658] last:border-0 hover:bg-black/40 transition"
+                    className="py-2 px-4 border-b border-[#bfa658] last:border-0 hover:bg-black/40 transition
+                               text-gray-300 font-medium text-[17px] tracking-normal"
+                    style={{
+                      letterSpacing: ".01em"
+                    }}
                     onClick={() => setMenuOpen(false)}
                   >
                     {item.name}
@@ -248,7 +252,7 @@ export default function Header() {
               <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
               <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
             </button>
-            {/* Hamburger açılır menü */}
+            {/* Hamburger açılır menü (header ile birebir aynı font, boyut, spacing) */}
             {menuOpen && (
               <nav
                 ref={menuBoxRef}
@@ -261,12 +265,16 @@ export default function Header() {
                   zIndex: 99,
                 }}
               >
-                <div className="flex flex-col gap-0 text-base font-semibold py-2">
+                <div className="flex flex-col gap-0 py-2">
                   {mobileBurger.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="py-2 px-4 border-b border-[#bfa658] last:border-0 hover:bg-black/40 transition"
+                      className="py-2 px-4 border-b border-[#bfa658] last:border-0 hover:bg-black/40 transition
+                                 text-gray-300 font-medium text-[17px] tracking-normal"
+                      style={{
+                        letterSpacing: ".01em"
+                      }}
                       onClick={() => setMenuOpen(false)}
                     >
                       {item.name}
