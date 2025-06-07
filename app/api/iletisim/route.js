@@ -1,23 +1,20 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-// 1. API Key otomatik olarak .env.local'dan gelir
+// .env.local dosyasından API Key’i alır
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// 2. API Route
 export async function POST(request) {
   try {
     const data = await request.json();
 
-    // 3. Zorunlu alanlar (gerekirse güncelleyebilirsin)
+    // Zorunlu alanlar
     if (!data.ad || !data.soyad || !data.telefon || !data.email || !data.mesaj) {
-      return NextResponse.json({ error: "Eksik bilgi." }, { status: 400 });
+      return NextResponse.json({ error: "Eksik bilgi var." }, { status: 400 });
     }
 
-    // 4. Admin ve yedek admin e-mail adresi
+    // Admin mailleri (gerekirse çoğalt)
     const TO_EMAILS = ["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"];
-
-    // 5. Mail içeriği
     const subject = `Yeni İletişim Formu: ${data.neden || "Mesaj"}`;
     const html = `
       <h2>Yeni iletişim talebi</h2>
@@ -32,22 +29,22 @@ export async function POST(request) {
       <small>YolcuTransferi.com - İletişim Formu</small>
     `;
 
-    // 6. Resend ile gönder
+    // Resend ile gönder
     const response = await resend.emails.send({
-      from: "YolcuTransferi <info@yolcutransferi.com>", // Bu adres Resend dashboard’da doğrulanmış olmalı!
+      from: "YolcuTransferi <info@yolcutransferi.com>", // Resend panelinde doğrulanmış adres olmalı!
       to: TO_EMAILS,
       subject,
       html,
       reply_to: data.email,
     });
 
-    // 7. Hata varsa logla ve göster
+    // Hata varsa detaylı bilgi dön
     if (response.error) {
       console.error("Resend Hatası:", response.error);
       return NextResponse.json({ error: "Mail gönderilemedi.", detail: response.error }, { status: 500 });
     }
 
-    // 8. Başarılı ise
+    // Başarılı ise
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("API Hatası:", error);
