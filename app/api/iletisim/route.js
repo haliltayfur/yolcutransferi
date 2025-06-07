@@ -206,7 +206,7 @@ export default function Iletisim() {
       return;
     }
 
-    /// Kısa, net, tekrar etmeyen kurumsal mesaj
+// Kısa, net, tekrar etmeyen kurumsal mesaj
 let infoMsg = "";
 if (form.iletisimTercihi === "E-posta") {
   infoMsg = "Teşekkürler. Mesajınız alınmıştır. Size <b>info@yolcutransferi.com</b> mail adresimizden ulaşacağız.";
