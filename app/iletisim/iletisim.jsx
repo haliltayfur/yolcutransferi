@@ -4,7 +4,7 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// --- Rate Limit ---
+// --- Yardımcı Fonksiyonlar ---
 function useRateLimit() {
   const key = "yt_contact_rate";
   const [blocked, setBlocked] = useState(false);
@@ -14,32 +14,22 @@ function useRateLimit() {
     const interval = setInterval(() => {
       const now = Date.now();
       let data = JSON.parse(localStorage.getItem(key) || "{}");
-      // Temizle: 24 saat öncesini sil
       for (const k in data) if (now - k > 24 * 60 * 60 * 1000) delete data[k];
       localStorage.setItem(key, JSON.stringify(data));
-
       let times = Object.values(data).map(Number).sort();
       let total = times.length;
-
       let isBlocked = false;
       let enYakin = 0;
-
       if (total >= 10) {
-        // 10 veya daha fazla: 1 saat bekle
         let lastTime = times[total - 1];
         let wait = 60 * 60 * 1000 - (now - lastTime);
-        if (wait > 0) {
-          isBlocked = true;
-          enYakin = wait;
-        }
+        if (wait > 0) { isBlocked = true; enYakin = wait; }
       } else if (total >= 2) {
-        // 3. ve sonrası: 5 dk bekle
         let lastTime = times[total - 1];
         let secondLastTime = times[total - 2];
         let wait = 5 * 60 * 1000 - (now - lastTime);
         if (wait > 0 && (now - secondLastTime < 5 * 60 * 1000)) {
-          isBlocked = true;
-          enYakin = wait;
+          isBlocked = true; enYakin = wait;
         }
       }
       setBlocked(isBlocked);
@@ -56,7 +46,6 @@ function useRateLimit() {
   }
   return [blocked, kaydet, remaining];
 }
-
 function formatDuration(ms) {
   if (!ms || ms < 1000) return "1 sn";
   const totalSec = Math.ceil(ms / 1000);
@@ -64,16 +53,13 @@ function formatDuration(ms) {
   const sec = totalSec % 60;
   return `${min > 0 ? min + "dk " : ""}${sec}sn`;
 }
-
 const BASE64_BLOCKED_WORDS = "YW1rLHF3cSxhbWssaWJuZSxzaWt0aXIsb3Jvc3B1LHNpazgsdGFxLGJvayxwZXpldmVua3xib2ssc2FsYWssZ2VyaXpla2FsacOnLGFwdGFsLHNoZXJlZnNizeixtYWwsw7x5bGUsYmtsLHNpY2sseyJjdWt1ciI6IH0=";
 function getBlockedWords() {
   try {
     if (typeof window !== "undefined" && window.atob)
       return window.atob(BASE64_BLOCKED_WORDS).split(",");
     return Buffer.from(BASE64_BLOCKED_WORDS, "base64").toString().split(",");
-  } catch (e) {
-    return [];
-  }
+  } catch (e) { return []; }
 }
 function isRealEmail(val) {
   if (!val) return false;
@@ -128,12 +114,12 @@ function parseMessage(msg, blockedWords) {
   return { parsed: censored, hasBlocked, blockedWords: blocked };
 }
 
+// --- Sabitler ---
 const SOCIALS = [
   { icon: <FaWhatsapp size={20} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
   { icon: <FaInstagram size={20} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
   { icon: <SiX size={20} />, name: "X (Twitter)", url: "https://x.com/yolcutransferi" }
 ];
-
 const ILETISIM_NEDENLERI = [
   "Bilgi Talebi",
   "Transfer Rezervasyonu",
@@ -143,13 +129,11 @@ const ILETISIM_NEDENLERI = [
   "Şikayet Bildirimi",
   "Diğer"
 ];
-
 const ILETISIM_TERCIHLERI = [
   { label: "WhatsApp", value: "WhatsApp", icon: <FaWhatsapp className="text-[#25d366] mr-1" size={16} /> },
   { label: "Telefon", value: "Telefon", icon: <FaPhone className="text-[#51A5FB] mr-1" size={16} /> },
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
-
 const messages = [
   "YolcuTransferi.com olarak, alanında uzman ve profesyonel ekibimizle ihtiyacınıza en uygun çözümleri sunuyoruz.",
   "Talep, rezervasyon ve iş ortaklığı süreçlerinde çözüm odaklı destek sağlıyoruz.",
@@ -157,6 +141,7 @@ const messages = [
   "YolcuTransferi.com Sadece bir transfer değil, size özel bir ayrıcalık yaşatır..."
 ];
 
+// --- Ana Component ---
 export default function Iletisim() {
   const blockedWords = getBlockedWords();
   const [form, setForm] = useState({
@@ -182,7 +167,6 @@ export default function Iletisim() {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
-
   useEffect(() => {
     const f = document.querySelector('input[autoComplete="given-name"]');
     if (f) f.focus();
@@ -193,7 +177,6 @@ export default function Iletisim() {
     setForm({ ...form, [name]: value });
     setErrors({ ...errors, [name]: undefined });
   };
-
   const handleIletisimTercihiChange = (value) => {
     setForm({ ...form, iletisimTercihi: value });
   };
@@ -203,7 +186,6 @@ export default function Iletisim() {
   const phoneValid = isRealPhone(form.telefon);
   const emailValid = isRealEmail(form.email);
   const msgValid = isRealMsg(form.mesaj);
-
   const censored = parseMessage(form.mesaj, blockedWords);
 
   const handleSubmit = async (e) => {
@@ -211,7 +193,7 @@ export default function Iletisim() {
     setSubmitError("");
     let newErrors = {};
     setSendInfo("");
-    if (blocked) newErrors.global = "Çok sık mesaj gönderdiniz, lütfen bekleyin.";
+    if (blocked) newErrors.global = "Çok sık mesaj gönderdiniz, lütfen 1 dakika sonra tekrar deneyin.";
     if (form.honeypot && form.honeypot.length > 0) return;
     if (!adValid) newErrors.ad = "Lütfen adınızı en az 3 karakter olacak şekilde doldurun.";
     if (!soyadValid) newErrors.soyad = "Lütfen soyadınızı en az 3 karakter olacak şekilde doldurun.";
@@ -222,8 +204,7 @@ export default function Iletisim() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
-      setSent(false);
-      setSubmitError(""); // Çünkü alan alan gösterilecek!
+      setSubmitError("");
       return;
     }
     let infoMsg = "";
@@ -257,12 +238,13 @@ export default function Iletisim() {
     });
   };
 
+  // --- Render ---
   return (
     <div className="w-full flex justify-center bg-black min-h-[calc(100vh-150px)] py-6 px-2">
       <div className="w-full max-w-4xl rounded-2xl shadow-2xl px-2 sm:px-6 py-6 flex flex-col gap-6"
         style={{ border: "2.5px solid #bfa658", background: "rgba(25, 23, 20, 0.98)" }}
       >
-        {/* --- BAŞLIK --- */}
+        {/* BAŞLIK */}
         <h1 className="text-center text-3xl md:text-4xl font-extrabold text-[#FFD700] mb-3 mt-2 tracking-tight drop-shadow">
           İletişim
         </h1>
@@ -295,8 +277,10 @@ export default function Iletisim() {
             )}
           </div>
         </div>
-        {/* Form */}
+
+        {/* FLEX GRID */}
         <div className="flex flex-col md:flex-row gap-6">
+          {/* FORM */}
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-3" autoComplete="on">
             <input type="text" name="honeypot" value={form.honeypot} onChange={handleChange} style={{display:"none"}} autoComplete="off" tabIndex="-1"/>
             <div className="flex gap-2">
@@ -370,7 +354,6 @@ export default function Iletisim() {
                 <option key={neden} value={neden}>{neden}</option>
               ))}
             </select>
-            {/* Chip butonlar */}
             <div className="mt-2 flex flex-col items-start gap-1">
               <span className="text-sm text-gray-300 font-bold mb-1 ml-1">Size nasıl ulaşalım?</span>
               <div className="flex flex-row gap-2 w-full">
@@ -412,7 +395,6 @@ export default function Iletisim() {
                   rows={3}
                   style={{ zIndex: 2, position: "relative", background: "transparent" }}
                 />
-                {/* Mesajda uygunsuz kelime varsa input üstüne bindirme ile göster */}
                 {form.mesaj && censored.hasBlocked && (
                   <div
                     style={{
@@ -444,7 +426,7 @@ export default function Iletisim() {
               </div>
               {errors.mesaj && <span className="text-red-500 text-xs px-1 pt-1">{errors.mesaj}</span>}
             </div>
-            {/* Hatalar/başarı mesajı (Aynı anda çıkmaz!) */}
+            {/* Hatalar */}
             {blocked && !sent && (
               <div className="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg text-base font-bold bg-red-700/90 text-white text-center border-2 border-red-400 shadow">
                 Güvenlik nedeniyle arka arkaya gönderimlerde kısa bir bekleme uygulanmaktadır.
@@ -485,7 +467,7 @@ export default function Iletisim() {
               </div>
             )}
           </form>
-          {/* Adres & Sosyal Medya */}
+          {/* SAĞ BİLGİ + SOSYAL + HARİTA (Desktop) */}
           <div className="flex-1 flex flex-col justify-start gap-4 mt-2">
             <div className="space-y-2 text-base text-gray-100">
               <div className="flex items-center gap-2"><FaPhone /> <span>+90 539 526 75 69</span></div>
@@ -505,13 +487,26 @@ export default function Iletisim() {
                 </a>
               ))}
             </div>
-            <div className="flex items-center gap-2 text-base text-gray-100 pt-2">
+            <div className="flex items-center gap-2 text-base text-gray-100 pt-2 mb-2">
               <FaMapMarkerAlt /> <span>Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span>
+            </div>
+            <div className="hidden md:block w-full">
+              <div style={{ width: "100%", maxWidth: "100%", height: "210px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
+                <iframe
+                  title="YolcuTransferi.com Konum"
+                  width="100%"
+                  height="210"
+                  frameBorder="0"
+                  style={{ border: 0 }}
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d24081.262044014337!2d29.0903967!3d41.0319917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac9cd7fd8d1ef%3A0xf6f8ff72b91ed1db!2sENPLAZA!5e0!3m2!1str!2str!4v1717693329992!5m2!1str!2str"
+                  allowFullScreen
+                ></iframe>
+              </div>
             </div>
           </div>
         </div>
-        {/* Harita */}
-        <div className="w-full flex justify-center">
+        {/* Harita Mobilde En Altta */}
+        <div className="md:hidden w-full flex justify-center mt-4">
           <div style={{ width: "100%", maxWidth: "900px", height: "210px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
             <iframe
               title="YolcuTransferi.com Konum"
@@ -524,13 +519,13 @@ export default function Iletisim() {
             ></iframe>
           </div>
         </div>
+        <style>{`
+          .animate-fade-in { animation: fadeIn .7s; }
+          @keyframes fadeIn { 0% { opacity: 0; transform: translateY(15px);} 100% { opacity: 1; transform: translateY(0);} }
+          .truncate-message { display: block; width: 100%; overflow-wrap: break-word; white-space: normal; line-height: 1.4; font-size: 1rem;}
+          @media (max-width: 640px) { .truncate-message { font-size: 0.97rem; } .max-w-3xl { max-width: 99vw !important; } }
+        `}</style>
       </div>
-      <style>{`
-        .animate-fade-in { animation: fadeIn .7s; }
-        @keyframes fadeIn { 0% { opacity: 0; transform: translateY(15px);} 100% { opacity: 1; transform: translateY(0);} }
-        .truncate-message { display: block; width: 100%; overflow-wrap: break-word; white-space: normal; line-height: 1.4; font-size: 1rem;}
-        @media (max-width: 640px) { .truncate-message { font-size: 0.97rem; } .max-w-3xl { max-width: 99vw !important; } }
-      `}</style>
     </div>
   );
 }
