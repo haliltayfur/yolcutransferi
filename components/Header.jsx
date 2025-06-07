@@ -5,7 +5,7 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// Menü tanımları
+// Masaüstü ana menü
 const desktopMenu = [
   { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
@@ -14,25 +14,30 @@ const desktopMenu = [
   { name: "Hakkımızda", href: "/hakkimizda" },
   { name: "İletişim", href: "/iletisim" },
 ];
+
+// Masaüstü hamburger menü
 const desktopBurger = [
+  { name: "Araçlar", href: "/araclar" },
   { name: "Şoför Başvurusu", href: "/sofor-basvuru" },
   { name: "İş Birliği", href: "/is-birligi" },
   { name: "Firma Başvurusu", href: "/firma-basvuru" },
   { name: "Aracı Başvurusu", href: "/araci-basvuru" },
-  { name: "Kurumsal", href: "/kurumsal" },
 ];
+
+// Mobil ana menü
 const mobileMenu = [
   { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
   { name: "Rezervasyon", href: "/rezervasyon" },
   { name: "İletişim", href: "/iletisim" },
 ];
+
+// Mobil hamburger menü
 const mobileBurger = [
+  { name: "Araçlar", href: "/araclar" },
   { name: "Şoför Başvurusu", href: "/sofor-basvuru" },
-  { name: "Kurumsal", href: "/kurumsal" },
   { name: "Hakkımızda", href: "/hakkimizda" },
   { name: "S.S.S.", href: "/sss" },
-  { name: "Araçlar", href: "/araclar" },
 ];
 
 export default function Header() {
@@ -40,8 +45,29 @@ export default function Header() {
   const [isDesktop, setIsDesktop] = useState(true);
   const burgerRef = useRef(null);
   const menuBoxRef = useRef(null);
+  const [menuCoords, setMenuCoords] = useState({ top: 0, left: 0, width: 220 });
 
-  // Hamburger dışına tıklayınca kapanma
+  // Responsive kontrol
+  useEffect(() => {
+    const checkScreen = () => setIsDesktop(window.innerWidth >= 1024);
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
+  // Hamburger pozisyonu
+  useEffect(() => {
+    if (menuOpen && burgerRef.current) {
+      const rect = burgerRef.current.getBoundingClientRect();
+      setMenuCoords({
+        top: rect.bottom + window.scrollY,
+        left: rect.right - 210,
+        width: 210,
+      });
+    }
+  }, [menuOpen, isDesktop]);
+
+  // Dışarı tıklayınca hamburgeri kapat
   useEffect(() => {
     function handleClick(e) {
       if (
@@ -53,34 +79,20 @@ export default function Header() {
         setMenuOpen(false);
       }
     }
-    if (menuOpen) {
-      window.addEventListener("mousedown", handleClick);
-    }
+    if (menuOpen) window.addEventListener("mousedown", handleClick);
     return () => window.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
-
-  useEffect(() => {
-    const checkScreen = () => setIsDesktop(window.innerWidth >= 1024);
-    checkScreen();
-    window.addEventListener("resize", checkScreen);
-    return () => window.removeEventListener("resize", checkScreen);
-  }, []);
-
-  // Hamburger'in butona tam yapışık olması için position (İletişim'in hemen sağında)
-  const burgerStyle = isDesktop
-    ? { marginLeft: 0, marginRight: 16 }
-    : { marginLeft: 0 };
 
   return (
     <header className="w-full bg-black/95 shadow z-40 relative">
       {isDesktop ? (
-        <div className="flex items-center justify-between px-4 lg:px-12 py-2 w-full" style={{minHeight: 95}}>
+        <div className="flex items-center justify-between px-4 lg:px-12 py-2 w-full" style={{ minHeight: 95 }}>
           {/* Logo (desktop %20 büyük) */}
-          <Link href="/" className="flex items-center min-w-0" style={{height: '90px'}}>
+          <Link href="/" className="flex items-center min-w-0" style={{ height: "90px" }}>
             <Image
               src="/LOGO.png"
               alt="Logo"
-              width={270} // %20 büyük
+              width={270}
               height={90}
               priority
               style={{
@@ -91,7 +103,7 @@ export default function Header() {
               }}
             />
           </Link>
-          {/* Menü (boşlukları yarı yarıya, gap-3 gibi) */}
+          {/* Menü (butonlar arası boşluk az, hamburger iletişimle yapışık) */}
           <nav className="flex items-center gap-3 flex-shrink-0 ml-4">
             {desktopMenu.map((item, i) => (
               <Link
@@ -99,39 +111,39 @@ export default function Header() {
                 href={item.href}
                 className="text-gray-300 px-2 py-1 font-medium text-[17px] hover:text-yellow-400 transition-colors rounded-lg whitespace-nowrap"
                 style={{
-                  marginRight: i !== desktopMenu.length - 1 ? 6 : 0, // Butonlar arası boşluğu iyice azalt
+                  marginRight: i !== desktopMenu.length - 1 ? 4 : 0,
                   letterSpacing: ".01em"
                 }}
               >
                 {item.name}
               </Link>
             ))}
-            {/* Hamburger (İletişim'in TAM yanında) */}
+            {/* Hamburger (İletişim'e tam bitişik) */}
             <button
               ref={burgerRef}
               className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 relative"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Menü"
-              style={burgerStyle}
+              style={{ marginLeft: 0 }}
             >
               <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
               <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
               <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
             </button>
           </nav>
-          {/* Sağda giriş/üye ol + sosyal (ikonlar büyük, bozulmamış) */}
+          {/* Sağda giriş/üye ol + sosyal */}
           <div className="flex items-center gap-3 ml-2">
             <Link
               href="/login"
               className="text-black font-semibold px-3 py-1.5 rounded bg-yellow-400 hover:bg-yellow-500 transition-colors duration-200 shadow-sm text-[15px]"
-              style={{minWidth: 80, fontWeight: 600}}
+              style={{ minWidth: 80, fontWeight: 600 }}
             >
               Giriş Yap
             </Link>
             <Link
               href="/register"
               className="text-[#222] font-semibold px-3 py-1.5 rounded border border-yellow-400 bg-yellow-200 hover:bg-yellow-400 hover:text-black transition-colors duration-200 shadow-sm text-[15px]"
-              style={{minWidth: 80, fontWeight: 600}}
+              style={{ minWidth: 80, fontWeight: 600 }}
             >
               Üye Ol
             </Link>
@@ -145,15 +157,14 @@ export default function Header() {
               <SiX className="w-7 h-7" />
             </a>
           </div>
-          {/* Hamburger açılır menü - TAM hamburger ikonunun altında, kutu ve koyu arka planlı */}
+          {/* Hamburger açılır menü */}
           {menuOpen && (
             <nav
               ref={menuBoxRef}
               className="absolute bg-[#1b1b1b] border border-[#bfa658] rounded-xl shadow-xl animate-fade-in"
               style={{
-                top: 95,
-                left: undefined,
-                right: 130, // hamburger ikonunun sol kenarına hizalı
+                top: menuCoords.top + 2,
+                left: menuCoords.left,
                 minWidth: 210,
                 maxWidth: 260,
                 zIndex: 99,
@@ -177,7 +188,7 @@ export default function Header() {
       ) : (
         <>
           {/* Mobil üst satır: Logo (%20 büyük) + Giriş/Üye Ol */}
-          <div className="flex items-center justify-between px-3 pt-2 pb-1 w-full" style={{minHeight: 65}}>
+          <div className="flex items-center justify-between px-3 pt-2 pb-1 w-full" style={{ minHeight: 65 }}>
             <Link href="/" className="flex items-center">
               <Image
                 src="/LOGO.png"
@@ -187,7 +198,7 @@ export default function Header() {
                 priority
                 style={{
                   width: "auto",
-                  height: "65px", // %20 büyük
+                  height: "65px",
                   minWidth: "90px",
                   maxHeight: "70px",
                   objectFit: "contain",
@@ -198,14 +209,14 @@ export default function Header() {
               <Link
                 href="/login"
                 className="text-black font-semibold px-2 py-1 rounded bg-yellow-400 hover:bg-yellow-500 transition-colors duration-200 shadow-sm text-[14px]"
-                style={{minWidth: 70, fontWeight: 600}}
+                style={{ minWidth: 70, fontWeight: 600 }}
               >
                 Giriş Yap
               </Link>
               <Link
                 href="/register"
                 className="text-[#222] font-semibold px-2 py-1 rounded border border-yellow-400 bg-yellow-200 hover:bg-yellow-400 hover:text-black transition-colors duration-200 shadow-sm text-[14px]"
-                style={{minWidth: 70, fontWeight: 600}}
+                style={{ minWidth: 70, fontWeight: 600 }}
               >
                 Üye Ol
               </Link>
@@ -225,26 +236,26 @@ export default function Header() {
                 </Link>
               ))}
             </nav>
-            {/* Hamburger sola yaslı ve altına açılır */}
+            {/* Hamburger */}
             <button
               ref={burgerRef}
               className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 ml-2 relative"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Menü"
-              style={{marginLeft: 0}}
+              style={{ marginLeft: 0 }}
             >
               <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
               <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
               <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
             </button>
-            {/* Hamburger açılır menü - hamburger ikonunun tam altından, kutu, sola taşmıyor */}
+            {/* Hamburger açılır menü */}
             {menuOpen && (
               <nav
                 ref={menuBoxRef}
                 className="absolute bg-[#181818] border border-[#bfa658] rounded-xl shadow-xl animate-fade-in"
                 style={{
-                  top: 108,
-                  left: 18,
+                  top: menuCoords.top + 2,
+                  left: menuCoords.left,
                   minWidth: 210,
                   maxWidth: 235,
                   zIndex: 99,
