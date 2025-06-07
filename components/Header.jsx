@@ -5,7 +5,7 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// Menü tanımları (senin istediğin sırayla)
+// Menü tanımları
 const desktopMenu = [
   { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
@@ -41,7 +41,7 @@ export default function Header() {
   const burgerRef = useRef(null);
   const menuBoxRef = useRef(null);
 
-  // Click dışında hamburgeri kapat
+  // Hamburger dışına tıklayınca kapanma
   useEffect(() => {
     function handleClick(e) {
       if (
@@ -59,7 +59,6 @@ export default function Header() {
     return () => window.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
 
-  // Responsive detection
   useEffect(() => {
     const checkScreen = () => setIsDesktop(window.innerWidth >= 1024);
     checkScreen();
@@ -67,89 +66,97 @@ export default function Header() {
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
 
+  // Hamburger'in butona tam yapışık olması için position (İletişim'in hemen sağında)
+  const burgerStyle = isDesktop
+    ? { marginLeft: 0, marginRight: 16 }
+    : { marginLeft: 0 };
+
   return (
     <header className="w-full bg-black/95 shadow z-40 relative">
       {isDesktop ? (
-        <div className="flex items-center justify-between px-2 sm:px-8 lg:px-16 py-2 w-full" style={{minHeight: 90}}>
-          {/* Logo */}
-          <Link href="/" className="flex items-center min-w-0" style={{height: '70px'}}>
+        <div className="flex items-center justify-between px-4 lg:px-12 py-2 w-full" style={{minHeight: 95}}>
+          {/* Logo (desktop %20 büyük) */}
+          <Link href="/" className="flex items-center min-w-0" style={{height: '90px'}}>
             <Image
               src="/LOGO.png"
               alt="Logo"
-              width={200}
-              height={70}
+              width={270} // %20 büyük
+              height={90}
               priority
               style={{
                 width: "auto",
-                height: "62px",
-                maxHeight: "70px",
+                height: "82px",
+                maxHeight: "90px",
                 objectFit: "contain",
               }}
             />
           </Link>
-          {/* Menü (gap azaldı, yarı yarıya) */}
-          <nav className="flex items-center gap-3 md:gap-5 flex-shrink-0" style={{marginLeft: 10}}>
+          {/* Menü (boşlukları yarı yarıya, gap-3 gibi) */}
+          <nav className="flex items-center gap-3 flex-shrink-0 ml-4">
             {desktopMenu.map((item, i) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-gray-300 px-1 md:px-2 py-1 font-medium text-[16px] hover:text-yellow-400 transition-colors rounded-lg whitespace-nowrap"
-                style={{letterSpacing: "0.01em"}}
+                className="text-gray-300 px-2 py-1 font-medium text-[17px] hover:text-yellow-400 transition-colors rounded-lg whitespace-nowrap"
+                style={{
+                  marginRight: i !== desktopMenu.length - 1 ? 6 : 0, // Butonlar arası boşluğu iyice azalt
+                  letterSpacing: ".01em"
+                }}
               >
                 {item.name}
               </Link>
             ))}
+            {/* Hamburger (İletişim'in TAM yanında) */}
+            <button
+              ref={burgerRef}
+              className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 relative"
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Menü"
+              style={burgerStyle}
+            >
+              <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
+              <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
+              <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
+            </button>
           </nav>
-          {/* Hamburger (iletişim ile hakkımızdanın arasında) */}
-          <button
-            ref={burgerRef}
-            className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 ml-2 mr-3 relative"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Menü"
-            style={{marginLeft: 10}}
-          >
-            <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
-            <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
-            <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
-          </button>
-          {/* Sağda giriş/üye ol + sosyal */}
-          <div className="flex items-center gap-2 ml-2">
+          {/* Sağda giriş/üye ol + sosyal (ikonlar büyük, bozulmamış) */}
+          <div className="flex items-center gap-3 ml-2">
             <Link
               href="/login"
-              className="text-black font-semibold px-3 py-1 rounded bg-yellow-400 hover:bg-yellow-500 transition-colors duration-200 shadow-sm text-[15px]"
-              style={{minWidth: 80, fontWeight: 600, fontSize: 15}}
+              className="text-black font-semibold px-3 py-1.5 rounded bg-yellow-400 hover:bg-yellow-500 transition-colors duration-200 shadow-sm text-[15px]"
+              style={{minWidth: 80, fontWeight: 600}}
             >
               Giriş Yap
             </Link>
             <Link
               href="/register"
-              className="text-[#222] font-semibold px-3 py-1 rounded border border-yellow-400 bg-yellow-200 hover:bg-yellow-400 hover:text-black transition-colors duration-200 shadow-sm text-[15px]"
-              style={{minWidth: 80, fontWeight: 600, fontSize: 15}}
+              className="text-[#222] font-semibold px-3 py-1.5 rounded border border-yellow-400 bg-yellow-200 hover:bg-yellow-400 hover:text-black transition-colors duration-200 shadow-sm text-[15px]"
+              style={{minWidth: 80, fontWeight: 600}}
             >
               Üye Ol
             </Link>
             <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-gray-100 transition-colors duration-200">
-              <FaWhatsapp className="w-5 h-5" />
+              <FaWhatsapp className="w-7 h-7" />
             </a>
             <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-gray-100 transition-colors duration-200">
-              <FaInstagram className="w-5 h-5" />
+              <FaInstagram className="w-7 h-7" />
             </a>
             <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-gray-100 transition-colors duration-200">
-              <SiX className="w-5 h-5" />
+              <SiX className="w-7 h-7" />
             </a>
           </div>
-          {/* Hamburger açılır menü - hemen ikonun altında, kutu ve koyu arka planlı */}
+          {/* Hamburger açılır menü - TAM hamburger ikonunun altında, kutu ve koyu arka planlı */}
           {menuOpen && (
             <nav
               ref={menuBoxRef}
               className="absolute bg-[#1b1b1b] border border-[#bfa658] rounded-xl shadow-xl animate-fade-in"
               style={{
-                top: 72,
-                right: 200,
+                top: 95,
+                left: undefined,
+                right: 130, // hamburger ikonunun sol kenarına hizalı
                 minWidth: 210,
                 maxWidth: 260,
                 zIndex: 99,
-                padding: "0px 0px",
               }}
             >
               <div className="flex flex-col gap-0 text-base font-semibold py-2">
@@ -169,20 +176,20 @@ export default function Header() {
         </div>
       ) : (
         <>
-          {/* Mobil üst satır: Logo + Giriş/Üye Ol */}
-          <div className="flex items-center justify-between px-3 pt-2 pb-1 w-full" style={{minHeight: 64}}>
+          {/* Mobil üst satır: Logo (%20 büyük) + Giriş/Üye Ol */}
+          <div className="flex items-center justify-between px-3 pt-2 pb-1 w-full" style={{minHeight: 65}}>
             <Link href="/" className="flex items-center">
               <Image
                 src="/LOGO.png"
                 alt="Logo"
-                width={155}
-                height={50}
+                width={160}
+                height={60}
                 priority
                 style={{
                   width: "auto",
-                  height: "55px",
-                  minWidth: "80px",
-                  maxHeight: "60px",
+                  height: "65px", // %20 büyük
+                  minWidth: "90px",
+                  maxHeight: "70px",
                   objectFit: "contain",
                 }}
               />
@@ -224,21 +231,22 @@ export default function Header() {
               className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 ml-2 relative"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Menü"
+              style={{marginLeft: 0}}
             >
               <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
               <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
               <span className="block w-6 h-0.5 bg-[#bfa658] rounded"></span>
             </button>
-            {/* Hamburger açılır menü - sola yaslı, hamburgerin altında kutu */}
+            {/* Hamburger açılır menü - hamburger ikonunun tam altından, kutu, sola taşmıyor */}
             {menuOpen && (
               <nav
                 ref={menuBoxRef}
                 className="absolute bg-[#181818] border border-[#bfa658] rounded-xl shadow-xl animate-fade-in"
                 style={{
-                  top: 104,
-                  left: 16,
-                  minWidth: 205,
-                  maxWidth: 240,
+                  top: 108,
+                  left: 18,
+                  minWidth: 210,
+                  maxWidth: 235,
                   zIndex: 99,
                 }}
               >
