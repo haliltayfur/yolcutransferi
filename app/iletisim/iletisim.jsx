@@ -124,11 +124,10 @@ function parseMessage(msg, blockedWords) {
   return { parsed: censored, hasBlocked, blockedWords: blocked };
 }
 
-// --- Sabitler
 const SOCIALS = [
-  { icon: <FaWhatsapp size={19} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
-  { icon: <FaInstagram size={19} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
-  { icon: <SiX size={19} />, name: "X (Twitter)", url: "https://x.com/yolcutransferi" }
+  { icon: <FaWhatsapp size={17} />, name: "WhatsApp", url: "https://wa.me/905395267569" },
+  { icon: <FaInstagram size={17} />, name: "Instagram", url: "https://instagram.com/yolcutransferi" },
+  { icon: <SiX size={17} />, name: "X (Twitter)", url: "https://x.com/yolcutransferi" }
 ];
 const ILETISIM_NEDENLERI = [
   "Bilgi Talebi",
@@ -162,9 +161,7 @@ export default function Iletisim() {
   const [sendInfo, setSendInfo] = useState("");
   const [buttonStatus, setButtonStatus] = useState("normal"); // normal, success, error
   const [buttonMsg, setButtonMsg] = useState("Mesajı Gönder");
-  const [activeIndex, setActiveIndex] = useState(0);
   const [blocked, kaydet, remaining] = useRateLimit();
-  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     setButtonMsg("Mesajı Gönder");
@@ -204,9 +201,8 @@ export default function Iletisim() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitError("");
-    let newErrors = {};
     setSendInfo("");
+    let newErrors = {};
     if (blocked) newErrors.global = "Güvenlik nedeniyle üst üste gönderimlerde kısa bir bekleme uygulanmaktadır.";
     if (form.honeypot && form.honeypot.length > 0) return;
     if (!adValid) newErrors.ad = "Lütfen adınızı en az 3 karakter olacak şekilde doldurun.";
@@ -215,7 +211,7 @@ export default function Iletisim() {
     if (!emailValid) newErrors.email = "Lütfen geçerli bir e-posta adresi giriniz.";
     if (!msgValid) newErrors.mesaj = "Mesajınızı daha açık ve anlamlı yazınız.";
     if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz veya argo kelime var. Lütfen değiştirin.";
-    if (!form.iletisimTercihi) newErrors.iletisimTercihi = "Lütfen ulaşım tercihinizi seçin.";
+    if (!form.iletisimTercihi) newErrors.iletisimTercihi = "Lütfen iletişim tercihinizi seçiniz.";
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
@@ -260,30 +256,34 @@ export default function Iletisim() {
   };
 
   return (
-    <div className="w-full flex justify-center bg-black min-h-[calc(100vh-150px)] py-6 px-2">
+    <div className="w-full flex justify-center bg-black min-h-[calc(100vh-150px)] py-6 px-2 font-poppins">
       <div className="w-full max-w-2xl rounded-2xl shadow-2xl px-1 sm:px-4 py-6 flex flex-col gap-4" style={{ border: "2.5px solid #bfa658", background: "rgba(25, 23, 20, 0.98)" }}>
         {/* BAŞLIK */}
         <h1 className="text-center text-4xl font-extrabold text-[#FFD700] mb-2 mt-1 tracking-tight drop-shadow">İletişim</h1>
-        <div className="text-center mb-1">
-          <span className="inline-block bg-[#FFD700] text-black font-bold text-xs px-4 py-1 rounded-full">7/24 VIP Müşteri Hattı • Kişiye özel ayrıcalık</span>
+        {/* Hareketli Band */}
+        <div className="flex justify-center w-full mb-1">
+          <div className="animate-gradient-move bg-gradient-to-r from-yellow-400 via-yellow-100 to-yellow-400 bg-[length:300%_100%] px-4 py-2 rounded-xl text-[15px] text-black font-bold shadow text-center"
+            style={{ minWidth: 180, maxWidth: 420, whiteSpace: 'nowrap' }}>
+            7/24 VIP Müşteri Hattı • Kişiye özel ayrıcalık
+          </div>
         </div>
         {/* FORM */}
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3 bg-black/60 rounded-2xl p-4 border border-[#bfa658]/60 shadow" autoComplete="on">
           <div className="flex gap-2">
             <input type="text" name="ad" autoComplete="given-name" placeholder="Ad"
               value={form.ad} onChange={handleChange}
-              className={`p-3 rounded-lg border flex-1 ${adValid ? "border-green-500" : form.ad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white focus:border-[#bfa658] transition text-base`} minLength={3} required />
+              className={`p-3 rounded-lg border flex-1 ${adValid ? "border-green-500" : form.ad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition text-base font-poppins`} minLength={3} required />
             <input type="text" name="soyad" autoComplete="family-name" placeholder="Soyad"
               value={form.soyad} onChange={handleChange}
-              className={`p-3 rounded-lg border flex-1 ${soyadValid ? "border-green-500" : form.soyad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white focus:border-[#bfa658] transition text-base`} minLength={3} required />
+              className={`p-3 rounded-lg border flex-1 ${soyadValid ? "border-green-500" : form.soyad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition text-base font-poppins`} minLength={3} required />
           </div>
           <div className="flex gap-2">
             <input type="tel" name="telefon" autoComplete="tel" placeholder="05xx xxx xx xx"
               value={form.telefon} onChange={handleChange}
-              className={`p-3 rounded-lg border flex-1 ${phoneValid ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white focus:border-[#bfa658] transition text-base`} maxLength={11} pattern="05\d{9}" required />
+              className={`p-3 rounded-lg border flex-1 ${phoneValid ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition text-base font-poppins`} maxLength={11} pattern="05\d{9}" required />
             <input type="email" name="email" autoComplete="email" placeholder="E-posta"
               value={form.email} onChange={handleChange}
-              className={`p-3 rounded-lg border flex-1 ${emailValid ? "border-green-500" : form.email ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white focus:border-[#bfa658] transition text-base`} required />
+              className={`p-3 rounded-lg border flex-1 ${emailValid ? "border-green-500" : form.email ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition text-base font-poppins`} required />
           </div>
           <select name="neden" value={form.neden} onChange={handleChange}
             className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-white focus:border-[#bfa658] transition text-base" required>
@@ -292,10 +292,10 @@ export default function Iletisim() {
             ))}
           </select>
           <textarea name="mesaj" placeholder="Mesajınız" value={form.mesaj} onChange={handleChange}
-            className={`p-3 rounded-lg border ${msgValid && !censored.hasBlocked ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-white focus:border-[#bfa658] transition text-base`} minLength={15} required rows={3} />
+            className={`p-3 rounded-lg border ${msgValid && !censored.hasBlocked ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition text-base`} minLength={15} required rows={3} />
           
           {/* --- Ulaşım Tercihiniz --- */}
-          <span className="text-sm text-gray-300 font-bold ml-1 mt-2">Ulaşım tercihiniz</span>
+          <span className="text-sm text-gray-300 font-bold ml-1 mt-2">İletişim tercihinizi seçiniz</span>
           <div className="flex flex-row gap-3 w-full mb-2">
             {ILETISIM_TERCIHLERI.map((item) => (
               <label
@@ -315,15 +315,14 @@ export default function Iletisim() {
                   checked={form.iletisimTercihi === item.value}
                   onChange={() => handleIletisimTercihiChange(item.value)}
                   className="hidden"
-                  required
                 />
-                <span className="mr-1">{item.icon}</span>
-                <span className="font-semibold">{item.label}</span>
+                {item.icon}
+                {item.label}
               </label>
             ))}
           </div>
+          {/* Hata mesajı */}
           {errors.iletisimTercihi && <span className="text-xs text-red-400 font-bold pl-2">{errors.iletisimTercihi}</span>}
-          
           {/* KVKK */}
           <div className="flex items-center gap-2 mt-1">
             <input type="checkbox" required className="accent-[#FFD700] w-4 h-4" />
@@ -345,32 +344,22 @@ export default function Iletisim() {
             {buttonMsg}
           </button>
         </form>
-        {/* Telefon / Mail / Adres (yan yana ve sade) */}
-        <div className="flex flex-wrap gap-x-8 gap-y-2 justify-center items-center px-2 pt-2 pb-1">
-          <span className="flex items-center gap-1 text-base text-gray-100">
-            <FaPhone /><span className="font-semibold">+90 539 526 75 69</span>
-          </span>
-          <span className="flex items-center gap-1 text-base text-gray-100">
-            <FaEnvelope /><span className="font-semibold">info@yolcutransferi.com</span>
-          </span>
-          <span className="flex items-center gap-1 text-base text-gray-100">
-            <FaMapMarkerAlt /><span className="font-semibold">Ümraniye, İnkılap Mah. Plazalar Bölgesi, İstanbul</span>
-          </span>
-          {/* Sosyal Medya */}
-          <span className="flex gap-2 ml-2">
+        {/* Telefon / Mail / Adres / Sosyal Medya (tek satır & sade) */}
+        <div className="w-full flex flex-col items-center gap-1 mt-2">
+          <div className="flex flex-row gap-3 justify-center items-center text-[0.98rem] font-semibold text-[#e1e1e1]">
+            <span className="flex items-center gap-1"><FaPhone className="opacity-80" />+90 539 526 75 69</span>
+            <span className="flex items-center gap-1"><FaEnvelope className="opacity-80" />info@yolcutransferi.com</span>
+            <span className="flex items-center gap-1"><FaMapMarkerAlt className="opacity-80" />Ümraniye, İnkılap Mah. Plazalar Bölgesi</span>
+          </div>
+          <div className="flex flex-row gap-2 justify-center pt-1">
             {SOCIALS.map(({ icon, url, name }) => (
-              <a
-                key={name}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
+              <a key={name} href={url} target="_blank" rel="noopener noreferrer"
                 className="flex items-center justify-center w-8 h-8 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition"
-                title={name}
-              >
+                title={name}>
                 {icon}
               </a>
             ))}
-          </span>
+          </div>
         </div>
         {/* HARİTA */}
         <div className="w-full flex justify-center mt-2">
@@ -388,12 +377,16 @@ export default function Iletisim() {
         </div>
       </div>
       <style>{`
+        .animate-gradient-move {
+          background-size: 300% 100%;
+          animation: gradientMove 2.5s linear infinite alternate;
+        }
+        @keyframes gradientMove {
+          0% { background-position-x: 0%; }
+          100% { background-position-x: 100%; }
+        }
         .animate-fade-in { animation: fadeIn .7s; }
         @keyframes fadeIn { 0% { opacity: 0; transform: translateY(15px);} 100% { opacity: 1; transform: translateY(0);} }
-        .truncate-message { display: block; width: 100%; overflow-wrap: break-word; white-space: normal; line-height: 1.4; font-size: 1rem;}
-        @media (max-width: 640px) {
-          .truncate-message { font-size: 0.97rem; }
-        }
       `}</style>
     </div>
   );
