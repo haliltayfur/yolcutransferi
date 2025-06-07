@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// Desktop ana menü
+// Menü tanımları
 const desktopMenu = [
   { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
@@ -14,8 +14,6 @@ const desktopMenu = [
   { name: "Hakkımızda", href: "/hakkimizda" },
   { name: "İletişim", href: "/iletisim" },
 ];
-
-// Desktop hamburger
 const desktopBurger = [
   { name: "Şoför Başvurusu", href: "/sofor-basvuru" },
   { name: "İş Birliği", href: "/is-birligi" },
@@ -24,15 +22,12 @@ const desktopBurger = [
   { name: "Kurumsal", href: "/kurumsal" },
 ];
 
-// Mobil ana menü
 const mobileMenu = [
   { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
   { name: "Rezervasyon", href: "/rezervasyon" },
   { name: "İletişim", href: "/iletisim" },
 ];
-
-// Mobil hamburger
 const mobileBurger = [
   { name: "Şoför Başvurusu", href: "/sofor-basvuru" },
   { name: "Firma Başvurusu", href: "/firma-basvuru" },
@@ -48,33 +43,34 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(true);
 
-  // Basit responsive kontrolü
-  if (typeof window !== "undefined") {
-    window.onresize = () => setIsDesktop(window.innerWidth >= 768);
-  }
-
-  // İlk yüklemede de responsive kontrolü
-  if (typeof window !== "undefined" && isDesktop !== window.innerWidth >= 768) {
-    setIsDesktop(window.innerWidth >= 768);
-  }
+  // Media query ile daha stabil responsive çözüm
+  useEffect(() => {
+    const checkScreen = () => setIsDesktop(window.innerWidth >= 768);
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
 
   return (
     <header className="w-full bg-black/95 shadow z-40 relative">
-      <div className="flex items-center justify-between px-3 sm:px-6 md:px-16 pt-3 pb-1 w-full">
+      {/* Üst Satır: Logo ve Sosyaller */}
+      <div className={`flex items-center justify-between px-3 sm:px-6 md:px-16 pt-3 pb-1 w-full ${isDesktop ? "" : "mb-2"}`}>
         <Link href="/" className="flex items-center min-w-0">
           <Image
             src="/LOGO.png"
             alt="Logo"
-            width={220}
-            height={80}
+            width={isDesktop ? 255 : 180}
+            height={isDesktop ? 88 : 85}
             priority
             className="mr-2"
             style={{
-              width: "180px",
-              maxWidth: "60vw",
-              maxHeight: "70px",
+              width: isDesktop ? "255px" : "90vw", // Desktopta %15 büyük, mobilde devasa
+              maxWidth: isDesktop ? "255px" : "90vw",
+              minWidth: isDesktop ? "160px" : "150px",
+              maxHeight: isDesktop ? "88px" : "85px",
               height: "auto",
               objectFit: "contain",
+              marginTop: isDesktop ? 0 : 10,
             }}
           />
         </Link>
@@ -90,24 +86,37 @@ export default function Header() {
           </a>
         </div>
       </div>
-      <div className="flex items-center justify-between px-3 sm:px-6 md:px-16 pb-2 pt-1 w-full">
-        <nav className="flex-1 flex flex-wrap items-center gap-2 justify-start overflow-x-auto">
-          {(typeof window !== "undefined" && window.innerWidth >= 768
-            ? desktopMenu
-            : mobileMenu
-          ).map((item) => (
+
+      {/* Menü satırı - masaüstü veya mobil */}
+      <div className={`flex items-center justify-between px-3 sm:px-6 md:px-16 pb-1 w-full ${isDesktop ? "" : "flex-wrap"}`}>
+        {/* Menü: Yan yana (mobilde de yan yana) */}
+        <nav className="flex-1 flex flex-row items-center gap-1 justify-start overflow-x-auto">
+          {(isDesktop ? desktopMenu : mobileMenu).map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className="text-gray-300 px-3 py-1 font-medium text-base hover:text-yellow-400 transition-colors rounded-lg whitespace-nowrap"
-              style={{ minWidth: 80, textAlign: "center" }}
+              style={{ minWidth: 60, textAlign: "center" }}
             >
               {item.name}
             </Link>
           ))}
         </nav>
-        {/* Sağda giriş ve üye ol butonları */}
-        <div className="flex gap-2 ml-2">
+        {/* Hamburger Menü */}
+        <button
+          className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 ml-2"
+          onClick={() => setMenuOpen((val) => !val)}
+          aria-label="Menü"
+        >
+          <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
+          <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
+          <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
+        </button>
+      </div>
+
+      {/* Mobilde Giriş Yap & Üye Ol - alt satır sağa yaslı */}
+      {!isDesktop && (
+        <div className="flex w-full justify-end px-3 mb-2 gap-2">
           <Link
             href="/login"
             className="text-black font-semibold px-3 py-1.5 rounded-lg bg-yellow-400 hover:bg-yellow-500 transition-colors duration-200 shadow-sm text-sm"
@@ -121,25 +130,31 @@ export default function Header() {
             Üye Ol
           </Link>
         </div>
-        {/* Hamburger Menü */}
-        <button
-          className="flex flex-col gap-1 p-2 rounded-lg border border-[#bfa658] bg-black/70 ml-2"
-          onClick={() => setMenuOpen((val) => !val)}
-          aria-label="Menü"
-        >
-          <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
-          <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
-          <span className="block w-7 h-0.5 bg-[#bfa658] rounded"></span>
-        </button>
-      </div>
-      {/* Hamburger açılır menü: içerik farklı! */}
+      )}
+
+      {/* Masaüstü sağda giriş & üye ol */}
+      {isDesktop && (
+        <div className="absolute right-10 top-[33px] flex gap-2">
+          <Link
+            href="/login"
+            className="text-black font-semibold px-3 py-1.5 rounded-lg bg-yellow-400 hover:bg-yellow-500 transition-colors duration-200 shadow-sm text-sm"
+          >
+            Giriş Yap
+          </Link>
+          <Link
+            href="/register"
+            className="text-yellow-400 border border-yellow-400 font-semibold px-3 py-1.5 rounded-lg hover:bg-yellow-400 hover:text-black transition-colors duration-200 shadow-sm text-sm"
+          >
+            Üye Ol
+          </Link>
+        </div>
+      )}
+
+      {/* Hamburger açılır menü */}
       {menuOpen && (
         <nav className="absolute top-full left-0 w-full bg-black/95 px-6 py-5 z-50 shadow-xl animate-fade-in">
           <div className="flex flex-col gap-2 text-lg font-semibold">
-            {(typeof window !== "undefined" && window.innerWidth >= 768
-              ? desktopBurger
-              : mobileBurger
-            ).map((item) => (
+            {(isDesktop ? desktopBurger : mobileBurger).map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -152,12 +167,13 @@ export default function Header() {
           </div>
         </nav>
       )}
+
       <div className="w-full mt-2" style={{ borderBottom: "0.3px solid rgba(255,255,255,0.15)" }}></div>
       <style jsx>{`
         .animate-fade-in { animation: fadeIn .4s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px);} to { opacity: 1; transform: translateY(0);} }
         @media (max-width: 600px) {
-          img[alt="Logo"] { width: 120px !important; max-height: 54px !important; }
+          img[alt="Logo"] { width: 90vw !important; min-width: 140px !important; max-height: 75px !important; }
         }
       `}</style>
     </header>
