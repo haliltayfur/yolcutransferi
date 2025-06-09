@@ -8,12 +8,10 @@ export default function Hakkimizda() {
       <h1 className="text-3xl md:text-4xl font-bold text-center text-[#bfa658] mb-8 tracking-tight">
         Hakkımızda
       </h1>
-
       {/* Slogan */}
       <div className="text-xl md:text-2xl font-semibold text-center mb-8 text-[#bfa658] tracking-tight">
         Türkiye genelinde VIP ayrıcalık, güvenli ve lüks transfer deneyimi YolcuTransferi.com’da.
       </div>
-
       {/* Kutu ve içeriği */}
       <div className="border-2 border-[#bfa658] rounded-2xl bg-black/80 px-4 md:px-8 py-7 md:py-10 mb-9">
         <div className="space-y-5 text-[1.13rem] md:text-[1.15rem] text-gray-200 font-normal leading-relaxed">
@@ -25,11 +23,11 @@ export default function Hakkimizda() {
           </p>
           <ul className="pl-2 md:pl-8 mt-2 space-y-3">
             {[
-              "Mercedes Vito, Maybach gibi lüks ve VIP araç seçenekleri",
-              "Aile, grup ve ekonomik transfer alternatifleri",
-              "Her yolculuğa özel ekstra hizmet ve kişiselleştirme imkanı",
-              "Gelişmiş online rezervasyon ve güvenli ödeme altyapısı",
-              "Tamamen yasal, sigortalı ve profesyonel hizmet ağı"
+              "Mercedes Vito, Maybach gibi lüks ve VIP Araç Seçenekleri",
+              "Kurumsal Misafirleri, Aile, Grup ve Ekonomik Transfer Alternatifleri",
+              "Her Yolculuğa Özel Ekstra Hizmet ve Kişiselleştirme İmkanı",
+              "Gelişmiş Online Rezervasyon ve Güvenli ödeme altyapısı",
+              "Güvenli, Sigortalı ve Profesyonel hizmet ağı"
             ].map((text, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span
@@ -57,20 +55,12 @@ export default function Hakkimizda() {
           </p>
         </div>
       </div>
-      {/* Büyük rezervasyon butonu */}
-      <div className="flex justify-center mt-3">
-        <Link
-          href="/rezervasyon"
-          className="inline-block w-full md:w-auto px-0 md:px-20 py-4 rounded-xl text-center bg-[#bfa658] hover:bg-[#a68d53] text-black font-bold text-lg tracking-tight shadow-md transition-all duration-200"
-          style={{
-            fontFamily: "inherit",
-            fontSize: "1.18rem",
-            letterSpacing: ".01em"
-          }}
-        >
+      {/* Buton tam senin verdiğin gibi, büyük ve çarpıcı */}
+      <Link href="https://yolcutransferi.com/rezervasyon">
+        <button className="bg-[#6e5a1e] hover:bg-[#8c7327] text-white font-bold py-3 px-8 rounded-xl mt-10 w-full text-lg shadow">
           Rezervasyon Yap
-        </Link>
-      </div>
+        </button>
+      </Link>
     </main>
   );
 }
