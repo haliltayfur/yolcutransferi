@@ -4,10 +4,10 @@ import { SiX } from "react-icons/si";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#141414] text-gray-200 pt-12 pb-7 px-3 border-t border-[#FFD70026] font-sans">
+    <footer className="bg-[#151515] text-gray-200 pt-12 pb-7 px-3 border-t border-[#FFD70029] font-sans">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 mb-8">
 
-        {/* LOGO + KURUMSAL SLOGAN + SERTİFİKALAR */}
+        {/* LOGO + SLOGAN + GÜVEN DAMGASI */}
         <div className="flex flex-col gap-2">
           <Image
             src="/LOGO.png"
@@ -19,11 +19,11 @@ export default function Footer() {
             style={{ objectFit: "contain" }}
           />
           <p className="text-gold font-semibold text-base mt-2 mb-2 leading-tight">
-            “Her yolculuk bir ayrıcalıktır.”
+            “VIP transferde ayrıcalık ve güven.”
           </p>
           <p className="text-xs text-gray-400 mb-3">
-            YolcuTransferi.com, Türkiye’nin lider VIP ve kurumsal transfer markasıdır.  
-            %100 müşteri memnuniyeti, üst düzey güvenlik ve ayrıcalık ilkesiyle hizmet vermektedir.
+            Türkiye’nin lider VIP ve kurumsal yolcu taşıma platformu.<br />
+            Tüm Türkiye’de, 7/24 profesyonel, lisanslı ve güvenli transfer hizmeti.
           </p>
           <div className="flex items-center gap-3 mt-2">
             <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" aria-label="Whatsapp" className="text-gold hover:text-yellow-400 transition">
@@ -36,16 +36,14 @@ export default function Footer() {
               <SiX size={20} />
             </a>
           </div>
-          {/* Sertifika/ödeme logoları */}
+          {/* Güven damgaları */}
           <div className="flex items-center gap-3 mt-5">
-            <Image src="/visa.png" alt="Visa" width={38} height={16} />
-            <Image src="/mastercard.png" alt="Mastercard" width={38} height={16} />
-            <Image src="/iyzico.svg" alt="iyzico" width={44} height={18} />
-            {/* Daha fazla ödeme/logosu eklenebilir */}
+            <Image src="/troy.png" alt="TROY" width={48} height={24} />
+            <Image src="/tursab.png" alt="TÜRSAB" width={70} height={28} />
           </div>
         </div>
 
-        {/* HIZLI MENÜ */}
+        {/* VIP MENÜ */}
         <div>
           <h3 className="text-gold text-lg font-semibold mb-4">VIP Hizmetler</h3>
           <ul className="space-y-2 text-[15px]">
@@ -58,7 +56,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* KURUMSAL/KANUNİ MENÜ */}
+        {/* KURUMSAL/YASAL MENÜ */}
         <div>
           <h3 className="text-gold text-lg font-semibold mb-4">Kurumsal & Yasal</h3>
           <ul className="space-y-2 text-[15px]">
@@ -90,22 +88,23 @@ export default function Footer() {
             </li>
             <li className="flex items-center gap-2 mt-3">
               <FaMapMarkerAlt className="text-gold" size={16} />
-              <span className="text-xs text-gray-400">İstanbul Merkez Ofis</span>
+              <span className="text-xs text-gray-400">Türkiye Geneli 7/24 Hizmet</span>
             </li>
           </ul>
         </div>
       </div>
 
-      {/* ALT BAND & GLOBAL PARTNERLER */}
+      {/* ALT BAND */}
       <div className="max-w-7xl mx-auto mt-8 border-t border-[#FFD70025] pt-4 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400 gap-3">
-        <div className="flex flex-row items-center gap-3">
-          <span>© {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.</span>
+        <div>
+          © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
         </div>
-        <div className="flex flex-row items-center gap-3">
-          <span>Global Partnerler:</span>
-          <Image src="/blacklane-logo.svg" alt="Blacklane" width={50} height={20} />
-          <Image src="/gettransfer-logo.svg" alt="GetTransfer" width={50} height={20} />
-          {/* Gerçek partnerlerin logosu buraya */}
+        <div className="flex gap-4 mt-2 md:mt-0">
+          <a href="/kvkk" className="hover:text-yellow-400 transition">KVKK</a>
+          <span>|</span>
+          <a href="/gizlilik-politikasi" className="hover:text-yellow-400 transition">Gizlilik</a>
+          <span>|</span>
+          <a href="/kullanim-sartlari" className="hover:text-yellow-400 transition">Kullanım Şartları</a>
         </div>
       </div>
       <style jsx>{`
