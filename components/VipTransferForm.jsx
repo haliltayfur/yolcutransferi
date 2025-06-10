@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import { vehicles } from "../data/vehicles";
-// Eğer ekstralar ve rötar seçimi bu formda gösterilecekse onları da import et (şu an kullanılmıyor)
+import { vehicles } from "../data/vehicles"; // !!! export const vehicles
+// Eğer ekstra ve rotar ekleyeceksen aşağıya import et
 // import { extrasList } from "../data/extras";
 // import { rotarList } from "../data/rotarOptions";
 
@@ -40,27 +40,61 @@ export default function VipTransferForm({ onSubmit }) {
   const [vehicle, setVehicle] = useState(vehicles[0]?.value || "");
   const [people, setPeople] = useState(1);
 
-  // İlgili aracın kişi sınırı
-  const maxPeople =
-    vehicles.find((v) => v.value === vehicle)?.max || 10;
+  // Seçilen aracın max kişi sınırı
+  const maxPeople = vehicles.find((v) => v.value === vehicle)?.max || 10;
 
   return (
     <form className="w-full flex flex-col gap-3">
       <div className="flex gap-2">
-        <input type="text" placeholder="Nereden?" className="input flex-1" value={from} onChange={e => setFrom(e.target.value)} />
-        <input type="text" placeholder="Nereye?" className="input flex-1" value={to} onChange={e => setTo(e.target.value)} />
+        <input
+          type="text"
+          placeholder="Nereden?"
+          className="input flex-1"
+          value={from}
+          onChange={e => setFrom(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Nereye?"
+          className="input flex-1"
+          value={to}
+          onChange={e => setTo(e.target.value)}
+        />
       </div>
       <div className="flex gap-2">
-        <input type="date" className="input" value={date} onChange={e => setDate(e.target.value)} />
-        <select className="input" value={time} onChange={e => setTime(e.target.value)}>
+        <input
+          type="date"
+          className="input"
+          value={date}
+          onChange={e => setDate(e.target.value)}
+        />
+        <select
+          className="input"
+          value={time}
+          onChange={e => setTime(e.target.value)}
+        >
           <option value="">Saat</option>
-          {saatler.map((saat, i) => <option key={i} value={saat}>{saat}</option>)}
+          {saatler.map((saat, i) => (
+            <option key={i} value={saat}>{saat}</option>
+          ))}
         </select>
-        <select className="input" value={vehicle} onChange={e => setVehicle(e.target.value)}>
-          {vehicles.map((v, i) => <option key={i} value={v.value}>{v.label}</option>)}
+        <select
+          className="input"
+          value={vehicle}
+          onChange={e => setVehicle(e.target.value)}
+        >
+          {vehicles.map((v, i) =>
+            <option key={i} value={v.value}>{v.label}</option>
+          )}
         </select>
-        <select className="input" value={people} onChange={e => setPeople(Number(e.target.value))}>
-          {[...Array(maxPeople).keys()].map(i => <option key={i+1} value={i+1}>{i+1} Kişi</option>)}
+        <select
+          className="input"
+          value={people}
+          onChange={e => setPeople(Number(e.target.value))}
+        >
+          {[...Array(maxPeople).keys()].map(i =>
+            <option key={i + 1} value={i + 1}>{i + 1} Kişi</option>
+          )}
         </select>
       </div>
       <button
