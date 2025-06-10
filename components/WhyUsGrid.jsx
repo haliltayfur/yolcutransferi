@@ -1,3 +1,6 @@
+
+"use client";
+
 import { whyUsCards } from "../data/whyUs";
 
 export default function WhyUsGrid() {
