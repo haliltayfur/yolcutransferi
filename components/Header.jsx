@@ -15,7 +15,7 @@ const desktopMenu = [
   { name: "İletişim", href: "/iletisim" },
 ];
 
-// Masaüstü hamburger menü
+// Masaüstü hamburger menüs
 const desktopBurger = [
   { name: "Araçlar", href: "/araclar" },
   { name: "Şoför Başvurusu", href: "/sofor-basvuru" },
