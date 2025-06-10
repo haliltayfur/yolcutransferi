@@ -18,7 +18,7 @@ export default function Footer() {
             style={{ objectFit: "contain" }}
           />
           <p className="text-sm text-gray-400 leading-tight font-medium max-w-xs mt-1 mb-2">
-            Türkiye'nin lider VIP transfer platformu.<br />Güvenli, lüks ve dakik ulaşım.
+            Türkiye'nin lider VIP transfer platformu.<br />Güvenli, lüks ve ayrıcalıklı ulaşım.
           </p>
           {/* Sosyal ikonlar */}
           <div className="flex items-center gap-3 mt-1">
