@@ -1,6 +1,6 @@
 "use client";
-import Header from "@/components/Header"; // Header'ı ayrı dosyadan import et!
-import Image from "next/image";
+
+import Header from "../components/Header";import Image from "next/image";
 import { FaPlaneArrival, FaCarSide, FaHandshake, FaPhoneAlt } from "react-icons/fa";
 
 export default function Home() {
