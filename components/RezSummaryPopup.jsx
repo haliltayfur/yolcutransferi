@@ -1,17 +1,19 @@
 "use client";
 import { useState } from "react";
-import { extras } from "../data/extras";
-import { rotarOptions } from "../data/rotarOptions";
-import { vehicleList } from "../data/vehicleList";
+import { extrasList } from "../data/extras";          // doğru export: extrasList
+import { rotarList } from "../data/rotarOptions";      // doğru export: rotarList
+import { vehicles } from "../data/vehicles";           // doğru export: vehicles
 
 export default function RezSummaryPopup({ show, onClose, info }) {
   const [ekstraList, setEkstraList] = useState(info.selectedExtras || []);
-  const rotarFiyat = rotarOptions.find(opt => opt.label === info.rotar)?.price || 0;
-  const [vehicle, setVehicle] = useState(vehicleList?.[0]?.name || "");
+  const rotarFiyat = rotarList.find(opt => opt.label === info.rotar)?.price || 0;
+  const [vehicle, setVehicle] = useState(
+    vehicles.find(v => v.label === info.vehicle)?.label || vehicles[0]?.label || ""
+  );
 
   // Kuruyemiş ve içki ilişkisi
   const hasAlcohol = ekstraList.some(key => ["bira", "sarap", "viski", "sampanya"].includes(key));
-  const kuruyemisKey = "kuruyemis";
+  const kuruyemisKey = "cookies";
   const showKuruyemisStrikethrough = hasAlcohol && ekstraList.includes(kuruyemisKey);
 
   // Ekstra çıkarma
@@ -20,7 +22,7 @@ export default function RezSummaryPopup({ show, onClose, info }) {
   // Fiyat hesaplama
   const baseFiyat = 1800;
   const ekstralarFiyat = ekstraList.reduce((sum, key) => {
-    const item = extras.find(e => e.key === key);
+    const item = extrasList.find(e => e.key === key);
     if (hasAlcohol && ["bira", "sarap", "viski", "sampanya"].includes(key)) {
       return sum + Math.round((item?.price || 0) * 1.10);
     }
@@ -36,7 +38,7 @@ export default function RezSummaryPopup({ show, onClose, info }) {
         <button onClick={onClose} className="absolute top-2 right-3 text-xl text-gray-400 hover:text-red-500 font-bold">×</button>
         <h3 className="text-xl font-bold mb-2 text-gold text-center">Rezervasyon Özeti</h3>
         <div className="mb-4">
-          <div className="mb-2 text-sm font-bold text-gray-700">{info.vehicle} | Yolcu sayısı: {info.people}</div>
+          <div className="mb-2 text-sm font-bold text-gray-700">{vehicle} | Yolcu sayısı: {info.people}</div>
           <div className="text-base mb-2">
             <span className="font-semibold">Nereden:</span> {info.from} &nbsp; <span className="font-semibold">Nereye:</span> {info.to}
           </div>
@@ -58,7 +60,7 @@ export default function RezSummaryPopup({ show, onClose, info }) {
                   </li>
                 );
               }
-              const item = extras.find(e => e.key === key);
+              const item = extrasList.find(e => e.key === key);
               if (!item) return null;
               return (
                 <li key={key} className="flex items-center gap-2">
@@ -99,7 +101,6 @@ export default function RezSummaryPopup({ show, onClose, info }) {
               <span>{rotarFiyat}₺</span>
             </div>
           )}
-          {/* Toplam */}
           <div className="flex justify-between text-lg font-extrabold mt-4 text-gold">
             <span>TOPLAM:</span>
             <span>{toplam}₺</span>
