@@ -1,13 +1,126 @@
 "use client";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import { FaPlaneArrival, FaCarSide, FaUserShield, FaCrown } from "react-icons/fa";
 
+// Bu listeyi /araclar sayfanızdan API veya sabit JSON ile çekebilirsiniz
+const vehicleTypes = [
+  "Mercedes Vito",
+  "Mercedes S-Class",
+  "Mercedes Maybach",
+  "VIP Minivan",
+  "Ekonomik Araç",
+  "VIP Otobüs",
+  "Elektrikli VIP",
+  "Engelli Transfer"
+];
+
+// 15 farklı müşteri yorumu (özgün yazıldı, örnek amaçlı)
+const testimonials = [
+  {
+    text: "Almanya'dan gelen özel misafirlerimizi bir hafta boyunca yolcutransferi.com ekibine teslim ettik. Her detayla ilgilendiler, müthiş profesyonellik!",
+    name: "Burcu A.",
+    company: "Kurumsal Firma Yöneticisi"
+  },
+  {
+    text: "Taksiyle uğraşmak yerine ekonomik transfer seçtim, tertemiz VIP araç ve zamanında hizmet! Uygun fiyata lüks deneyim, şaşırdım.",
+    name: "Serkan G.",
+    company: "Bireysel Müşteri"
+  },
+  {
+    text: "5 gün boyunca İstanbul’un tarihi yerlerini keşfettik, hem sürücümüz hem araçlar mükemmeldi. Unutulmaz bir VIP tur yaşadık.",
+    name: "Maria T.",
+    company: "Tourist from UK",
+    lang: "en",
+    enText: "We explored Istanbul's historical sites for 5 days, our driver and the vehicles were just perfect. Unforgettable VIP tour!"
+  },
+  {
+    text: "VIP havalimanı transferiyle iş toplantıma yetiştim, bagajım ve konforumla hiç ilgilenmek zorunda kalmadım. Sürekli tercih edeceğim!",
+    name: "Arda M.",
+    company: "CEO"
+  },
+  {
+    text: "Şirket toplantılarımız için toplu transfer talep ettik. Zamanında, tertemiz ve güler yüzlü hizmet. Teşekkürler!",
+    name: "Deniz Y.",
+    company: "HR Manager"
+  },
+  {
+    text: "İlk defa kullandım, bu kadar hızlı ve güvenli hizmet beklemiyordum. Şoförümüz çok nazikti.",
+    name: "Buse E.",
+    company: "Öğrenci"
+  },
+  {
+    text: "Her detayı düşünülmüş; çocuk koltuğundan internetine kadar. Tekrar tercih edeceğim, ailecek çok memnun kaldık.",
+    name: "Yusuf K.",
+    company: "Aile Babası"
+  },
+  {
+    text: "Lüks araçlar, dakik şoförler, üst düzey güvenlik… Gerçekten işin hakkı veriliyor!",
+    name: "İsmail D.",
+    company: "Yönetici"
+  },
+  {
+    text: "4 gün boyunca transfer, tur, şehirlerarası yolculuk… Hepsinde aynı kalite. Fiyatlar da gayet makul.",
+    name: "Gülşah S.",
+    company: "Travel Consultant"
+  },
+  {
+    text: "İstanbul'da önemli bir toplantım için kullandım, gizlilik ve konforu çok önemsedim. Beklentimi fazlasıyla karşıladı.",
+    name: "Michael P.",
+    company: "Businessman (UK)"
+  },
+  {
+    text: "Sürücüler çok deneyimli, trafikte bile tam güvenle yolculuk yaptım. Hızlı rezervasyon da çok pratik.",
+    name: "Cem T.",
+    company: "Sigorta Uzmanı"
+  },
+  {
+    text: "Kızımın mezuniyet gecesi için VIP minivan hizmeti aldık, güvenli ve konforlu oldu. Teşekkürler.",
+    name: "Filiz Ç.",
+    company: "Anne"
+  },
+  {
+    text: "Sigortalı taşıma hizmeti sundukları için tercih ettim. Sorunsuz ve gönül rahatlığıyla tavsiye ederim.",
+    name: "Adnan S.",
+    company: "Finans Uzmanı"
+  },
+  {
+    text: "İlk transferimde bile kendimi ayrıcalıklı hissettim. Uygun fiyat, üst düzey hizmet. Tek kelimeyle harika!",
+    name: "Fatih B.",
+    company: "Müşteri"
+  },
+  {
+    text: "Drone ile şehir turu gerçekten çok etkileyiciydi! Modern, teknolojik ve çok eğlenceli bir deneyimdi.",
+    name: "Jenna S.",
+    company: "Digital Nomad",
+    lang: "en",
+    enText: "The drone passenger transfer was an incredible and unique experience! So modern and fun!"
+  }
+];
+
 export default function Home() {
+  // Yorum slider için
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [currentTestimonial]);
+
   return (
     <main className="bg-black text-white w-full overflow-x-hidden">
 
+      {/* EN ÜST - HERO DIŞI BAŞLIK */}
+      <div className="w-full flex justify-center items-center pt-8 pb-2 bg-black z-50">
+        <h1 className="text-xl md:text-2xl font-extrabold text-gold tracking-tight text-center drop-shadow" style={{letterSpacing: ".01em"}}>
+          Türkiye'nin Lider VIP Transfer Ağı
+        </h1>
+      </div>
+
       {/* HERO ALANI */}
-      <section className="relative w-full min-h-[520px] flex items-center justify-center">
+      <section className="relative w-full min-h-[520px] flex items-end justify-center">
         <Image
           src="/Orta.jpg"
           alt="VIP Transfer Hero"
@@ -15,18 +128,13 @@ export default function Home() {
           className="object-cover object-center"
           priority
         />
-        <div className="absolute top-14 left-0 w-full flex flex-col items-center z-10">
-          <h1 className="text-4xl md:text-6xl font-black text-white drop-shadow-xl mb-4 max-w-4xl text-center">
-            Türkiye'nin Lider <span className="text-gold">VIP Transfer Ağı</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-100 font-medium mb-7 max-w-2xl text-center drop-shadow-lg">
-            Her yolculuk, size özel bir deneyim.<br />
-            Kişiselleştirilmiş hizmetin ve gerçek ayrıcalığın adresi.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="w-full max-w-7xl flex flex-col md:flex-row items-end justify-between px-4 md:px-8 pb-6 gap-6 z-10 relative">
+
+          {/* Sol: Butonlar */}
+          <div className="flex flex-col md:flex-row items-start md:items-end gap-3 md:gap-6 mb-4 md:mb-0">
             <a
               href="/rezervasyon"
-              className="bg-gold hover:bg-yellow-400 text-black font-bold px-8 py-3 rounded-2xl shadow-lg text-lg transition"
+              className="bg-gold hover:bg-yellow-400 text-black font-bold px-7 py-3 rounded-2xl shadow-lg text-base md:text-lg transition whitespace-nowrap"
             >
               Hemen Rezervasyon Yap
             </a>
@@ -34,138 +142,101 @@ export default function Home() {
               href="https://wa.me/905395267569"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white/20 border border-gold text-gold font-semibold px-7 py-3 rounded-2xl shadow-lg text-lg flex items-center gap-2 hover:bg-gold hover:text-black transition"
+              className="bg-white/20 border border-gold text-gold font-semibold px-7 py-3 rounded-2xl shadow-lg text-base md:text-lg flex items-center gap-2 hover:bg-gold hover:text-black transition whitespace-nowrap"
             >
               VIP Hattı: 0539 526 75 69
             </a>
           </div>
-        </div>
-      </section>
 
-      {/* PRESTİJ SLOGAN BANTLARI */}
-      <section className="w-full max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 py-10 px-3">
-        <MiniBanner text="Sadece Size Özel Kişiselleştirilmiş Hizmet" />
-        <MiniBanner text="Çok Dilli, Uluslararası Eğitimli Sürücüler" />
-        <MiniBanner text="Transferin Her Anında VIP Destek" />
+          {/* SLOGAN KUTUSU */}
+          <div className="flex-1 max-w-3xl flex items-center">
+            <div className="bg-black/60 border border-gold rounded-2xl shadow-lg px-7 py-5 w-full flex flex-col gap-2 md:gap-2">
+              {sloganlar.map((s, i) => (
+                <div key={i} className="flex items-center gap-2 text-gold text-base md:text-lg font-semibold">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-gold" />
+                  <span>{s}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* REZERVASYON FORMU */}
       <section className="flex justify-center w-full z-10 relative mb-10 px-2">
-        <div className="bg-white rounded-2xl shadow-2xl px-8 py-8 w-full max-w-2xl flex flex-col gap-7 border border-gray-200">
-          <h3 className="text-2xl font-bold text-black mb-2 text-center">VIP Transferinizi Şimdi Planlayın</h3>
-          <div className="flex flex-col md:flex-row gap-4">
+        <div className="bg-[#242424] rounded-2xl shadow-2xl px-8 py-8 w-full max-w-3xl flex flex-col md:flex-row gap-5 border border-gold/20 items-center">
+          <div className="w-full flex flex-col md:flex-row gap-4 flex-1">
             <input type="text" className="input" placeholder="Nereden?" />
             <input type="text" className="input" placeholder="Nereye?" />
             <input type="datetime-local" className="input" placeholder="Tarih & Saat" />
+            <select className="input" defaultValue="">
+              <option value="" disabled>Araç Türü</option>
+              {vehicleTypes.map((v, i) => (
+                <option key={i} value={v}>{v}</option>
+              ))}
+            </select>
             <input type="number" min="1" max="10" className="input" placeholder="Kişi Sayısı" />
-            <button className="bg-gold hover:bg-yellow-400 text-black font-semibold rounded-xl px-6 py-2 whitespace-nowrap">
-              Fiyatı Gör
-            </button>
           </div>
+          <button className="bg-gold hover:bg-yellow-400 text-black font-semibold rounded-xl px-8 py-3 whitespace-nowrap min-w-[150px] mt-2 md:mt-0">
+            Fiyatı Gör
+          </button>
         </div>
       </section>
 
-      {/* REFERANSLAR ve YORUMLAR */}
-      <section className="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-10 items-center justify-between py-6 mb-4 px-2">
-        {/* Referans logoları */}
-        <div className="flex-1 flex flex-col items-center md:items-start mb-5 md:mb-0">
-          <h4 className="text-gold font-bold text-lg mb-3">Bizi Tercih Edenler</h4>
-          <div className="flex gap-5 flex-wrap">
-            <Image src="/ref1.png" width={90} height={38} alt="Referans 1" className="opacity-80" />
-            <Image src="/ref2.png" width={90} height={38} alt="Referans 2" className="opacity-80" />
-            <Image src="/ref3.png" width={90} height={38} alt="Referans 3" className="opacity-80" />
-            <Image src="/ref4.png" width={90} height={38} alt="Referans 4" className="opacity-80" />
-          </div>
+      {/* REFERANSLAR ve YORUMLAR (Slider) */}
+      <section className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center gap-6 py-8 mb-2 px-2">
+        <h4 className="text-gold font-bold text-xl mb-2">Müşterilerimizin Yorumları</h4>
+        <div className="relative w-full">
+          <TestimonialCard {...testimonials[currentTestimonial]} />
+          {/* Slider okları */}
+          <button
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-black/40 rounded-full p-2 text-gold hover:bg-gold hover:text-black transition"
+            onClick={() => setCurrentTestimonial((currentTestimonial - 1 + testimonials.length) % testimonials.length)}
+            aria-label="Önceki"
+            style={{zIndex:2}}
+          >‹</button>
+          <button
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-black/40 rounded-full p-2 text-gold hover:bg-gold hover:text-black transition"
+            onClick={() => setCurrentTestimonial((currentTestimonial + 1) % testimonials.length)}
+            aria-label="Sonraki"
+            style={{zIndex:2}}
+          >›</button>
         </div>
-        {/* Testimonial */}
-        <div className="flex-1 flex flex-col items-center">
-          <blockquote className="text-white bg-black/60 rounded-xl px-6 py-6 italic font-medium max-w-xl border-l-4 border-gold">
-            “Dünyanın her yerinde transfer kullandım, bu kadar üst düzey ilgi, konfor ve güveni başka yerde bulmadım.”
-            <div className="text-gold font-semibold mt-3 text-right w-full">Ece Y., Global Yatırımcı</div>
-          </blockquote>
-        </div>
-      </section>
-
-      {/* HİZMETLER BÖLÜMÜ */}
-      <section className="w-full max-w-6xl mx-auto py-10 px-3">
-        <h2 className="text-2xl font-bold text-gold mb-6 text-center">VIP Hizmetlerimiz</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
-          <ServiceCard
-            icon={<FaPlaneArrival size={38} className="text-gold" />}
-            title="Havalimanı VIP Karşılama"
-            desc="Uçuşunuzdan önce ve sonra özel asistan hizmetiyle karşılanırsınız."
-          />
-          <ServiceCard
-            icon={<FaCarSide size={38} className="text-gold" />}
-            title="Şehirlerarası VIP Transfer"
-            desc="Türkiye genelinde, dilediğiniz noktadan noktaya üst segment araçlarla ulaşım."
-          />
-          <ServiceCard
-            icon={<FaCrown size={38} className="text-gold" />}
-            title="Kişiye Özel Transfer"
-            desc="Özel istekleriniz için, size ve misafirlerinize özel planlanan rota ve araç tahsisi."
-          />
-          <ServiceCard
-            icon={<FaUserShield size={38} className="text-gold" />}
-            title="Kurumsal VIP & Concierge"
-            desc="Şirketlere, otellere ve üst düzey yöneticilere ayrıcalıklı ve gizlilik odaklı transfer."
-          />
+        <div className="flex gap-1 mt-3">
+          {testimonials.map((_, i) => (
+            <span key={i} className={`w-2 h-2 rounded-full ${i === currentTestimonial ? 'bg-gold' : 'bg-gold/30'}`} />
+          ))}
         </div>
       </section>
 
-      {/* ARAÇLAR BÖLÜMÜ */}
-      <section className="w-full max-w-6xl mx-auto py-10 px-3">
-        <h2 className="text-2xl font-bold text-gold mb-6 text-center">Filo & VIP Araçlar</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
-          <CarCard
-            src="/car-vito.jpg"
-            title="Mercedes Vito"
-            desc="Yolcu odaklı, tam VIP donanım, 6+1 konforlu yolculuk."
-          />
-          <CarCard
-            src="/car-sclass.jpg"
-            title="Mercedes S-Class"
-            desc="Sadece üst düzey yöneticiler ve özel misafirler için."
-          />
-          <CarCard
-            src="/car-maybach.jpg"
-            title="Mercedes Maybach"
-            desc="Lüksün zirvesi; konfor, prestij ve üst düzey gizlilik."
-          />
-          <CarCard
-            src="/car-vipminivan.jpg"
-            title="VIP Minivan"
-            desc="Kalabalık aile ve gruplar için ferah, şık ve güvenli ulaşım."
-          />
-        </div>
-      </section>
-
-      {/* NEDEN BİZ? */}
+      {/* NEDEN BİZ KUTULARI */}
       <section className="w-full max-w-6xl mx-auto py-10 px-3">
         <h2 className="text-2xl font-bold text-gold mb-6 text-center">Neden YolcuTransferi?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-7">
           <WhyUsCard
-            title="Her Müşteriye Özel Rota & Araç"
-            desc="Her transfer öncesi detaylarınız analiz edilir, size özel güzergah ve araç tahsisi yapılır."
+            title="5+ Yıllık VIP Transfer Tecrübesi"
+            desc="Binlerce transfer, yüksek memnuniyet ve güven."
           />
           <WhyUsCard
-            title="Uluslararası Eğitimli Şoförler"
-            desc="Tüm sürücülerimiz çok dilli, üst düzey protokol ve misafirperverlik eğitimlidir."
+            title="Her Yolculukta Tam Sigorta"
+            desc="Her transferinizde üst düzey güvence ve sigorta."
           />
           <WhyUsCard
-            title="VIP Hizmette 15+ Yıl Deneyim"
-            desc="Onlarca kurum, yüzlerce üst düzey misafir bize yıllardır güveniyor."
+            title="Esnek Fiyat Seçenekleri"
+            desc="Her bütçeye uygun, lüks veya ekonomik transfer çözümleri."
+          />
+          <WhyUsCard
+            title="VIP Sürücü ve Araç Filosu"
+            desc="Tüm sürücülerimiz eğitimli ve araçlarımız lüks segment."
           />
         </div>
       </section>
 
-      {/* SSS & KAMPANYA */}
-      <section className="w-full max-w-5xl mx-auto py-10 px-3">
-        <div className="bg-gold/15 border border-gold rounded-2xl px-7 py-7 flex flex-col items-center">
-          <h2 className="text-2xl font-bold text-gold mb-3 text-center">Sıkça Sorulan Sorular</h2>
-          <p className="text-lg text-gray-200 text-center mb-2">Aklınızdaki tüm sorular için <a href="/sss" className="text-gold underline hover:text-yellow-400">SSS</a> sayfamızı ziyaret edin ya da <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="text-gold underline hover:text-yellow-400">WhatsApp ile anında bize ulaşın</a>.</p>
-          <p className="text-base text-gray-300 mt-2 text-center">İlk yolculuğunuzda özel avantajlar sizi bekliyor!</p>
-        </div>
+      {/* EN ALTA - CTA */}
+      <section className="w-full bg-gold text-black py-10 flex justify-center items-center">
+        <h2 className="text-2xl md:text-3xl font-extrabold text-center max-w-3xl drop-shadow">
+          Yolculuğunuz bir tık uzağınızda! VIP konfor ve güvenle hemen şimdi transferinizi planlayın, farkı yaşayın!
+        </h2>
       </section>
 
       {/* GLOBAL STYLE EKLERİ */}
@@ -173,55 +244,55 @@ export default function Home() {
         .text-gold { color: #FFD700; }
         .bg-gold { background: #FFD700; }
         .input {
-          background: #f7f7f7;
-          color: #222;
+          background: #1b1b1b;
+          color: #fff;
           border-radius: 0.75rem;
           padding: 0.8rem 1rem;
-          border: 1px solid #ddd;
+          border: 1px solid #FFD70044;
           min-width: 0;
           flex: 1 1 0px;
         }
         .input:focus { outline: 2px solid #FFD700; }
+        ::placeholder { color: #bcbcbc; }
+        select.input { padding-right: 2rem; }
       `}</style>
     </main>
   );
 }
 
-// PRESTİJ BANNER KOMPONENTİ
-function MiniBanner({ text }) {
-  return (
-    <div className="bg-black border border-gold text-gold py-3 px-6 rounded-xl font-semibold text-center shadow text-base">
-      {text}
-    </div>
-  );
-}
+// Sloganlar topluca
+const sloganlar = [
+  "Her yolculuk, size özel bir deneyim.",
+  "Kişiselleştirilmiş hizmetin ve gerçek ayrıcalığın adresi.",
+  "Sadece size özel transfer çözümleri",
+  "Çok dilli, uluslararası eğitimli sürücüler",
+  "Her an VIP destek",
+  "Her bütçeye uygun transferler",
+  "5+ yıllık deneyimli şoförler",
+  "Sigortalı taşıma hizmetleri",
+  "Lüks hizmet deneyimi",
+  "%99.97 müşteri memnuniyeti",
+  "VIP havalimanı transferi",
+  "Şehirler arası transfer",
+  "Kurumsal & toplu transfer",
+  "Tur & gezi transferi",
+  "Drone yolcu transferi"
+];
 
-// HİZMETLER KARTI
-function ServiceCard({ icon, title, desc }) {
+// Yorum kartı
+function TestimonialCard({ text, name, company, lang, enText }) {
   return (
-    <div className="flex flex-col items-center text-center gap-3 bg-[#1a1a1a] rounded-2xl p-5 border border-gold/10 shadow">
-      <div>{icon}</div>
-      <div className="text-lg font-bold text-gold">{title}</div>
-      <div className="text-gray-300 text-sm">{desc}</div>
-    </div>
-  );
-}
-
-// ARAÇLAR KARTI
-function CarCard({ src, title, desc }) {
-  return (
-    <div className="flex flex-col items-center bg-[#181818] border border-gold/10 rounded-2xl p-4 shadow">
-      <Image src={src} alt={title} width={130} height={80} className="rounded-xl object-contain mb-3 bg-black" />
-      <div className="text-gold font-bold text-base mb-1">{title}</div>
-      <div className="text-gray-300 text-sm text-center">{desc}</div>
-    </div>
+    <blockquote className="text-white bg-black/70 rounded-xl px-7 py-8 italic font-medium max-w-2xl mx-auto border-l-4 border-gold relative text-lg min-h-[128px] flex flex-col justify-center">
+      <span>{lang === "en" ? enText : text}</span>
+      <div className="text-gold font-semibold mt-4 text-right w-full">{name} <span className="text-white/60 font-normal">{company && `– ${company}`}</span></div>
+    </blockquote>
   );
 }
 
 // NEDEN BİZ KARTI
 function WhyUsCard({ title, desc }) {
   return (
-    <div className="bg-black/50 border border-gold/15 rounded-2xl p-6 text-center flex flex-col items-center shadow">
+    <div className="bg-black/60 border border-gold/15 rounded-2xl p-6 text-center flex flex-col items-center shadow">
       <div className="text-gold font-bold text-lg mb-2">{title}</div>
       <div className="text-gray-300 text-base">{desc}</div>
     </div>
