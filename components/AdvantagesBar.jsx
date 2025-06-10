@@ -1,3 +1,6 @@
+
+"use client";
+
 import { advantages } from "../data/advantages";
 
 export default function AdvantagesBar() {
