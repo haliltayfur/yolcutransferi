@@ -99,8 +99,8 @@ export default function Header() {
                 width: "auto",
                 height: "80px",
                 maxHeight: "90px",
-                objectFit: "contain",
-                filter: "drop-shadow(0 2px 8px #ffd70030)"
+                objectFit: "contain"
+                // filter kaldırıldı
               }}
             />
           </Link>
@@ -201,8 +201,8 @@ export default function Header() {
                   height: "60px",
                   minWidth: "90px",
                   maxHeight: "65px",
-                  objectFit: "contain",
-                  filter: "drop-shadow(0 2px 8px #ffd70035)"
+                  objectFit: "contain"
+                  // filter kaldırıldı
                 }}
               />
             </Link>
