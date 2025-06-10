@@ -1,67 +1,73 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-// Rezervasyon datası localStorage’da tutuluyor (geliştirilebilir)
-function getReservations() {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem("reservations") || "[]");
-  } catch {
-    return [];
-  }
-}
+const demoReservations = [
+  { id: 1, name: "Mehmet Yılmaz", from: "İstanbul Havalimanı", to: "Kadıköy", date: "2024-06-01", time: "12:30", driver: "Onaysız", status: "Bekliyor" },
+  { id: 2, name: "Elif Karaca", from: "Antalya Havalimanı", to: "Lara", date: "2024-06-02", time: "10:00", driver: "Onaylı", status: "Aktif" }
+];
 
 export default function AdminReservations() {
-  const [list, setList] = useState([]);
+  const [reservations, setReservations] = useState(demoReservations);
 
-  useEffect(() => {
-    setList(getReservations());
-  }, []);
+  function approveDriver(idx) {
+    const next = [...reservations];
+    next[idx].driver = "Onaylı";
+    next[idx].status = "Aktif";
+    setReservations(next);
+  }
 
-  // Sadece örnek! Kayıt eklendiğinde PaymentForm’da da aynı şekilde push etmelisin
-  // localStorage’a yeni kayıt eklemek için:
-  // const all = getReservations();
-  // all.push(newReservation);
-  // localStorage.setItem("reservations", JSON.stringify(all));
+  function disableDriver(idx) {
+    const next = [...reservations];
+    next[idx].driver = "Onaysız";
+    next[idx].status = "Bekliyor";
+    setReservations(next);
+  }
 
   return (
-    <section className="p-8 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold text-gold mb-7">Rezervasyon Talepleri</h2>
-      {list.length === 0
-        ? <div className="text-gray-400">Henüz rezervasyon talebi bulunamadı.</div>
-        : (
-          <table className="w-full border text-sm">
+    <main className="min-h-[80vh] flex flex-col items-center justify-center bg-black/30 py-8">
+      <section className="w-full max-w-4xl bg-black/80 rounded-2xl shadow-lg px-8 py-10 border border-gold">
+        <h1 className="text-2xl font-bold text-gold mb-6 text-center">Admin Paneli</h1>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-[#181818] text-gold border-b">
-                <th className="py-2 px-3">Sipariş No</th>
-                <th className="py-2 px-3">Yolcu Adı</th>
-                <th className="py-2 px-3">Telefon</th>
-                <th className="py-2 px-3">Tarih</th>
-                <th className="py-2 px-3">Saat</th>
-                <th className="py-2 px-3">Araç Tipi</th>
-                <th className="py-2 px-3">Nereden</th>
-                <th className="py-2 px-3">Nereye</th>
-                <th className="py-2 px-3">Durum</th>
+              <tr className="bg-gold text-black">
+                <th className="py-2 px-2">Ad Soyad</th>
+                <th className="py-2 px-2">Nereden</th>
+                <th className="py-2 px-2">Nereye</th>
+                <th className="py-2 px-2">Tarih</th>
+                <th className="py-2 px-2">Saat</th>
+                <th className="py-2 px-2">Şoför Durumu</th>
+                <th className="py-2 px-2">Transfer Durumu</th>
+                <th className="py-2 px-2">İşlem</th>
               </tr>
             </thead>
             <tbody>
-              {list.map((item, i) => (
-                <tr key={item.siparisNo || i} className="border-b">
-                  <td className="py-2 px-3 font-mono">{item.siparisNo}</td>
-                  <td className="py-2 px-3">{item.ad} {item.soyad}</td>
-                  <td className="py-2 px-3">{item.tel}</td>
-                  <td className="py-2 px-3">{item.tarih}</td>
-                  <td className="py-2 px-3">{item.saat}</td>
-                  <td className="py-2 px-3">{item.arac}</td>
-                  <td className="py-2 px-3">{item.from}</td>
-                  <td className="py-2 px-3">{item.to}</td>
-                  <td className="py-2 px-3">{item.durum || "Bekliyor"}</td>
+              {reservations.map((r, i) => (
+                <tr key={r.id} className="border-b border-gold/30">
+                  <td className="py-2 px-2">{r.name}</td>
+                  <td className="py-2 px-2">{r.from}</td>
+                  <td className="py-2 px-2">{r.to}</td>
+                  <td className="py-2 px-2">{r.date}</td>
+                  <td className="py-2 px-2">{r.time}</td>
+                  <td className="py-2 px-2">{r.driver}</td>
+                  <td className="py-2 px-2">{r.status}</td>
+                  <td className="py-2 px-2">
+                    {r.driver !== "Onaylı" ? (
+                      <button onClick={() => approveDriver(i)} className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-700">
+                        Onayla
+                      </button>
+                    ) : (
+                      <button onClick={() => disableDriver(i)} className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700">
+                        Pasifleştir
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        )
-      }
-    </section>
+        </div>
+      </section>
+    </main>
   );
 }
