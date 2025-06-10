@@ -15,7 +15,7 @@ export default function Home() {
           className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/45">
           <h1 className="text-4xl md:text-6xl font-black text-white drop-shadow-xl mb-4 text-center">
             Türkiye'nin Lider <span className="text-gold">VIP Transfer Ağı</span>
           </h1>
@@ -42,8 +42,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* AVANTAJ/FAYDA BANDI */}
-      <section className="max-w-5xl mx-auto w-full mt-[-40px] mb-12 flex flex-col md:flex-row gap-6 z-10 relative px-2">
+      {/* AVANTAJ BANDI */}
+      <section className="max-w-5xl mx-auto w-full mt-[-36px] mb-12 flex flex-col md:flex-row gap-6 z-10 relative px-2">
         <MiniBanner text="Kişiye özel, tam gizlilikte VIP transfer." />
         <MiniBanner text="Çok dilli, uluslararası eğitimli sürücüler." />
         <MiniBanner text="TÜRSAB belgeli, sigortalı ve güvenli yolculuk." />
@@ -66,7 +66,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* MÜŞTERİ YORUMLARI */}
+      {/* YORUMLAR */}
       <section className="w-full max-w-6xl mx-auto py-6 mb-2 px-2">
         <h2 className="text-2xl font-bold text-gold mb-7 text-center">Müşterilerimizin Yorumları</h2>
         <div className="flex flex-col md:flex-row gap-6 justify-center items-stretch">
@@ -116,8 +116,8 @@ export default function Home() {
       </section>
 
       {/* SARI BANNER: GÜVEN BANDI ve TROY/TÜRSAB */}
-      <section className="w-full py-6 bg-gold text-black font-bold text-lg flex items-center justify-between px-6 mb-0 mt-8">
-        <span>
+      <section className="w-full py-6 bg-gold text-black font-bold text-lg flex flex-col md:flex-row items-center justify-between px-6 mb-0 mt-12 border-t border-[#FFD70033]">
+        <span className="mb-2 md:mb-0 text-center">
           Yolculuğunuz bir tık uzağınızda! VIP konfor ve güvenle hemen şimdi transferinizi planlayın, farkı yaşayın!
         </span>
         <div className="flex gap-7 items-center">
@@ -126,8 +126,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <Footer />
+      {/* Footer arası padding */}
+      <div className="w-full" style={{ height: "20px" }}></div>
+
+      {/* Footer — layout.js içinde kullanılacak, burada çağrılmayacak! */}
+      {/* <Footer /> */}
 
       {/* GLOBAL STYLE */}
       <style jsx global>{`
@@ -148,7 +151,7 @@ export default function Home() {
   );
 }
 
-// PRESTİJ BANNER KOMPONENTİ
+// AVANTAJ KARTI
 function MiniBanner({ text }) {
   return (
     <div className="bg-[#181818] border border-gold text-gold py-3 px-6 rounded-xl font-semibold text-center shadow text-base flex-1">
@@ -157,7 +160,7 @@ function MiniBanner({ text }) {
   );
 }
 
-// TESTIMONIAL KARTI
+// YORUM KARTI
 function TestimonialCard({ text, author, role }) {
   return (
     <div className="bg-[#181818] border border-gold/20 rounded-2xl px-6 py-5 shadow flex flex-col justify-between min-h-[170px] flex-1">
