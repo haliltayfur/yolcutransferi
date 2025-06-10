@@ -6,10 +6,15 @@
 /* Quicksand fontunu Google Fonts’tan dahil ettik */
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap');
 
+/* Tüm input/select/button stilleri */
 input, select, button {
   outline: none;
   font-size: 16px;
   font-family: 'Quicksand', sans-serif;
+}
+
+.input {
+  @apply bg-white border border-gray-300 rounded-lg px-3 py-2 w-full text-black transition duration-200 focus:border-gold;
 }
 
 input:focus, select:focus {
