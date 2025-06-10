@@ -2,10 +2,12 @@
 import { useState } from "react";
 import { extras } from "../data/extras";
 import { rotarOptions } from "../data/rotarOptions";
+import { vehicleList } from "../data/vehicleList";
 
 export default function RezSummaryPopup({ show, onClose, info }) {
   const [ekstraList, setEkstraList] = useState(info.selectedExtras || []);
   const rotarFiyat = rotarOptions.find(opt => opt.label === info.rotar)?.price || 0;
+  const [vehicle, setVehicle] = useState(vehicleList?.[0]?.name || "");
 
   // Kuruyemiş ve içki ilişkisi
   const hasAlcohol = ekstraList.some(key => ["bira", "sarap", "viski", "sampanya"].includes(key));
@@ -15,11 +17,10 @@ export default function RezSummaryPopup({ show, onClose, info }) {
   // Ekstra çıkarma
   const handleRemove = (key) => setEkstraList(list => list.filter(k => k !== key));
 
-  // Örnek fiyat hesaplama (API veya fakeFirms ile fiyatı alabilirsiniz)
-  const baseFiyat = 1800; // Buraya gerçek fiyat hesap kodunu koyabilirsin
+  // Fiyat hesaplama
+  const baseFiyat = 1800;
   const ekstralarFiyat = ekstraList.reduce((sum, key) => {
     const item = extras.find(e => e.key === key);
-    // İçkiye %10 ekle
     if (hasAlcohol && ["bira", "sarap", "viski", "sampanya"].includes(key)) {
       return sum + Math.round((item?.price || 0) * 1.10);
     }
