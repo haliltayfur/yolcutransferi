@@ -1,12 +1,10 @@
-"use client";
-import React from "react";
 import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#151515] text-gray-200 pt-12 pb-7 px-3 border-t border-[#FFD70029] font-sans">
+    <footer className="bg-[#181818] text-gray-200 pt-12 pb-7 px-3 border-t border-[#FFD70029] font-sans">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 mb-8">
 
         {/* LOGO + SLOGAN + GÜVEN DAMGASI */}
@@ -25,7 +23,7 @@ export default function Footer() {
           </p>
           <p className="text-xs text-gray-400 mb-3">
             Türkiye’nin lider VIP ve kurumsal yolcu taşıma platformu.<br />
-            Tüm Türkiye’de, 7/24 profesyonel, lisanslı ve güvenli transfer hizmeti.
+            7/24 profesyonel, lisanslı ve güvenli transfer hizmeti.
           </p>
           <div className="flex items-center gap-3 mt-2">
             <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" aria-label="Whatsapp" className="text-gold hover:text-yellow-400 transition">
