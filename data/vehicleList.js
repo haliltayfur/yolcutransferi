@@ -1,11 +1,10 @@
-// /data/vehicles.js
-export const vehicles = [
-  { value: "mercedes_vito", label: "Mercedes Vito", max: 7 },
-  { value: "s_class", label: "Mercedes S-Class", max: 4 },
-  { value: "vip_minivan", label: "VIP Minivan", max: 8 },
-  { value: "suv", label: "SUV", max: 5 },
-  { value: "premium_sedan", label: "Premium Sedan", max: 4 },
-  { value: "cadillac", label: "Cadillac", max: 6 },
-  { value: "dron", label: "Dron", max: 2 },
-  { value: "minibus", label: "Minibüs", max: 17 }
+export const vehicleList = [
+  { value: "mercedes_vito", name: "Mercedes Vito", max: 7 },
+  { value: "s_class", name: "Mercedes S-Class", max: 4 },
+  { value: "vip_minivan", name: "VIP Minivan", max: 8 },
+  { value: "suv", name: "SUV", max: 5 },
+  { value: "premium_sedan", name: "Premium Sedan", max: 4 },
+  { value: "cadillac", name: "Cadillac", max: 6 },
+  { value: "dron", name: "Dron", max: 2 },
+  { value: "minibus", name: "Minibüs", max: 17 },
 ];
