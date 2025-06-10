@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
-// Hero görselleri burada tutulacak, import yerine direkt dizide isim veriyoruz
 const heroImages = [
   "/Hero1.png", "/Hero2.png", "/Hero3.png", "/Hero4.png", "/Hero5.png",
   "/Hero6.png", "/Hero7.png", "/Hero8.png", "/Hero9.png"
@@ -13,7 +12,6 @@ export default function HeroSlider() {
   const [manualPause, setManualPause] = useState(false);
   const pauseTimeoutRef = useRef();
 
-  // Otomatik slider (manuel pause yoksa 10 sn'de bir)
   useEffect(() => {
     if (manualPause) return;
     const interval = setInterval(() => {
@@ -22,7 +20,6 @@ export default function HeroSlider() {
     return () => clearInterval(interval);
   }, [manualPause, currentSlide]);
 
-  // Manuel ileri/geri butonları için
   const handleNav = (dir) => {
     setCurrentSlide(dir === "right"
       ? (currentSlide + 1) % heroImages.length
@@ -35,7 +32,6 @@ export default function HeroSlider() {
 
   return (
     <section className="relative w-full min-h-[370px] md:min-h-[480px] flex items-center justify-center overflow-hidden select-none">
-      {/* Tüm slider görselleri, fade animasyonlu */}
       {heroImages.map((src, idx) => (
         <Image
           key={src}
@@ -48,7 +44,6 @@ export default function HeroSlider() {
           draggable={false}
         />
       ))}
-      {/* Slider ileri/geri butonları */}
       <button
         onClick={() => handleNav("left")}
         aria-label="Önceki"
