@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
-import { extras } from "../data/extras";
-import { vehicleList } from "../data/vehicleList";
-import { rotarOptions } from "../data/rotarOptions";
-import RezSummaryPopup from "./RezSummaryPopup";
+import { vehicles } from "../data/vehicles";
+// Eğer ekstralar ve rötar seçimi bu formda gösterilecekse onları da import et (şu an kullanılmıyor)
+// import { extrasList } from "../data/extras";
+// import { rotarList } from "../data/rotarOptions";
 
 const saatler = [
   "00:00", "00:15", "00:30", "00:45",
@@ -37,12 +37,12 @@ export default function VipTransferForm({ onSubmit }) {
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [vehicle, setVehicle] = useState(vehicleList[0]?.name || "");
+  const [vehicle, setVehicle] = useState(vehicles[0]?.value || "");
   const [people, setPeople] = useState(1);
 
   // İlgili aracın kişi sınırı
   const maxPeople =
-    vehicleList.find((v) => v.name === vehicle)?.max || 10;
+    vehicles.find((v) => v.value === vehicle)?.max || 10;
 
   return (
     <form className="w-full flex flex-col gap-3">
@@ -57,7 +57,7 @@ export default function VipTransferForm({ onSubmit }) {
           {saatler.map((saat, i) => <option key={i} value={saat}>{saat}</option>)}
         </select>
         <select className="input" value={vehicle} onChange={e => setVehicle(e.target.value)}>
-          {vehicleList.map((v, i) => <option key={i} value={v.name}>{v.name}</option>)}
+          {vehicles.map((v, i) => <option key={i} value={v.value}>{v.label}</option>)}
         </select>
         <select className="input" value={people} onChange={e => setPeople(Number(e.target.value))}>
           {[...Array(maxPeople).keys()].map(i => <option key={i+1} value={i+1}>{i+1} Kişi</option>)}
