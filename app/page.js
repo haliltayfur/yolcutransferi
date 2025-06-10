@@ -24,7 +24,7 @@ export default function Home() {
             Türkiye'nin Lider <span className="text-gold">VIP Transfer Ağı</span>
           </h1>
         </section>
-
+<meta name="google-site-verification" content="084NNONOhJ2ry2BTv_uWZEF6Y_hEVbcQ0O99gtm1O5g" />
         {/* REZERVASYON FORMU */}
         <div className="flex justify-center z-10 relative mt-10">
           <div className="bg-white rounded-2xl shadow-2xl px-7 py-5 max-w-3xl w-full flex flex-col md:flex-row md:items-end gap-4 border border-gray-200">
