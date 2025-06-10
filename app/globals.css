@@ -1,42 +1,42 @@
-/* app/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Quicksand fontunu Google Fonts’tan dahil ettik */
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap');
 
-/* Tüm input/select/button stilleri */
 input, select, button {
   outline: none;
   font-size: 16px;
   font-family: 'Quicksand', sans-serif;
 }
-
-.input {
-  @apply bg-white border border-gray-300 rounded-lg px-3 py-2 w-full text-black transition duration-200 focus:border-gold;
-}
-
 input:focus, select:focus {
   border: 2px solid #FFD700 !important;
 }
-
 label {
   font-weight: bold;
   color: #333;
   font-family: 'Quicksand', sans-serif;
 }
-
-html {
-  scrollbar-gutter: stable;
-}
-
+html { scrollbar-gutter: stable; }
 body {
   background-color: #111;
   color: #fff;
   overflow-y: scroll;
   font-family: 'Quicksand', sans-serif;
 }
-
 .text-gold { color: #ffd700; }
 .bg-gold { background-color: #ffd700; }
+
+/* Hatalı kodu kaldır! */
+.input {
+  background: #fff;
+  border: 1px solid #ccc;  /* veya border-gray-400 */
+  border-radius: 0.75rem;
+  padding: 0.8rem 1rem;
+  color: #222;
+  transition: border 0.2s;
+  width: 100%;
+}
+.input:focus {
+  border-color: #ffd700;
+}
