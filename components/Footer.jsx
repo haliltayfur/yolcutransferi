@@ -1,3 +1,5 @@
+"use client";
+import React from "react";
 import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 import { SiX } from "react-icons/si";
