@@ -2,10 +2,11 @@
 import { useState } from "react";
 import { extras } from "../data/extras";
 import { rotarOptions } from "../data/rotarOptions";
-
+import { vehicleList } from "../data/vehicleList";
 export default function RezSummaryPopup({ show, onClose, info }) {
   const [ekstraList, setEkstraList] = useState(info.selectedExtras || []);
   const rotarFiyat = rotarOptions.find(opt => opt.label === info.rotar)?.price || 0;
+  const [vehicle, setVehicle] = useState(vehicleList?.[0]?.name || "");
 
   // Kuruyemiş ve içki ilişkisi
   const hasAlcohol = ekstraList.some(key => ["bira", "sarap", "viski", "sampanya"].includes(key));
