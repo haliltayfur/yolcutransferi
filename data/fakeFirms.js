@@ -1,0 +1,17 @@
+export const fakeFirms = [
+  { name: "VIPGo", fiyat: (base, km, saat) => base + 2 * km + 120 * saat },
+  { name: "JetLüks", fiyat: (base, km, saat) => base + 1.9 * km + 110 * saat },
+  { name: "EliteRide", fiyat: (base, km, saat) => base + 2.1 * km + 105 * saat },
+  { name: "GoldTransfer", fiyat: (base, km, saat) => base + 2 * km + 130 * saat },
+  { name: "TurVIP", fiyat: (base, km, saat) => base + 2.2 * km + 95 * saat },
+  { name: "PlazaLimo", fiyat: (base, km, saat) => base + 2.3 * km + 120 * saat },
+  { name: "AirportMaster", fiyat: (base, km, saat) => base + 1.8 * km + 150 * saat },
+  { name: "TrendyTransfer", fiyat: (base, km, saat) => base + 2.05 * km + 110 * saat },
+  { name: "LuxAuto", fiyat: (base, km, saat) => base + 1.95 * km + 125 * saat },
+  { name: "DeluxeChauffeur", fiyat: (base, km, saat) => base + 2.15 * km + 100 * saat },
+  { name: "SuperVIP", fiyat: (base, km, saat) => base + 2.2 * km + 125 * saat },
+  { name: "ProTransfer", fiyat: (base, km, saat) => base + 1.98 * km + 115 * saat },
+  { name: "Transfer24", fiyat: (base, km, saat) => base + 2.18 * km + 105 * saat },
+  { name: "PrestigeRide", fiyat: (base, km, saat) => base + 2.08 * km + 120 * saat },
+  { name: "ExpressChauffeur", fiyat: (base, km, saat) => base + 2.11 * km + 140 * saat },
+];
