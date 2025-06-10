@@ -1,9 +1,6 @@
 "use client";
 import { useState } from "react";
-import { vehicles } from "../data/vehicles"; // !!! export const vehicles
-// Eğer ekstra ve rotar ekleyeceksen aşağıya import et
-// import { extrasList } from "../data/extras";
-// import { rotarList } from "../data/rotarOptions";
+import { vehicles } from "../data/vehicles"; // export const vehicles
 
 const saatler = [
   "00:00", "00:15", "00:30", "00:45",
