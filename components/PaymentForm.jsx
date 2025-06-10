@@ -66,6 +66,7 @@ export default function PaymentForm({ show, amount, onClose, onSuccess }) {
             </form>
           )
         }
+        <button className="underline text-gray-500 hover:text-gray-900 mt-4 w-full" onClick={onClose}>Geri</button>
       </div>
       <style jsx>{`
         .animate-fade-in { animation: fadeIn .3s; }
