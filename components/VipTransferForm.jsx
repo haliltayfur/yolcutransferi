@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
-import { vehicles } from "../data/vehicles"; // export const vehicles
+import { vehicles } from "../data/vehicles";
+import { extrasList } from "../data/extras";
+import RezSummaryPopup from "./RezSummaryPopup";
 
 const saatler = [
   "00:00", "00:15", "00:30", "00:45",
@@ -29,78 +31,96 @@ const saatler = [
   "23:00", "23:15", "23:30", "23:45"
 ];
 
-export default function VipTransferForm({ onSubmit }) {
+export default function VipTransferForm() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [vehicle, setVehicle] = useState(vehicles[0]?.value || "");
   const [people, setPeople] = useState(1);
+  const [selectedExtras, setSelectedExtras] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
 
-  // Seçilen aracın max kişi sınırı
+  // Araç kişi sınırı
   const maxPeople = vehicles.find((v) => v.value === vehicle)?.max || 10;
 
+  // Ekstra ekleme/çıkarma
+  const toggleExtra = key => {
+    setSelectedExtras(list =>
+      list.includes(key)
+        ? list.filter(k => k !== key)
+        : [...list, key]
+    );
+  };
+
+  // Form verisiyle popup aç
+  const handleShowPrice = () => {
+    if (!from || !to || !date || !time) {
+      alert("Lütfen tüm alanları doldurun.");
+      return;
+    }
+    setShowPopup(true);
+  };
+
   return (
-    <form className="w-full flex flex-col gap-3">
-      <div className="flex gap-2">
-        <input
-          type="text"
-          placeholder="Nereden?"
-          className="input flex-1"
-          value={from}
-          onChange={e => setFrom(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Nereye?"
-          className="input flex-1"
-          value={to}
-          onChange={e => setTo(e.target.value)}
-        />
+    <section className="w-full flex flex-col items-center my-6">
+      <div className="w-full max-w-2xl bg-black/90 rounded-2xl p-7 shadow-2xl border border-gold">
+        {/* Form */}
+        <form className="flex flex-col gap-4">
+          <div className="flex gap-3 flex-col md:flex-row">
+            <input type="text" placeholder="Nereden?" className="input flex-1" value={from} onChange={e => setFrom(e.target.value)} />
+            <input type="text" placeholder="Nereye?" className="input flex-1" value={to} onChange={e => setTo(e.target.value)} />
+          </div>
+          <div className="flex gap-3 flex-col md:flex-row">
+            <input type="date" className="input" value={date} onChange={e => setDate(e.target.value)} />
+            <select className="input" value={time} onChange={e => setTime(e.target.value)}>
+              <option value="">Saat</option>
+              {saatler.map((saat, i) => <option key={i} value={saat}>{saat}</option>)}
+            </select>
+            <select className="input" value={vehicle} onChange={e => setVehicle(e.target.value)}>
+              {vehicles.map((v, i) => <option key={i} value={v.value}>{v.label}</option>)}
+            </select>
+            <select className="input" value={people} onChange={e => setPeople(Number(e.target.value))}>
+              {[...Array(maxPeople).keys()].map(i => <option key={i+1} value={i+1}>{i+1} Kişi</option>)}
+            </select>
+          </div>
+          {/* Ekstralar */}
+          <div className="flex flex-wrap gap-2 justify-center mt-2">
+            {extrasList.map(extra => (
+              <button
+                type="button"
+                key={extra.key}
+                className={`flex items-center gap-1 px-3 py-1 rounded-lg border font-semibold shadow text-sm transition ${selectedExtras.includes(extra.key) ? "bg-gold text-black border-gold" : "bg-gray-900 text-white border-gray-700 hover:bg-yellow-800"}`}
+                onClick={() => toggleExtra(extra.key)}
+              >
+                {extra.icon} {extra.label}
+              </button>
+            ))}
+          </div>
+          {/* Fiyatı Gör Butonu */}
+          <button
+            type="button"
+            className="bg-gold text-black font-bold py-3 rounded-xl mt-3 text-lg w-full hover:bg-yellow-400 transition"
+            onClick={handleShowPrice}
+          >
+            Fiyatı Gör
+          </button>
+        </form>
       </div>
-      <div className="flex gap-2">
-        <input
-          type="date"
-          className="input"
-          value={date}
-          onChange={e => setDate(e.target.value)}
-        />
-        <select
-          className="input"
-          value={time}
-          onChange={e => setTime(e.target.value)}
-        >
-          <option value="">Saat</option>
-          {saatler.map((saat, i) => (
-            <option key={i} value={saat}>{saat}</option>
-          ))}
-        </select>
-        <select
-          className="input"
-          value={vehicle}
-          onChange={e => setVehicle(e.target.value)}
-        >
-          {vehicles.map((v, i) =>
-            <option key={i} value={v.value}>{v.label}</option>
-          )}
-        </select>
-        <select
-          className="input"
-          value={people}
-          onChange={e => setPeople(Number(e.target.value))}
-        >
-          {[...Array(maxPeople).keys()].map(i =>
-            <option key={i + 1} value={i + 1}>{i + 1} Kişi</option>
-          )}
-        </select>
-      </div>
-      <button
-        type="button"
-        className="bg-gold text-black font-bold py-2 rounded-xl mt-2 w-full"
-        onClick={() => onSubmit && onSubmit({ from, to, date, time, vehicle, people })}
-      >
-        Fiyatı Gör
-      </button>
-    </form>
+      {/* Popup */}
+      <RezSummaryPopup
+        show={showPopup}
+        onClose={() => setShowPopup(false)}
+        info={{
+          from,
+          to,
+          date,
+          time,
+          vehicle: vehicles.find(v => v.value === vehicle)?.label || "",
+          people,
+          selectedExtras
+        }}
+      />
+    </section>
   );
 }
