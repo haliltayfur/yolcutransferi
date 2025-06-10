@@ -1,4 +1,6 @@
+// /data/extras.js
 import { FaWifi, FaChild, FaDog, FaNewspaper, FaHandshake, FaGift, FaGlassCheers } from "react-icons/fa";
+
 export const extrasList = [
   { key: "wifi", label: "Wi-Fi", price: 500, icon: <FaWifi /> },
   { key: "child_seat", label: "Çocuk koltuğu", price: 500, icon: <FaChild /> },
