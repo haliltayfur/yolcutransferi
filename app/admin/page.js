@@ -1,8 +1,10 @@
 "use client";
 import { useState } from "react";
 import AdminReservations from '../../components/AdminReservations';
-export default function AdminPage() { return <AdminReservations />; }
 
+export default function AdminPage() {
+  return <AdminReservations />;
+}
 // Sahte demo veri, backend bağlanınca API'den gelir
 const demoReservations = [
   {
