@@ -33,13 +33,16 @@ const saatler = [
 ];
 
 export default function VipTransferForm({ onSubmit }) {
-  // Örnek bir sadeleştirilmiş form - kendi state ve tasarımına göre özelleştir!
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [vehicle, setVehicle] = useState(vehicleList[0]?.name || "");
   const [people, setPeople] = useState(1);
+
+  // İlgili aracın kişi sınırı
+  const maxPeople =
+    vehicleList.find((v) => v.name === vehicle)?.max || 10;
 
   return (
     <form className="w-full flex flex-col gap-3">
@@ -56,11 +59,15 @@ export default function VipTransferForm({ onSubmit }) {
         <select className="input" value={vehicle} onChange={e => setVehicle(e.target.value)}>
           {vehicleList.map((v, i) => <option key={i} value={v.name}>{v.name}</option>)}
         </select>
-        <select className="input" value={people} onChange={e => setPeople(e.target.value)}>
-          {[...Array(10).keys()].map(i => <option key={i+1} value={i+1}>{i+1} Kişi</option>)}
+        <select className="input" value={people} onChange={e => setPeople(Number(e.target.value))}>
+          {[...Array(maxPeople).keys()].map(i => <option key={i+1} value={i+1}>{i+1} Kişi</option>)}
         </select>
       </div>
-      <button type="button" className="bg-gold text-black font-bold py-2 rounded-xl mt-2 w-full" onClick={() => onSubmit && onSubmit({from, to, date, time, vehicle, people})}>
+      <button
+        type="button"
+        className="bg-gold text-black font-bold py-2 rounded-xl mt-2 w-full"
+        onClick={() => onSubmit && onSubmit({ from, to, date, time, vehicle, people })}
+      >
         Fiyatı Gör
       </button>
     </form>
