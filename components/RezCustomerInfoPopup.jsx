@@ -1,118 +1,210 @@
 "use client";
-import { useState } from "react";
-import { extras } from "../data/extras";
-import { rotarOptions } from "../data/rotarOptions";
-import { vehicleList } from "../data/vehicleList";
-export default function RezSummaryPopup({ show, onClose, info }) {
-  const [ekstraList, setEkstraList] = useState(info.selectedExtras || []);
-  const rotarFiyat = rotarOptions.find(opt => opt.label === info.rotar)?.price || 0;
-  const [vehicle, setVehicle] = useState(vehicleList?.[0]?.name || "");
+import { useState, useEffect } from "react";
 
-  // Kuruyemiş ve içki ilişkisi
-  const hasAlcohol = ekstraList.some(key => ["bira", "sarap", "viski", "sampanya"].includes(key));
-  const kuruyemisKey = "kuruyemis";
-  const showKuruyemisStrikethrough = hasAlcohol && ekstraList.includes(kuruyemisKey);
+export default function RezCustomerInfoPopup({ show, onClose, onNext, info }) {
+  const [ad, setAd] = useState("");
+  const [soyad, setSoyad] = useState("");
+  const [tc, setTc] = useState("");
+  const [tel, setTel] = useState("");
+  const [email, setEmail] = useState("");
+  const [rezervAd, setRezervAd] = useState("");
+  const [tel2, setTel2] = useState("");
+  const [ucusNo, setUcusNo] = useState("");
+  const [ekstraNot, setEkstraNot] = useState("");
 
-  // Ekstra çıkarma
-  const handleRemove = (key) => setEkstraList(list => list.filter(k => k !== key));
+  // Otomatik doldurma: rezervasyon yapan adı yolcu adıyla dolmalı
+  useEffect(() => {
+    setRezervAd(`${ad} ${soyad}`);
+  }, [ad, soyad]);
 
-  // Örnek fiyat hesaplama (API veya fakeFirms ile fiyatı alabilirsiniz)
-  const baseFiyat = 1800; // Buraya gerçek fiyat hesap kodunu koyabilirsin
-  const ekstralarFiyat = ekstraList.reduce((sum, key) => {
-    const item = extras.find(e => e.key === key);
-    // İçkiye %10 ekle
-    if (hasAlcohol && ["bira", "sarap", "viski", "sampanya"].includes(key)) {
-      return sum + Math.round((item?.price || 0) * 1.10);
+  // Havalimanı mı kontrolü
+  const isAirport =
+    (info?.from || "").toLowerCase().includes("hava") ||
+    (info?.to || "").toLowerCase().includes("hava");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (isAirport && !ucusNo) {
+      alert("Havalimanı transferlerinde uçuş numarası (PNR) gereklidir!");
+      return;
     }
-    return sum + (item?.price || 0);
-  }, 0);
-  const toplam = baseFiyat + ekstralarFiyat + rotarFiyat;
+    onNext &&
+      onNext({
+        ad,
+        soyad,
+        tc,
+        tel,
+        email,
+        rezervAd,
+        tel2,
+        ucusNo,
+        ekstraNot,
+      });
+  };
 
   if (!show) return null;
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
-      <div className="bg-white text-black rounded-2xl shadow-2xl p-8 max-w-md w-full relative animate-fade-in">
-        <button onClick={onClose} className="absolute top-2 right-3 text-xl text-gray-400 hover:text-red-500 font-bold">×</button>
-        <h3 className="text-xl font-bold mb-2 text-gold text-center">Rezervasyon Özeti</h3>
-        <div className="mb-4">
-          <div className="mb-2 text-sm font-bold text-gray-700">{info.vehicle} | Yolcu sayısı: {info.people}</div>
-          <div className="text-base mb-2">
-            <span className="font-semibold">Nereden:</span> {info.from} &nbsp; <span className="font-semibold">Nereye:</span> {info.to}
+      <div className="bg-white text-black rounded-2xl shadow-2xl p-8 max-w-lg w-full relative animate-fade-in border border-gold/50">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-3 text-lg text-gray-400 hover:text-red-500 font-bold"
+        >
+          ×
+        </button>
+        <h3 className="text-xl font-bold mb-3 text-center text-gold">
+          Yolcu Bilgileri
+        </h3>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <div className="flex gap-3">
+            <div className="flex flex-col flex-1">
+              <label className="text-sm font-bold text-gray-700">Adı</label>
+              <input
+                autoComplete="given-name"
+                type="text"
+                className="input"
+                placeholder="Adı"
+                value={ad}
+                onChange={(e) => setAd(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex flex-col flex-1">
+              <label className="text-sm font-bold text-gray-700">Soyadı</label>
+              <input
+                autoComplete="family-name"
+                type="text"
+                className="input"
+                placeholder="Soyadı"
+                value={soyad}
+                onChange={(e) => setSoyad(e.target.value)}
+                required
+              />
+            </div>
           </div>
-          <div className="text-base mb-2">
-            <span className="font-semibold">Tarih:</span> {info.date} &nbsp; <span className="font-semibold">Saat:</span> {info.time}
+          <div className="flex gap-3">
+            <div className="flex flex-col flex-1">
+              <label className="text-sm font-bold text-gray-700">
+                TC Kimlik No
+              </label>
+              <input
+                autoComplete="off"
+                type="text"
+                className="input"
+                placeholder="TC Kimlik No"
+                value={tc}
+                onChange={(e) => setTc(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex flex-col flex-1">
+              <label className="text-sm font-bold text-gray-700">
+                Telefon No
+              </label>
+              <input
+                autoComplete="tel"
+                type="text"
+                className="input"
+                placeholder="Telefon No"
+                value={tel}
+                onChange={(e) => setTel(e.target.value)}
+                required
+              />
+            </div>
           </div>
-        </div>
-        {/* Ekstralar */}
-        <div className="mb-3">
-          <div className="font-bold mb-1 text-gray-700">Ekstralar:</div>
-          <ul className="text-base space-y-1">
-            {ekstraList.map(key => {
-              if (key === kuruyemisKey && showKuruyemisStrikethrough) {
-                return (
-                  <li key={key} className="flex items-center gap-2 line-through text-gray-500 italic">
-                    Kuruyemiş İkramı
-                    <span className="ml-auto text-xs">ikram</span>
-                    <button onClick={() => handleRemove(key)} className="text-red-500 text-lg px-2 font-bold">×</button>
-                  </li>
-                );
-              }
-              const item = extras.find(e => e.key === key);
-              if (!item) return null;
-              return (
-                <li key={key} className="flex items-center gap-2">
-                  {item.label}
-                  <span className="ml-auto text-xs font-semibold">
-                    {hasAlcohol && ["bira", "sarap", "viski", "sampanya"].includes(key)
-                      ? (item.price * 1.10).toFixed(0)
-                      : item.price
-                    }₺
-                  </span>
-                  <button onClick={() => handleRemove(key)} className="text-red-500 text-lg px-2 font-bold">×</button>
-                </li>
-              );
-            })}
-            {ekstraList.length === 0 && <li className="italic text-gray-400">Ekstra yok</li>}
-          </ul>
-        </div>
-        {/* Rotar Garantisi */}
-        {info.rotar && (
-          <div className="flex justify-between text-base border-t pt-2 mt-3">
-            <span className="font-semibold">Rötar Garantisi</span>
-            <span className="font-semibold">{info.rotar} ({rotarFiyat}₺)</span>
+          <div className="flex flex-col">
+            <label className="text-sm font-bold text-gray-700">Mail</label>
+            <input
+              autoComplete="email"
+              type="email"
+              className="input"
+              placeholder="Mail"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
-        )}
-        {/* Fiyatlar */}
-        <div className="pt-4 mt-4 border-t">
-          <div className="flex justify-between text-base mb-1">
-            <span className="font-semibold">VIP Transfer Ücreti:</span>
-            <span>{baseFiyat}₺</span>
+          <div className="flex flex-col">
+            <label className="text-sm font-bold text-gray-700">
+              Rezervasyon Yapan
+            </label>
+            <input
+              autoComplete="off"
+              type="text"
+              className="input"
+              placeholder="Rezervasyon yapan (ad soyad)"
+              value={rezervAd}
+              onChange={(e) => setRezervAd(e.target.value)}
+              required
+            />
           </div>
-          <div className="flex justify-between text-base mb-1">
-            <span className="font-semibold">Ekstralar:</span>
-            <span>{ekstralarFiyat}₺</span>
+          <div className="flex flex-col">
+            <label className="text-sm font-bold text-gray-700">
+              2. İrtibat Numarası
+            </label>
+            <input
+              autoComplete="tel"
+              type="text"
+              className="input"
+              placeholder="2. İrtibat Numarası"
+              value={tel2}
+              onChange={(e) => setTel2(e.target.value)}
+            />
           </div>
-          {rotarFiyat > 0 && (
-            <div className="flex justify-between text-base mb-1">
-              <span className="font-semibold">Rötar Garantisi:</span>
-              <span>{rotarFiyat}₺</span>
+          {isAirport && (
+            <div className="flex flex-col">
+              <label className="text-sm font-bold text-gray-700">
+                Uçuş Numarası / PNR
+              </label>
+              <input
+                autoComplete="off"
+                type="text"
+                className="input"
+                placeholder="Uçuş Numarası / PNR"
+                value={ucusNo}
+                onChange={(e) => setUcusNo(e.target.value)}
+                required
+              />
             </div>
           )}
-          {/* Toplam */}
-          <div className="flex justify-between text-lg font-extrabold mt-4 text-gold">
-            <span>TOPLAM:</span>
-            <span>{toplam}₺</span>
+          <div className="flex flex-col">
+            <label className="text-sm font-bold text-gray-700">
+              Ekstra İstekler & Notlar
+            </label>
+            <textarea
+              className="input"
+              placeholder="Ekstra isteklerinizi ve notlarınızı buradan belirtiniz."
+              value={ekstraNot}
+              onChange={(e) => setEkstraNot(e.target.value)}
+              rows={2}
+            />
           </div>
-        </div>
-        <button className="w-full bg-gold text-black font-bold rounded-xl py-3 text-lg mt-5 hover:bg-yellow-400" onClick={() => alert("Bir sonraki adıma geçecek!")}>
-          Devam Et / Rezervasyonu Onayla
+          <button className="bg-gold hover:bg-yellow-400 text-black font-bold rounded-xl px-6 py-3 transition text-lg w-full mt-2">
+            Ödeme Adımına Geç
+          </button>
+        </form>
+        <button
+          className="underline text-gray-500 hover:text-gray-900 mt-2 w-full"
+          onClick={onClose}
+        >
+          Geri
         </button>
-        <button className="underline text-gray-500 hover:text-gray-900 mt-2 w-full" onClick={onClose}>Geri</button>
       </div>
       <style jsx>{`
-        .animate-fade-in { animation: fadeIn .3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(.95);} to { opacity: 1; transform: scale(1);} }
+        .animate-fade-in {
+          animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
       `}</style>
     </div>
   );
