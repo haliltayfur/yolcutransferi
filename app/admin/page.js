@@ -1,35 +1,36 @@
 "use client";
 import { useState } from "react";
-import AdminReservations from '../../components/AdminReservations';
+
+// NOT: Eğer ayrı bir dosyada AdminReservations varsa, onu burada import et. (Senin kodunda içerik gömülü.)
+//
+// import AdminReservations from '../../components/AdminReservations';
+// VEYA aşağıdaki gibi kendi içinde komponent olarak yazabilirsin:
 
 export default function AdminPage() {
-  return <AdminReservations />;
-}
-// Sahte demo veri, backend bağlanınca API'den gelir
-const demoReservations = [
-  {
-    id: 1,
-    name: "Mehmet Yılmaz",
-    from: "İstanbul Havalimanı",
-    to: "Kadıköy",
-    date: "2024-06-01",
-    time: "12:30",
-    driver: "Onaysız",
-    status: "Bekliyor"
-  },
-  {
-    id: 2,
-    name: "Elif Karaca",
-    from: "Antalya Havalimanı",
-    to: "Lara",
-    date: "2024-06-02",
-    time: "10:00",
-    driver: "Onaylı",
-    status: "Aktif"
-  }
-];
+  // Sahte demo veri
+  const demoReservations = [
+    {
+      id: 1,
+      name: "Mehmet Yılmaz",
+      from: "İstanbul Havalimanı",
+      to: "Kadıköy",
+      date: "2024-06-01",
+      time: "12:30",
+      driver: "Onaysız",
+      status: "Bekliyor"
+    },
+    {
+      id: 2,
+      name: "Elif Karaca",
+      from: "Antalya Havalimanı",
+      to: "Lara",
+      date: "2024-06-02",
+      time: "10:00",
+      driver: "Onaylı",
+      status: "Aktif"
+    }
+  ];
 
-export default function AdminPanel() {
   const [login, setLogin] = useState(false);
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
@@ -110,12 +111,8 @@ export default function AdminPanel() {
                   <td className="py-2 px-2">{r.to}</td>
                   <td className="py-2 px-2">{r.date}</td>
                   <td className="py-2 px-2">{r.time}</td>
-                  <td className="py-2 px-2">
-                    {r.driver}
-                  </td>
-                  <td className="py-2 px-2">
-                    {r.status}
-                  </td>
+                  <td className="py-2 px-2">{r.driver}</td>
+                  <td className="py-2 px-2">{r.status}</td>
                   <td className="py-2 px-2">
                     {r.driver !== "Onaylı" ? (
                       <button onClick={() => approveDriver(i)} className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-700">
