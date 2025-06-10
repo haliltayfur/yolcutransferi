@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import HeroSlider from "../components/HeroSlider";
 import ExtrasSelector from "../components/ExtrasSelector";
 import RezSummaryPopup from "../components/RezSummaryPopup";
+import PaymentForm from "../components/PaymentForm";
 
 import { vehicles } from "../data/vehicleList";
 import { advantages } from "../data/advantages";
@@ -12,7 +13,7 @@ import { fakeFirms } from "../data/fakeFirms";
 import { testimonials } from "../data/testimonials";
 import { whyUsCards } from "../data/whyUs";
 
-// --- Yorumlar responsive için ---
+// --- Responsive kontrolü için (yorumlar) ---
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -35,9 +36,11 @@ export default function Home() {
   const [extras, setExtras] = useState([]);
   const [rotar, setRotar] = useState(rotarList[0].hours);
 
-  // --- Rezervasyon Özeti ve popup ---
+  // --- Popuplar ---
   const [showSummary, setShowSummary] = useState(false);
   const [summaryData, setSummaryData] = useState(null);
+  const [showPayment, setShowPayment] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState(0);
 
   // --- Yorumlar için slider state ---
   const [testimonialIndex, setTestimonialIndex] = useState(0);
@@ -45,7 +48,11 @@ export default function Home() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTestimonialIndex(idx => (isMobile ? (idx + 1) % testimonials.length : (idx + 3) % testimonials.length));
+      setTestimonialIndex(idx =>
+        isMobile
+          ? (idx + 1) % testimonials.length
+          : (idx + 3) % testimonials.length
+      );
     }, 10000);
     return () => clearInterval(interval);
   }, [isMobile, testimonialIndex]);
@@ -101,6 +108,19 @@ export default function Home() {
   // --- Ekstraları özetten sil ---
   const removeExtra = (key) => setExtras(extras.filter(e => e !== key));
 
+  // --- Popup > ödeme adımı
+  const handlePaymentStep = () => {
+    setShowSummary(false);
+    setPaymentAmount(summaryData?.fiyatlar?.toplam || 0);
+    setTimeout(() => setShowPayment(true), 350);
+  };
+
+  // --- Ödeme sonrası
+  const handlePaymentSuccess = () => {
+    setTimeout(() => setShowPayment(false), 1500);
+    // Buraya e-posta ya da database kaydı/başarılı bildirim fonksiyonu ekleyebilirsin.
+  };
+
   return (
     <main className="bg-black text-white w-full overflow-x-hidden">
       {/* Slogan */}
@@ -116,24 +136,24 @@ export default function Home() {
       {/* VIP Transfer Formu */}
       <section className="w-full flex flex-col items-center py-10 px-3 bg-black">
         <div className="bg-[#161616] rounded-2xl shadow-2xl px-8 py-8 max-w-3xl w-full border border-gold/15">
-          <h3 className="text-2xl font-bold text-gold mb-5 text-center">VIP Transferinizi Planlayın</h3>
-          <form className="flex flex-wrap gap-4 w-full justify-center items-center" onSubmit={showRezSummary}>
-            <input type="text" className="input flex-1 min-w-[110px]" placeholder="Nereden?" value={from} onChange={e => setFrom(e.target.value)} required />
-            <input type="text" className="input flex-1 min-w-[110px]" placeholder="Nereye?" value={to} onChange={e => setTo(e.target.value)} required />
-            <input type="date" className="input flex-1 min-w-[110px]" placeholder="Tarih" value={date} onChange={e => setDate(e.target.value)} required />
-            <input type="time" className="input flex-1 min-w-[110px]" placeholder="Saat" value={time} onChange={e => setTime(e.target.value)} required />
-            <select className="input flex-1 min-w-[130px]" value={selectedVehicle}
+          <h3 className="text-2xl font-bold text-gold mb-7 text-center">VIP Transferinizi Planlayın</h3>
+          <form className="grid grid-cols-1 md:grid-cols-6 gap-3 w-full justify-center items-center" onSubmit={showRezSummary}>
+            <input type="text" className="input md:col-span-1" placeholder="Nereden?" value={from} onChange={e => setFrom(e.target.value)} required />
+            <input type="text" className="input md:col-span-1" placeholder="Nereye?" value={to} onChange={e => setTo(e.target.value)} required />
+            <input type="date" className="input md:col-span-1" placeholder="Tarih" value={date} onChange={e => setDate(e.target.value)} required />
+            <input type="time" className="input md:col-span-1" placeholder="Saat" value={time} onChange={e => setTime(e.target.value)} required />
+            <select className="input md:col-span-1" value={selectedVehicle}
               onChange={e => { setSelectedVehicle(e.target.value); setPersonCount(1); }}>
               {vehicles.map(v => (
                 <option key={v.value} value={v.value}>{v.label}</option>
               ))}
             </select>
-            <select className="input flex-1 min-w-[90px]" value={personCount} onChange={e => setPersonCount(Number(e.target.value))}>
+            <select className="input md:col-span-1" value={personCount} onChange={e => setPersonCount(Number(e.target.value))}>
               {Array.from({ length: maxPerson }, (_, i) => (
                 <option key={i+1} value={i+1}>{i+1} Kişi</option>
               ))}
             </select>
-            <button type="submit" className="bg-gold hover:bg-yellow-400 text-black font-semibold rounded-xl px-8 py-2 whitespace-nowrap transition text-lg mt-2">
+            <button type="submit" className="md:col-span-6 bg-gold hover:bg-yellow-400 text-black font-semibold rounded-xl px-8 py-3 whitespace-nowrap transition text-lg mt-2 w-full">
               Fiyatı Gör
             </button>
           </form>
@@ -204,9 +224,18 @@ export default function Home() {
       {/* Rezervasyon Özeti Pop-up */}
       <RezSummaryPopup
         show={showSummary}
-        summaryData={{ ...summaryData, extras, rotar }}
+        summaryData={{ ...summaryData, extras, rotar, from, to, date, time, vehicle: selectedVehicleObj.label, personCount }}
         onRemoveExtra={removeExtra}
         onClose={() => setShowSummary(false)}
+        onPaymentStep={handlePaymentStep}
+      />
+
+      {/* Ödeme Formu Pop-up */}
+      <PaymentForm
+        show={showPayment}
+        amount={paymentAmount}
+        onClose={() => setShowPayment(false)}
+        onSuccess={handlePaymentSuccess}
       />
 
       {/* Styles */}
