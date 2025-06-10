@@ -32,7 +32,7 @@ const saatler = [
   "23:00", "23:15", "23:30", "23:45"
 ];
 
-export default function VipTransferForm() {
+export default function VipTransferForm(props) {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
