@@ -8,28 +8,21 @@ export default function Footer() {
     <footer className="bg-black text-gray-200 pt-10 pb-6 px-3 border-t border-[#FFD70022] font-sans">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-10 mb-4">
 
-        {/* SOL BLOK: Sosyal ikonlar + Slogan + Güven damgaları */}
+        {/* SOL BLOK: Slogan + Açıklama + Güven Damgaları */}
         <div className="flex flex-col gap-3">
-          {/* Sosyal ikonlar */}
-          <div className="flex items-center gap-3 mb-2">
-            <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="footer-social">
-              <FaInstagram size={22} />
-            </a>
-            <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" aria-label="X" className="footer-social">
-              <SiX size={20} />
-            </a>
-          </div>
-          <p className="text-gold font-bold text-base mt-1 mb-1 leading-tight">
+          <p className="text-gold font-bold text-base mb-1 leading-tight">
             “VIP transferde ayrıcalık ve güven.”
           </p>
-          <p className="text-xs text-gray-400 mb-2">
+          <p className="text-xs text-gray-400 mb-1">
             Türkiye’nin lider VIP ve kurumsal yolcu taşıma platformu.<br />
             7/24 profesyonel, lisanslı ve güvenli transfer hizmeti.
           </p>
-          {/* Güven damgaları */}
-          <div className="flex items-center gap-5 mt-4">
-            <Image src="/Troy.png" alt="TROY" width={52} height={24} style={{ background: "#fff", borderRadius: 7, padding: 2 }} />
-            <Image src="/tursab.png" alt="TÜRSAB" width={72} height={28} />
+          {/* Kart ve güven damgaları */}
+          <div className="flex items-center gap-4 mt-2">
+            <Image src="/mastercard.png" alt="MasterCard" width={46} height={23} style={{ background: "#fff", borderRadius: 6, padding: 2 }} />
+            <Image src="/visa.png" alt="Visa" width={46} height={23} style={{ background: "#fff", borderRadius: 6, padding: 2 }} />
+            <Image src="/Troy.png" alt="TROY" width={46} height={23} style={{ background: "#fff", borderRadius: 6, padding: 2 }} />
+            <Image src="/tursab.png" alt="TÜRSAB" width={60} height={23} style={{ background: "#fff", borderRadius: 6, padding: 2 }} />
           </div>
         </div>
 
@@ -60,10 +53,10 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* İLETİŞİM + OFİS */}
+        {/* İLETİŞİM + SOSYAL */}
         <div>
           <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">İletişim</h3>
-          <ul className="space-y-3 text-[15px]">
+          <ul className="space-y-2 text-[15px]">
             <li className="flex items-center gap-2">
               <FaPhoneAlt className="text-gold" size={16} />
               <a href="tel:+905395267569" className="footer-link">+90 539 526 75 69</a>
@@ -72,7 +65,16 @@ export default function Footer() {
               <FaEnvelope className="text-gold" size={16} />
               <a href="mailto:info@yolcutransferi.com" className="footer-link">info@yolcutransferi.com</a>
             </li>
-            <li className="flex items-center gap-2 mt-3">
+            {/* Sosyal ikonlar burada */}
+            <li className="flex items-center gap-3 pl-6 mt-2 mb-1">
+              <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="footer-social">
+                <FaInstagram size={21} />
+              </a>
+              <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" aria-label="X" className="footer-social">
+                <SiX size={19} />
+              </a>
+            </li>
+            <li className="flex items-center gap-2 mt-1">
               <FaMapMarkerAlt className="text-gold" size={16} />
               <span className="text-xs text-gray-400">Türkiye Geneli 7/24 Hizmet</span>
             </li>
@@ -106,12 +108,12 @@ export default function Footer() {
         .footer-social {
           color: #FFD700;
           border-radius: 50%;
-          padding: 8px;
-          transition: color 0.14s, box-shadow 0.17s;
+          padding: 7px;
+          transition: color 0.14s, box-shadow 0.18s;
         }
         .footer-social:hover {
           color: #fff8c0;
-          box-shadow: 0 0 12px 3px #FFD70060;
+          box-shadow: 0 0 10px 3px #FFD70060;
           background: #161616;
         }
       `}</style>
