@@ -31,7 +31,7 @@ const transferTypes = {
   ]
 };
 
-// JSON veri için fetch (public/dumps'tan)
+// Lokasyon verisi
 const useLocationData = () => {
   const [airports, setAirports] = useState([]);
   const [iller, setIller] = useState([]);
@@ -46,11 +46,17 @@ const useLocationData = () => {
   return { airports, iller, ilceler, mahalleler };
 };
 
-export default function Page() {
+// Havalimanı olup olmadığını kontrol et
+function needsPnr(from, to) {
+  const lower = [from, to].join(" ").toLocaleLowerCase("tr-TR");
+  return lower.includes("havalimanı") || lower.includes("airport");
+}
+
+export default function RezervasyonForm() {
   // Lokasyon verisi
   const { airports, iller, ilceler, mahalleler } = useLocationData();
 
-  // Zincirli state’ler
+  // State'ler
   const [segment, setSegment] = useState("ekonomik");
   const [transfer, setTransfer] = useState("");
   const [vehicle, setVehicle] = useState("");
@@ -69,27 +75,29 @@ export default function Page() {
   const [pnr, setPnr] = useState("");
   const [showSummary, setShowSummary] = useState(false);
 
-  // Filtreli transfer ve araç seçenekleri
+  // Transfer ve araç seçenekleri zinciri
   const availableTransfers = transferTypes[segment] || [];
-  const availableVehicles = vehicles.filter(
-    v =>
-      v.segment?.toLowerCase() === segment &&
-      (v.transferTypes || []).includes(transfer)
-  );
+
+  // DÜZELTME: Araçları, segment seçilince getir, transfer tipi seçilirse ona göre daralt
+  const availableVehicles = vehicles.filter(v => {
+    if (transfer) {
+      return v.segment?.toLowerCase() === segment && (v.transferTypes || []).includes(transfer);
+    } else {
+      return v.segment?.toLowerCase() === segment;
+    }
+  });
 
   // Kişi sayısı ve ekstralar
-  const maxPeople = availableVehicles.find(v => v.value === vehicle)?.max || 1;
-  const availableExtras = availableVehicles.find(v => v.value === vehicle)?.extras || [];
-
-  // Fiyat (dummy hesaplama)
   const vehicleObj = availableVehicles.find(v => v.value === vehicle);
+  const maxPeople = vehicleObj?.max || 1;
+  const availableExtras = vehicleObj?.extras || [];
+
+  // Fiyat hesaplama
   const basePrice = vehicleObj?.price || 1500;
-  const extrasPrice = extrasList
-    .filter(e => extras.includes(e.key))
-    .reduce((sum, e) => sum + (e.price || 0), 0);
+  const extrasPrice = extrasList.filter(e => extras.includes(e.key)).reduce((sum, e) => sum + (e.price || 0), 0);
   const totalPrice = basePrice + extrasPrice;
 
-  // Autocomplete mantığı
+  // Autocomplete
   const allLocations = [
     ...(Array.isArray(airports) ? airports.map(a => a.name) : []),
     ...(Array.isArray(iller) ? iller.map(i => i.name) : []),
@@ -102,15 +110,15 @@ export default function Page() {
   useEffect(() => { setFromSug(getSuggestions(from)); }, [from, airports, iller, ilceler, mahalleler]);
   useEffect(() => { setToSug(getSuggestions(to)); }, [to, airports, iller, ilceler, mahalleler]);
 
-  // Seçim zinciri reset
+  // Zincir reset
   useEffect(() => { setTransfer(""); setVehicle(""); setPeople(1); setExtras([]); }, [segment]);
   useEffect(() => { setVehicle(""); setPeople(1); setExtras([]); }, [transfer]);
   useEffect(() => { setPeople(1); setExtras([]); }, [vehicle]);
 
-  // Form validation
+  // Doğrulama
   const validate = () => {
     if (!from || !to || !date || !time || !name || !surname || !tc || !phone) return false;
-    if (transfer?.toLowerCase().includes("havalimanı") && !pnr) return false;
+    if (needsPnr(from, to) && !pnr) return false;
     if (!vehicle) return false;
     return true;
   };
@@ -130,7 +138,7 @@ export default function Page() {
           <div><b>Tarih:</b> {date} {time}</div>
           <div><b>Ad Soyad:</b> {name} {surname} – T.C.: {tc}</div>
           <div><b>Telefon:</b> {phone}</div>
-          {transfer?.toLowerCase().includes("havalimanı") && (
+          {needsPnr(from, to) && (
             <div><b>PNR/Uçuş No:</b> {pnr}</div>
           )}
           <div><b>Ekstralar:</b> {extrasList.filter(e => extras.includes(e.key)).map(e => e.label).join(", ") || "Yok"}</div>
@@ -329,7 +337,7 @@ export default function Page() {
             <input type="tel" className="rounded-xl border border-yellow-400 px-4 py-3 text-base bg-white text-black" value={phone} onChange={e => setPhone(e.target.value)} required />
           </div>
           {/* Havalimanı PNR */}
-          {transfer?.toLowerCase().includes("havalimanı") && (
+          {needsPnr(from, to) && (
             <div className="flex flex-col col-span-4">
               <label className="text-white font-semibold mb-1">Uçuş/PNR No</label>
               <input type="text" className="rounded-xl border border-yellow-400 px-4 py-3 text-base bg-white text-black" value={pnr} onChange={e => setPnr(e.target.value)} required />
