@@ -53,12 +53,12 @@ export default function RezervasyonForm() {
     fetch("/dumps/airports.json").then(res => res.json()).then(setAirports);
   }, []);
 
-  // Tüm adresler/havalimanı için master liste
+  // Tüm adresler/havalimanı için master liste (GÜVENLİ!)
   const allLocations = [
-    ...airports.map(a => a.name),
-    ...iller.map(i => i.name),
-    ...ilceler.map(i => i.name),
-    ...mahalleler.map(i => i.name),
+    ...(Array.isArray(airports) ? airports.map(a => a.name) : []),
+    ...(Array.isArray(iller) ? iller.map(i => i.name) : []),
+    ...(Array.isArray(ilceler) ? ilceler.map(i => i.name) : []),
+    ...(Array.isArray(mahalleler) ? mahalleler.map(i => i.name) : []),
   ];
 
   function getSuggestions(value) {
