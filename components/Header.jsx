@@ -5,7 +5,7 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// Masaüstü ana menü
+// Menü tanımları
 const desktopMenu = [
   { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
@@ -14,8 +14,6 @@ const desktopMenu = [
   { name: "Hakkımızda", href: "/hakkimizda" },
   { name: "İletişim", href: "/iletisim" },
 ];
-
-// Masaüstü hamburger menü
 const desktopBurger = [
   { name: "Araçlar", href: "/araclar" },
   { name: "Şoför Başvurusu", href: "/sofor-basvuru" },
@@ -23,16 +21,12 @@ const desktopBurger = [
   { name: "Firma Başvurusu", href: "/firma-basvuru" },
   { name: "Aracı Başvurusu", href: "/araci-basvuru" },
 ];
-
-// Mobil ana menü
 const mobileMenu = [
   { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
   { name: "Rezervasyon", href: "/rezervasyon" },
   { name: "İletişim", href: "/iletisim" },
 ];
-
-// Mobil hamburger menü
 const mobileBurger = [
   { name: "Araçlar", href: "/araclar" },
   { name: "Şoför Başvurusu", href: "/sofor-basvuru" },
@@ -84,36 +78,35 @@ export default function Header() {
   }, [menuOpen]);
 
   return (
-    <header className="w-full bg-[#111111e5] backdrop-blur-lg shadow-xl z-40 relative border-b border-[#FFD70022]">
+    <header className="w-full bg-black backdrop-blur-md shadow-2xl z-40 relative border-b border-[#FFD70033]">
       {isDesktop ? (
-        <div className="flex items-center justify-between px-4 lg:px-12 py-2 w-full" style={{ minHeight: 98 }}>
+        <div className="flex items-center justify-between px-6 lg:px-14 py-2 w-full" style={{ minHeight: 100 }}>
           {/* Logo */}
           <Link href="/" className="flex items-center min-w-0" style={{ height: "90px" }}>
             <Image
               src="/LOGO.png"
               alt="Logo"
-              width={270}
+              width={260}
               height={90}
               priority
               style={{
                 width: "auto",
-                height: "80px",
+                height: "82px",
                 maxHeight: "90px",
                 objectFit: "contain"
-                // filter kaldırıldı
               }}
             />
           </Link>
           {/* Menü */}
-          <nav className="flex items-center gap-2 flex-shrink-0 ml-4">
+          <nav className="flex items-center gap-3 flex-shrink-0 ml-6">
             {desktopMenu.map((item, i) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-gray-200 px-2 py-1 font-semibold text-[18px] hover:text-gold transition-colors rounded-lg tracking-tight whitespace-nowrap"
+                className="text-gold px-4 py-2 font-extrabold text-[20px] hover:bg-[#ffd70016] hover:text-yellow-300 transition-colors duration-150 rounded-xl tracking-wide shadow-sm uppercase"
                 style={{
                   marginRight: i !== desktopMenu.length - 1 ? 4 : 0,
-                  letterSpacing: ".01em"
+                  letterSpacing: ".03em"
                 }}
               >
                 {item.name}
@@ -122,38 +115,38 @@ export default function Header() {
             {/* Hamburger */}
             <button
               ref={burgerRef}
-              className="flex flex-col gap-1 p-2 rounded-lg border border-[#FFD700] bg-black/60 ml-2 relative"
+              className="flex flex-col gap-1 p-2 rounded-lg border-2 border-gold bg-[#0a0a0a] hover:scale-105 transition-all duration-150 ml-2 shadow-xl"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Menü"
             >
-              <span className="block w-6 h-0.5 bg-gold rounded"></span>
-              <span className="block w-6 h-0.5 bg-gold rounded"></span>
-              <span className="block w-6 h-0.5 bg-gold rounded"></span>
+              <span className="block w-8 h-1 bg-gold rounded-xl transition-all"></span>
+              <span className="block w-8 h-1 bg-gold rounded-xl transition-all"></span>
+              <span className="block w-8 h-1 bg-gold rounded-xl transition-all"></span>
             </button>
           </nav>
           {/* Sağda giriş/üye ol + sosyal */}
-          <div className="flex items-center gap-3 ml-3">
+          <div className="flex items-center gap-4 ml-5">
             <Link
               href="/login"
-              className="text-black font-semibold px-3 py-1.5 rounded bg-gold hover:bg-yellow-400 transition-colors duration-200 shadow text-[15px]"
-              style={{ minWidth: 82, fontWeight: 700 }}
+              className="lux-btn"
+              style={{ minWidth: 98, fontWeight: 800 }}
             >
               Giriş Yap
             </Link>
             <Link
               href="/register"
-              className="text-[#222] font-semibold px-3 py-1.5 rounded border border-gold bg-yellow-200 hover:bg-yellow-400 hover:text-black transition-colors duration-200 shadow text-[15px]"
-              style={{ minWidth: 82, fontWeight: 700 }}
+              className="lux-btn lux-btn-outline"
+              style={{ minWidth: 98, fontWeight: 800 }}
             >
               Üye Ol
             </Link>
-            <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="text-gold hover:text-yellow-400 transition-colors duration-200">
+            <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="social-icon">
               <FaWhatsapp className="w-7 h-7" />
             </a>
-            <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="text-gold hover:text-yellow-400 transition-colors duration-200">
+            <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="social-icon">
               <FaInstagram className="w-7 h-7" />
             </a>
-            <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="text-gold hover:text-yellow-400 transition-colors duration-200">
+            <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="social-icon">
               <SiX className="w-7 h-7" />
             </a>
           </div>
@@ -161,11 +154,11 @@ export default function Header() {
           {menuOpen && (
             <nav
               ref={menuBoxRef}
-              className="absolute bg-[#181818] border border-gold rounded-xl shadow-xl animate-fade-in"
+              className="absolute bg-[#1b1a17] border-2 border-gold rounded-2xl shadow-2xl animate-fade-in"
               style={{
                 top: menuCoords.top + 2,
                 left: menuCoords.left,
-                minWidth: 210,
+                minWidth: 220,
                 maxWidth: 260,
                 zIndex: 99,
               }}
@@ -175,7 +168,7 @@ export default function Header() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="py-2 px-4 border-b border-gold last:border-0 hover:bg-black/40 transition text-gray-200 font-medium text-[17px] tracking-tight"
+                    className="py-2 px-6 border-b border-gold last:border-0 hover:bg-black/50 transition text-gold font-semibold text-[17px] tracking-tight"
                     onClick={() => setMenuOpen(false)}
                   >
                     {item.name}
@@ -188,36 +181,33 @@ export default function Header() {
       ) : (
         <>
           {/* Mobil: Logo + Giriş/Üye Ol */}
-          <div className="flex items-center justify-between px-3 pt-2 pb-1 w-full" style={{ minHeight: 65 }}>
+          <div className="flex items-center justify-between px-3 pt-2 pb-1 w-full" style={{ minHeight: 66 }}>
             <Link href="/" className="flex items-center">
               <Image
                 src="/LOGO.png"
                 alt="Logo"
-                width={150}
+                width={135}
                 height={55}
                 priority
                 style={{
                   width: "auto",
-                  height: "60px",
+                  height: "54px",
                   minWidth: "90px",
-                  maxHeight: "65px",
+                  maxHeight: "66px",
                   objectFit: "contain"
-                  // filter kaldırıldı
                 }}
               />
             </Link>
             <div className="flex gap-1 flex-shrink-0">
               <Link
                 href="/login"
-                className="text-black font-semibold px-2 py-1 rounded bg-gold hover:bg-yellow-400 transition-colors duration-200 shadow-sm text-[14px]"
-                style={{ minWidth: 68, fontWeight: 700 }}
+                className="lux-btn min-w-[72px] py-1.5 text-[15px]"
               >
                 Giriş Yap
               </Link>
               <Link
                 href="/register"
-                className="text-[#222] font-semibold px-2 py-1 rounded border border-gold bg-yellow-200 hover:bg-yellow-400 hover:text-black transition-colors duration-200 shadow-sm text-[14px]"
-                style={{ minWidth: 68, fontWeight: 700 }}
+                className="lux-btn lux-btn-outline min-w-[72px] py-1.5 text-[15px]"
               >
                 Üye Ol
               </Link>
@@ -230,8 +220,8 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-gray-200 px-2 py-1 font-semibold text-[15px] hover:text-gold transition-colors rounded-lg whitespace-nowrap"
-                  style={{ minWidth: 55, textAlign: "center" }}
+                  className="text-gold px-3 py-1 font-bold text-[16px] hover:bg-[#ffd70011] hover:text-yellow-300 transition-colors rounded-lg whitespace-nowrap uppercase"
+                  style={{ minWidth: 54, textAlign: "center" }}
                 >
                   {item.name}
                 </Link>
@@ -240,19 +230,19 @@ export default function Header() {
             {/* Hamburger */}
             <button
               ref={burgerRef}
-              className="flex flex-col gap-1 p-2 rounded-lg border border-gold bg-black/70 ml-2 relative"
+              className="flex flex-col gap-1 p-2 rounded-lg border-2 border-gold bg-black/90 ml-2 shadow-xl hover:scale-110 transition-all duration-150"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Menü"
             >
-              <span className="block w-6 h-0.5 bg-gold rounded"></span>
-              <span className="block w-6 h-0.5 bg-gold rounded"></span>
-              <span className="block w-6 h-0.5 bg-gold rounded"></span>
+              <span className="block w-7 h-1 bg-gold rounded-xl transition-all"></span>
+              <span className="block w-7 h-1 bg-gold rounded-xl transition-all"></span>
+              <span className="block w-7 h-1 bg-gold rounded-xl transition-all"></span>
             </button>
             {/* Hamburger açılır menü */}
             {menuOpen && (
               <nav
                 ref={menuBoxRef}
-                className="absolute bg-[#181818] border border-gold rounded-xl shadow-xl animate-fade-in"
+                className="absolute bg-[#1b1a17] border-2 border-gold rounded-2xl shadow-2xl animate-fade-in"
                 style={{
                   top: menuCoords.top + 2,
                   left: menuCoords.left,
@@ -266,7 +256,7 @@ export default function Header() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="py-2 px-4 border-b border-gold last:border-0 hover:bg-black/40 transition text-gray-200 font-medium text-[17px] tracking-tight"
+                      className="py-2 px-6 border-b border-gold last:border-0 hover:bg-black/50 transition text-gold font-semibold text-[16px] tracking-tight"
                       onClick={() => setMenuOpen(false)}
                     >
                       {item.name}
@@ -278,12 +268,55 @@ export default function Header() {
           </div>
         </>
       )}
-      <div className="w-full mt-2" style={{ borderBottom: "0.4px solid rgba(255,215,0,0.12)" }}></div>
+      <div className="w-full mt-2" style={{ borderBottom: "0.5px solid rgba(255,215,0,0.10)" }}></div>
       <style jsx>{`
         .text-gold { color: #FFD700; }
         .bg-gold { background: #FFD700; }
-        .animate-fade-in { animation: fadeIn .21s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px);} to { opacity: 1; transform: translateY(0);} }
+        .border-gold { border-color: #FFD700 !important; }
+        .lux-btn {
+          background: linear-gradient(90deg, #FFD700 65%, #fff8c0 100%);
+          color: #101010;
+          font-weight: 900;
+          font-size: 1.08rem;
+          border-radius: 16px;
+          box-shadow: 0 4px 20px 0 rgba(255,215,0,0.14);
+          border: none;
+          padding: 0.55rem 1.4rem;
+          transition: all .18s cubic-bezier(.32,1.56,.68,1.11);
+          letter-spacing: .02em;
+        }
+        .lux-btn:hover {
+          background: linear-gradient(90deg, #ffe567 30%, #FFD700 80%);
+          color: #191919;
+          box-shadow: 0 2px 20px 0 rgba(255,215,0,0.32), 0 1.5px 8px rgba(0,0,0,0.08);
+          transform: translateY(-2px) scale(1.035);
+        }
+        .lux-btn-outline {
+          background: #191919;
+          color: #FFD700;
+          border: 2px solid #FFD700;
+        }
+        .lux-btn-outline:hover {
+          background: linear-gradient(90deg, #FFD700 70%, #fff8c0 100%);
+          color: #191919;
+          box-shadow: 0 2px 20px 0 rgba(255,215,0,0.22);
+        }
+        .social-icon {
+          color: #FFD700;
+          margin-left: 2px;
+          margin-right: 2px;
+          border-radius: 50%;
+          padding: 7px;
+          transition: box-shadow 0.18s, color 0.15s;
+          box-shadow: 0 0 0 rgba(255,215,0,0);
+        }
+        .social-icon:hover {
+          color: #fff8c0;
+          box-shadow: 0 0 10px 3px #FFD70077;
+          background: #161616;
+        }
+        .animate-fade-in { animation: fadeIn .23s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-12px);} to { opacity: 1; transform: translateY(0);} }
       `}</style>
     </header>
   );
