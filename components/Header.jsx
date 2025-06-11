@@ -36,7 +36,7 @@ export default function Header() {
 
   return (
     <header className="w-full bg-black shadow-2xl z-40 border-b border-[#FFD70044]">
-      <div className="flex items-center justify-between px-7 lg:px-20 py-1 w-full" style={{ minHeight: 70 }}> {/* 70px ile %30 daha dar */}
+      <div className="flex items-center justify-between px-7 lg:px-20 py-1 w-full" style={{ minHeight: 70 }}>
         {/* Logo */}
         <Link href="/" className="flex items-center min-w-0" style={{ height: "60px" }}>
           <Image
@@ -53,14 +53,14 @@ export default function Header() {
             }}
           />
         </Link>
-        {/* Menü - gap %10 daha az */}
+        {/* Menü - hepsi buton gibi aynı font ve style */}
         <nav className="hidden lg:flex flex-1 justify-center items-center">
-          <div className="flex items-center gap-[20px]"> {/* Orta aralık, çok yakın değil çok uzak değil */}
+          <div className="flex items-center gap-[22px]">
             {menuItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="header-menu-link"
+                className="header-nav-btn"
               >
                 {item.name}
               </Link>
@@ -117,7 +117,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="header-menu-link"
+                  className="header-nav-btn"
                   onClick={() => setMenuOpen(false)}
                 >
                   {item.name}
@@ -153,35 +153,40 @@ export default function Header() {
         )}
       </div>
       <style jsx>{`
-        .header-menu-link {
-          color: #eaeaea;
-          font-size: 1.2rem;
-          font-weight: 700;
-          letter-spacing: .02em;
-          padding: 10px 0;
-          border-radius: 10px;
-          transition: color 0.16s, background 0.15s;
-        }
-        .header-menu-link:hover {
+        .header-nav-btn {
+          background: none;
           color: #FFD700;
-          background: #191919;
+          font-size: 1.10rem;
+          font-weight: 800;
+          padding: 8px 18px;
+          border-radius: 11px;
+          transition: color 0.13s, background 0.13s, box-shadow 0.14s;
+          border: 2px solid transparent;
+          letter-spacing: .025em;
+        }
+        .header-nav-btn:hover, .header-nav-btn:focus {
+          background: #222;
+          color: #fffbe6;
+          border-color: #FFD700;
+          box-shadow: 0 0 0 2px #FFD70055;
         }
         .header-btn {
-          background: linear-gradient(90deg, #FFD700 75%, #fffbe6 100%);
+          background: linear-gradient(90deg, #FFD700 80%, #fffbe6 100%);
           color: #191919;
-          font-weight: 800;
-          font-size: 1.08rem;
-          border-radius: 13px;
+          font-weight: 900;
+          font-size: 1.11rem;
+          border-radius: 15px;
           border: 2px solid #FFD700;
-          padding: 0.48rem 1.35rem;
-          box-shadow: 0 2px 9px 0 rgba(255,215,0,0.10);
-          transition: all .16s;
+          padding: 0.5rem 1.7rem;
+          box-shadow: 0 2px 9px 0 rgba(255,215,0,0.11);
+          transition: all .15s;
+          margin-left: 2px;
         }
         .header-btn:hover {
           background: linear-gradient(90deg, #fffbe6 10%, #FFD700 100%);
           color: #101010;
-          box-shadow: 0 2px 10px 0 rgba(255,215,0,0.15);
-          transform: translateY(-1px) scale(1.04);
+          box-shadow: 0 2px 11px 0 rgba(255,215,0,0.15);
+          transform: translateY(-1px) scale(1.045);
         }
         .header-btn-outline {
           background: transparent;
@@ -189,9 +194,9 @@ export default function Header() {
           border: 2px solid #FFD700;
         }
         .header-btn-outline:hover {
-          background: linear-gradient(90deg, #FFD700 80%, #fff8c0 100%);
+          background: linear-gradient(90deg, #FFD700 85%, #fff8c0 100%);
           color: #191919;
-          box-shadow: 0 2px 12px 0 rgba(255,215,0,0.18);
+          box-shadow: 0 2px 13px 0 rgba(255,215,0,0.16);
         }
         .header-social {
           color: #FFD700;
@@ -206,7 +211,7 @@ export default function Header() {
         }
         .bg-gold { background: #FFD700; }
         .border-gold { border-color: #FFD700 !important; }
-        .animate-fade-in { animation: fadeIn .18s; }
+        .animate-fade-in { animation: fadeIn .16s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-12px);} to { opacity: 1; transform: translateY(0);} }
       `}</style>
     </header>
