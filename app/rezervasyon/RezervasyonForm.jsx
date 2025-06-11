@@ -49,7 +49,7 @@ export default function RezervasyonForm() {
 
   // Transfer tipi değişince uygun araçları filtrele
   useEffect(() => {
-    const vList = vehicles.filter(v => v.transferTypes.includes(selectedTransfer));
+const vList = vehicles.filter(v => Array.isArray(v.transferTypes) && v.transferTypes.includes(selectedTransfer));
     setFilteredVehicles(vList);
     setSelectedVehicle(vList[0]?.value || "");
   }, [selectedTransfer]);
