@@ -3,11 +3,6 @@ import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { vehicles } from "../../data/vehicles";
 import { extrasList } from "../../data/extras";
-// Türkiye il-ilçe-mahalle ve havalimanı jsonlarını import et
-import iller from "../../public/dumps/iller.metadata.json";
-import ilceler from "../../public/dumps/ilceler.metadata.json";
-import mahalleler from "../../public/dumps/mahalleler.metadata.json";
-import airports from "../../public/dumps/airports.json";
 
 const transferTypes = [
   "Havalimanı",
@@ -21,30 +16,22 @@ const transferTypes = [
   "Düğün"
 ];
 
-// Otomatik öneri için tüm adres ve havalimanlarını bir diziye topla
-const allLocations = [
-  ...airports.map(a => a.name),
-  ...iller.map(i => i.name),
-  ...ilceler.map(i => i.name),
-  ...mahalleler.map(i => i.name),
-];
-
-function getSuggestions(value) {
-  if (!value) return [];
-  const q = value.toLocaleLowerCase("tr-TR");
-  return allLocations.filter(
-    l => l.toLocaleLowerCase("tr-TR").includes(q)
-  ).slice(0, 10);
-}
-
 export default function RezervasyonForm() {
   const params = useSearchParams();
 
-  // Form State
+  // JSON veriler için state
+  const [iller, setIller] = useState([]);
+  const [ilceler, setIlceler] = useState([]);
+  const [mahalleler, setMahalleler] = useState([]);
+  const [airports, setAirports] = useState([]);
+
+  // Adres inputları ve autocomplete
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [fromSug, setFromSug] = useState([]);
   const [toSug, setToSug] = useState([]);
+
+  // Diğer form state'leri
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [name, setName] = useState("");
@@ -58,9 +45,32 @@ export default function RezervasyonForm() {
   const [selectedExtras, setSelectedExtras] = useState([]);
   const [showSummary, setShowSummary] = useState(false);
 
-  // Autocomplete suggestions
-  useEffect(() => { setFromSug(getSuggestions(from)); }, [from]);
-  useEffect(() => { setToSug(getSuggestions(to)); }, [to]);
+  // JSON'ları fetch ile yükle
+  useEffect(() => {
+    fetch("/dumps/iller.metadata.json").then(res => res.json()).then(setIller);
+    fetch("/dumps/ilceler.metadata.json").then(res => res.json()).then(setIlceler);
+    fetch("/dumps/mahalleler.metadata.json").then(res => res.json()).then(setMahalleler);
+    fetch("/dumps/airports.json").then(res => res.json()).then(setAirports);
+  }, []);
+
+  // Tüm adresler/havalimanı için master liste
+  const allLocations = [
+    ...airports.map(a => a.name),
+    ...iller.map(i => i.name),
+    ...ilceler.map(i => i.name),
+    ...mahalleler.map(i => i.name),
+  ];
+
+  function getSuggestions(value) {
+    if (!value) return [];
+    const q = value.toLocaleLowerCase("tr-TR");
+    return allLocations.filter(
+      l => l && l.toLocaleLowerCase("tr-TR").includes(q)
+    ).slice(0, 10);
+  }
+
+  useEffect(() => { setFromSug(getSuggestions(from)); }, [from, iller, ilceler, mahalleler, airports]);
+  useEffect(() => { setToSug(getSuggestions(to)); }, [to, iller, ilceler, mahalleler, airports]);
 
   useEffect(() => {
     setFrom(params.get("from") || "");
