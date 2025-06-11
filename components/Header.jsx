@@ -5,7 +5,6 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// Menü başlıkları
 const menuItems = [
   { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
@@ -20,7 +19,6 @@ export default function Header() {
   const burgerRef = useRef(null);
   const menuBoxRef = useRef(null);
 
-  // Hamburger açılır menü kapatma
   useEffect(() => {
     function handleClick(e) {
       if (
@@ -38,27 +36,26 @@ export default function Header() {
 
   return (
     <header className="w-full bg-black shadow-2xl z-40 border-b border-[#FFD70044]">
-      <div className="flex items-center justify-between px-7 lg:px-20 py-2 w-full" style={{ minHeight: 100 }}>
+      <div className="flex items-center justify-between px-7 lg:px-20 py-1 w-full" style={{ minHeight: 70 }}> {/* 70px ile %30 daha dar */}
         {/* Logo */}
-        <Link href="/" className="flex items-center min-w-0" style={{ height: "96px" }}>
+        <Link href="/" className="flex items-center min-w-0" style={{ height: "60px" }}>
           <Image
             src="/LOGO.png"
             alt="Logo"
-            width={270} // Kendi logonun width'i neyse onu KÜÇÜLTME!
-            height={96}
+            width={180}
+            height={60}
             priority
             style={{
               width: "auto",
-              height: "96px",
-              maxHeight: "96px",
+              height: "60px",
+              maxHeight: "60px",
               objectFit: "contain"
             }}
           />
         </Link>
-
-        {/* Menü - ortalanmış ve büyütülmüş */}
+        {/* Menü - gap %10 daha az */}
         <nav className="hidden lg:flex flex-1 justify-center items-center">
-          <div className="flex items-center gap-[36px]"> {/* klasik 30px ise %20 arttırdık */}
+          <div className="flex items-center gap-[20px]"> {/* Orta aralık, çok yakın değil çok uzak değil */}
             {menuItems.map((item) => (
               <Link
                 key={item.href}
@@ -70,18 +67,17 @@ export default function Header() {
             ))}
           </div>
         </nav>
-
         {/* Giriş/Üye Ol Butonları ve Sosyal */}
-        <div className="hidden lg:flex items-center gap-3 ml-6">
+        <div className="hidden lg:flex items-center gap-2 ml-5">
           <Link
             href="/login"
-            className="header-btn"
+            className="header-btn header-btn-outline"
           >
             Giriş Yap
           </Link>
           <Link
             href="/register"
-            className="header-btn header-btn-outline"
+            className="header-btn"
           >
             Üye Ol
           </Link>
@@ -95,26 +91,25 @@ export default function Header() {
             <SiX className="w-6 h-6" />
           </a>
         </div>
-
         {/* Hamburger - sadece mobilde */}
         <button
           ref={burgerRef}
-          className="lg:hidden flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 border-gold bg-black/90 shadow-xl hover:scale-110 transition-all duration-200"
+          className="lg:hidden flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border-2 border-gold bg-black/90 shadow-xl hover:scale-110 transition-all duration-200"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Menü"
-          style={{ minWidth: 52 }}
+          style={{ minWidth: 48 }}
         >
-          <span className="block w-9 h-1.5 rounded-full bg-gold mb-1 shadow-lg" />
-          <span className="block w-9 h-1.5 rounded-full bg-gold mb-1 shadow-lg" />
-          <span className="block w-9 h-1.5 rounded-full bg-gold shadow-lg" />
+          <span className="block w-8 h-1.5 rounded-full bg-gold mb-1 shadow-lg" />
+          <span className="block w-8 h-1.5 rounded-full bg-gold mb-1 shadow-lg" />
+          <span className="block w-8 h-1.5 rounded-full bg-gold shadow-lg" />
         </button>
         {menuOpen && (
           <nav
             ref={menuBoxRef}
-            className="fixed right-4 top-24 z-50 bg-[#161616] border-2 border-gold rounded-2xl shadow-2xl animate-fade-in px-7 py-6"
+            className="fixed right-4 top-20 z-50 bg-[#161616] border-2 border-gold rounded-2xl shadow-2xl animate-fade-in px-7 py-6"
             style={{
-              minWidth: 250,
-              maxWidth: 350,
+              minWidth: 210,
+              maxWidth: 340,
             }}
           >
             <div className="flex flex-col gap-2">
@@ -130,14 +125,14 @@ export default function Header() {
               ))}
               <Link
                 href="/login"
-                className="header-btn mt-6"
+                className="header-btn header-btn-outline mt-6"
                 onClick={() => setMenuOpen(false)}
               >
                 Giriş Yap
               </Link>
               <Link
                 href="/register"
-                className="header-btn header-btn-outline mt-3"
+                className="header-btn mt-3"
                 onClick={() => setMenuOpen(false)}
               >
                 Üye Ol
@@ -160,10 +155,10 @@ export default function Header() {
       <style jsx>{`
         .header-menu-link {
           color: #eaeaea;
-          font-size: 1.37rem;  /* %20 büyütülmüş */
+          font-size: 1.2rem;
           font-weight: 700;
-          letter-spacing: .03em;
-          padding: 13px 0;
+          letter-spacing: .02em;
+          padding: 10px 0;
           border-radius: 10px;
           transition: color 0.16s, background 0.15s;
         }
@@ -172,47 +167,47 @@ export default function Header() {
           background: #191919;
         }
         .header-btn {
-          background: linear-gradient(90deg, #E5C100 65%, #FFD700 100%);
+          background: linear-gradient(90deg, #FFD700 75%, #fffbe6 100%);
           color: #191919;
-          font-weight: 900;
-          font-size: 1.09rem;
-          border-radius: 15px;
-          box-shadow: 0 3px 18px 0 rgba(255,215,0,0.13);
-          border: none;
-          padding: 0.62rem 1.55rem;
-          transition: all .18s cubic-bezier(.32,1.56,.68,1.11);
-          letter-spacing: .02em;
+          font-weight: 800;
+          font-size: 1.08rem;
+          border-radius: 13px;
+          border: 2px solid #FFD700;
+          padding: 0.48rem 1.35rem;
+          box-shadow: 0 2px 9px 0 rgba(255,215,0,0.10);
+          transition: all .16s;
         }
         .header-btn:hover {
-          background: linear-gradient(90deg, #FFD700 10%, #E5C100 100%);
+          background: linear-gradient(90deg, #fffbe6 10%, #FFD700 100%);
           color: #101010;
-          box-shadow: 0 2px 16px 0 rgba(255,215,0,0.19);
-          transform: translateY(-1px) scale(1.03);
+          box-shadow: 0 2px 10px 0 rgba(255,215,0,0.15);
+          transform: translateY(-1px) scale(1.04);
         }
         .header-btn-outline {
-          background: #191919;
+          background: transparent;
           color: #FFD700;
           border: 2px solid #FFD700;
         }
         .header-btn-outline:hover {
           background: linear-gradient(90deg, #FFD700 80%, #fff8c0 100%);
           color: #191919;
+          box-shadow: 0 2px 12px 0 rgba(255,215,0,0.18);
         }
         .header-social {
           color: #FFD700;
           border-radius: 50%;
-          padding: 7px;
-          transition: color 0.15s, box-shadow 0.18s;
+          padding: 6px;
+          transition: color 0.15s, box-shadow 0.16s;
         }
         .header-social:hover {
           color: #fff8c0;
-          box-shadow: 0 0 11px 2px #FFD70099;
+          box-shadow: 0 0 10px 2px #FFD70099;
           background: #161616;
         }
         .bg-gold { background: #FFD700; }
         .border-gold { border-color: #FFD700 !important; }
-        .animate-fade-in { animation: fadeIn .20s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-16px);} to { opacity: 1; transform: translateY(0);} }
+        .animate-fade-in { animation: fadeIn .18s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-12px);} to { opacity: 1; transform: translateY(0);} }
       `}</style>
     </header>
   );
