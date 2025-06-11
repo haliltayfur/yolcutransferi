@@ -1,9 +1,9 @@
 import { Suspense } from "react";
-import RezervasyonForm from "./RezervasyonForm";
+import RezervasyonForm from "../../components/RezervasyonForm";
 
 export default function Page() {
   return (
-    <Suspense>
+    <Suspense fallback={<div>Yükleniyor...</div>}>
       <RezervasyonForm />
     </Suspense>
   );
