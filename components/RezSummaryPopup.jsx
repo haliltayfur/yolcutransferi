@@ -1,23 +1,22 @@
 "use client";
 import { useState } from "react";
-import { extrasList } from "../data/extras";          // doğru export: extrasList
-import { rotarList } from "../data/rotarOptions";      // doğru export: rotarList
-import { vehicles } from "../data/vehicles";           // doğru export: vehicles
+import { extrasList } from "../data/extras";
+import { rotarList } from "../data/rotarOptions";
 
 export default function RezSummaryPopup({ show, onClose, info }) {
   const [ekstraList, setEkstraList] = useState(info.selectedExtras || []);
   const rotarFiyat = rotarList.find(opt => opt.label === info.rotar)?.price || 0;
-  const [vehicle, setVehicle] = useState(
-    vehicles.find(v => v.label === info.vehicle)?.label || vehicles[0]?.label || ""
-  );
 
   // Kuruyemiş ve içki ilişkisi
-  const hasAlcohol = ekstraList.some(key => ["bira", "sarap", "viski", "sampanya"].includes(key));
+  const hasAlcohol = ekstraList.some(key =>
+    ["bira", "sarap", "viski", "sampanya"].includes(key)
+  );
   const kuruyemisKey = "cookies";
   const showKuruyemisStrikethrough = hasAlcohol && ekstraList.includes(kuruyemisKey);
 
   // Ekstra çıkarma
-  const handleRemove = (key) => setEkstraList(list => list.filter(k => k !== key));
+  const handleRemove = (key) =>
+    setEkstraList(list => list.filter(k => k !== key));
 
   // Fiyat hesaplama
   const baseFiyat = 1800;
@@ -32,20 +31,36 @@ export default function RezSummaryPopup({ show, onClose, info }) {
 
   if (!show) return null;
 
+  // Havalimanı mı kontrolü
+  const isAirport =
+    (info?.from || "").toLowerCase().includes("hava") ||
+    (info?.to || "").toLowerCase().includes("hava");
+
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
       <div className="bg-white text-black rounded-2xl shadow-2xl p-8 max-w-md w-full relative animate-fade-in">
-        <button onClick={onClose} className="absolute top-2 right-3 text-xl text-gray-400 hover:text-red-500 font-bold">×</button>
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-3 text-xl text-gray-400 hover:text-red-500 font-bold"
+        >×</button>
         <h3 className="text-xl font-bold mb-2 text-gold text-center">Rezervasyon Özeti</h3>
         <div className="mb-4">
-          <div className="mb-2 text-sm font-bold text-gray-700">{vehicle} | Yolcu sayısı: {info.people}</div>
+          <div className="mb-2 text-sm font-bold text-gray-700">{info.vehicle} | Yolcu: {info.people}</div>
           <div className="text-base mb-2">
-            <span className="font-semibold">Nereden:</span> {info.from} &nbsp; <span className="font-semibold">Nereye:</span> {info.to}
+            <span className="font-semibold">Nereden:</span> {info.from} &nbsp;
+            <span className="font-semibold">Nereye:</span> {info.to}
           </div>
           <div className="text-base mb-2">
-            <span className="font-semibold">Tarih:</span> {info.date} &nbsp; <span className="font-semibold">Saat:</span> {info.time}
+            <span className="font-semibold">Tarih:</span> {info.date} &nbsp;
+            <span className="font-semibold">Saat:</span> {info.time}
           </div>
+          {isAirport && info.ucusNo && (
+            <div className="text-base mb-2">
+              <span className="font-semibold">Uçuş/Pnr No:</span> {info.ucusNo}
+            </div>
+          )}
         </div>
+
         {/* Ekstralar */}
         <div className="mb-3">
           <div className="font-bold mb-1 text-gray-700">Ekstralar:</div>
@@ -75,9 +90,12 @@ export default function RezSummaryPopup({ show, onClose, info }) {
                 </li>
               );
             })}
-            {ekstraList.length === 0 && <li className="italic text-gray-400">Ekstra yok</li>}
+            {ekstraList.length === 0 && (
+              <li className="italic text-gray-400">Ekstra yok</li>
+            )}
           </ul>
         </div>
+
         {/* Rotar Garantisi */}
         {info.rotar && (
           <div className="flex justify-between text-base border-t pt-2 mt-3">
@@ -85,6 +103,7 @@ export default function RezSummaryPopup({ show, onClose, info }) {
             <span className="font-semibold">{info.rotar} ({rotarFiyat}₺)</span>
           </div>
         )}
+
         {/* Fiyatlar */}
         <div className="pt-4 mt-4 border-t">
           <div className="flex justify-between text-base mb-1">
@@ -101,6 +120,7 @@ export default function RezSummaryPopup({ show, onClose, info }) {
               <span>{rotarFiyat}₺</span>
             </div>
           )}
+          {/* Toplam */}
           <div className="flex justify-between text-lg font-extrabold mt-4 text-gold">
             <span>TOPLAM:</span>
             <span>{toplam}₺</span>
