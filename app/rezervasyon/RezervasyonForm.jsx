@@ -3,6 +3,11 @@ import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { vehicles } from "../../data/vehicles";
 import { extrasList } from "../../data/extras";
+// Türkiye il-ilçe-mahalle ve havalimanı jsonlarını import et
+import iller from "../../public/dumps/iller.metadata.json";
+import ilceler from "../../public/dumps/ilceler.metadata.json";
+import mahalleler from "../../public/dumps/mahalleler.metadata.json";
+import airports from "../../public/dumps/airports.json";
 
 const transferTypes = [
   "Havalimanı",
@@ -16,18 +21,34 @@ const transferTypes = [
   "Düğün"
 ];
 
+// Otomatik öneri için tüm adres ve havalimanlarını bir diziye topla
+const allLocations = [
+  ...airports.map(a => a.name),
+  ...iller.map(i => i.name),
+  ...ilceler.map(i => i.name),
+  ...mahalleler.map(i => i.name),
+];
+
+function getSuggestions(value) {
+  if (!value) return [];
+  const q = value.toLocaleLowerCase("tr-TR");
+  return allLocations.filter(
+    l => l.toLocaleLowerCase("tr-TR").includes(q)
+  ).slice(0, 10);
+}
+
 export default function RezervasyonForm() {
   const params = useSearchParams();
 
   // Form State
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [fromSug, setFromSug] = useState([]);
+  const [toSug, setToSug] = useState([]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-
-  // Dinamik State
   const [selectedTransfer, setSelectedTransfer] = useState(transferTypes[0]);
   const [filteredVehicles, setFilteredVehicles] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState("");
@@ -36,6 +57,10 @@ export default function RezervasyonForm() {
   const [vehicleExtras, setVehicleExtras] = useState([]);
   const [selectedExtras, setSelectedExtras] = useState([]);
   const [showSummary, setShowSummary] = useState(false);
+
+  // Autocomplete suggestions
+  useEffect(() => { setFromSug(getSuggestions(from)); }, [from]);
+  useEffect(() => { setToSug(getSuggestions(to)); }, [to]);
 
   useEffect(() => {
     setFrom(params.get("from") || "");
@@ -70,7 +95,6 @@ export default function RezervasyonForm() {
     e.preventDefault();
     setShowSummary(true);
   }
-
   function closeSummary() {
     setShowSummary(false);
   }
@@ -78,7 +102,6 @@ export default function RezervasyonForm() {
   function RezSummaryPopup() {
     const ekstraDetay = extrasList.filter(e => selectedExtras.includes(e.key));
     const toplam = ekstraDetay.reduce((acc, e) => acc + (e.price || 0), 0);
-
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-8 relative">
@@ -112,40 +135,64 @@ export default function RezervasyonForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#232526] to-[#414345]">
-      <div className="w-full max-w-4xl p-6 md:p-12 rounded-3xl shadow-2xl bg-white/95 backdrop-blur-xl border border-gray-200">
-        <h1 className="text-3xl font-bold mb-8 text-center text-[#21243d] tracking-tight">VIP Rezervasyon Formu</h1>
+    <div className="min-h-screen flex items-center justify-center bg-[#111112]">
+      <div className="w-full max-w-4xl p-6 md:p-12 rounded-3xl shadow-2xl bg-[#161616] backdrop-blur-xl border border-gray-900">
+        <h1 className="text-3xl font-bold mb-8 text-center text-[#ffc700] tracking-tight">VIP Rezervasyon Formu</h1>
         <form className="grid grid-cols-1 md:grid-cols-4 gap-4" onSubmit={handleSubmit}>
           {/* Nereden */}
-          <div className="flex flex-col">
-            <label className="text-[#21243d] font-semibold mb-1">Nereden</label>
+          <div className="flex flex-col relative">
+            <label className="text-white font-semibold mb-1">Nereden</label>
             <input
               type="text"
-              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
+              className="rounded-xl border border-[#ffc700] px-4 py-3 text-base bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#ffc700] shadow"
               placeholder="Örn: İstanbul Havalimanı"
               value={from}
               onChange={e => setFrom(e.target.value)}
+              autoComplete="off"
               required
             />
+            {/* Autocomplete Suggestions */}
+            {from && fromSug.length > 0 && (
+              <ul className="absolute z-50 top-full left-0 right-0 bg-white border border-[#ffc700] rounded-b-xl text-black max-h-40 overflow-y-auto">
+                {fromSug.map((s, i) => (
+                  <li key={i} className="px-4 py-1 hover:bg-[#ffe066] cursor-pointer"
+                    onClick={() => { setFrom(s); setFromSug([]); }}>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           {/* Nereye */}
-          <div className="flex flex-col">
-            <label className="text-[#21243d] font-semibold mb-1">Nereye</label>
+          <div className="flex flex-col relative">
+            <label className="text-white font-semibold mb-1">Nereye</label>
             <input
               type="text"
-              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
+              className="rounded-xl border border-[#ffc700] px-4 py-3 text-base bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#ffc700] shadow"
               placeholder="Örn: Taksim"
               value={to}
               onChange={e => setTo(e.target.value)}
+              autoComplete="off"
               required
             />
+            {/* Autocomplete Suggestions */}
+            {to && toSug.length > 0 && (
+              <ul className="absolute z-50 top-full left-0 right-0 bg-white border border-[#ffc700] rounded-b-xl text-black max-h-40 overflow-y-auto">
+                {toSug.map((s, i) => (
+                  <li key={i} className="px-4 py-1 hover:bg-[#ffe066] cursor-pointer"
+                    onClick={() => { setTo(s); setToSug([]); }}>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           {/* Tarih */}
           <div className="flex flex-col">
-            <label className="text-[#21243d] font-semibold mb-1">Tarih</label>
+            <label className="text-white font-semibold mb-1">Tarih</label>
             <input
               type="date"
-              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
+              className="rounded-xl border border-[#ffc700] px-4 py-3 text-base bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#ffc700] shadow"
               value={date}
               onChange={e => setDate(e.target.value)}
               required
@@ -153,21 +200,20 @@ export default function RezervasyonForm() {
           </div>
           {/* Saat */}
           <div className="flex flex-col">
-            <label className="text-[#21243d] font-semibold mb-1">Saat</label>
+            <label className="text-white font-semibold mb-1">Saat</label>
             <input
               type="time"
-              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
+              className="rounded-xl border border-[#ffc700] px-4 py-3 text-base bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#ffc700] shadow"
               value={time}
               onChange={e => setTime(e.target.value)}
               required
             />
           </div>
-
           {/* Transfer Tipi */}
           <div className="flex flex-col col-span-2 md:col-span-2">
-            <label className="text-[#21243d] font-semibold mb-1">Transfer Tipi</label>
+            <label className="text-white font-semibold mb-1">Transfer Tipi</label>
             <select
-              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
+              className="rounded-xl border border-[#ffc700] px-4 py-3 text-base bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#ffc700] shadow"
               value={selectedTransfer}
               onChange={e => setSelectedTransfer(e.target.value)}
             >
@@ -178,9 +224,9 @@ export default function RezervasyonForm() {
           </div>
           {/* Araç Tipi */}
           <div className="flex flex-col col-span-2 md:col-span-2">
-            <label className="text-[#21243d] font-semibold mb-1">Araç Tipi</label>
+            <label className="text-white font-semibold mb-1">Araç Tipi</label>
             <select
-              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
+              className="rounded-xl border border-[#ffc700] px-4 py-3 text-base bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#ffc700] shadow"
               value={selectedVehicle}
               onChange={e => setSelectedVehicle(e.target.value)}
             >
@@ -191,9 +237,9 @@ export default function RezervasyonForm() {
           </div>
           {/* Kişi Sayısı */}
           <div className="flex flex-col col-span-2 md:col-span-2">
-            <label className="text-[#21243d] font-semibold mb-1">Kişi Sayısı</label>
+            <label className="text-white font-semibold mb-1">Kişi Sayısı</label>
             <select
-              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
+              className="rounded-xl border border-[#ffc700] px-4 py-3 text-base bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#ffc700] shadow"
               value={people}
               onChange={e => setPeople(Number(e.target.value))}
             >
@@ -201,13 +247,13 @@ export default function RezervasyonForm() {
                 <option key={n} value={n}>{n}</option>
               )}
             </select>
-            <div className="text-xs text-gray-500 mt-1">
+            <div className="text-xs text-gray-400 mt-1">
               Maksimum {vehicleMax} kişi (şoför hariç)
             </div>
           </div>
           {/* Ekstralar */}
           <div className="flex flex-col col-span-2 md:col-span-2">
-            <label className="text-[#21243d] font-semibold mb-1">Ekstra Hizmetler</label>
+            <label className="text-white font-semibold mb-1">Ekstra Hizmetler</label>
             <div className="flex flex-wrap gap-2">
               {vehicleExtras.length === 0 && (
                 <span className="text-sm text-gray-400">Bu araca özel ekstra hizmet yok.</span>
@@ -216,13 +262,13 @@ export default function RezervasyonForm() {
                 const ex = extrasList.find(e => e.key === key);
                 if (!ex) return null;
                 return (
-                  <label key={ex.key} className="flex items-center gap-1 px-2 py-1 rounded-lg border border-gray-300 cursor-pointer bg-white hover:bg-[#f8efcd]">
+                  <label key={ex.key} className="flex items-center gap-1 px-2 py-1 rounded-lg border border-gray-400 cursor-pointer bg-white hover:bg-[#ffe066]">
                     <input
                       type="checkbox"
                       checked={selectedExtras.includes(ex.key)}
                       onChange={() => toggleExtra(ex.key)}
                     />
-                    <span>{ex.label}</span>
+                    <span className="text-black">{ex.label}</span>
                   </label>
                 );
               })}
@@ -230,10 +276,10 @@ export default function RezervasyonForm() {
           </div>
           {/* Ad Soyad */}
           <div className="flex flex-col col-span-2 md:col-span-2">
-            <label className="text-[#21243d] font-semibold mb-1">Ad Soyad</label>
+            <label className="text-white font-semibold mb-1">Ad Soyad</label>
             <input
               type="text"
-              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
+              className="rounded-xl border border-[#ffc700] px-4 py-3 text-base bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#ffc700] shadow"
               placeholder="Adınız Soyadınız"
               value={name}
               onChange={e => setName(e.target.value)}
@@ -242,10 +288,10 @@ export default function RezervasyonForm() {
           </div>
           {/* Telefon */}
           <div className="flex flex-col col-span-2 md:col-span-2">
-            <label className="text-[#21243d] font-semibold mb-1">Telefon</label>
+            <label className="text-white font-semibold mb-1">Telefon</label>
             <input
               type="tel"
-              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
+              className="rounded-xl border border-[#ffc700] px-4 py-3 text-base bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#ffc700] shadow"
               placeholder="05xx xxx xx xx"
               value={phone}
               onChange={e => setPhone(e.target.value)}
@@ -256,7 +302,7 @@ export default function RezervasyonForm() {
           <div className="col-span-4">
             <button
               type="submit"
-              className="w-full py-4 rounded-2xl bg-[#bba56e] text-[#21243d] font-extrabold text-lg shadow-lg hover:bg-[#f3e5b1] transition"
+              className="w-full py-4 rounded-2xl bg-[#ffc700] text-[#222] font-extrabold text-lg shadow-lg hover:bg-[#ffe066] transition"
             >
               Rezervasyon Yap
             </button>
