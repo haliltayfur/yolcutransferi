@@ -1,38 +1,101 @@
-// Örnek: pages/rezervasyon.js
+"use client";
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function Rezervasyon() {
+  const params = useSearchParams();
+
+  // State'ler: anasayfadan gelen veya kullanıcı tarafından girilen
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+
+  // İlk yüklemede parametrelerden oku
+  useEffect(() => {
+    setFrom(params.get("from") || "");
+    setTo(params.get("to") || "");
+    setDate(params.get("date") || "");
+    setTime(params.get("time") || "");
+    // name ve phone parametresi gelmiyorsa boş kalsın
+  }, [params]);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    // Burada ileride rezervasyon kaydı/ödeme entegrasyonu yapılacak
+    alert("Rezervasyon kaydı tamamlandı (demo)");
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300">
       <div className="w-full max-w-lg p-8 rounded-2xl shadow-2xl bg-white/95 backdrop-blur-md">
         <h1 className="text-2xl font-bold mb-8 text-center text-gray-800">Rezervasyon Formu</h1>
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label className="block text-gray-700 mb-1">Nereden</label>
-            <input type="text" className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Örn: İstanbul Havalimanı" />
+            <input
+              type="text"
+              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 bg-white"
+              placeholder="Örn: İstanbul Havalimanı"
+              value={from}
+              onChange={e => setFrom(e.target.value)}
+            />
           </div>
           <div>
             <label className="block text-gray-700 mb-1">Nereye</label>
-            <input type="text" className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 bg-white" placeholder="Örn: Taksim" />
+            <input
+              type="text"
+              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 bg-white"
+              placeholder="Örn: Taksim"
+              value={to}
+              onChange={e => setTo(e.target.value)}
+            />
           </div>
           <div className="flex gap-4">
             <div className="flex-1">
               <label className="block text-gray-700 mb-1">Tarih</label>
-              <input type="date" className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white" />
+              <input
+                type="date"
+                className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white"
+                value={date}
+                onChange={e => setDate(e.target.value)}
+              />
             </div>
             <div className="flex-1">
               <label className="block text-gray-700 mb-1">Saat</label>
-              <input type="time" className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white" />
+              <input
+                type="time"
+                className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white"
+                value={time}
+                onChange={e => setTime(e.target.value)}
+              />
             </div>
           </div>
           <div>
             <label className="block text-gray-700 mb-1">Ad Soyad</label>
-            <input type="text" className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white" placeholder="Adınız Soyadınız" />
+            <input
+              type="text"
+              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white"
+              placeholder="Adınız Soyadınız"
+              value={name}
+              onChange={e => setName(e.target.value)}
+            />
           </div>
           <div>
             <label className="block text-gray-700 mb-1">Telefon</label>
-            <input type="tel" className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white" placeholder="05xx xxx xx xx" />
+            <input
+              type="tel"
+              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white"
+              placeholder="05xx xxx xx xx"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+            />
           </div>
-          <button type="submit" className="w-full py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition">Rezervasyon Yap</button>
+          <button type="submit" className="w-full py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition">
+            Rezervasyon Yap
+          </button>
         </form>
       </div>
     </div>
