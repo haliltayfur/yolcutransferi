@@ -6,24 +6,24 @@ import { SiX } from "react-icons/si";
 export default function Footer() {
   return (
     <footer className="bg-black text-gray-200 pt-12 pb-7 px-3 border-t border-[#FFD70022] font-sans">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-14 gap-y-10 mb-10">
-        {/* 1. Sütun: Slogan + Açıklama + Kartlar */}
-        <div className="flex flex-col items-start gap-4 min-w-0">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-8 mb-9">
+        {/* Sütun 1: Slogan + Açıklama + Kartlar */}
+        <div className="flex flex-col gap-3 min-w-0 items-start">
           <h3 className="footer-title">VIP transferde ayrıcalık ve güven.</h3>
-          <div className="footer-desc mb-1">
+          <div className="footer-desc">
             Türkiye’nin lider VIP ve kurumsal yolcu taşıma platformu.<br />
             7/24 profesyonel, lisanslı ve güvenli transfer hizmeti.
           </div>
-          <div className="flex items-center gap-5 mt-1">
-            <Image src="/tursab.png" alt="TÜRSAB" width={60} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
-            <Image src="/mastercard.png" alt="MasterCard" width={60} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
-            <Image src="/visa.png" alt="Visa" width={60} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
-            <Image src="/Troy.png" alt="TROY" width={60} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
+          <div className="flex flex-row items-center gap-4 mt-3">
+            <Image src="/tursab.png" alt="TÜRSAB" width={58} height={28} style={{ background: "#fff", borderRadius: 7, padding: 2 }} />
+            <Image src="/mastercard.png" alt="MasterCard" width={58} height={28} style={{ background: "#fff", borderRadius: 7, padding: 2 }} />
+            <Image src="/visa.png" alt="Visa" width={58} height={28} style={{ background: "#fff", borderRadius: 7, padding: 2 }} />
+            <Image src="/Troy.png" alt="TROY" width={58} height={28} style={{ background: "#fff", borderRadius: 7, padding: 2 }} />
           </div>
         </div>
 
-        {/* 2. Sütun: VIP Hizmetler */}
-        <div className="flex flex-col items-start gap-4 min-w-0">
+        {/* Sütun 2: VIP Hizmetler */}
+        <div className="flex flex-col gap-3 min-w-0 items-start">
           <h3 className="footer-title">VIP Hizmetler</h3>
           <ul className="footer-list">
             <li><a href="/hizmetler" className="footer-link">Havalimanı VIP Transfer</a></li>
@@ -35,8 +35,8 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* 3. Sütun: Kurumsal & Yasal */}
-        <div className="flex flex-col items-start gap-4 min-w-0">
+        {/* Sütun 3: Kurumsal & Yasal */}
+        <div className="flex flex-col gap-3 min-w-0 items-start">
           <h3 className="footer-title">Kurumsal & Yasal</h3>
           <ul className="footer-list">
             <li><a href="/hakkimizda" className="footer-link">Hakkımızda</a></li>
@@ -49,8 +49,8 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* 4. Sütun: İletişim */}
-        <div className="flex flex-col items-start gap-4 min-w-0">
+        {/* Sütun 4: İletişim */}
+        <div className="flex flex-col gap-3 min-w-0 items-start">
           <h3 className="footer-title">İletişim</h3>
           <div className="footer-list">
             <div className="flex items-center gap-2 mb-1">
@@ -65,7 +65,7 @@ export default function Footer() {
               <FaMapMarkerAlt className="text-gold" size={17} />
               <span className="footer-desc">Türkiye Geneli 7/24 Hizmet</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mt-1">
               <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="footer-social">
                 <FaWhatsapp size={22} />
               </a>
@@ -81,64 +81,69 @@ export default function Footer() {
       </div>
 
       {/* Alt Bant */}
-      <div className="max-w-7xl mx-auto mt-8 border-t border-[#FFD70028] pt-4 flex flex-col md:flex-row justify-between items-center text-[15px] text-gray-400 gap-5">
+      <div className="max-w-7xl mx-auto mt-6 border-t border-[#FFD70028] pt-4 flex flex-col md:flex-row justify-between items-center text-[15px] text-gray-400 gap-5">
         <div>
           © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
         </div>
-        <div className="flex gap-4 mt-1 md:mt-0">
-          <a href="/kvkk" className="footer-link">KVKK</a>
+        <div className="flex gap-3 mt-1 md:mt-0">
+          <a href="/kvkk" className="footer-link footer-link-bottom">KVKK</a>
           <span>|</span>
-          <a href="/gizlilik-politikasi" className="footer-link">Gizlilik</a>
+          <a href="/gizlilik-politikasi" className="footer-link footer-link-bottom">Gizlilik</a>
           <span>|</span>
-          <a href="/kullanim-sartlari" className="footer-link">Kullanım Şartları</a>
+          <a href="/kullanim-sartlari" className="footer-link footer-link-bottom">Kullanım Şartları</a>
         </div>
       </div>
       <style jsx>{`
         .text-gold { color: #FFD700; }
         .footer-title {
           color: #FFD700;
-          font-size: 1.13rem;
+          font-size: 1.10rem;
           font-weight: 700;
-          letter-spacing: .02em;
-          margin-bottom: 0.4rem;
+          letter-spacing: .015em;
+          margin-bottom: 0.3rem;
         }
         .footer-desc {
-          font-size: 1.01rem;
+          font-size: 1.00rem;
           color: #bdbdbd;
           font-weight: 400;
-          line-height: 1.6;
+          line-height: 1.60;
         }
         .footer-list {
           display: flex;
           flex-direction: column;
-          gap: 0.45rem;
+          gap: 0.30rem;
         }
         .footer-link {
           color: #bdbdbd;
-          font-size: 1.01rem;
+          font-size: 1.00rem;
           font-weight: 500;
           line-height: 1.66;
           transition: color 0.15s;
+          text-decoration: none;
         }
         .footer-link:hover {
           color: #FFD700;
         }
+        .footer-link-bottom {
+          font-size: 1.00rem !important;
+          font-weight: 500 !important;
+        }
         .footer-social {
           color: #FFD700;
           border-radius: 50%;
-          padding: 9px;
+          padding: 8px;
           font-size: 1.17rem;
-          transition: color 0.14s, box-shadow 0.18s, transform 0.16s;
+          transition: color 0.15s, box-shadow 0.18s, transform 0.14s;
         }
         .footer-social:hover {
           color: #fff8c0;
           box-shadow: 0 0 13px 3px #FFD70066;
           background: #161616;
-          transform: scale(1.17);
+          transform: scale(1.13);
         }
         @media (max-width: 1024px) {
-          .footer-title { font-size: 1.04rem; }
-          .footer-list { gap: 0.29rem; }
+          .footer-title { font-size: 1.03rem; }
+          .footer-list { gap: 0.19rem; }
         }
       `}</style>
     </footer>
