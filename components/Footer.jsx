@@ -15,13 +15,12 @@ export default function Footer() {
             7/24 profesyonel, lisanslı ve güvenli transfer hizmeti.
           </div>
           <div className="flex items-center gap-5 mt-1">
-            <Image src="/tursab.png" alt="TÜRSAB" width={62} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
-            <Image src="/mastercard.png" alt="MasterCard" width={62} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
-            <Image src="/visa.png" alt="Visa" width={62} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
-            <Image src="/Troy.png" alt="TROY" width={62} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
+            <Image src="/tursab.png" alt="TÜRSAB" width={60} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
+            <Image src="/mastercard.png" alt="MasterCard" width={60} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
+            <Image src="/visa.png" alt="Visa" width={60} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
+            <Image src="/Troy.png" alt="TROY" width={60} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
           </div>
         </div>
-
         {/* Sütun 2: VIP Hizmetler */}
         <div className="flex flex-col items-start gap-4 min-w-0">
           <h3 className="footer-title">VIP Hizmetler</h3>
@@ -34,7 +33,6 @@ export default function Footer() {
             <li><a href="/sofor-basvuru" className="footer-link">Şoför Başvurusu</a></li>
           </ul>
         </div>
-
         {/* Sütun 3: Kurumsal & Yasal */}
         <div className="flex flex-col items-start gap-4 min-w-0">
           <h3 className="footer-title">Kurumsal & Yasal</h3>
@@ -48,7 +46,6 @@ export default function Footer() {
             <li><a href="/sss" className="footer-link">S.S.S.</a></li>
           </ul>
         </div>
-
         {/* Sütun 4: İletişim */}
         <div className="flex flex-col items-start gap-4 min-w-0">
           <h3 className="footer-title">İletişim</h3>
@@ -79,7 +76,6 @@ export default function Footer() {
           </div>
         </div>
       </div>
-
       {/* Alt Bant */}
       <div className="max-w-7xl mx-auto mt-8 border-t border-[#FFD70028] pt-4 flex flex-col md:flex-row justify-between items-center text-[15px] text-gray-400 gap-5">
         <div>
