@@ -1,8 +1,8 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { vehicles } from "/data/vehicles";
-import { extrasList } from "/data/extras";
+import { vehicles } from "../../data/vehicles";
+import { extrasList } from "../../data/extras";
 
 const transferTypes = [
   "Havalimanı",
@@ -35,11 +35,8 @@ export default function RezervasyonForm() {
   const [vehicleMax, setVehicleMax] = useState(1);
   const [vehicleExtras, setVehicleExtras] = useState([]);
   const [selectedExtras, setSelectedExtras] = useState([]);
-
-  // Popup için (kendi popup'ın varsa onu ekleyebilirsin)
   const [showSummary, setShowSummary] = useState(false);
 
-  // Parametreleri ilk yükle
   useEffect(() => {
     setFrom(params.get("from") || "");
     setTo(params.get("to") || "");
@@ -47,14 +44,14 @@ export default function RezervasyonForm() {
     setTime(params.get("time") || "");
   }, [params]);
 
-  // Transfer tipi değişince uygun araçları filtrele
   useEffect(() => {
-const vList = vehicles.filter(v => Array.isArray(v.transferTypes) && v.transferTypes.includes(selectedTransfer));
+    const vList = vehicles.filter(
+      v => Array.isArray(v.transferTypes) && v.transferTypes.includes(selectedTransfer)
+    );
     setFilteredVehicles(vList);
     setSelectedVehicle(vList[0]?.value || "");
   }, [selectedTransfer]);
 
-  // Araç değişince max kişi ve ekstralar güncelle
   useEffect(() => {
     const v = vehicles.find(v => v.value === selectedVehicle);
     setVehicleMax(v?.max || 1);
@@ -63,35 +60,30 @@ const vList = vehicles.filter(v => Array.isArray(v.transferTypes) && v.transferT
     setSelectedExtras([]);
   }, [selectedVehicle]);
 
-  // Ekstra seçimi toggle
   const toggleExtra = key => {
     setSelectedExtras(prev =>
       prev.includes(key) ? prev.filter(e => e !== key) : [...prev, key]
     );
   };
 
-  // Rezervasyon gönderimi
   function handleSubmit(e) {
     e.preventDefault();
     setShowSummary(true);
   }
 
-  // Popup kapat
   function closeSummary() {
     setShowSummary(false);
   }
 
-  // Özet popup
   function RezSummaryPopup() {
-    // Fiyatlar
     const ekstraDetay = extrasList.filter(e => selectedExtras.includes(e.key));
     const toplam = ekstraDetay.reduce((acc, e) => acc + (e.price || 0), 0);
 
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-8 relative">
-          <button onClick={closeSummary} className="absolute top-2 right-4 text-xl">×</button>
-          <h2 className="text-xl font-bold mb-4 text-center text-gray-800">Rezervasyon Özeti</h2>
+          <button onClick={closeSummary} className="absolute top-2 right-4 text-2xl font-bold text-red-500 hover:text-red-700">×</button>
+          <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Rezervasyon Özeti</h2>
           <ul className="mb-3 space-y-2 text-black">
             <li><b>Nereden:</b> {from}</li>
             <li><b>Nereye:</b> {to}</li>
@@ -120,58 +112,62 @@ const vList = vehicles.filter(v => Array.isArray(v.transferTypes) && v.transferT
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300">
-      <div className="w-full max-w-lg p-8 rounded-2xl shadow-2xl bg-white/95 backdrop-blur-md">
-        <h1 className="text-2xl font-bold mb-8 text-center text-gray-800">Rezervasyon Formu</h1>
-        <form className="space-y-6" onSubmit={handleSubmit}>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#232526] to-[#414345]">
+      <div className="w-full max-w-4xl p-6 md:p-12 rounded-3xl shadow-2xl bg-white/95 backdrop-blur-xl border border-gray-200">
+        <h1 className="text-3xl font-bold mb-8 text-center text-[#21243d] tracking-tight">VIP Rezervasyon Formu</h1>
+        <form className="grid grid-cols-1 md:grid-cols-4 gap-4" onSubmit={handleSubmit}>
           {/* Nereden */}
-          <div>
-            <label className="block text-gray-700 mb-1">Nereden</label>
+          <div className="flex flex-col">
+            <label className="text-[#21243d] font-semibold mb-1">Nereden</label>
             <input
               type="text"
-              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 bg-white"
+              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
               placeholder="Örn: İstanbul Havalimanı"
               value={from}
               onChange={e => setFrom(e.target.value)}
+              required
             />
           </div>
           {/* Nereye */}
-          <div>
-            <label className="block text-gray-700 mb-1">Nereye</label>
+          <div className="flex flex-col">
+            <label className="text-[#21243d] font-semibold mb-1">Nereye</label>
             <input
               type="text"
-              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 bg-white"
+              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
               placeholder="Örn: Taksim"
               value={to}
               onChange={e => setTo(e.target.value)}
+              required
             />
           </div>
-          {/* Tarih/Saat */}
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-gray-700 mb-1">Tarih</label>
-              <input
-                type="date"
-                className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white"
-                value={date}
-                onChange={e => setDate(e.target.value)}
-              />
-            </div>
-            <div className="flex-1">
-              <label className="block text-gray-700 mb-1">Saat</label>
-              <input
-                type="time"
-                className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white"
-                value={time}
-                onChange={e => setTime(e.target.value)}
-              />
-            </div>
+          {/* Tarih */}
+          <div className="flex flex-col">
+            <label className="text-[#21243d] font-semibold mb-1">Tarih</label>
+            <input
+              type="date"
+              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              required
+            />
           </div>
-          {/* Transfer Tipi Dropdown */}
-          <div>
-            <label className="block text-gray-700 mb-1">Transfer Tipi</label>
+          {/* Saat */}
+          <div className="flex flex-col">
+            <label className="text-[#21243d] font-semibold mb-1">Saat</label>
+            <input
+              type="time"
+              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
+              value={time}
+              onChange={e => setTime(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Transfer Tipi */}
+          <div className="flex flex-col col-span-2 md:col-span-2">
+            <label className="text-[#21243d] font-semibold mb-1">Transfer Tipi</label>
             <select
-              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white"
+              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
               value={selectedTransfer}
               onChange={e => setSelectedTransfer(e.target.value)}
             >
@@ -180,11 +176,11 @@ const vList = vehicles.filter(v => Array.isArray(v.transferTypes) && v.transferT
               ))}
             </select>
           </div>
-          {/* Araç Tipi Dropdown */}
-          <div>
-            <label className="block text-gray-700 mb-1">Araç Tipi</label>
+          {/* Araç Tipi */}
+          <div className="flex flex-col col-span-2 md:col-span-2">
+            <label className="text-[#21243d] font-semibold mb-1">Araç Tipi</label>
             <select
-              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white"
+              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
               value={selectedVehicle}
               onChange={e => setSelectedVehicle(e.target.value)}
             >
@@ -193,11 +189,11 @@ const vList = vehicles.filter(v => Array.isArray(v.transferTypes) && v.transferT
               ))}
             </select>
           </div>
-          {/* Kişi Sayısı Dropdown */}
-          <div>
-            <label className="block text-gray-700 mb-1">Kişi Sayısı</label>
+          {/* Kişi Sayısı */}
+          <div className="flex flex-col col-span-2 md:col-span-2">
+            <label className="text-[#21243d] font-semibold mb-1">Kişi Sayısı</label>
             <select
-              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white"
+              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
               value={people}
               onChange={e => setPeople(Number(e.target.value))}
             >
@@ -209,9 +205,9 @@ const vList = vehicles.filter(v => Array.isArray(v.transferTypes) && v.transferT
               Maksimum {vehicleMax} kişi (şoför hariç)
             </div>
           </div>
-          {/* Ekstralar Checkbox */}
-          <div>
-            <label className="block text-gray-700 mb-1">Ekstra Hizmetler</label>
+          {/* Ekstralar */}
+          <div className="flex flex-col col-span-2 md:col-span-2">
+            <label className="text-[#21243d] font-semibold mb-1">Ekstra Hizmetler</label>
             <div className="flex flex-wrap gap-2">
               {vehicleExtras.length === 0 && (
                 <span className="text-sm text-gray-400">Bu araca özel ekstra hizmet yok.</span>
@@ -220,7 +216,7 @@ const vList = vehicles.filter(v => Array.isArray(v.transferTypes) && v.transferT
                 const ex = extrasList.find(e => e.key === key);
                 if (!ex) return null;
                 return (
-                  <label key={ex.key} className="flex items-center gap-1 px-2 py-1 rounded-lg border border-gray-300 cursor-pointer bg-white">
+                  <label key={ex.key} className="flex items-center gap-1 px-2 py-1 rounded-lg border border-gray-300 cursor-pointer bg-white hover:bg-[#f8efcd]">
                     <input
                       type="checkbox"
                       checked={selectedExtras.includes(ex.key)}
@@ -233,34 +229,38 @@ const vList = vehicles.filter(v => Array.isArray(v.transferTypes) && v.transferT
             </div>
           </div>
           {/* Ad Soyad */}
-          <div>
-            <label className="block text-gray-700 mb-1">Ad Soyad</label>
+          <div className="flex flex-col col-span-2 md:col-span-2">
+            <label className="text-[#21243d] font-semibold mb-1">Ad Soyad</label>
             <input
               type="text"
-              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white"
+              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
               placeholder="Adınız Soyadınız"
               value={name}
               onChange={e => setName(e.target.value)}
+              required
             />
           </div>
           {/* Telefon */}
-          <div>
-            <label className="block text-gray-700 mb-1">Telefon</label>
+          <div className="flex flex-col col-span-2 md:col-span-2">
+            <label className="text-[#21243d] font-semibold mb-1">Telefon</label>
             <input
               type="tel"
-              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white"
+              className="rounded-xl border border-[#bba56e] px-4 py-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#bba56e] shadow"
               placeholder="05xx xxx xx xx"
               value={phone}
               onChange={e => setPhone(e.target.value)}
+              required
             />
           </div>
           {/* Gönder Butonu */}
-          <button
-            type="submit"
-            className="w-full py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition"
-          >
-            Rezervasyon Yap
-          </button>
+          <div className="col-span-4">
+            <button
+              type="submit"
+              className="w-full py-4 rounded-2xl bg-[#bba56e] text-[#21243d] font-extrabold text-lg shadow-lg hover:bg-[#f3e5b1] transition"
+            >
+              Rezervasyon Yap
+            </button>
+          </div>
         </form>
         {/* Özet Popup */}
         {showSummary && <RezSummaryPopup />}
