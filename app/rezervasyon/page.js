@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import RezervasyonForm from "../../components/RezervasyonForm";
+import RezervasyonForm from "../components/RezervasyonForm";
 
 export default function Page() {
   return (
