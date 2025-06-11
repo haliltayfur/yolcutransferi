@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer className="bg-black text-gray-200 pt-12 pb-7 px-3 border-t border-[#FFD70022] font-sans">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-14 gap-y-10 mb-10">
-        {/* Sütun 1: Slogan + Açıklama + Kart & Güven Damgaları */}
+        {/* 1. Sütun: Slogan + Açıklama + Kartlar */}
         <div className="flex flex-col items-start gap-4 min-w-0">
           <h3 className="footer-title">VIP transferde ayrıcalık ve güven.</h3>
           <div className="footer-desc mb-1">
@@ -21,7 +21,8 @@ export default function Footer() {
             <Image src="/Troy.png" alt="TROY" width={60} height={30} style={{ background: "#fff", borderRadius: 7, padding: 3 }} />
           </div>
         </div>
-        {/* Sütun 2: VIP Hizmetler */}
+
+        {/* 2. Sütun: VIP Hizmetler */}
         <div className="flex flex-col items-start gap-4 min-w-0">
           <h3 className="footer-title">VIP Hizmetler</h3>
           <ul className="footer-list">
@@ -33,7 +34,8 @@ export default function Footer() {
             <li><a href="/sofor-basvuru" className="footer-link">Şoför Başvurusu</a></li>
           </ul>
         </div>
-        {/* Sütun 3: Kurumsal & Yasal */}
+
+        {/* 3. Sütun: Kurumsal & Yasal */}
         <div className="flex flex-col items-start gap-4 min-w-0">
           <h3 className="footer-title">Kurumsal & Yasal</h3>
           <ul className="footer-list">
@@ -46,7 +48,8 @@ export default function Footer() {
             <li><a href="/sss" className="footer-link">S.S.S.</a></li>
           </ul>
         </div>
-        {/* Sütun 4: İletişim */}
+
+        {/* 4. Sütun: İletişim */}
         <div className="flex flex-col items-start gap-4 min-w-0">
           <h3 className="footer-title">İletişim</h3>
           <div className="footer-list">
@@ -76,6 +79,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
       {/* Alt Bant */}
       <div className="max-w-7xl mx-auto mt-8 border-t border-[#FFD70028] pt-4 flex flex-col md:flex-row justify-between items-center text-[15px] text-gray-400 gap-5">
         <div>
