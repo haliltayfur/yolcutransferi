@@ -1,45 +1,35 @@
 "use client";
 import Image from "next/image";
-import { FaWhatsapp, FaInstagram, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
+import { FaInstagram, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#191919] text-gray-200 pt-12 pb-7 px-3 border-t border-[#FFD70029] font-sans">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-10 mb-8">
+    <footer className="bg-black text-gray-200 pt-10 pb-6 px-3 border-t border-[#FFD70022] font-sans">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-10 mb-4">
 
-        {/* LOGO + SLOGAN + GÜVEN DAMGASI */}
+        {/* SOL BLOK: Sosyal ikonlar + Slogan + Güven damgaları */}
         <div className="flex flex-col gap-3">
-          <Image
-            src="/LOGO.png"
-            alt="YolcuTransferi.com"
-            width={160}
-            height={52}
-            priority
-            style={{ objectFit: "contain" }}
-          />
-          <p className="text-gold font-bold text-base mt-2 mb-1 leading-tight">
-            “VIP transferde ayrıcalık ve güven.”
-          </p>
-          <p className="text-xs text-gray-400 mb-3">
-            Türkiye’nin lider VIP ve kurumsal yolcu taşıma platformu.<br />
-            7/24 profesyonel, lisanslı ve güvenli transfer hizmeti.
-          </p>
-          <div className="flex items-center gap-3 mt-1">
-            <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" aria-label="Whatsapp" className="text-gold hover:text-yellow-400 transition">
-              <FaWhatsapp size={22} />
-            </a>
-            <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gold hover:text-yellow-400 transition">
+          {/* Sosyal ikonlar */}
+          <div className="flex items-center gap-3 mb-2">
+            <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="footer-social">
               <FaInstagram size={22} />
             </a>
-            <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" aria-label="X" className="text-gold hover:text-yellow-400 transition">
+            <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" aria-label="X" className="footer-social">
               <SiX size={20} />
             </a>
           </div>
+          <p className="text-gold font-bold text-base mt-1 mb-1 leading-tight">
+            “VIP transferde ayrıcalık ve güven.”
+          </p>
+          <p className="text-xs text-gray-400 mb-2">
+            Türkiye’nin lider VIP ve kurumsal yolcu taşıma platformu.<br />
+            7/24 profesyonel, lisanslı ve güvenli transfer hizmeti.
+          </p>
           {/* Güven damgaları */}
-          <div className="flex items-center gap-4 mt-6">
-            <Image src="/troy.png" alt="TROY" width={52} height={24} />
-            <Image src="/tursab.png" alt="TÜRSAB" width={75} height={28} />
+          <div className="flex items-center gap-5 mt-4">
+            <Image src="/Troy.png" alt="TROY" width={52} height={24} style={{ background: "#fff", borderRadius: 7, padding: 2 }} />
+            <Image src="/tursab.png" alt="TÜRSAB" width={72} height={28} />
           </div>
         </div>
 
@@ -82,10 +72,6 @@ export default function Footer() {
               <FaEnvelope className="text-gold" size={16} />
               <a href="mailto:info@yolcutransferi.com" className="footer-link">info@yolcutransferi.com</a>
             </li>
-            <li className="flex items-center gap-2">
-              <FaWhatsapp className="text-gold" size={16} />
-              <a href="https://wa.me/905395267569" className="footer-link" target="_blank" rel="noopener noreferrer">Whatsapp ile yaz</a>
-            </li>
             <li className="flex items-center gap-2 mt-3">
               <FaMapMarkerAlt className="text-gold" size={16} />
               <span className="text-xs text-gray-400">Türkiye Geneli 7/24 Hizmet</span>
@@ -95,11 +81,11 @@ export default function Footer() {
       </div>
 
       {/* ALT BAND */}
-      <div className="max-w-7xl mx-auto mt-10 border-t border-[#FFD70025] pt-4 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400 gap-4">
+      <div className="max-w-7xl mx-auto mt-6 border-t border-[#FFD70028] pt-3 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400 gap-3">
         <div>
           © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
         </div>
-        <div className="flex gap-4 mt-2 md:mt-0">
+        <div className="flex gap-4 mt-1 md:mt-0">
           <a href="/kvkk" className="footer-link">KVKK</a>
           <span>|</span>
           <a href="/gizlilik-politikasi" className="footer-link">Gizlilik</a>
@@ -116,6 +102,17 @@ export default function Footer() {
         }
         .footer-link:hover {
           color: #FFD700;
+        }
+        .footer-social {
+          color: #FFD700;
+          border-radius: 50%;
+          padding: 8px;
+          transition: color 0.14s, box-shadow 0.17s;
+        }
+        .footer-social:hover {
+          color: #fff8c0;
+          box-shadow: 0 0 12px 3px #FFD70060;
+          background: #161616;
         }
       `}</style>
     </footer>
