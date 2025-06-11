@@ -44,7 +44,7 @@ export default function Header() {
           <Image
             src="/LOGO.png"
             alt="Logo"
-            width={270} // Kendi ideal logonun width'i neyse onu KÜÇÜLTME!
+            width={270} // Kendi logonun width'i neyse onu KÜÇÜLTME!
             height={96}
             priority
             style={{
@@ -58,7 +58,7 @@ export default function Header() {
 
         {/* Menü - ortalanmış ve büyütülmüş */}
         <nav className="hidden lg:flex flex-1 justify-center items-center">
-          <div className="flex items-center gap-[36px]">
+          <div className="flex items-center gap-[36px]"> {/* klasik 30px ise %20 arttırdık */}
             {menuItems.map((item) => (
               <Link
                 key={item.href}
@@ -71,7 +71,7 @@ export default function Header() {
           </div>
         </nav>
 
-        {/* Giriş/Üye Ol Butonları */}
+        {/* Giriş/Üye Ol Butonları ve Sosyal */}
         <div className="hidden lg:flex items-center gap-3 ml-6">
           <Link
             href="/login"
@@ -160,7 +160,7 @@ export default function Header() {
       <style jsx>{`
         .header-menu-link {
           color: #eaeaea;
-          font-size: 1.37rem;  /* %20 büyütülmüş (örn: 18px yerine 22px gibi) */
+          font-size: 1.37rem;  /* %20 büyütülmüş */
           font-weight: 700;
           letter-spacing: .03em;
           padding: 13px 0;
