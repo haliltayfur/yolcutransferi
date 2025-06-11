@@ -16,7 +16,6 @@ export default function Footer() {
             Türkiye’nin lider VIP ve kurumsal yolcu taşıma platformu.<br />
             7/24 profesyonel, lisanslı ve güvenli transfer hizmeti.
           </p>
-          {/* Kart ve güven damgaları */}
           <div className="flex items-center gap-4 mt-3">
             <Image src="/mastercard.png" alt="MasterCard" width={46} height={23} style={{ background: "#fff", borderRadius: 6, padding: 2 }} />
             <Image src="/visa.png" alt="Visa" width={46} height={23} style={{ background: "#fff", borderRadius: 6, padding: 2 }} />
