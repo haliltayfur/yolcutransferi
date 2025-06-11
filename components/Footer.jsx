@@ -7,9 +7,8 @@ export default function Footer() {
   return (
     <footer className="bg-black text-gray-200 pt-10 pb-6 px-3 border-t border-[#FFD70022] font-sans">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-10 mb-4">
-
         {/* SOL BLOK: Slogan + Açıklama + Güven Damgaları */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           <p className="text-gold font-bold text-base mb-1 leading-tight">
             “VIP transferde ayrıcalık ve güven.”
           </p>
@@ -18,7 +17,7 @@ export default function Footer() {
             7/24 profesyonel, lisanslı ve güvenli transfer hizmeti.
           </p>
           {/* Kart ve güven damgaları */}
-          <div className="flex items-center gap-4 mt-2">
+          <div className="flex items-center gap-4 mt-3">
             <Image src="/mastercard.png" alt="MasterCard" width={46} height={23} style={{ background: "#fff", borderRadius: 6, padding: 2 }} />
             <Image src="/visa.png" alt="Visa" width={46} height={23} style={{ background: "#fff", borderRadius: 6, padding: 2 }} />
             <Image src="/Troy.png" alt="TROY" width={46} height={23} style={{ background: "#fff", borderRadius: 6, padding: 2 }} />
@@ -65,8 +64,8 @@ export default function Footer() {
               <FaEnvelope className="text-gold" size={16} />
               <a href="mailto:info@yolcutransferi.com" className="footer-link">info@yolcutransferi.com</a>
             </li>
-            {/* Sosyal ikonlar burada */}
-            <li className="flex items-center gap-3 pl-6 mt-2 mb-1">
+            {/* Sosyal ikonlar tam burada, info ile adres arasında */}
+            <li className="flex items-center gap-3 mt-2 mb-2">
               <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="footer-social">
                 <FaInstagram size={21} />
               </a>
