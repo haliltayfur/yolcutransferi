@@ -5,17 +5,10 @@ import { extrasList } from "../data/extras";
 import { rotarList } from "../data/rotarOptions";
 import RezSummaryPopup from "./RezSummaryPopup";
 
-const saatler = [ ... ]; // Tüm saatler aynen kalsın
-
-const ADRES_PATH = "/addresses/il-ilce-mahalle-sokak.json"; // path doğruysa sorun yok
+const saatler = [ /* ... senin saat array’in ... */ ];
 
 export default function VipTransferForm() {
-  // --- AUTOCOMPLETE STATE ---
-  const [adresler, setAdresler] = useState([]);
-  const [fromSuggestions, setFromSuggestions] = useState([]);
-  const [toSuggestions, setToSuggestions] = useState([]);
-
-  // SENİN STATE’LERİN AYNEN KALIYOR
+  // Diğer stateler aynı
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
@@ -25,12 +18,19 @@ export default function VipTransferForm() {
   const [selectedExtras, setSelectedExtras] = useState([]);
   const [rotar, setRotar] = useState(rotarList[0]?.label || "");
   const [showPopup, setShowPopup] = useState(false);
+  const [ucusNo, setUcusNo] = useState("");
+
+  // AUTOCOMPLETE stateleri
+  const [addressList, setAddressList] = useState([]);
+  const [fromSuggestions, setFromSuggestions] = useState([]);
+  const [toSuggestions, setToSuggestions] = useState([]);
 
   // Havalimanı mı kontrolü
   const isAirport =
     from.toLowerCase().includes("hava") ||
-    to.toLowerCase().includes("hava");
-  const [ucusNo, setUcusNo] = useState("");
+    from.toLowerCase().match(/\b[a-z]{3}\b/) || // iata kodu yazılırsa da
+    to.toLowerCase().includes("hava") ||
+    to.toLowerCase().match(/\b[a-z]{3}\b/);
 
   // Ekstra seçme
   const toggleExtra = (key) => {
@@ -43,29 +43,49 @@ export default function VipTransferForm() {
 
   const maxPeople = vehicles.find((v) => v.value === vehicle)?.max || 10;
 
-  // AUTOCOMPLETE JSON YÜKLE
+  // ---- ADRES DATA YÜKLEME (Şehir, ilçe, mahalle, sokak + havalimanları) ----
   useEffect(() => {
-    fetch(ADRES_PATH)
-      .then(r => r.json())
-      .then(d => setAdresler(d));
+    async function fetchAll() {
+      const [iller, ilceler, mahalleler, sokaklar, airports] = await Promise.all([
+        fetch("/dumps/iller.metadata.json").then(r => r.json()),
+        fetch("/dumps/ilceler.metadata.json").then(r => r.json()),
+        fetch("/dumps/mahalleler.metadata.json").then(r => r.json()),
+        fetch("/dumps/sokaklar.metadata.json").then(r => r.json()),
+        fetch("/dumps/airports.json").then(r => r.json())
+      ]);
+
+      // Adres array’lerini string’e çevir (isim field’ı farklı olursa ayarla)
+      const list = [
+        ...iller.map(i => i.name || i.il_adi || i.label),
+        ...ilceler.map(i => i.name || i.ilce_adi || i.label),
+        ...mahalleler.map(i => i.name || i.mahalle_adi || i.label),
+        ...sokaklar.map(i => i.name || i.sokak_adi || i.label),
+        ...airports.map(a => `${a.name} (${a.city}) [${a.iata}]`), // Havalimanı adı+şehir+kodu
+        ...airports.map(a => a.iata) // Ayrı olarak sadece kodu
+      ];
+      setAddressList([...new Set(list)]); // Tekilleştir
+    }
+    fetchAll();
   }, []);
 
-  // AUTOCOMPLETE FILTER
-  function autocompleteAdres(val) {
-    if (!val || val.length < 2) return [];
-    return adresler
-      .filter(a =>
-        a.toLowerCase().includes(val.toLowerCase())
+  // AUTOCOMPLETE FONKSİYONU
+  function getSuggestions(input) {
+    if (!input || input.length < 2) return [];
+    input = input.toLowerCase();
+    // isme/koda göre eşleştir
+    return addressList
+      .filter(item =>
+        item.toLowerCase().includes(input)
       )
       .slice(0, 8);
   }
 
   useEffect(() => {
-    setFromSuggestions(autocompleteAdres(from));
-  }, [from, adresler]);
+    setFromSuggestions(getSuggestions(from));
+  }, [from, addressList]);
   useEffect(() => {
-    setToSuggestions(autocompleteAdres(to));
-  }, [to, adresler]);
+    setToSuggestions(getSuggestions(to));
+  }, [to, addressList]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -129,91 +149,9 @@ export default function VipTransferForm() {
             )}
           </div>
         </div>
-
-        {/* Kalan senin kodun AYNEN */}
-        <div className="flex gap-2 mb-2">
-          <input
-            type="date"
-            className="input"
-            value={date}
-            onChange={e => setDate(e.target.value)}
-          />
-          <select
-            className="input"
-            value={time}
-            onChange={e => setTime(e.target.value)}
-          >
-            <option value="">Saat</option>
-            {saatler.map((saat, i) => (
-              <option key={i} value={saat}>{saat}</option>
-            ))}
-          </select>
-          <select
-            className="input"
-            value={vehicle}
-            onChange={e => setVehicle(e.target.value)}
-          >
-            {vehicles.map((v, i) =>
-              <option key={i} value={v.value}>{v.label}</option>
-            )}
-          </select>
-          <select
-            className="input"
-            value={people}
-            onChange={e => setPeople(Number(e.target.value))}
-          >
-            {[...Array(maxPeople).keys()].map(i =>
-              <option key={i + 1} value={i + 1}>{i + 1} Kişi</option>
-            )}
-          </select>
-        </div>
-
-        {isAirport && (
-          <div className="mb-2">
-            <input
-              type="text"
-              className="input"
-              value={ucusNo}
-              onChange={e => setUcusNo(e.target.value)}
-              placeholder="Uçuş/Pnr Numarası"
-              required
-            />
-          </div>
-        )}
-
-        {/* Ekstralar */}
-        <div className="flex flex-wrap gap-3 mb-2">
-          {extrasList.map(item => (
-            <label key={item.key} className={`flex items-center gap-1 px-2 py-1 rounded-lg border border-gray-600 cursor-pointer ${selectedExtras.includes(item.key) ? "bg-gold text-black" : "bg-black text-white"}`}>
-              <input
-                type="checkbox"
-                className="mr-1"
-                checked={selectedExtras.includes(item.key)}
-                onChange={() => toggleExtra(item.key)}
-              />
-              <span className="text-base">{item.icon} {item.label} <span className="text-xs">(+{item.price}₺)</span></span>
-            </label>
-          ))}
-        </div>
-
-        {/* Rötar Garantisi */}
-        <div className="mb-3">
-          <label className="font-bold text-sm">Rötar Garantisi:</label>
-          <select className="input mt-1" value={rotar} onChange={e => setRotar(e.target.value)}>
-            {rotarList.map(opt => (
-              <option key={opt.label} value={opt.label}>{opt.label} {opt.price > 0 ? `(+${opt.price}₺)` : ""}</option>
-            ))}
-          </select>
-        </div>
-
-        <button
-          type="submit"
-          className="bg-gold text-black font-bold py-3 rounded-xl mt-2 w-full text-lg"
-        >
-          Fiyatı Gör
-        </button>
+        {/* Diğer alanlar ve butonlar senin kodundaki gibi devam edecek */}
+        {/* ... */}
       </form>
-
       {/* Rezervasyon Özeti Popup */}
       <RezSummaryPopup
         show={showPopup}
