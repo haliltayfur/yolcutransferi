@@ -1,19 +1,24 @@
+// components/AdvantagesBar.jsx
 
-"use client";
-
-import { advantages } from "../data/advantages";
+const advantages = [
+  "Neden iye özel, tam gizlilikte VIP transfer.",
+  "Çok dilli, uluslararası eğitimli sürücüler.",
+  "TÜRSAB belgeli, sigortalı ve güvenli yolculuk.",
+  "TROY güvencesiyle %100 yerli ödeme altyapısı.",
+  "5+ yıllık tecrübeli şoförler ve ayrıcalıklı hizmet.",
+  "%99.97 müşteri memnuniyeti ve lüks konfor.",
+  "Havalimanı ve şehirlerarası VIP transfer.",
+  "Büyük gruplar için Minibüs ve Dron ile transfer."
+];
 
 export default function AdvantagesBar() {
   return (
-    <section className="w-full flex flex-col items-center mb-12 px-2">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 max-w-5xl w-full">
-        {advantages.map((adv, i) => (
-          <div key={i} className="flex items-center gap-3 bg-[#191919] border border-gold/30 rounded-xl py-4 px-4 shadow font-semibold text-base min-h-[65px]">
-            <span className="text-gold">{adv.icon}</span>
-            <span className="leading-tight">{adv.text}</span>
-          </div>
-        ))}
-      </div>
-    </section>
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-10 mb-10">
+      {advantages.map((adv, i) => (
+        <div key={i} className="bg-black/80 border border-gold rounded-xl p-4 text-white shadow">
+          {adv}
+        </div>
+      ))}
+    </div>
   );
 }
