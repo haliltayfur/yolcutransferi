@@ -5,10 +5,10 @@ import { SiX } from "react-icons/si";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#151310] pt-12 pb-5 px-3 border-t border-[#FFD70022] text-gray-200 font-sans">
-      {/* 3’lü BLOK — Ortalı */}
+    <footer className="bg-[#151310] pt-12 pb-3 px-3 border-t border-[#FFD70022] text-gray-200 font-sans">
+      {/* Ana GRID */}
       <div className="w-full flex justify-center">
-        <div className="max-w-5xl w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-12 gap-y-10 pb-6">
+        <div className="max-w-6xl w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-14 gap-y-10 pb-6">
           {/* 1. VIP Hizmetler */}
           <div>
             <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">VIP Hizmetler</h3>
@@ -34,8 +34,8 @@ export default function Footer() {
               <li><a href="/sss" className="footer-link">S.S.S.</a></li>
             </ul>
           </div>
-          {/* 3. İletişim + TÜRSAB */}
-          <div className="flex flex-col items-start">
+          {/* 3. İletişim + Sosyal */}
+          <div>
             <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">İletişim</h3>
             <div className="flex flex-col gap-3 text-[1rem]">
               <div className="flex items-center gap-2">
@@ -51,7 +51,7 @@ export default function Footer() {
                 <span className="text-gray-300">Türkiye Geneli 7/24 Hizmet</span>
               </div>
             </div>
-            <div className="flex gap-4 mt-5 mb-4">
+            <div className="flex gap-4 mt-5">
               <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="WhatsApp">
                 <FaWhatsapp size={22} />
               </a>
@@ -62,19 +62,24 @@ export default function Footer() {
                 <SiX size={21} />
               </a>
             </div>
-            {/* TÜRSAB — Büyük ve Ortada */}
-            <div className="w-full flex justify-center">
-              <Image src="/tursab.png" alt="TÜRSAB" width={88} height={40} className="footer-tursab-img" style={{objectFit:"contain"}} />
-            </div>
           </div>
         </div>
       </div>
-      {/* ALT TELİF ve LİNK BANDI */}
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center pt-7 text-gray-400 text-[15px] gap-3">
-        <span>
-          © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
-        </span>
-        <div className="flex gap-3 mt-2 md:mt-0 text-base">
+      {/* ALT BAND: Sol (telif) - Orta (logolar) - Sağ (menü) */}
+      <div className="w-full flex flex-col md:flex-row md:items-center justify-between max-w-6xl mx-auto pt-6 pb-2 gap-2">
+        {/* Telif */}
+        <div className="text-[15px] text-gray-400 flex-1 flex justify-start items-center">
+          © {new Date().getFullYear()} <span className="text-gold font-semibold ml-1">YolcuTransferi.com</span> • Tüm hakları saklıdır.
+        </div>
+        {/* Orta logolar */}
+        <div className="flex flex-row items-center justify-center gap-3 flex-1">
+          <Image src="/tursab.png" alt="TÜRSAB" width={54} height={28} className="footer-card-img" style={{objectFit:"contain"}} />
+          <Image src="/mastercard.png" alt="MasterCard" width={44} height={28} className="footer-card-img" style={{objectFit:"contain"}} />
+          <Image src="/visa.png" alt="Visa" width={44} height={28} className="footer-card-img" style={{objectFit:"contain"}} />
+          <Image src="/Troy.png" alt="TROY" width={44} height={28} className="footer-card-img" style={{objectFit:"contain"}} />
+        </div>
+        {/* Sağ Menü */}
+        <div className="flex gap-3 flex-1 justify-end items-center text-base">
           <a href="/kvkk" className="footer-link">KVKK</a>
           <span>|</span>
           <a href="/gizlilik-politikasi" className="footer-link">Gizlilik</a>
@@ -107,15 +112,15 @@ export default function Footer() {
           box-shadow: 0 0 16px 5px #FFD70059;
           transform: scale(1.13);
         }
-        .footer-tursab-img {
+        .footer-card-img {
           background: #fff;
-          border-radius: 10px;
-          padding: 6px 14px;
-          height: 44px !important;
+          border-radius: 8px;
+          padding: 4px 9px;
+          height: 30px !important;
           width: auto !important;
           object-fit: contain;
           box-shadow: 0 1px 7px 0 #3332;
-          margin-top: 4px;
+          display: inline-block;
         }
       `}</style>
     </footer>
