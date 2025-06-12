@@ -7,8 +7,8 @@ export default function Footer() {
   return (
     <footer className="bg-[#151310] pt-12 pb-5 px-3 border-t border-[#FFD70022] text-gray-200 font-sans">
       {/* Ana GRID */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-10 gap-y-10 pb-10 border-b border-[#FFD70033]">
-        {/* VIP Hizmetler */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-x-10 gap-y-10 pb-10 border-b border-[#FFD70033]">
+        {/* 1. VIP Hizmetler */}
         <div>
           <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">VIP Hizmetler</h3>
           <ul className="flex flex-col gap-2 text-[1rem]">
@@ -20,7 +20,7 @@ export default function Footer() {
             <li><a href="/sofor-basvuru" className="footer-link">Şoför Başvurusu</a></li>
           </ul>
         </div>
-        {/* Kurumsal & Yasal */}
+        {/* 2. Kurumsal & Yasal */}
         <div>
           <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">Kurumsal & Yasal</h3>
           <ul className="flex flex-col gap-2 text-[1rem]">
@@ -33,7 +33,7 @@ export default function Footer() {
             <li><a href="/sss" className="footer-link">S.S.S.</a></li>
           </ul>
         </div>
-        {/* İletişim */}
+        {/* 3. İletişim */}
         <div>
           <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">İletişim</h3>
           <div className="flex flex-col gap-3 text-[1rem]">
@@ -62,13 +62,10 @@ export default function Footer() {
             </a>
           </div>
         </div>
-        {/* Ödeme Logoları */}
-        <div className="flex flex-col gap-4">
+        {/* 4. Ödeme Yöntemleri */}
+        <div>
           <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">Ödeme Yöntemleri</h3>
           <div className="flex flex-wrap gap-3 items-center">
-            <div className="footer-card-wrap">
-              <Image src="/tursab.png" alt="TÜRSAB" width={44} height={24} className="footer-card-img" />
-            </div>
             <div className="footer-card-wrap">
               <Image src="/mastercard.png" alt="MasterCard" width={44} height={24} className="footer-card-img" />
             </div>
@@ -78,6 +75,16 @@ export default function Footer() {
             <div className="footer-card-wrap">
               <Image src="/Troy.png" alt="TROY" width={44} height={24} className="footer-card-img" />
             </div>
+          </div>
+        </div>
+        {/* 5. Belgelendirme/TÜRSAB */}
+        <div>
+          <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">Belgelendirme</h3>
+          <div className="flex items-center gap-3">
+            <div className="footer-card-wrap">
+              <Image src="/tursab.png" alt="TÜRSAB" width={60} height={24} className="footer-card-img" />
+            </div>
+            <span className="text-gray-400 text-[0.96rem]">A-12345</span>
           </div>
         </div>
       </div>
