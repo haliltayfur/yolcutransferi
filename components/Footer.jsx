@@ -88,7 +88,7 @@ export default function Footer() {
           © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
         </div>
         <div className="flex gap-3 mt-1 md:mt-0">
-          <a href="/kvkkkkkkkk" className="hover:text-gold">KVKK</a>
+          <a href="/kvkk" className="hover:text-gold">KVKK</a>
           <span>|</span>
           <a href="/gizlilik-politikasi" className="hover:text-gold">Gizlilik</a>
           <span>|</span>
