@@ -6,8 +6,8 @@ import { SiX } from "react-icons/si";
 export default function Footer() {
   return (
     <footer className="bg-[#14120f] pt-16 pb-8 px-3 border-t border-[#FFD70022] text-gray-200 font-sans">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-x-10 gap-y-12 pb-14 border-b border-[#FFD70033]">
-        {/* 1 - Sadece metin ve kartlar */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-x-12 gap-y-12 pb-14 border-b border-[#FFD70033]">
+        {/* 1 - Slogan & Açıklama & Kartlar */}
         <div className="flex flex-col min-w-0 items-start">
           <div className="font-bold text-gold text-[1.14rem] mb-2">
             VIP transferde ayrıcalık ve güven.
@@ -16,15 +16,23 @@ export default function Footer() {
             Türkiye’nin lider VIP ve kurumsal yolcu taşıma platformu.<br />
             7/24 profesyonel, lisanslı ve sigortalı hizmet.
           </div>
-          <div className="flex gap-2 mt-1">
-            <Image src="/tursab.png" alt="TÜRSAB" width={40} height={20} className="bg-white rounded p-1" />
-            <Image src="/mastercard.png" alt="MasterCard" width={38} height={20} className="bg-white rounded p-1" />
-            <Image src="/visa.png" alt="Visa" width={38} height={20} className="bg-white rounded p-1" />
-            <Image src="/Troy.png" alt="TROY" width={38} height={20} className="bg-white rounded p-1" />
+          <div className="flex flex-row gap-3 mt-1">
+            <div className="footer-card-wrap">
+              <Image src="/tursab.png" alt="TÜRSAB" width={50} height={28} className="footer-card-img" />
+            </div>
+            <div className="footer-card-wrap">
+              <Image src="/mastercard.png" alt="MasterCard" width={50} height={28} className="footer-card-img" />
+            </div>
+            <div className="footer-card-wrap">
+              <Image src="/visa.png" alt="Visa" width={50} height={28} className="footer-card-img" />
+            </div>
+            <div className="footer-card-wrap">
+              <Image src="/Troy.png" alt="TROY" width={50} height={28} className="footer-card-img" />
+            </div>
           </div>
         </div>
-        {/* 2 - VIP Hizmetler (Aradaki boşluk mb-8 ile AÇIK) */}
-        <div>
+        {/* 2 - VIP Hizmetler */}
+        <div className="flex flex-col min-w-0 items-start">
           <h3 className="text-gold text-lg font-semibold mb-8">VIP Hizmetler</h3>
           <ul className="flex flex-col gap-2">
             <li><a href="/hizmetler" className="footer-link">Havalimanı VIP Transfer</a></li>
@@ -35,9 +43,9 @@ export default function Footer() {
             <li><a href="/sofor-basvuru" className="footer-link">Şoför Başvurusu</a></li>
           </ul>
         </div>
-        {/* 3 - Kurumsal */}
-        <div>
-          <h3 className="text-gold text-lg font-semibold mb-4">Kurumsal & Yasal</h3>
+        {/* 3 - Kurumsal & Yasal */}
+        <div className="flex flex-col min-w-0 items-start">
+          <h3 className="text-gold text-lg font-semibold mb-8">Kurumsal & Yasal</h3>
           <ul className="flex flex-col gap-2">
             <li><a href="/hakkimizda" className="footer-link">Hakkımızda</a></li>
             <li><a href="/kvkk" className="footer-link">KVKK Politikası</a></li>
@@ -49,9 +57,9 @@ export default function Footer() {
           </ul>
         </div>
         {/* 4 - İletişim ve Sosyal */}
-        <div>
-          <h3 className="text-gold text-lg font-semibold mb-4">İletişim</h3>
-          <div className="flex flex-col gap-2 text-base">
+        <div className="flex flex-col min-w-0 items-start">
+          <h3 className="text-gold text-lg font-semibold mb-8">İletişim</h3>
+          <div className="flex flex-col gap-2 text-base mb-1">
             <div className="flex items-center gap-2">
               <FaPhoneAlt className="text-gold" />
               <a href="tel:+905395267569" className="footer-link">+90 539 526 75 69</a>
@@ -115,6 +123,21 @@ export default function Footer() {
           background: #FFD700;
           box-shadow: 0 0 16px 5px #FFD70059;
           transform: scale(1.13);
+        }
+        .footer-card-wrap {
+          background: #fff;
+          border-radius: 8px;
+          padding: 4px 8px 4px 8px;
+          height: 38px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 1px 7px 0 #3332;
+        }
+        .footer-card-img {
+          height: 24px !important;
+          width: auto !important;
+          object-fit: contain;
         }
       `}</style>
     </footer>
