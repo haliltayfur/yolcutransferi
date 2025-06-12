@@ -6,17 +6,17 @@ import { SiX } from "react-icons/si";
 export default function Footer() {
   return (
     <footer className="bg-[#14120f] pt-16 pb-8 px-3 border-t border-[#FFD70022] text-gray-200 font-sans">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-x-12 gap-y-12 pb-14 border-b border-[#FFD70033]">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-x-10 gap-y-12 pb-14 border-b border-[#FFD70033]">
         {/* 1 - Slogan & Açıklama & Kartlar */}
-        <div className="flex flex-col min-w-0 items-start">
+        <div className="flex flex-col w-full items-start">
           <div className="font-bold text-gold text-[1.14rem] mb-2">
             VIP transferde ayrıcalık ve güven.
           </div>
-          <div className="text-base text-gray-300 mb-8">
+          <div className="text-base text-gray-300 mb-8 w-full">
             Türkiye’nin lider VIP ve kurumsal yolcu taşıma platformu.<br />
             7/24 profesyonel, lisanslı ve sigortalı hizmet.
           </div>
-          <div className="flex flex-row gap-3 mt-1">
+          <div className="flex flex-row gap-3 mt-1 w-full">
             <div className="footer-card-wrap">
               <Image src="/tursab.png" alt="TÜRSAB" width={50} height={28} className="footer-card-img" />
             </div>
@@ -32,9 +32,9 @@ export default function Footer() {
           </div>
         </div>
         {/* 2 - VIP Hizmetler */}
-        <div className="flex flex-col min-w-0 items-start">
+        <div className="flex flex-col w-full items-start">
           <h3 className="text-gold text-lg font-semibold mb-8">VIP Hizmetler</h3>
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-2 w-full">
             <li><a href="/hizmetler" className="footer-link">Havalimanı VIP Transfer</a></li>
             <li><a href="/hizmetler" className="footer-link">Şehirlerarası Transfer</a></li>
             <li><a href="/hizmetler" className="footer-link">Kurumsal Transfer</a></li>
@@ -44,9 +44,9 @@ export default function Footer() {
           </ul>
         </div>
         {/* 3 - Kurumsal & Yasal */}
-        <div className="flex flex-col min-w-0 items-start">
+        <div className="flex flex-col w-full items-start">
           <h3 className="text-gold text-lg font-semibold mb-8">Kurumsal & Yasal</h3>
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-2 w-full">
             <li><a href="/hakkimizda" className="footer-link">Hakkımızda</a></li>
             <li><a href="/kvkk" className="footer-link">KVKK Politikası</a></li>
             <li><a href="/gizlilik-politikasi" className="footer-link">Gizlilik Politikası</a></li>
@@ -57,9 +57,9 @@ export default function Footer() {
           </ul>
         </div>
         {/* 4 - İletişim ve Sosyal */}
-        <div className="flex flex-col min-w-0 items-start">
+        <div className="flex flex-col w-full items-start">
           <h3 className="text-gold text-lg font-semibold mb-8">İletişim</h3>
-          <div className="flex flex-col gap-2 text-base mb-1">
+          <div className="flex flex-col gap-2 text-base mb-1 w-full">
             <div className="flex items-center gap-2">
               <FaPhoneAlt className="text-gold" />
               <a href="tel:+905395267569" className="footer-link">+90 539 526 75 69</a>
