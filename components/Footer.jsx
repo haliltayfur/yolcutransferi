@@ -64,25 +64,24 @@ export default function Footer() {
         </div>
       </div>
       {/* ALT TELİF + KART LOGOLARI */}
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center pt-7 text-gray-400 text-[15px] gap-3">
-        <div className="flex flex-col md:flex-row items-center gap-3 md:gap-6">
+      <div className="w-full flex flex-col items-center gap-2 mt-5">
+        <div className="flex flex-row items-center gap-4 mb-1">
+          <Image src="/tursab.png" alt="TÜRSAB" width={44} height={24} className="footer-card-img" style={{objectFit:"contain"}} />
+          <Image src="/mastercard.png" alt="MasterCard" width={38} height={24} className="footer-card-img" style={{objectFit:"contain"}} />
+          <Image src="/visa.png" alt="Visa" width={38} height={24} className="footer-card-img" style={{objectFit:"contain"}} />
+          <Image src="/Troy.png" alt="TROY" width={42} height={24} className="footer-card-img" style={{objectFit:"contain"}} />
+        </div>
+        <div className="flex flex-col md:flex-row justify-center items-center w-full text-gray-400 text-[15px] gap-3">
           <span>
             © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
           </span>
-          {/* Logolar: TÜRSAB, Mastercard, Visa, Troy */}
-          <div className="flex flex-row items-center gap-3 md:ml-6">
-            <Image src="/tursab.png" alt="TÜRSAB" width={52} height={24} className="footer-card-img" />
-            <Image src="/mastercard.png" alt="MasterCard" width={52} height={24} className="footer-card-img" />
-            <Image src="/visa.png" alt="Visa" width={52} height={24} className="footer-card-img" />
-            <Image src="/Troy.png" alt="TROY" width={52} height={24} className="footer-card-img" />
+          <div className="flex gap-3 mt-2 md:mt-0 text-base">
+            <a href="/kvkk" className="footer-link">KVKK</a>
+            <span>|</span>
+            <a href="/gizlilik-politikasi" className="footer-link">Gizlilik</a>
+            <span>|</span>
+            <a href="/kullanim-sartlari" className="footer-link">Kullanım Şartları</a>
           </div>
-        </div>
-        <div className="flex gap-3 mt-2 md:mt-0 text-base">
-          <a href="/kvkk" className="footer-link">KVKK</a>
-          <span>|</span>
-          <a href="/gizlilik-politikasi" className="footer-link">Gizlilik</a>
-          <span>|</span>
-          <a href="/kullanim-sartlari" className="footer-link">Kullanım Şartları</a>
         </div>
       </div>
       <style jsx>{`
@@ -114,7 +113,7 @@ export default function Footer() {
           background: #fff;
           border-radius: 7px;
           padding: 3px 9px;
-          height: 30px !important;
+          height: 28px !important;
           width: auto !important;
           object-fit: contain;
           box-shadow: 0 1px 7px 0 #3332;
