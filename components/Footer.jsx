@@ -7,27 +7,25 @@ export default function Footer() {
   return (
     <footer className="bg-[#14120f] pt-16 pb-8 px-3 border-t border-[#FFD70022] text-gray-200 font-sans">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-x-10 gap-y-12 pb-14 border-b border-[#FFD70033]">
-        {/* 1 - Marka & Özet */}
-        <div className="flex flex-col gap-5">
-          <div className="flex items-center gap-3 mb-2">
-            <Image src="/LOGO.png" alt="Logo" width={80} height={36} className="rounded-xl" />
-            <span className="text-2xl font-serif font-semibold text-gold">YolcuTransferi.com</span>
+        {/* 1 - Sadece metin ve kartlar */}
+        <div className="flex flex-col min-w-0 items-start">
+          <div className="font-bold text-gold text-[1.14rem] mb-2">
+            VIP transferde ayrıcalık ve güven.
           </div>
-          <div className="text-base text-gray-300">
-            <span className="font-bold text-gold">VIP transferde ayrıcalık ve güven.</span><br />
+          <div className="text-base text-gray-300 mb-8">
             Türkiye’nin lider VIP ve kurumsal yolcu taşıma platformu.<br />
             7/24 profesyonel, lisanslı ve sigortalı hizmet.
           </div>
-          <div className="flex gap-2 mt-2">
+          <div className="flex gap-2 mt-1">
             <Image src="/tursab.png" alt="TÜRSAB" width={40} height={20} className="bg-white rounded p-1" />
             <Image src="/mastercard.png" alt="MasterCard" width={38} height={20} className="bg-white rounded p-1" />
             <Image src="/visa.png" alt="Visa" width={38} height={20} className="bg-white rounded p-1" />
             <Image src="/Troy.png" alt="TROY" width={38} height={20} className="bg-white rounded p-1" />
           </div>
         </div>
-        {/* 2 - Hizmetler */}
+        {/* 2 - VIP Hizmetler (Aradaki boşluk mb-8 ile AÇIK) */}
         <div>
-          <h3 className="text-gold text-lg font-semibold mb-4">VIP Hizmetler</h3>
+          <h3 className="text-gold text-lg font-semibold mb-8">VIP Hizmetler</h3>
           <ul className="flex flex-col gap-2">
             <li><a href="/hizmetler" className="footer-link">Havalimanı VIP Transfer</a></li>
             <li><a href="/hizmetler" className="footer-link">Şehirlerarası Transfer</a></li>
