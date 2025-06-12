@@ -15,9 +15,7 @@ export default function AdvantagesBar() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-10 mb-10">
       {advantages.map((adv, i) => (
-        <div key={i} className="bg-black/80 border border-gold rounded-xl p-4 text-white shadow">
-          {adv}
-        </div>
+        <div key={i} className="bg-black/80 border border-gold rounded-xl p-4 text-white shadow">{adv}</div>
       ))}
     </div>
   );
