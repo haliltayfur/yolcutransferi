@@ -13,6 +13,13 @@ const saatler = [
   "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00", "23:30"
 ];
 
+// Türkçe karakter normalize fonksiyonu
+const normalize = s => s
+  .toLowerCase()
+  .replace(/ç/g,"c").replace(/ğ/g,"g").replace(/ı/g,"i")
+  .replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u")
+  .replace(/[\s\-\.]/g,"");
+
 export default function VipTransferForm() {
   const router = useRouter();
 
@@ -46,17 +53,17 @@ export default function VipTransferForm() {
         ...airports.map(a => `${a.name} (${a.city}) [${a.iata}]`),
         ...airports.map(a => a.iata)
       ];
-      setAddressList([...new Set(list)]);
+      setAddressList([...new Set(list.filter(Boolean))]);
     }
     fetchAll();
   }, []);
 
-  // AUTOCOMPLETE FONKSİYONU
+  // AUTOCOMPLETE FONKSİYONU - Türkçe uyumlu
   function getSuggestions(input) {
     if (!input || input.length < 2) return [];
-    input = input.toLowerCase();
+    const q = normalize(input);
     return addressList.filter(item =>
-      item.toLowerCase().includes(input)
+      normalize(item).includes(q)
     ).slice(0, 8);
   }
 
@@ -73,14 +80,8 @@ export default function VipTransferForm() {
       alert("Lütfen tüm alanları eksiksiz doldurun.");
       return;
     }
-    // Bilgileri query string ile taşı
     const params = new URLSearchParams({
-      from,
-      to,
-      date,
-      time,
-      vehicle,
-      people
+      from, to, date, time, vehicle, people
     }).toString();
     router.push(`/rezervasyon?${params}`);
   }
@@ -184,7 +185,6 @@ export default function VipTransferForm() {
           ))}
         </select>
       </div>
-      {/* TRANSFER PLANLA BUTONU */}
       <button
         type="submit"
         className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-3 px-8 rounded-xl mt-2 w-full text-lg shadow hover:scale-105 transition"
