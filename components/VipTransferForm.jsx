@@ -35,27 +35,19 @@ export default function VipTransferForm() {
 
   const maxPeople = vehicles.find((v) => v.value === vehicle)?.max || 10;
 
-  // ---- ADRES DATA YÜKLEME (Şehir, ilçe, mahalle, sokak + havalimanları) ----
+  // ---- YENİ TEK JSON'DAN ADRESLERİ YÜKLE ----
   useEffect(() => {
-    async function fetchAll() {
-      const [iller, ilceler, mahalleler, sokaklar, airports] = await Promise.all([
-        fetch("/dumps/iller.metadata.json").then(r => r.json()),
-        fetch("/dumps/ilceler.metadata.json").then(r => r.json()),
-        fetch("/dumps/mahalleler.metadata.json").then(r => r.json()),
-        fetch("/dumps/sokaklar.metadata.json").then(r => r.json()),
-        fetch("/dumps/airports.json").then(r => r.json())
-      ]);
-      const list = [
-        ...iller.map(i => i.name || i.il_adi || i.label),
-        ...ilceler.map(i => i.name || i.ilce_adi || i.label),
-        ...mahalleler.map(i => i.name || i.mahalle_adi || i.label),
-        ...sokaklar.map(i => i.name || i.sokak_adi || i.label),
-        ...airports.map(a => `${a.name} (${a.city}) [${a.iata}]`),
-        ...airports.map(a => a.iata)
-      ];
-      setAddressList([...new Set(list.filter(Boolean))]);
-    }
-    fetchAll();
+    fetch("/dumps/adresler.json")
+      .then(r => r.json())
+      .then(data => {
+        // JSON şu yapıda olmalı:
+        // { il: "...", ilce: "...", mahalle: "...", sokak: "..." }
+        // Tek satırlık gösterim: il/ilçe/mahalle/sokak
+        const list = data.map(obj =>
+          [obj.il, obj.ilce, obj.mahalle, obj.sokak].filter(Boolean).join(" / ")
+        );
+        setAddressList([...new Set(list.filter(Boolean))]);
+      });
   }, []);
 
   // AUTOCOMPLETE FONKSİYONU - Türkçe uyumlu
@@ -96,7 +88,7 @@ export default function VipTransferForm() {
         <div className="relative flex-1">
           <input
             type="text"
-            placeholder="Nereden?"
+            placeholder="Nereden? (il/ilçe/mahalle/sokak)"
             className="input w-full"
             value={from}
             onChange={e => setFrom(e.target.value)}
@@ -120,7 +112,7 @@ export default function VipTransferForm() {
         <div className="relative flex-1">
           <input
             type="text"
-            placeholder="Nereye?"
+            placeholder="Nereye? (il/ilçe/mahalle/sokak)"
             className="input w-full"
             value={to}
             onChange={e => setTo(e.target.value)}
