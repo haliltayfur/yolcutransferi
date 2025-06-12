@@ -6,7 +6,7 @@ import { SiX } from "react-icons/si";
 export default function Footer() {
   return (
     <footer className="bg-black text-gray-200 pt-14 pb-7 px-3 border-t border-[#FFD70022] font-sans">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-14 mb-12">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-14 mb-6">
         {/* Sütun 1: Slogan + Açıklama + Kartlar */}
         <div className="flex flex-col gap-5 min-w-0 items-start">
           <h3 className="footer-title">VIP transferde ayrıcalık ve güven.</h3>
@@ -76,8 +76,11 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      {/* Alt Bant */}
-      <div className="max-w-7xl mx-auto mt-7 border-t border-[#FFD70028] pt-5 flex flex-col md:flex-row justify-between items-center text-[15px] text-gray-400 gap-4">
+      {/* BÜYÜK ALT BOŞLUK ve KALIN ÇİZGİ */}
+      <div className="h-[64px]"></div>
+      <div className="border-t border-[#FFD70044]"></div>
+      {/* Alt Telif Bant */}
+      <div className="max-w-7xl mx-auto pt-4 flex flex-col md:flex-row justify-between items-center text-[15px] text-gray-400 gap-4">
         <div>
           © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
         </div>
