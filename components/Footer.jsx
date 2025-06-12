@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#151310] pt-12 pb-5 px-3 border-t border-[#FFD70022] text-gray-200 font-sans">
       {/* Ana GRID */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-x-10 gap-y-10 pb-10 border-b border-[#FFD70033]">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-10 gap-y-10 pb-10 border-b border-[#FFD70033]">
         {/* 1. VIP Hizmetler */}
         <div>
           <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">VIP Hizmetler</h3>
@@ -62,38 +62,22 @@ export default function Footer() {
             </a>
           </div>
         </div>
-        {/* 4. Ödeme Yöntemleri */}
-        <div>
-          <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">Ödeme Yöntemleri</h3>
-          <div className="flex flex-wrap gap-3 items-center">
-            <div className="footer-card-wrap">
-              <Image src="/mastercard.png" alt="MasterCard" width={44} height={24} className="footer-card-img" />
-            </div>
-            <div className="footer-card-wrap">
-              <Image src="/visa.png" alt="Visa" width={44} height={24} className="footer-card-img" />
-            </div>
-            <div className="footer-card-wrap">
-              <Image src="/Troy.png" alt="TROY" width={44} height={24} className="footer-card-img" />
-            </div>
-          </div>
-        </div>
-        {/* 5. Belgelendirme/TÜRSAB */}
-        <div>
-          <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">Belgelendirme</h3>
-          <div className="flex items-center gap-3">
-            <div className="footer-card-wrap">
-              <Image src="/tursab.png" alt="TÜRSAB" width={60} height={24} className="footer-card-img" />
-            </div>
-            <span className="text-gray-400 text-[0.96rem]">A-12345</span>
-          </div>
-        </div>
       </div>
-      {/* ALT TELİF */}
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center pt-7 text-gray-400 text-[15px]">
-        <div>
-          © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
+      {/* ALT TELİF + KART LOGOLARI */}
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center pt-7 text-gray-400 text-[15px] gap-3">
+        <div className="flex flex-col md:flex-row items-center gap-3 md:gap-6">
+          <span>
+            © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
+          </span>
+          {/* Logolar: TÜRSAB, Mastercard, Visa, Troy */}
+          <div className="flex flex-row items-center gap-3 md:ml-6">
+            <Image src="/tursab.png" alt="TÜRSAB" width={52} height={24} className="footer-card-img" />
+            <Image src="/mastercard.png" alt="MasterCard" width={52} height={24} className="footer-card-img" />
+            <Image src="/visa.png" alt="Visa" width={52} height={24} className="footer-card-img" />
+            <Image src="/Troy.png" alt="TROY" width={52} height={24} className="footer-card-img" />
+          </div>
         </div>
-        <div className="flex gap-3 mt-3 md:mt-0 text-base">
+        <div className="flex gap-3 mt-2 md:mt-0 text-base">
           <a href="/kvkk" className="footer-link">KVKK</a>
           <span>|</span>
           <a href="/gizlilik-politikasi" className="footer-link">Gizlilik</a>
@@ -126,20 +110,15 @@ export default function Footer() {
           box-shadow: 0 0 16px 5px #FFD70059;
           transform: scale(1.13);
         }
-        .footer-card-wrap {
+        .footer-card-img {
           background: #fff;
           border-radius: 7px;
-          padding: 4px 10px 4px 10px;
-          height: 34px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 1px 7px 0 #3332;
-        }
-        .footer-card-img {
-          height: 20px !important;
+          padding: 3px 9px;
+          height: 30px !important;
           width: auto !important;
           object-fit: contain;
+          box-shadow: 0 1px 7px 0 #3332;
+          display: inline-block;
         }
       `}</style>
     </footer>
