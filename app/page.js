@@ -20,6 +20,7 @@ export default function Home() {
 
       {/* Yorumlar alanı */}
       <section className="w-full flex flex-col items-center mt-6 mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gold text-center drop-shadow">
          Müşteri Deneyimleri & Yorumları
         <TestimonialsSlider />
       </section>
