@@ -1,6 +1,3 @@
-// 1. Lucide paketini kurman gerek (npm install lucide-react)
-// 2. Kodu kullanabilirsin
-
 import { Lock, Globe, ShieldCheck, CreditCard, Car, Star, Plane, Bus } from "lucide-react";
 
 const advantages = [
