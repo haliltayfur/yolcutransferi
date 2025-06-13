@@ -1,6 +1,8 @@
-// app/api/iletisim/route.js
-
 import { NextResponse } from "next/server";
+import clientPromise from "@/lib/mongodb";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request) {
   try {
@@ -34,7 +36,26 @@ export async function POST(request) {
       return NextResponse.json({ error: "Tüm alanlar zorunludur." }, { status: 400 });
     }
 
-    // Mail gövdesi — Tüm detaylar, iletişim tercihi ile birlikte
+    // 1. MongoDB'ye kaydet
+    try {
+      const client = await clientPromise;
+      const db = client.db(); // Default DB (yolcutransferi)
+      await db.collection("iletisim_formlari").insertOne({
+        ad,
+        soyad,
+        telefon,
+        email,
+        neden,
+        mesaj,
+        iletisimTercihi,
+        createdAt: new Date()
+      });
+    } catch (err) {
+      console.error("MongoDB kayıt hatası:", err);
+      // DB hatası olsa bile, form kaybolmasın diye devam edelim (ama logla)
+    }
+
+    // 2. Mail içeriği
     const mailContent = `
       <div style="font-family:sans-serif;">
         <h2>Yeni İletişim Talebi</h2>
@@ -57,31 +78,25 @@ export async function POST(request) {
             ? `Lütfen müşteriyi <b>telefonla arayarak</b> geri dönüş yapınız: <b>${telefon}</b>`
             : ""
         }
+        <br><br><i>Bu mesaj admin panelinde de kayıt altındadır.</i>
       </div>
     `;
 
-    // BURADA GERÇEK MAİL GÖNDERME KODU OLACAK — örn: Resend veya Nodemailer
-    // Sadece örnek: Konsola yazdırmak (test için)
-    console.log("Yeni iletişim talebi:\n", {
-      ad,
-      soyad,
-      telefon,
-      email,
-      neden,
-      mesaj,
-      iletisimTercihi
-    });
+    // 3. Mail gönder (her iki adrese!)
+    try {
+      await resend.emails.send({
+        from: "YolcuTransferi <info@yolcutransferi.com>",
+        to: ["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"],
+        subject: "Yeni İletişim Talebi (YolcuTransferi.com)",
+        html: mailContent,
+        reply_to: email
+      });
+    } catch (err) {
+      console.error("Mail gönderim hatası:", err);
+      // Hata olursa logla ama kullanıcıya error döndürme!
+    }
 
-    // Örnek: Mail gönderme kodu (isteğe bağlı):
-    // await resend.emails.send({
-    //   from: "YolcuTransferi <info@yolcutransferi.com>",
-    //   to: ["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"],
-    //   subject: "Yeni İletişim Talebi (YolcuTransferi.com)",
-    //   html: mailContent,
-    //   reply_to: email
-    // });
-
-    // Cevap dön
+    // 4. Kullanıcıya başarılı yanıt dön
     return NextResponse.json({ success: true, message: "Mesajınız başarıyla alındı." });
   } catch (error) {
     console.error("İletişim API hatası:", error);
