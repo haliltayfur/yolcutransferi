@@ -56,6 +56,9 @@ const advantages = [
 export default function AdvantagesBar() {
   return (
     <section className="w-full flex flex-col items-center py-12 px-2 bg-transparent">
+      <h2 className="text-4xl font-bold mb-2.5 text-gold text-center">
+        Neden YolcuTransferi?
+      </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl w-full">
         {advantages.map((adv, i) => (
           <div
