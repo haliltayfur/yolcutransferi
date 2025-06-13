@@ -36,10 +36,10 @@ export async function POST(request) {
       return NextResponse.json({ error: "Tüm alanlar zorunludur." }, { status: 400 });
     }
 
-    // 1. MongoDB'ye kaydet
+    // MongoDB'ye kaydet
     try {
       const client = await clientPromise;
-      const db = client.db(); // Default DB (yolcutransferi)
+      const db = client.db();
       await db.collection("iletisim_formlari").insertOne({
         ad,
         soyad,
@@ -52,10 +52,10 @@ export async function POST(request) {
       });
     } catch (err) {
       console.error("MongoDB kayıt hatası:", err);
-      // DB hatası olsa bile, form kaybolmasın diye devam edelim (ama logla)
+      // Kayıt olmasa da mail yine de gönderilsin
     }
 
-    // 2. Mail içeriği
+    // Mail içeriği
     const mailContent = `
       <div style="font-family:sans-serif;">
         <h2>Yeni İletişim Talebi</h2>
@@ -82,21 +82,20 @@ export async function POST(request) {
       </div>
     `;
 
-    // 3. Mail gönder (her iki adrese!)
+    // Mail gönder (sadece byhaliltayfur@hotmail.com'a!)
     try {
       await resend.emails.send({
-        from: "YolcuTransferi <info@yolcutransferi.com>",
-        to: ["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"],
+        from: "YolcuTransferi <no-reply@yolcutransferi.com>",
+        to: ["byhaliltayfur@hotmail.com"],
         subject: "Yeni İletişim Talebi (YolcuTransferi.com)",
         html: mailContent,
         reply_to: email
       });
     } catch (err) {
       console.error("Mail gönderim hatası:", err);
-      // Hata olursa logla ama kullanıcıya error döndürme!
     }
 
-    // 4. Kullanıcıya başarılı yanıt dön
+    // Başarılı cevap
     return NextResponse.json({ success: true, message: "Mesajınız başarıyla alındı." });
   } catch (error) {
     console.error("İletişim API hatası:", error);
