@@ -16,8 +16,6 @@ export default function Home() {
           Neden YolcuTransferi?
         </h2>
         <p className="text-lg text-gray-300 mb-8 max-w-2xl text-center">
-          VIP transferde ayrıcalık, güven ve şeffaf fiyatlarla Türkiye'nin dört bir yanında hizmet.
-        </p>
         {/* Avantaj kutuları */}
         <AdvantagesBar />
       </section>
