@@ -10,12 +10,14 @@ export default function Home() {
       <HeroSlider />
       <VipTransferForm />
 
-      <section className="w-full flex flex-col items-center mb-16 mt-8">
+      {/* Neden YolcuTransferi alanı */}
+      <section className="w-full flex flex-col items-center mt-10 mb-16">
         <SectionTitle>Neden YolcuTransferi?</SectionTitle>
         <AdvantagesBar />
       </section>
 
-      <section className="w-full flex flex-col items-center mb-16 mt-8">
+      {/* Yorumlar alanı */}
+      <section className="w-full flex flex-col items-center mb-16">
         <SectionTitle>Müşterilerimizin Yorumları</SectionTitle>
         <TestimonialsSlider />
       </section>
