@@ -11,13 +11,16 @@ export default function Home() {
       <VipTransferForm />
 
       {/* Neden YolcuTransferi alanı */}
-      <section className="w-full flex flex-col items-center mt-10 mb-16">
-        <SectionTitle>Neden YolcuTransferi?</SectionTitle>
-        <AdvantagesBar />
-      </section>
+  <section className="w-full flex flex-col items-center mt-6 mb-12">
+  <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gold text-center drop-shadow">
+    Neden YolcuTransferi?
+  </h2>
+  <AdvantagesBar />
+</section>
 
       {/* Yorumlar alanı */}
-      <section className="w-full flex flex-col items-center mb-16">
+      <section className="w-full flex flex-col items-center mt-6 mb-12">
+         Müşteri Deneyimleri & Yorumları
         <TestimonialsSlider />
       </section>
     </main>
