@@ -80,7 +80,7 @@ export default function AdvantagesBar() {
 }
 
 // tailwind.config.js'a ekle:
-module.exports = {
+export default {
   theme: {
     extend: {
       colors: {
