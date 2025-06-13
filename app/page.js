@@ -18,7 +18,6 @@ export default function Home() {
 
       {/* Yorumlar alanı */}
       <section className="w-full flex flex-col items-center mb-16">
-        <SectionTitle>Müşterilerimizin Yorumları</SectionTitle>
         <TestimonialsSlider />
       </section>
     </main>
