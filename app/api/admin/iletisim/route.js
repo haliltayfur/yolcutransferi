@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "../../../../lib/mongodb";
+import { connectToDatabase } from "@/lib/mongodb";
+
 // GET /api/admin/iletisim
 export async function GET() {
   try {
