@@ -7,7 +7,7 @@ export default function AdminIletisimPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/iletisim")
+    fetch("/api/iletisim")
       .then(r => r.json())
       .then(d => {
         setForms(d.forms || []);
