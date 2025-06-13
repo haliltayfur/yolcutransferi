@@ -40,7 +40,6 @@ export default function TestimonialsSlider() {
 
   return (
     <section className="w-full max-w-6xl mx-auto py-7 mb-3 px-2">
-      <h2 className="text-2xl font-bold text-gold mb-7 text-center">Müşterilerimizin Yorumları</h2>
       <div className={`flex ${isMobile ? "flex-col items-center" : "flex-row"} gap-5 justify-center transition-all`}>
         {getVisibleTestimonials().map((item, idx) => (
           <div key={idx} className="bg-[#181818] border border-gold/18 rounded-2xl px-7 py-6 shadow flex flex-col justify-between min-h-[158px] max-w-sm w-full" style={{ minHeight: 158, maxHeight: 158, height: 158 }}>
