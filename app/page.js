@@ -9,19 +9,13 @@ export default function Home() {
       <HeroSlider />
       <VipTransferForm />
 
-      {/* Neden YolcuTransferi Alanı */}
+      {/* Avantajlar kutuları */}
       <section className="w-full flex flex-col items-center mt-8 mb-12">
-        <h2 className="text-4xl font-bold mb-2.5 text-gold text-center">
-          Neden YolcuTransferi?
-        </h2>
         <AdvantagesBar />
       </section>
 
-      {/* Müşteri Deneyimleri Alanı */}
+      {/* Yorumlar kutuları */}
       <section className="w-full flex flex-col items-center mt-8 mb-12">
-        <h2 className="text-4xl font-bold mb-2.5 text-gold text-center">
-          Müşteri Deneyimleri & Yorumları
-        </h2>
         <TestimonialsSlider />
       </section>
     </main>
