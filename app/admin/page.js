@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import KvkkUyariButonu from "@/components/admin/KvkkUyariButonu";
 
 export default function AdminPage() {
   const [login, setLogin] = useState(false);
@@ -60,6 +61,7 @@ export default function AdminPage() {
           >
             İletişimden Gelenler
           </Link>
+          <KvkkUyariButonu />
         </div>
       </section>
     </main>
