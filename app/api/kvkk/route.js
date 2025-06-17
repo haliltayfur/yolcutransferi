@@ -12,7 +12,6 @@ export async function POST(request) {
     }
 
     const db = await connectToDatabase();
-
     await db.collection("kvkkForms").insertOne({
       adsoyad,
       telefon,
@@ -20,7 +19,6 @@ export async function POST(request) {
       talep,
       aciklama,
       createdAt: new Date(),
-      okundu: false,
     });
 
     const transporter = nodemailer.createTransport({
@@ -48,7 +46,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("KVKK API hatası:", err);
+    console.error("KVKK POST HATASI:", err);
     return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }
 }
