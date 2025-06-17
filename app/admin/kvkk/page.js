@@ -6,14 +6,31 @@ import { format } from "date-fns";
 export default function AdminKvkk() {
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false); // ❗️Hata durumu eklendi
 
   const fetchForms = async () => {
     setLoading(true);
-    const res = await fetch("/api/kvkk/forms");
-    const data = await res.json();
-    setForms(data);
-    setLoading(false);
-    localStorage.setItem("kvkkLastRead", new Date().toISOString());
+    setError(false);
+    try {
+      const res = await fetch("/api/kvkk/forms");
+      const json = await res.json();
+
+      // ✅ Dizi mi kontrolü
+      if (Array.isArray(json)) {
+        setForms(json);
+      } else {
+        console.error("Veri dizi değil:", json);
+        setForms([]);
+        setError(true);
+      }
+    } catch (err) {
+      console.error("KVKK verisi çekilemedi:", err);
+      setForms([]);
+      setError(true);
+    } finally {
+      setLoading(false);
+      localStorage.setItem("kvkkLastRead", new Date().toISOString());
+    }
   };
 
   useEffect(() => {
@@ -23,8 +40,11 @@ export default function AdminKvkk() {
   return (
     <main className="max-w-6xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold text-[#bfa658] mb-8">KVKK Başvuruları</h1>
+
       {loading ? (
         <p className="text-gray-300">Yükleniyor...</p>
+      ) : error ? (
+        <p className="text-red-500">Veri alınırken bir hata oluştu.</p>
       ) : forms.length === 0 ? (
         <p className="text-gray-300">Henüz başvuru yok.</p>
       ) : (
@@ -36,7 +56,12 @@ export default function AdminKvkk() {
               <p><strong>E-posta:</strong> {form.eposta}</p>
               <p><strong>Talep:</strong> {form.talep}</p>
               <p><strong>Açıklama:</strong> {form.aciklama || "-"}</p>
-              <p className="text-sm text-gray-400 mt-2">Gönderim Tarihi: {format(new Date(form.createdAt), "dd.MM.yyyy HH:mm")}</p>
+              <p className="text-sm text-gray-400 mt-2">
+                Gönderim Tarihi:{" "}
+                {form.createdAt
+                  ? format(new Date(form.createdAt), "dd.MM.yyyy HH:mm")
+                  : "-"}
+              </p>
             </div>
           ))}
         </div>
