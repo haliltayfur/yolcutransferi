@@ -1,4 +1,3 @@
-// ✅ Dosya: app/api/kvkk/route.js
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import nodemailer from "nodemailer";
@@ -12,7 +11,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Eksik bilgi" }, { status: 400 });
     }
 
-    const { db } = await connectToDatabase();
+    const db = await connectToDatabase(); // ✅ sadece db döner
 
     const kvkkData = {
       adsoyad,
@@ -26,18 +25,17 @@ export async function POST(request) {
 
     await db.collection("kvkkForms").insertOne(kvkkData);
 
-    // ✅ E-Posta bildirimi (gerekirse SMTP bilgileri .env'den alınmalı)
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
       secure: false,
       auth: {
-        user: process.env.MAIL_USER, // örn: info@yolcutransferi.com
+        user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS
       }
     });
 
-    const mailOptions = {
+    await transporter.sendMail({
       from: process.env.MAIL_USER,
       to: process.env.MAIL_USER,
       subject: "Yeni KVKK Başvurusu",
@@ -48,9 +46,7 @@ export async function POST(request) {
         <p><strong>Talep:</strong> ${talep}</p>
         <p><strong>Açıklama:</strong> ${aciklama || "-"}</p>
       `
-    };
-
-    await transporter.sendMail(mailOptions);
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
