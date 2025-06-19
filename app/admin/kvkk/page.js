@@ -1,4 +1,3 @@
-// ✅ Dosya: app/admin/kvkk/page.js
 "use client";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
@@ -6,7 +5,7 @@ import { format } from "date-fns";
 export default function AdminKvkk() {
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false); // ❗️Hata durumu eklendi
+  const [error, setError] = useState(false);
 
   const fetchForms = async () => {
     setLoading(true);
@@ -15,7 +14,6 @@ export default function AdminKvkk() {
       const res = await fetch("/api/kvkk/forms");
       const json = await res.json();
 
-      // ✅ Dizi mi kontrolü
       if (Array.isArray(json)) {
         setForms(json);
       } else {
@@ -38,34 +36,45 @@ export default function AdminKvkk() {
   }, []);
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-[#bfa658] mb-8">KVKK Başvuruları</h1>
+    <main className="max-w-7xl mx-auto px-4 py-12 text-white">
+      <h1 className="text-3xl font-bold text-[#bfa658] mb-8 text-center">KVKK Başvuruları</h1>
 
-      {loading ? (
-        <p className="text-gray-300">Yükleniyor...</p>
-      ) : error ? (
-        <p className="text-red-500">Veri alınırken bir hata oluştu.</p>
-      ) : forms.length === 0 ? (
-        <p className="text-gray-300">Henüz başvuru yok.</p>
-      ) : (
-        <div className="space-y-6">
-          {forms.map((form) => (
-            <div key={form._id} className="border border-[#bfa658] rounded-lg bg-black/70 p-6 text-gray-200">
-              <p><strong>Ad Soyad:</strong> {form.adsoyad}</p>
-              <p><strong>Telefon:</strong> {form.telefon || "-"}</p>
-              <p><strong>E-posta:</strong> {form.eposta}</p>
-              <p><strong>Talep:</strong> {form.talep}</p>
-              <p><strong>Açıklama:</strong> {form.aciklama || "-"}</p>
-              <p className="text-sm text-gray-400 mt-2">
-                Gönderim Tarihi:{" "}
-                {form.createdAt
-                  ? format(new Date(form.createdAt), "dd.MM.yyyy HH:mm")
-                  : "-"}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="border border-[#bfa658] rounded-xl overflow-x-auto">
+        {loading ? (
+          <p className="text-center text-gray-300 py-4">Yükleniyor...</p>
+        ) : error ? (
+          <p className="text-center text-red-500 py-4">Kayıtlar alınamadı</p>
+        ) : forms.length === 0 ? (
+          <p className="text-center text-gray-300 py-4">Henüz başvuru yok.</p>
+        ) : (
+          <table className="w-full text-sm text-center">
+            <thead>
+              <tr className="bg-[#bfa658] text-black font-semibold">
+                <th className="px-2 py-2">Tarih</th>
+                <th className="px-2 py-2">Ad Soyad</th>
+                <th className="px-2 py-2">Telefon</th>
+                <th className="px-2 py-2">E-posta</th>
+                <th className="px-2 py-2">Talep Türü</th>
+                <th className="px-2 py-2">Açıklama</th>
+              </tr>
+            </thead>
+            <tbody>
+              {forms.map((form) => (
+                <tr key={form._id} className="border-t border-[#bfa658] text-gray-200">
+                  <td className="px-2 py-2">
+                    {form.createdAt ? format(new Date(form.createdAt), "dd.MM.yyyy HH:mm") : "-"}
+                  </td>
+                  <td className="px-2 py-2">{form.adsoyad}</td>
+                  <td className="px-2 py-2">{form.telefon || "-"}</td>
+                  <td className="px-2 py-2">{form.eposta}</td>
+                  <td className="px-2 py-2">{form.talep}</td>
+                  <td className="px-2 py-2">{form.aciklama || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </main>
   );
 }
