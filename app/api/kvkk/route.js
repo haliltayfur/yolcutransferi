@@ -1,24 +1,22 @@
-import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+let errorStep = "başlangıç";
 
 export async function POST(request) {
   try {
     console.log("✅ Adım 0: İstek geldi");
 
     const body = await request.json();
+    errorStep = "body parsing";
+
     const { adsoyad, telefon, eposta, talep, aciklama } = body;
-
-    console.log("✅ Adım 1: Body alındı", body);
-
     if (!adsoyad || !eposta || !talep) {
-      console.warn("⚠️ Eksik bilgi var");
+      errorStep = "eksik alan kontrolü";
       return NextResponse.json({ error: "Eksik bilgi" }, { status: 400 });
     }
 
+    errorStep = "MongoDB bağlantısı";
     const db = await connectToDatabase();
+
+    errorStep = "MongoDB kayıt işlemi";
     await db.collection("kvkkForms").insertOne({
       adsoyad,
       telefon,
@@ -28,18 +26,10 @@ export async function POST(request) {
       createdAt: new Date(),
     });
 
-    console.log("✅ Adım 2: MongoDB kaydı başarılı");
-
-    const recipients = [
-      "info@yolcutransferi.com",
-      "byhaliltayfur@hotmail.com"
-    ];
-
-    console.log("✅ Adım 3: Mail gönderimi başlıyor");
-
+    errorStep = "mail gönderim başlangıcı";
     await resend.emails.send({
       from: "YolcuTransferi KVKK <info@yolcutransferi.com>",
-      to: recipients,
+      to: ["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"],
       subject: "Yeni KVKK Başvurusu",
       html: `
         <div style="font-family:sans-serif; font-size:15px;">
@@ -52,11 +42,9 @@ export async function POST(request) {
       `
     });
 
-    console.log("✅ Adım 4: Mail başarıyla gönderildi");
-
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("❌ KVKK RESEND HATASI:", JSON.stringify(err, null, 2));
-    return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
+    console.error(`❌ KVKK HATA – Adım: ${errorStep}`, JSON.stringify(err, null, 2));
+    return NextResponse.json({ error: `Sunucu hatası – Adım: ${errorStep}` }, { status: 500 });
   }
 }
