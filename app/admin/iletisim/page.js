@@ -1,65 +1,82 @@
 "use client";
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
 
-export default function AdminIletisimPage() {
+export default function AdminIletisim() {
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(false);
+
+  const fetchForms = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await fetch("/api/iletisim/forms");
+      const json = await res.json();
+
+      if (Array.isArray(json)) {
+        setForms(json);
+      } else {
+        console.error("Veri dizi değil:", json);
+        setForms([]);
+        setError(true);
+      }
+    } catch (err) {
+      console.error("İletişim verisi çekilemedi:", err);
+      setForms([]);
+      setError(true);
+    } finally {
+      setLoading(false);
+      localStorage.setItem("iletisimLastRead", new Date().toISOString());
+    }
+  };
 
   useEffect(() => {
-    fetch("/api/iletisim")
-      .then(r => r.json())
-      .then(d => {
-        setForms(d.forms || []);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError("Kayıtlar alınamadı");
-        setLoading(false);
-      });
+    fetchForms();
   }, []);
 
   return (
-    <main className="min-h-[80vh] flex flex-col items-center justify-center bg-black/30 py-8">
-      <section className="w-full max-w-4xl bg-black/80 rounded-2xl shadow-lg px-8 py-10 border border-gold">
-        <h1 className="text-2xl font-bold text-gold mb-6 text-center">
-          İletişimden Gelenler
-        </h1>
-        {loading && <div className="text-center text-gold">Yükleniyor...</div>}
-        {error && <div className="text-center text-red-500">{error}</div>}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
+    <main className="max-w-7xl mx-auto px-4 py-12 text-white">
+      <h1 className="text-3xl font-bold text-[#bfa658] mb-8 text-center">İletişimden Gelenler</h1>
+
+      <div className="border border-[#bfa658] rounded-xl overflow-x-auto">
+        {loading ? (
+          <p className="text-center text-gray-300 py-4">Yükleniyor...</p>
+        ) : error ? (
+          <p className="text-center text-red-500 py-4">Kayıtlar alınamadı</p>
+        ) : forms.length === 0 ? (
+          <p className="text-center text-gray-300 py-4">Henüz başvuru yok.</p>
+        ) : (
+          <table className="w-full text-sm text-center">
             <thead>
-              <tr className="bg-gold text-black">
-                <th className="py-2 px-2">Tarih</th>
-                <th className="py-2 px-2">Ad Soyad</th>
-                <th className="py-2 px-2">Telefon</th>
-                <th className="py-2 px-2">E-posta</th>
-                <th className="py-2 px-2">Mesaj</th>
-                <th className="py-2 px-2">İletişim Nedeni</th>
-                <th className="py-2 px-2">Tercihi</th>
+              <tr className="bg-[#bfa658] text-black font-semibold">
+                <th className="px-2 py-2">Tarih</th>
+                <th className="px-2 py-2">Ad Soyad</th>
+                <th className="px-2 py-2">Telefon</th>
+                <th className="px-2 py-2">E-posta</th>
+                <th className="px-2 py-2">Mesaj</th>
+                <th className="px-2 py-2">İletişim Nedeni</th>
+                <th className="px-2 py-2">Tercih</th>
               </tr>
             </thead>
             <tbody>
-              {forms.map((f, i) => (
-                <tr key={i} className="border-b border-gold/30">
-                  <td className="py-2 px-2">
-                    {f.createdAt
-                      ? new Date(f.createdAt).toLocaleString("tr-TR")
-                      : "-"}
+              {forms.map((form) => (
+                <tr key={form._id} className="border-t border-[#bfa658] text-gray-200">
+                  <td className="px-2 py-2">
+                    {form.createdAt ? format(new Date(form.createdAt), "dd.MM.yyyy HH:mm") : "-"}
                   </td>
-                  <td className="py-2 px-2">{f.ad} {f.soyad}</td>
-                  <td className="py-2 px-2">{f.telefon}</td>
-                  <td className="py-2 px-2">{f.email}</td>
-                  <td className="py-2 px-2">{f.mesaj}</td>
-                  <td className="py-2 px-2">{f.neden}</td>
-                  <td className="py-2 px-2">{f.iletisimTercihi}</td>
+                  <td className="px-2 py-2">{form.ad} {form.soyad}</td>
+                  <td className="px-2 py-2">{form.telefon || "-"}</td>
+                  <td className="px-2 py-2">{form.email}</td>
+                  <td className="px-2 py-2">{form.mesaj}</td>
+                  <td className="px-2 py-2">{form.neden}</td>
+                  <td className="px-2 py-2">{form.iletisimTercihi}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      </section>
+        )}
+      </div>
     </main>
   );
 }
