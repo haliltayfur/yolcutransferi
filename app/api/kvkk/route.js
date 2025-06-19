@@ -1,15 +1,24 @@
-let errorStep = "başlangıç";
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request) {
+  let errorStep = "başlangıç";
+
   try {
     console.log("✅ Adım 0: İstek geldi");
 
     const body = await request.json();
     errorStep = "body parsing";
+    console.log("✅ Adım 1: Body alındı", body);
 
     const { adsoyad, telefon, eposta, talep, aciklama } = body;
+
     if (!adsoyad || !eposta || !talep) {
       errorStep = "eksik alan kontrolü";
+      console.warn("⚠️ Eksik bilgi var");
       return NextResponse.json({ error: "Eksik bilgi" }, { status: 400 });
     }
 
@@ -25,6 +34,8 @@ export async function POST(request) {
       aciklama,
       createdAt: new Date(),
     });
+
+    console.log("✅ Adım 2: MongoDB kaydı başarılı");
 
     errorStep = "mail gönderim başlangıcı";
     await resend.emails.send({
@@ -42,7 +53,10 @@ export async function POST(request) {
       `
     });
 
+    console.log("✅ Adım 3: Mail başarıyla gönderildi");
+
     return NextResponse.json({ success: true });
+
   } catch (err) {
     console.error(`❌ KVKK HATA – Adım: ${errorStep}`, JSON.stringify(err, null, 2));
     return NextResponse.json({ error: `Sunucu hatası – Adım: ${errorStep}` }, { status: 500 });
