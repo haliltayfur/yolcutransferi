@@ -37,7 +37,9 @@ export default function AdminKvkk() {
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-12 text-white">
-      <h1 className="text-3xl font-bold text-[#bfa658] mb-8 text-center">KVKK Başvuruları</h1>
+      <h1 className="text-3xl font-bold text-[#bfa658] mb-8 text-center">
+        KVKK Başvuruları
+      </h1>
 
       <div className="border border-[#bfa658] rounded-xl overflow-x-auto">
         {loading ? (
@@ -62,7 +64,9 @@ export default function AdminKvkk() {
               {forms.map((form) => (
                 <tr key={form._id} className="border-t border-[#bfa658] text-gray-200">
                   <td className="px-2 py-2">
-                    {form.createdAt ? format(new Date(form.createdAt), "dd.MM.yyyy HH:mm") : "-"}
+                    {form.createdAt
+                      ? format(new Date(form.createdAt), "dd.MM.yyyy HH:mm")
+                      : "-"}
                   </td>
                   <td className="px-2 py-2">{form.adsoyad}</td>
                   <td className="px-2 py-2">{form.telefon || "-"}</td>
