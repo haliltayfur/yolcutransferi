@@ -9,17 +9,12 @@ export default function Kvkk() {
         Kişisel Verilerin Korunması
       </h1>
 
-      {/* Slogan */}
-      <div className="text-xl md:text-2xl font-semibold text-center mb-8 text-[#bfa658] tracking-tight">
-        YolcuTransferi.com olarak kişisel verilerinizi KVKK'ya uygun şekilde işliyoruz.
-      </div>
-
       {/* İçerik Kutusu */}
       <div className="border-2 border-[#bfa658] rounded-2xl bg-black/80 px-4 md:px-8 py-7 md:py-10 mb-9">
         <div className="space-y-5 text-[1.13rem] md:text-[1.15rem] text-gray-200 font-normal leading-relaxed">
 
           <p>
-            YolcuTransferi.com, yalnızca hizmet sunumu ve iletişim amacıyla sınırlı kişisel verilerinizi (ad, soyad, telefon ve e-posta) rezervasyon ve iletişim formlarında toplar. IP adresi, kredi kartı, kimlik, konum verisi veya çerez gibi hassas kişisel veriler toplanmaz, saklanmaz.
+            YolcuTransferi.com olarak kişisel verilerinizi KVKK'ya uygun şekilde işliyor, yalnızca hizmet sunumu ve iletişim amacıyla sınırlı kişisel verilerinizi (ad, soyad, telefon ve e-posta) rezervasyon ve iletişim formlarında topluyoruz. IP adresi, kredi kartı, kimlik, konum verisi veya çerez gibi hassas kişisel veriler toplanmaz, saklanmaz.
           </p>
 
           <p>
@@ -39,7 +34,7 @@ export default function Kvkk() {
           </p>
 
           <ul className="pl-2 md:pl-8 mt-2 space-y-3">
-            {[
+            {[ 
               "Kişisel verinizin işlenip işlenmediğini öğrenme",
               "Hangi verilerin işlendiğini ve işleme amacını öğrenme",
               "Hatalı/eksik verilerin düzeltilmesini isteme",
