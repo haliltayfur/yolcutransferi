@@ -44,21 +44,10 @@ export default function KvkkFormPage() {
   };
 
   return (
-    <main className="max-w-4xl mx-auto px-4 py-12 border-2 border-[#bfa658] rounded-3xl bg-black/80">
+    <main className="max-w-4xl mx-auto px-4 py-12 mb-20 border-2 border-[#bfa658] rounded-3xl bg-black/80">
       <h1 className="text-3xl md:text-4xl font-bold text-center text-[#bfa658] mb-8 tracking-tight">
         KVKK Başvuru Formu
       </h1>
-
-      <p className="text-sm text-gray-300 mb-6">
-        Form gönderenin hakları KVKK kapsamında sahip olduğunuz başlıca haklar:
-        <ul className="list-disc list-inside mt-2">
-          <li>Kişisel verinizin işlenip işlenmediğini öğrenme</li>
-          <li>Hangi verilerin işlendiğini ve işleme amacını öğrenme</li>
-          <li>Hatalı/eksik verilerin düzeltilmesini isteme</li>
-          <li>Verilerin silinmesini/yok edilmesini talep etme</li>
-          <li>Yasaya aykırı işlenme nedeniyle zarar doğarsa tazminat isteme</li>
-        </ul>
-      </p>
 
       {status === "success" && <p className="text-green-500 font-semibold mb-6">Başvurunuz alındı. Teşekkür ederiz.</p>}
       {status === "error" && <p className="text-red-500 font-semibold mb-6">Bir hata oluştu. Lütfen tekrar deneyin.</p>}
@@ -81,11 +70,11 @@ export default function KvkkFormPage() {
           <select name="talep" required onChange={handleChange} value={form.talep} className="w-full p-3 rounded bg-gray-900 border border-[#bfa658] text-white">
             <option value="">Bir seçim yapınız</option>
             <option value="veri_ogrenme">Kişisel verilerim işleniyor mu?</option>
-            <option value="veri_duzeltme">Eksik/yanlış verilerimin düzeltilmesi</option>
-            <option value="veri_silme">Kişisel verilerimin silinmesi</option>
+            <option value="veri_duzeltme">Eksik veya yanlış verilerin düzeltilmesi</option>
+            <option value="veri_silme">Verilerin silinmesi / yok edilmesi</option>
             <option value="veri_aktarim">Verilerim kimlerle paylaşıldı?</option>
-            <option value="tazminat">Zarar nedeniyle tazminat talebi</option>
-            <option value="diger">Diğer</option>
+            <option value="tazminat">Yasaya aykırı işleme nedeniyle zarar tazmini</option>
+            <option value="diger">Diğer (KVKK kapsamındaki tüm haklarınız için açıklama kısmını kullanabilirsiniz)</option>
           </select>
         </div>
         <div>
