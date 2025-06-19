@@ -18,7 +18,6 @@ export async function POST(request) {
 
     if (!adsoyad || !eposta || !talep) {
       errorStep = "eksik alan kontrolü";
-      console.warn("⚠️ Eksik bilgi var");
       return NextResponse.json({ error: "Eksik bilgi" }, { status: 400 });
     }
 
@@ -26,7 +25,7 @@ export async function POST(request) {
     const db = await connectToDatabase();
 
     errorStep = "MongoDB kayıt işlemi";
-    await db.collection("kvkkForms").insertOne({
+    const result = await db.collection("kvkkForms").insertOne({
       adsoyad,
       telefon,
       eposta,
@@ -35,7 +34,7 @@ export async function POST(request) {
       createdAt: new Date(),
     });
 
-    console.log("✅ Adım 2: MongoDB kaydı başarılı");
+    console.log("🟢 MongoDB'ye başarılı insert:", result.insertedId);
 
     errorStep = "mail gönderim başlangıcı";
     await resend.emails.send({
@@ -53,12 +52,12 @@ export async function POST(request) {
       `
     });
 
-    console.log("✅ Adım 3: Mail başarıyla gönderildi");
+    console.log("✅ Mail başarıyla gönderildi");
 
     return NextResponse.json({ success: true });
 
   } catch (err) {
-    console.error(`❌ KVKK HATA – Adım: ${errorStep}`, JSON.stringify(err, null, 2));
+    console.error(`❌ KVKK HATA – Adım: ${errorStep}`, err);
     return NextResponse.json({ error: `Sunucu hatası – Adım: ${errorStep}` }, { status: 500 });
   }
 }
