@@ -4,13 +4,13 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// ...yardımcı fonksiyonlar ve sabitler değişmedi...
+// ...Yardımcı fonksiyonlar ve sabitler burada...
 
 export default function Iletisim() {
   const blockedWords = getBlockedWords();
   const [form, setForm] = useState({
     ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "",
-    iletisimTercihi: "", honeypot: "", kvkkOnay: false  // EKLENDİ
+    iletisimTercihi: "", honeypot: "", kvkkOnay: false // <-- KVKK ONAY EKLENDİ
   });
   const [errors, setErrors] = useState({});
   const [buttonStatus, setButtonStatus] = useState("normal");
@@ -54,7 +54,7 @@ export default function Iletisim() {
     if (!msgValid) newErrors.mesaj = "Mesajınızı daha açık ve anlamlı yazınız.";
     if (censored.hasBlocked) newErrors.mesaj = "Mesajınızda uygunsuz veya argo kelime var. Lütfen değiştirin.";
     if (!form.iletisimTercihi) newErrors.iletisimTercihi = "Lütfen iletişim tercihinizi seçiniz.";
-    if (!form.kvkkOnay) newErrors.kvkkOnay = "KVKK & Gizlilik Sözleşmesi'ni kabul etmelisiniz.";
+    if (!form.kvkkOnay) newErrors.kvkkOnay = "KVKK & Gizlilik Sözleşmesi'ni kabul etmelisiniz."; // <-- Eklendi!
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
