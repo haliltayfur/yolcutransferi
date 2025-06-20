@@ -2,10 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 
-// Açıklamayı kısaltmak için yardımcı fonksiyon
 function kisaAciklama(str) {
   if (!str) return "";
-  return str.length > 15 ? str.slice(0, 15) + "..." : str;
+  return str.length > 15 ? str.slice(0, 15) + "...": str;
 }
 
 export default function AdminKvkk() {
@@ -19,9 +18,9 @@ export default function AdminKvkk() {
       try {
         const res = await fetch("/api/kvkk/forms");
         const data = await res.json();
-        setForms(data);
+        // Defensive! Gelen veri array mi değil mi, kontrol et.
+        setForms(Array.isArray(data) ? data : []);
       } catch (e) {
-        // Hata durumunda boş göster, burada logging eklenebilir
         setForms([]);
       }
       setLoading(false);
@@ -50,33 +49,41 @@ export default function AdminKvkk() {
               </tr>
             </thead>
             <tbody>
-              {forms.map((form) => (
-                <tr key={form._id}>
-                  <td className="p-2 border-b border-gray-600">{form.kayitNo || "-"}</td>
-                  <td className="p-2 border-b border-gray-600">{form.adsoyad}</td>
-                  <td className="p-2 border-b border-gray-600">{form.telefon}</td>
-                  <td className="p-2 border-b border-gray-600">{form.eposta}</td>
-                  <td className="p-2 border-b border-gray-600">{form.talep}</td>
-                  <td className="p-2 border-b border-gray-600">
-                    {kisaAciklama(form.aciklama)}
-                    {form.aciklama && form.aciklama.length > 15 && (
-                      <button
-                        className="ml-2 underline text-[#FFD700] cursor-pointer text-xs"
-                        onClick={() => setModalAciklama(form.aciklama)}
-                        type="button"
-                      >
-                        Oku
-                      </button>
-                    )}
-                  </td>
-                  <td className="p-2 border-b border-gray-600">
-                    {form.tarih ? format(new Date(form.tarih), "dd.MM.yyyy HH:mm") : "-"}
-                  </td>
-                  <td className="p-2 border-b border-gray-600">
-                    {/* Buraya silme butonu vs. eklenebilir */}
+              {Array.isArray(forms) && forms.length > 0 ? (
+                forms.map((form) => (
+                  <tr key={form._id}>
+                    <td className="p-2 border-b border-gray-600">{form.kayitNo || "-"}</td>
+                    <td className="p-2 border-b border-gray-600">{form.adsoyad}</td>
+                    <td className="p-2 border-b border-gray-600">{form.telefon}</td>
+                    <td className="p-2 border-b border-gray-600">{form.eposta}</td>
+                    <td className="p-2 border-b border-gray-600">{form.talep}</td>
+                    <td className="p-2 border-b border-gray-600">
+                      {kisaAciklama(form.aciklama)}
+                      {form.aciklama && form.aciklama.length > 15 && (
+                        <button
+                          className="ml-2 underline text-[#FFD700] cursor-pointer text-xs"
+                          onClick={() => setModalAciklama(form.aciklama)}
+                          type="button"
+                        >
+                          Oku
+                        </button>
+                      )}
+                    </td>
+                    <td className="p-2 border-b border-gray-600">
+                      {form.tarih ? format(new Date(form.tarih), "dd.MM.yyyy HH:mm") : "-"}
+                    </td>
+                    <td className="p-2 border-b border-gray-600">
+                      {/* Silme butonu vs. */}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="text-center p-4 text-gray-400">
+                    Hiç başvuru bulunamadı.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
