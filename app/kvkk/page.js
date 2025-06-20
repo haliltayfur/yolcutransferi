@@ -1,85 +1,97 @@
 "use client";
-import Link from "next/link";
+import { useState } from "react";
 
-export default function Kvkk() {
+export default function KvkkFormu() {
+  const [form, setForm] = useState({
+    adsoyad: "",
+    telefon: "",
+    eposta: "",
+    talep: "",
+    aciklama: "",
+    kvkkOnay: false,
+  });
+  const [errors, setErrors] = useState({});
+  const [msg, setMsg] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
+    setErrors((e) => ({ ...e, [name]: undefined }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    let newErrors = {};
+    if (!form.adsoyad) newErrors.adsoyad = "Ad Soyad zorunlu";
+    if (!form.telefon) newErrors.telefon = "Telefon zorunlu";
+    if (!form.eposta) newErrors.eposta = "E-posta zorunlu";
+    if (!form.talep) newErrors.talep = "Talep Türü zorunlu";
+    if (!form.aciklama) newErrors.aciklama = "Açıklama zorunlu";
+    if (!form.kvkkOnay) newErrors.kvkkOnay = "KVKK onayı gerekli";
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    try {
+      await fetch("/api/kvkk/forms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      setMsg("Başvurunuz alınmıştır. Teşekkür ederiz.");
+      setForm({
+        adsoyad: "",
+        telefon: "",
+        eposta: "",
+        talep: "",
+        aciklama: "",
+        kvkkOnay: false,
+      });
+    } catch {
+      setMsg("Başvuru kaydedilemedi. Lütfen tekrar deneyiniz.");
+    }
+  };
+
   return (
-    <main className="max-w-3xl mx-auto px-4 py-12">
-      {/* Başlık */}
-      <h1 className="text-3xl md:text-4xl font-bold text-center text-[#bfa658] mb-8 tracking-tight">
-        Kişisel Verilerin Korunması
-      </h1>
+    <main className="max-w-2xl mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold text-[#bfa658] mb-4">KVKK Başvuru Formu</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-black/80 rounded-2xl p-6 border-2 border-[#bfa658]">
+        <input name="adsoyad" value={form.adsoyad} onChange={handleChange} placeholder="Ad Soyad" className="p-3 rounded" />
+        {errors.adsoyad && <span className="text-red-400 text-xs">{errors.adsoyad}</span>}
 
-      {/* İçerik Kutusu */}
-      <div className="border-2 border-[#bfa658] rounded-2xl bg-black/80 px-4 md:px-8 py-7 md:py-10 mb-9">
-        <div className="space-y-5 text-[1.13rem] md:text-[1.15rem] text-gray-200 font-normal leading-relaxed">
+        <input name="telefon" value={form.telefon} onChange={handleChange} placeholder="Telefon" className="p-3 rounded" />
+        {errors.telefon && <span className="text-red-400 text-xs">{errors.telefon}</span>}
 
-          <p>
-            YolcuTransferi.com olarak kişisel verilerinizi KVKK'ya uygun şekilde işliyor, yalnızca hizmet sunumu ve iletişim amacıyla sınırlı kişisel verilerinizi (ad, soyad, telefon ve e-posta) rezervasyon ve iletişim formlarında topluyoruz. IP adresi, kredi kartı, kimlik, konum verisi veya çerez gibi hassas kişisel veriler toplanmaz, saklanmaz.
-          </p>
+        <input name="eposta" value={form.eposta} onChange={handleChange} placeholder="E-posta" className="p-3 rounded" />
+        {errors.eposta && <span className="text-red-400 text-xs">{errors.eposta}</span>}
 
-          <p>
-            Tüm ödeme işlemleri, entegre olduğumuz ödeme sağlayıcılar üzerinden gerçekleştirilir. Kredi kartı bilgileri şirketimiz tarafından işlenmez veya kaydedilmez.
-          </p>
+        <select name="talep" value={form.talep} onChange={handleChange} className="p-3 rounded">
+          <option value="">Talep Türü Seçin</option>
+          <option value="veri_duzeltme">Veri Düzeltme</option>
+          <option value="veri_silme">Veri Silme</option>
+          <option value="veri_ogr_enme">Veri Öğrenme</option>
+          <option value="tazminat">Tazminat</option>
+        </select>
+        {errors.talep && <span className="text-red-400 text-xs">{errors.talep}</span>}
 
-          <p>
-            Veriler yalnızca yasal zorunluluklar kapsamında tutulur ve süre sonunda silinir veya anonim hale getirilir. Hiçbir veri yurt içi veya dışı üçüncü taraflarla paylaşılmaz.
-          </p>
+        <textarea name="aciklama" value={form.aciklama} onChange={handleChange} placeholder="Açıklama" className="p-3 rounded" />
+        {errors.aciklama && <span className="text-red-400 text-xs">{errors.aciklama}</span>}
 
-          <p>
-            WhatsApp gibi iletişim kanalları yalnızca iletişim için kullanılır, veri kaydı yapılmaz.
-          </p>
-
-          <p>
-            KVKK kapsamında sahip olduğunuz başlıca haklar:
-          </p>
-
-          <ul className="pl-2 md:pl-8 mt-2 space-y-3">
-            {[ 
-              "Kişisel verinizin işlenip işlenmediğini öğrenme",
-              "Hangi verilerin işlendiğini ve işleme amacını öğrenme",
-              "Hatalı/eksik verilerin düzeltilmesini isteme",
-              "Verilerin silinmesini/yok edilmesini talep etme",
-              "Yasaya aykırı işlenme nedeniyle zarar doğarsa tazminat isteme"
-            ].map((text, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span
-                  className="mt-1"
-                  style={{
-                    width: 16,
-                    height: 16,
-                    display: "inline-block",
-                    borderRadius: "50%",
-                    background: "radial-gradient(circle, #e3b77b 65%, #bfa658 100%)",
-                    marginTop: 3,
-                    marginRight: 5,
-                    flexShrink: 0
-                  }}
-                ></span>
-                <span className="text-gray-300">{text}</span>
-              </li>
-            ))}
-          </ul>
-
-          <p>
-            KVKK kapsamındaki başvurularınızı{" "}
-            <Link
-              href="/kvkk/form"
-              className="underline text-[#e3b77b] hover:text-[#f5d48d]"
-            >
-              bu formu doldurarak
-            </Link>{" "}
-            veya <strong>info@yolcutransferi.com</strong> adresine iletebilirsiniz.
-            Başvurular yasal süre içinde yanıtlanır.
-          </p>
+        <div className="flex items-center gap-2">
+          <input type="checkbox" name="kvkkOnay" checked={form.kvkkOnay} onChange={handleChange} />
+          <span className="text-xs text-gray-200">
+            <a href="/gizlilik" target="_blank" rel="noopener noreferrer" className="underline text-[#FFD700]">
+              KVKK & Gizlilik Sözleşmesi'ni
+            </a>{" "}
+            okudum, kabul ediyorum.
+          </span>
         </div>
-      </div>
+        {errors.kvkkOnay && <span className="text-red-400 text-xs">{errors.kvkkOnay}</span>}
 
-      {/* Buton */}
-      <Link href="/rezervasyon">
-        <button className="bg-[#6e5a1e] hover:bg-[#8c7327] text-white font-bold py-3 px-8 rounded-xl mt-10 w-full text-lg shadow">
-          Rezervasyon Yap
+        <button className="py-3 rounded bg-[#bfa658] font-bold text-black" type="submit">
+          Gönder
         </button>
-      </Link>
+        {msg && <div className="mt-2 text-green-500 text-center">{msg}</div>}
+      </form>
     </main>
   );
 }
