@@ -1,7 +1,10 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 
 export default function Kvkk() {
+  const [kvkkOkundu, setKvkkOkundu] = useState(false);
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-12">
       {/* Başlık */}
@@ -15,47 +18,28 @@ export default function Kvkk() {
           <b>YolcuTransferi.com</b> olarak kişisel verilerinizin korunmasına büyük önem veriyoruz. 
           Kişisel verileriniz, 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) ve ilgili mevzuat kapsamında, aşağıda belirtilen esaslara uygun olarak işlenmektedir.
         </p>
+        {/* ... Diğer metin alanları yukarıdaki gibi ... */}
 
-        <h2 className="text-2xl font-semibold text-[#bfa658] mt-6 mb-2">1. Veri Sorumlusu</h2>
-        <p>
-          YolcuTransferi.com olarak, tarafımıza iletilen veya sistemlerimiz aracılığıyla toplanan kişisel verilerin korunmasından sorumluyuz.
-        </p>
-
-        <h2 className="text-2xl font-semibold text-[#bfa658] mt-6 mb-2">2. Kişisel Verilerin İşlenme Amaçları</h2>
-        <p>
-          Kişisel verileriniz; rezervasyon işlemleri, hizmet taleplerinizin yerine getirilmesi, müşteri ilişkileri yönetimi, yasal yükümlülüklerimizin yerine getirilmesi, pazarlama ve analiz faaliyetleri kapsamında işlenmektedir.
-        </p>
-
-        <h2 className="text-2xl font-semibold text-[#bfa658] mt-6 mb-2">3. Kişisel Verilerin Aktarılması</h2>
-        <p>
-          Kişisel verileriniz, yasal yükümlülüklerimizin gerektirdiği veya hizmet gereği anlaşmalı olduğumuz üçüncü kişilerle, yetkili kamu kurum ve kuruluşlarıyla paylaşılabilir.
-        </p>
-
-        <h2 className="text-2xl font-semibold text-[#bfa658] mt-6 mb-2">4. Kişisel Verilerinizin Toplanma Yöntemi ve Hukuki Sebepler</h2>
-        <p>
-          Kişisel verileriniz; web sitemiz, mobil uygulamalar, çağrı merkezi, e-posta ve benzeri kanallar aracılığıyla otomatik veya otomatik olmayan yollarla toplanabilir.
-          Hukuki sebepler, sözleşmenin kurulması ve ifası, açık rıza, yasal yükümlülüklerin yerine getirilmesi ve meşru menfaatlerimizdir.
-        </p>
-
-        <h2 className="text-2xl font-semibold text-[#bfa658] mt-6 mb-2">5. KVKK Kapsamındaki Haklarınız</h2>
-        <ul className="list-disc pl-6 mb-4">
-          <li>Kişisel verinizin işlenip işlenmediğini öğrenme,</li>
-          <li>İşlenmişse buna ilişkin bilgi talep etme,</li>
-          <li>Verilerin işlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme,</li>
-          <li>Yurt içinde veya yurt dışında verilerin aktarıldığı üçüncü kişileri bilme,</li>
-          <li>Eksik veya yanlış işlenmişse düzeltilmesini isteme,</li>
-          <li>Mevzuatta öngörülen şartlar çerçevesinde silinmesini/yok edilmesini isteme,</li>
-          <li>Aktarılan üçüncü kişilere yapılan işlemlerin bildirilmesini isteme,</li>
-          <li>İşlemenin hukuka aykırı olması nedeniyle zarara uğrarsanız tazminat talep etme.</li>
-        </ul>
-
-        <h2 className="text-2xl font-semibold text-[#bfa658] mt-6 mb-2">6. Başvuru ve İletişim</h2>
-        <p>
-          KVKK kapsamındaki haklarınızı kullanmak veya detaylı bilgi almak için <Link href="/iletisim" className="underline text-[#FFD700]">İletişim</Link> sayfamız üzerinden bizimle irtibata geçebilirsiniz.
-        </p>
-        <p className="mt-6 text-sm text-[#bfa658]">
-          Güncel tarih: {new Date().toLocaleDateString("tr-TR")}
-        </p>
+        {/* Kabul kutusu + buton */}
+        <div className="mt-8 flex flex-col items-start gap-3">
+          <label className="flex items-center text-base text-[#e4c275]">
+            <input
+              type="checkbox"
+              checked={kvkkOkundu}
+              onChange={(e) => setKvkkOkundu(e.target.checked)}
+              className="w-5 h-5 accent-[#bfa658] rounded border border-[#bfa658] mr-2"
+            />
+            KVKK Aydınlatma Metni’ni okudum ve onaylıyorum.
+          </label>
+          <Link
+            href={kvkkOkundu ? "/kvkk/form" : "#"}
+            className={`px-6 py-3 rounded-xl font-bold text-lg mt-1 transition bg-[#bfa658] text-black hover:opacity-90 ${!kvkkOkundu ? "pointer-events-none opacity-50" : ""}`}
+            tabIndex={kvkkOkundu ? 0 : -1}
+            aria-disabled={!kvkkOkundu}
+          >
+            KVKK Başvuru Formuna Geç
+          </Link>
+        </div>
       </div>
     </main>
   );
