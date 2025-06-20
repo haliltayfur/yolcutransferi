@@ -41,12 +41,17 @@ export default function Kvkk() {
           <li>İşlemenin hukuka aykırı olması nedeniyle zarara uğrarsanız tazminat talep etme.</li>
         </ul>
         <h2 className="text-xl font-semibold text-[#bfa658] mt-6 mb-2">Başvuru ve İletişim</h2>
-        <p>
-          KVKK kapsamındaki haklarınızı kullanmak için <b>Başvuru Formu</b> doldurabilir veya <b>info@yolcutransferi.com</b> adresine başvuruda bulunabilirsiniz.
-        </p>
-        <p className="mt-6 text-sm text-[#bfa658]">
-          Güncelleme tarihi: {new Date().toLocaleDateString("tr-TR")}
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mt-2">
+          <Link
+            href="/kvkk/form"
+            className="bg-[#bfa658] text-black font-bold px-6 py-3 rounded-xl text-lg shadow hover:bg-[#e4c275] transition"
+          >
+            Başvuru Formu Doldur
+          </Link>
+          <span className="text-base">
+            veya <b>info@yolcutransferi.com</b> adresine başvuruda bulunabilirsiniz.
+          </span>
+        </div>
       </div>
     </main>
   );
