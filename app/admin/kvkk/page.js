@@ -2,15 +2,32 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 
+// Yardımcı: Kısa açıklama için
 function kisaAciklama(str) {
   if (!str) return "";
-  return str.length > 15 ? str.slice(0, 15) + "...": str;
+  return str.length > 20 ? str.slice(0, 20) + "..." : str;
+}
+
+// Yardımcı: Kayıt no üretilmesi
+function kayitNoUret(form, i) {
+  if (form.kayitNo) return form.kayitNo;
+  if (form.tarih) {
+    const t = new Date(form.tarih);
+    const yy = t.getFullYear();
+    const mm = String(t.getMonth() + 1).padStart(2, "0");
+    const dd = String(t.getDate()).padStart(2, "0");
+    return `kvkk${yy}${mm}${dd}_${String(i + 1).padStart(4, "0")}`;
+  }
+  return `kvkk_000${i + 1}`;
 }
 
 export default function AdminKvkk() {
   const [forms, setForms] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalAciklama, setModalAciklama] = useState(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(5);
 
   useEffect(() => {
     async function fetchForms() {
@@ -18,74 +35,135 @@ export default function AdminKvkk() {
       try {
         const res = await fetch("/api/kvkk/forms");
         const data = await res.json();
-        // Defensive! Gelen veri array mi değil mi, kontrol et.
         setForms(Array.isArray(data) ? data : []);
+        setFiltered(Array.isArray(data) ? data : []);
       } catch (e) {
         setForms([]);
+        setFiltered([]);
       }
       setLoading(false);
     }
     fetchForms();
   }, []);
 
+  // Sayfalama
+  const totalPages = Math.ceil(filtered.length / perPage);
+  const pagedForms = filtered.slice((page - 1) * perPage, page * perPage);
+
+  // Excel Export
+  function exportCSV() {
+    if (!filtered.length) return;
+    const keys = [
+      "Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Talep Türü", "Açıklama"
+    ];
+    const rows = [
+      keys.join(";"),
+      ...filtered.map((f, i) =>
+        [
+          kayitNoUret(f, i),
+          f.tarih ? format(new Date(f.tarih), "dd.MM.yyyy HH:mm") : "",
+          f.adsoyad || "",
+          f.telefon || "",
+          f.eposta || "",
+          f.talep || "",
+          (f.aciklama || "").replace(/;/g, " "),
+        ].join(";")
+      ),
+    ].join("\n");
+    const blob = new Blob([rows], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "kvkk_basvurulari.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
-    <main className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-[#bfa658] mb-8">KVKK Başvuruları</h1>
-      {loading ? (
-        <p className="text-gray-300">Yükleniyor...</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm bg-black/80 rounded-2xl">
-            <thead>
+    <main className="max-w-6xl mx-auto px-2 py-8">
+      <h1 className="text-3xl font-bold text-[#bfa658] mb-6">KVKK Başvuruları</h1>
+
+      <div className="mb-3 flex flex-wrap items-center gap-3">
+        <select
+          value={perPage}
+          onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }}
+          className="border border-gray-500 rounded px-2 py-1 text-sm"
+        >
+          {[5, 10, 25, 50, 100].map((v) => <option key={v}>{v}</option>)}
+        </select>
+        <button onClick={exportCSV}
+          className="bg-[#bfa658] text-black px-3 py-2 rounded font-bold hover:opacity-80 text-sm">
+          Excel (CSV) İndir
+        </button>
+        <span className="ml-2 text-sm text-gray-400">{filtered.length} başvuru bulundu.</span>
+      </div>
+
+      <div className="overflow-x-auto bg-black/80 rounded-2xl border-2 border-[#bfa658]">
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr>
+              <th className="p-2 border-b border-gray-600">Kayıt No</th>
+              <th className="p-2 border-b border-gray-600">Tarih</th>
+              <th className="p-2 border-b border-gray-600">Ad Soyad</th>
+              <th className="p-2 border-b border-gray-600">Telefon</th>
+              <th className="p-2 border-b border-gray-600">E-posta</th>
+              <th className="p-2 border-b border-gray-600">Talep Türü</th>
+              <th className="p-2 border-b border-gray-600">Açıklama</th>
+              <th className="p-2 border-b border-gray-600">İşlem</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
               <tr>
-                <th className="p-2 border-b border-gray-500">Kayıt No</th>
-                <th className="p-2 border-b border-gray-500">Ad Soyad</th>
-                <th className="p-2 border-b border-gray-500">Telefon</th>
-                <th className="p-2 border-b border-gray-500">E-posta</th>
-                <th className="p-2 border-b border-gray-500">Talep Türü</th>
-                <th className="p-2 border-b border-gray-500">Açıklama</th>
-                <th className="p-2 border-b border-gray-500">Tarih</th>
-                <th className="p-2 border-b border-gray-500">İşlem</th>
+                <td colSpan={8} className="text-center p-4 text-gray-400">Yükleniyor...</td>
               </tr>
-            </thead>
-            <tbody>
-              {Array.isArray(forms) && forms.length > 0 ? (
-                forms.map((form) => (
-                  <tr key={form._id}>
-                    <td className="p-2 border-b border-gray-600">{form.kayitNo || "-"}</td>
-                    <td className="p-2 border-b border-gray-600">{form.adsoyad}</td>
-                    <td className="p-2 border-b border-gray-600">{form.telefon}</td>
-                    <td className="p-2 border-b border-gray-600">{form.eposta}</td>
-                    <td className="p-2 border-b border-gray-600">{form.talep}</td>
-                    <td className="p-2 border-b border-gray-600">
-                      {kisaAciklama(form.aciklama)}
-                      {form.aciklama && form.aciklama.length > 15 && (
-                        <button
-                          className="ml-2 underline text-[#FFD700] cursor-pointer text-xs"
-                          onClick={() => setModalAciklama(form.aciklama)}
-                          type="button"
-                        >
-                          Oku
-                        </button>
-                      )}
-                    </td>
-                    <td className="p-2 border-b border-gray-600">
-                      {form.tarih ? format(new Date(form.tarih), "dd.MM.yyyy HH:mm") : "-"}
-                    </td>
-                    <td className="p-2 border-b border-gray-600">
-                      {/* Silme butonu vs. */}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="8" className="text-center p-4 text-gray-400">
-                    Hiç başvuru bulunamadı.
+            ) : pagedForms.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="text-center p-4 text-gray-400">Hiç başvuru bulunamadı.</td>
+              </tr>
+            ) : (
+              pagedForms.map((form, i) => (
+                <tr key={form._id || i}>
+                  <td className="p-2 border-b border-gray-700">{kayitNoUret(form, i + (page-1)*perPage)}</td>
+                  <td className="p-2 border-b border-gray-700">{form.tarih ? format(new Date(form.tarih), "dd.MM.yyyy HH:mm") : ""}</td>
+                  <td className="p-2 border-b border-gray-700">{form.adsoyad}</td>
+                  <td className="p-2 border-b border-gray-700">{form.telefon}</td>
+                  <td className="p-2 border-b border-gray-700">{form.eposta}</td>
+                  <td className="p-2 border-b border-gray-700">{form.talep}</td>
+                  <td className="p-2 border-b border-gray-700">
+                    {kisaAciklama(form.aciklama)}
+                    {form.aciklama && form.aciklama.length > 20 && (
+                      <button
+                        className="ml-2 underline text-[#FFD700] cursor-pointer text-xs"
+                        onClick={() => setModalAciklama(form.aciklama)}
+                        type="button"
+                      >
+                        Oku
+                      </button>
+                    )}
+                  </td>
+                  <td className="p-2 border-b border-gray-700">
+                    {/* Silme, düzenleme vs. ekleyebilirsin */}
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Sayfalama butonları */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-1 mt-4">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i + 1)}
+              className={`px-3 py-1 rounded font-bold border ${page === i + 1 ? "bg-[#bfa658] text-black" : "bg-black text-[#bfa658]"}`}
+            >
+              {i + 1}
+            </button>
+          ))}
         </div>
       )}
 
