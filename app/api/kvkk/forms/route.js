@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-// Tarihe göre kayıtNo üret
+// Kayıt no için tarih kodu
 function tarihKodu() {
   const now = new Date();
   const yyyy = now.getFullYear();
@@ -10,31 +10,34 @@ function tarihKodu() {
   const dd = String(now.getDate()).padStart(2, "0");
   return `kvkk${yyyy}${mm}${dd}_`;
 }
+// Kaçıncı kayıt olduğunu bul
 async function nextKayitNo(db, dateCode) {
   const regex = new RegExp("^" + dateCode);
   const count = await db.collection("kvkkForms").countDocuments({ kayitNo: { $regex: regex } });
   return dateCode + String(count + 1).padStart(5, "0");
 }
 
-// GET
+// --- GET (sayfalama/kaldırılan) ---
 export async function GET(req) {
   const url = new URL(req.url, "http://localhost");
   const showRemoved = url.searchParams.get("showRemoved") === "true";
   const page = parseInt(url.searchParams.get("page") || "1", 10);
   const pageSize = parseInt(url.searchParams.get("pageSize") || "25", 10);
+
   const db = await connectToDatabase();
   const query = showRemoved ? {} : { kaldirildi: { $ne: true } };
   const total = await db.collection("kvkkForms").countDocuments(query);
-  const items = await db.collection("kvkkForms")
+  const forms = await db.collection("kvkkForms")
     .find(query)
     .sort({ createdAt: -1 })
     .skip((page - 1) * pageSize)
     .limit(pageSize)
     .toArray();
-  return NextResponse.json({ items, total });
+
+  return NextResponse.json({ items: forms, total });
 }
 
-// PATCH (Kaldır/Geri al)
+// --- PATCH (Kaldır/Geri Ekle) ---
 export async function PATCH(req) {
   const { id, kaldirildi } = await req.json();
   const db = await connectToDatabase();
@@ -45,16 +48,18 @@ export async function PATCH(req) {
   return NextResponse.json({ success: true });
 }
 
-// POST (Kayıt ekle)
+// --- POST (Yeni Kayıt) ---
 export async function POST(req) {
   try {
     const body = await req.json();
     const db = await connectToDatabase();
     const dateCode = tarihKodu();
     const kayitNo = await nextKayitNo(db, dateCode);
+
     const {
       adsoyad, telefon, eposta, talep, aciklama, kvkkOnay
     } = body;
+
     await db.collection("kvkkForms").insertOne({
       kayitNo,
       adsoyad,
@@ -66,8 +71,10 @@ export async function POST(req) {
       kaldirildi: false,
       createdAt: new Date()
     });
+
     return NextResponse.json({ success: true });
   } catch (e) {
+    console.error("KVKK formu eklenirken hata:", e);
     return NextResponse.json({ error: "Kayıt eklenemedi" }, { status: 500 });
   }
 }
