@@ -2,16 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 
-// Yardımcı: Kısa açıklama için
 function kisaAciklama(str) {
   if (!str) return "";
   return str.length > 20 ? str.slice(0, 20) + "..." : str;
 }
 
-// Yardımcı: Kayıt no üretilmesi
 function kayitNoUret(form, i) {
   if (form.kayitNo) return form.kayitNo;
-  // Hem tarih, hem createdAt olabiliyor, ikisini de kontrol et!
   const tarihStr = form.tarih || form.createdAt;
   if (tarihStr) {
     const t = new Date(tarihStr);
@@ -37,7 +34,6 @@ export default function AdminKvkk() {
       try {
         const res = await fetch("/api/kvkk/forms");
         const data = await res.json();
-        // DİKKAT: Sadece items dizisini alıyoruz!
         const arr = Array.isArray(data.items) ? data.items : [];
         setForms(arr);
         setFiltered(arr);
@@ -50,11 +46,9 @@ export default function AdminKvkk() {
     fetchForms();
   }, []);
 
-  // Sayfalama
   const totalPages = Math.ceil(filtered.length / perPage);
   const pagedForms = filtered.slice((page - 1) * perPage, page * perPage);
 
-  // Excel Export
   function exportCSV() {
     if (!filtered.length) return;
     const keys = [
@@ -65,7 +59,6 @@ export default function AdminKvkk() {
       ...filtered.map((f, i) =>
         [
           kayitNoUret(f, i),
-          // tarih veya createdAt
           f.tarih
             ? format(new Date(f.tarih), "dd.MM.yyyy HH:mm")
             : f.createdAt
@@ -91,7 +84,6 @@ export default function AdminKvkk() {
   return (
     <main className="max-w-6xl mx-auto px-2 py-8">
       <h1 className="text-3xl font-bold text-[#bfa658] mb-6">KVKK Başvuruları</h1>
-
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <select
           value={perPage}
@@ -106,7 +98,6 @@ export default function AdminKvkk() {
         </button>
         <span className="ml-2 text-sm text-gray-400">{filtered.length} başvuru bulundu.</span>
       </div>
-
       <div className="overflow-x-auto bg-black/80 rounded-2xl border-2 border-[#bfa658]">
         <table className="min-w-full text-sm">
           <thead>
@@ -166,8 +157,6 @@ export default function AdminKvkk() {
           </tbody>
         </table>
       </div>
-
-      {/* Sayfalama butonları */}
       {totalPages > 1 && (
         <div className="flex justify-center gap-1 mt-4">
           {Array.from({ length: totalPages }, (_, i) => (
@@ -181,8 +170,6 @@ export default function AdminKvkk() {
           ))}
         </div>
       )}
-
-      {/* Modal açıklama kutusu */}
       {modalAciklama && (
         <div
           className="fixed left-0 top-0 w-full h-full bg-black/80 flex items-center justify-center z-50"
