@@ -5,10 +5,9 @@ import { saveAs } from "file-saver";
 
 const PAGE_SIZES = [5, 10, 20, 100];
 
-// Yardımcı: Mesajı kısa göster
-function kisaMesaj(str) {
+function kisaMetin(str, len = 15) {
   if (!str) return "";
-  return str.length > 15 ? str.slice(0, 15) + "..." : str;
+  return str.length > len ? str.slice(0, len) + "..." : str;
 }
 
 export default function AdminIletisim() {
@@ -92,9 +91,18 @@ export default function AdminIletisim() {
   const pageCount = Math.ceil(total / pageSize);
   const goToPage = p => setPage(p);
 
-  // Tablodaki başlıklar
   const columns = [
-    "Kayıt No", "Tarih", "Ad", "Soyad", "Telefon", "E-posta", "Mesaj", "Neden", "Tercih", "KVKK", "İşlem"
+    { name: "Kayıt No", className: "min-w-[120px]" },
+    { name: "Tarih", className: "min-w-[140px]" },
+    { name: "Ad", className: "min-w-[70px]" },
+    { name: "Soyad", className: "min-w-[70px]" },
+    { name: "Telefon", className: "min-w-[120px]" },
+    { name: "E-posta", className: "max-w-[140px] truncate" },
+    { name: "Mesaj", className: "max-w-[110px] truncate" },
+    { name: "Neden", className: "max-w-[120px] truncate" },
+    { name: "Tercih", className: "min-w-[80px]" },
+    { name: "KVKK", className: "min-w-[55px] text-center" },
+    { name: "İşlem", className: "min-w-[180px] text-right" }
   ];
 
   return (
@@ -124,35 +132,39 @@ export default function AdminIletisim() {
         ) : forms.length === 0 ? (
           <p className="text-center py-6 text-gray-300">Hiç kayıt yok.</p>
         ) : (
-          <table className="min-w-full text-sm border-separate border-spacing-0">
+          <table className="table-fixed w-full min-w-full text-sm border-separate border-spacing-0">
             <thead>
               <tr>
                 {columns.map((col, i, arr) => (
                   <th
-                    key={col}
-                    className="p-2 border-b-2 border-[#bfa658] bg-black/90 text-[#ffeec2] font-bold"
+                    key={col.name}
+                    className={`p-2 border-b-2 border-[#bfa658] bg-black/90 text-[#ffeec2] font-bold ${col.className}`}
                     style={{ borderRight: i !== arr.length - 1 ? '1px solid #bfa658' : undefined, textAlign: "left" }}
-                  >{col}</th>
+                  >{col.name}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {forms.map((form, idx) => (
                 <tr key={form._id} className={form.kaldirildi ? "bg-[#331] text-gray-500" : "hover:bg-[#231d10] transition"}>
-                  <td className="p-2 border-b border-[#bfa658] font-semibold" style={{ borderRight: '1px solid #bfa658' }}>{form.kayitNo || "-"}</td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.createdAt ? new Date(form.createdAt).toLocaleString("tr-TR") : "-"}</td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.ad}</td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.soyad}</td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.telefon}</td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.email}</td>
-                  <td className="p-2 border-b border-[#bfa658] font-mono" style={{ borderRight: '1px solid #bfa658' }}>
-                    {kisaMesaj(form.mesaj)}
+                  <td className="p-2 border-b border-[#bfa658] font-semibold min-w-[120px]" style={{ borderRight: '1px solid #bfa658' }}>{form.kayitNo || "-"}</td>
+                  <td className="p-2 border-b border-[#bfa658] min-w-[140px]" style={{ borderRight: '1px solid #bfa658' }}>{form.createdAt ? new Date(form.createdAt).toLocaleString("tr-TR") : "-"}</td>
+                  <td className="p-2 border-b border-[#bfa658] min-w-[70px]" style={{ borderRight: '1px solid #bfa658' }}>{form.ad}</td>
+                  <td className="p-2 border-b border-[#bfa658] min-w-[70px]" style={{ borderRight: '1px solid #bfa658' }}>{form.soyad}</td>
+                  <td className="p-2 border-b border-[#bfa658] min-w-[120px]" style={{ borderRight: '1px solid #bfa658' }}>{form.telefon}</td>
+                  <td className="p-2 border-b border-[#bfa658] max-w-[140px] truncate" style={{ borderRight: '1px solid #bfa658' }}>
+                    {kisaMetin(form.email, 18)}
                   </td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.neden}</td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.iletisimTercihi}</td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.kvkkOnay ? "✓" : "X"}</td>
-                  {/* İŞLEM sütunu: Oku, kaldır/geri al, sil */}
-                  <td className="p-2 border-b border-[#bfa658] text-right min-w-[160px] flex gap-2 justify-end items-center">
+                  <td className="p-2 border-b border-[#bfa658] font-mono max-w-[110px] truncate" style={{ borderRight: '1px solid #bfa658' }}>
+                    {kisaMetin(form.mesaj, 15)}
+                  </td>
+                  <td className="p-2 border-b border-[#bfa658] max-w-[120px] truncate" style={{ borderRight: '1px solid #bfa658' }}>
+                    {kisaMetin(form.neden, 15)}
+                  </td>
+                  <td className="p-2 border-b border-[#bfa658] min-w-[80px]" style={{ borderRight: '1px solid #bfa658' }}>{form.iletisimTercihi}</td>
+                  <td className="p-2 border-b border-[#bfa658] min-w-[55px] text-center" style={{ borderRight: '1px solid #bfa658' }}>{form.kvkkOnay ? "✓" : "X"}</td>
+                  {/* İŞLEM sütunu */}
+                  <td className="p-2 border-b border-[#bfa658] text-right min-w-[180px]">
                     <button
                       className="bg-[#bfa658] text-black px-3 py-1 rounded font-bold text-xs hover:opacity-80 shadow"
                       onClick={() => setModalForm(form)}
@@ -161,17 +173,17 @@ export default function AdminIletisim() {
                     {!form.kaldirildi ? (
                       <button
                         onClick={() => handleToggleRemove(form._id, true)}
-                        className="bg-yellow-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
+                        className="bg-yellow-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition ml-2"
                       >Kaldır</button>
                     ) : (
                       <button
                         onClick={() => handleToggleRemove(form._id, false)}
-                        className="bg-green-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-green-400 hover:text-black transition"
+                        className="bg-green-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-green-400 hover:text-black transition ml-2"
                       >Geri Al</button>
                     )}
                     <button
                       onClick={() => handleSil(form._id)}
-                      className="bg-red-700 text-white px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-red-400 hover:text-black transition"
+                      className="bg-red-700 text-white px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-red-400 hover:text-black transition ml-2"
                     >Sil</button>
                   </td>
                 </tr>
