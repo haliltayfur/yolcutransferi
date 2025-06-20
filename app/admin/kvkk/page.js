@@ -1,80 +1,84 @@
-import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
+"use client";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
 
-function tarihKodu() {
-  // Örn: kvkk20240620_
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `kvkk${yyyy}${mm}${dd}_`;
-}
-async function nextKayitNo(db, dateCode) {
-  const regex = new RegExp("^" + dateCode);
-  const count = await db.collection("kvkkForms").countDocuments({ kayitNo: { $regex: regex } });
-  return dateCode + String(count + 1).padStart(5, "0");
-}
+export default function AdminKvkk() {
+  const [forms, setForms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-// ---- GET ----
-export async function GET(req) {
-  const url = new URL(req.url, "http://localhost");
-  const showRemoved = url.searchParams.get("showRemoved") === "true";
-  const page = parseInt(url.searchParams.get("page") || "1", 10);
-  const pageSize = parseInt(url.searchParams.get("pageSize") || "5", 10);
+  const fetchForms = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await fetch("/api/kvkk/forms");
+      const json = await res.json();
 
-  const db = await connectToDatabase();
-  const query = showRemoved ? {} : { kaldirildi: { $ne: true } };
-  const total = await db.collection("kvkkForms").countDocuments(query);
+      if (Array.isArray(json)) {
+        setForms(json);
+      } else {
+        console.error("Veri dizi değil:", json);
+        setForms([]);
+        setError(true);
+      }
+    } catch (err) {
+      console.error("KVKK verisi çekilemedi:", err);
+      setForms([]);
+      setError(true);
+    } finally {
+      setLoading(false);
+      localStorage.setItem("kvkkLastRead", new Date().toISOString());
+    }
+  };
 
-  const forms = await db.collection("kvkkForms")
-    .find(query)
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * pageSize)
-    .limit(pageSize)
-    .toArray();
+  useEffect(() => {
+    fetchForms();
+  }, []);
 
-  // JSON: { items, total }
-  return NextResponse.json({ items: forms, total });
-}
+  return (
+    <main className="max-w-7xl mx-auto px-4 py-12 text-white">
+      <h1 className="text-3xl font-bold text-[#bfa658] mb-8 text-center">
+        KVKK Başvuruları
+      </h1>
 
-// ---- PATCH (Kaldır / Geri Ekle) ----
-export async function PATCH(req) {
-  const { id, kaldirildi } = await req.json();
-  const db = await connectToDatabase();
-  await db.collection("kvkkForms").updateOne(
-    { _id: new ObjectId(id) },
-    { $set: { kaldirildi: !!kaldirildi } }
+      <div className="border border-[#bfa658] rounded-xl overflow-x-auto">
+        {loading ? (
+          <p className="text-center text-gray-300 py-4">Yükleniyor...</p>
+        ) : error ? (
+          <p className="text-center text-red-500 py-4">Kayıtlar alınamadı</p>
+        ) : forms.length === 0 ? (
+          <p className="text-center text-gray-300 py-4">Henüz başvuru yok.</p>
+        ) : (
+          <table className="w-full text-sm text-center">
+            <thead>
+              <tr className="bg-[#bfa658] text-black font-semibold">
+                <th className="px-2 py-2">Tarih</th>
+                <th className="px-2 py-2">Ad Soyad</th>
+                <th className="px-2 py-2">Telefon</th>
+                <th className="px-2 py-2">E-posta</th>
+                <th className="px-2 py-2">Talep Türü</th>
+                <th className="px-2 py-2">Açıklama</th>
+              </tr>
+            </thead>
+            <tbody>
+              {forms.map((form) => (
+                <tr key={form._id} className="border-t border-[#bfa658] text-gray-200">
+                  <td className="px-2 py-2">
+                    {form.createdAt
+                      ? format(new Date(form.createdAt), "dd.MM.yyyy HH:mm")
+                      : "-"}
+                  </td>
+                  <td className="px-2 py-2">{form.adsoyad}</td>
+                  <td className="px-2 py-2">{form.telefon || "-"}</td>
+                  <td className="px-2 py-2">{form.eposta}</td>
+                  <td className="px-2 py-2">{form.talep}</td>
+                  <td className="px-2 py-2">{form.aciklama || "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </main>
   );
-  return NextResponse.json({ success: true });
-}
-
-// ---- POST (Yeni Kayıt Ekle) ----
-export async function POST(req) {
-  try {
-    const body = await req.json();
-    const db = await connectToDatabase();
-    const dateCode = tarihKodu();
-    const kayitNo = await nextKayitNo(db, dateCode);
-
-    const {
-      adsoyad, telefon, eposta, talep, aciklama
-    } = body;
-
-    await db.collection("kvkkForms").insertOne({
-      kayitNo,
-      adsoyad,
-      telefon,
-      eposta,
-      talep,
-      aciklama,
-      kaldirildi: false,
-      createdAt: new Date()
-    });
-
-    return NextResponse.json({ success: true });
-  } catch (e) {
-    console.error("KVKK formu eklenirken hata:", e);
-    return NextResponse.json({ error: "Kayıt eklenemedi" }, { status: 500 });
-  }
 }
