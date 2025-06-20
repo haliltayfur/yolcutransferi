@@ -53,7 +53,7 @@ export default function KvkkFormPage() {
   };
 
   return (
-    <main className="max-w-4xl mx-auto px-4 py-12 mb-20 border-2 border-[#bfa658] rounded-3xl bg-black/80">
+    <main className="max-w-4xl mx-auto px-4 py-12 mb-20 border-2 border-[#bfa658] rounded-3xl bg-black/80 mt-16">
       <h1 className="text-3xl md:text-4xl font-bold text-center text-[#bfa658] mb-8 tracking-tight">
         KVKK Başvuru Formu
       </h1>
