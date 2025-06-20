@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function Kvkk() {
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
-      <section className="w-full max-w-2xl mx-auto bg-gradient-to-br from-black via-[#19160a] to-[#302811] border border-[#bfa658] rounded-3xl shadow-2xl p-8 md:p-14 mt-16 mb-10">
+      <section className="w-full max-w-4xl mx-auto bg-gradient-to-br from-black via-[#19160a] to-[#302811] border border-[#bfa658] rounded-3xl shadow-2xl p-8 md:p-14 mt-16 mb-10">
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-[#bfa658] tracking-tight drop-shadow-lg text-center mb-2">
             KVKK Politikası
