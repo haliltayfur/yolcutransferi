@@ -34,9 +34,8 @@ export default function AdminKvkk() {
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
-  const [timer, setTimer] = useState(null);
 
-  // Kayıt No sıralı üretme (frontend örnek; backend'de otomatik olması önerilir)
+  // Kayıt No sıralı üretme (backendde yoksa)
   function formatKayitNo(index) {
     return `kvkkgunayyil_${(index + 1).toString().padStart(4, "0")}`;
   }
@@ -51,22 +50,19 @@ export default function AdminKvkk() {
     localStorage.setItem("kvkkLastRead", new Date().toISOString());
   };
 
+  // 15 sn'de bir sadece yeni kayıt varsa ekle
   useEffect(() => {
     fetchForms();
-
-    // Sadece yeni kayıtları ekle
-    if (timer) clearInterval(timer);
     const intv = setInterval(async () => {
       const res = await fetch("/api/kvkk/forms");
       const data = await res.json();
       if (data.length > forms.length) {
-        setForms(data); // yeni kayıtlar varsa listeyi güncelle
+        setForms(data);
       }
-    }, 15000); // 15sn
-    setTimer(intv);
+    }, 15000);
     return () => clearInterval(intv);
     // eslint-disable-next-line
-  }, []);
+  }, [forms]);
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-12 mt-12 md:mt-16">
