@@ -1,108 +1,152 @@
 "use client";
 import { useEffect, useState } from "react";
 
-// Tablo başlıkları
-const columns = [
-  { label: "Kayıt No", key: "kayitNo" },
-  { label: "Tarih", key: "createdAt" },
-  { label: "Ad", key: "ad" },
-  { label: "Soyad", key: "soyad" },
-  { label: "Telefon", key: "telefon" },
-  { label: "E-posta", key: "email" },
-  { label: "Mesaj", key: "mesaj" },
-  { label: "Neden", key: "neden" },
-  { label: "Tercih", key: "iletisimTercihi" },
-  { label: "KVKK", key: "kvkkOnay" }
-];
-
-function formatDate(dt) {
-  try {
-    if (!dt) return "";
-    const date = new Date(dt);
-    return date.toLocaleString("tr-TR", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
-  } catch {
-    return dt;
-  }
-}
+const PAGE_SIZES = [5, 10, 20, 100];
 
 export default function AdminIletisim() {
-  const [data, setData] = useState([]);
+  const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [showRemoved, setShowRemoved] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [total, setTotal] = useState(0);
 
-  // Export için kod burada
-  function exportCSV() {
-    const rows = [
-      columns.map(col => col.label), // header
-      ...data.map(row =>
-        columns.map(col => {
-          if (col.key === "createdAt") return formatDate(row[col.key]);
-          if (col.key === "kvkkOnay") return row[col.key] ? "✔" : "✗";
-          return typeof row[col.key] === "string" ? row[col.key].replace(/;/g, ",") : row[col.key] || "";
-        })
-      )
-    ];
-    // UTF-8 BOM ile başlatıyoruz
-    const csvContent = "\uFEFF" + rows.map(e => e.join(";")).join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "iletisim-kayitlari.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
+  // Her 10sn’de bir güncelle (isteğe bağlı: ŞİMDİ YENİLE butonu da ekle)
+  useEffect(() => {
+    let interval = setInterval(() => {
+      fetchForms();
+    }, 10000);
+    fetchForms();
+    return () => clearInterval(interval);
+    // eslint-disable-next-line
+  }, [showRemoved, page, pageSize]);
 
-  // Kayıtları çek
-  const fetchData = async () => {
-    setLoading(true); setError(false);
+  const fetchForms = async () => {
+    setLoading(true);
+    setError(false);
     try {
-      const res = await fetch("/api/iletisim/forms?page=1&pageSize=1000");
-      const { items } = await res.json();
-      setData(items);
-    } catch (e) {
+      const res = await fetch(
+        `/api/iletisim/forms?showRemoved=${showRemoved}&page=${page}&pageSize=${pageSize}`
+      );
+      const json = await res.json();
+      setForms(json.items || []);
+      setTotal(json.total || 0);
+    } catch (err) {
       setError(true);
+      setForms([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  // Kaldır/Geri Al
+  const handleToggleRemove = async (id, kaldirildi) => {
+    await fetch("/api/iletisim/forms", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, kaldirildi }),
+    });
+    fetchForms();
+  };
+
+  // CSV Export
+  const exportCSV = () => {
+    const header = [
+      "Kayıt No", "Tarih", "Ad", "Soyad", "Telefon", "E-posta",
+      "Mesaj", "Neden", "Tercih", "KVKK"
+    ];
+    const rows = forms.map(f => [
+      f.kayitNo || "-", f.createdAt ? new Date(f.createdAt).toLocaleString("tr-TR") : "-",
+      f.ad, f.soyad, f.telefon, f.email, f.mesaj, f.neden, f.iletisimTercihi,
+      f.kvkkOnay ? "✓" : "X"
+    ]);
+    const csvContent = "\uFEFF" + [header, ...rows].map(e => e.join(";")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "iletisim-kayitlari.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Pagination
+  const pageCount = Math.ceil(total / pageSize);
+  const goToPage = p => setPage(p);
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-[#bfa658] mb-8 text-center">İletişimden Gelenler</h1>
-      <button
-        onClick={exportCSV}
-        className="mb-4 px-5 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-      >Excel (CSV) İndir</button>
+    <main className="max-w-5xl mx-auto px-4 py-10 text-white">
+      <h1 className="text-3xl font-bold text-[#FFD700] mb-8 text-center">İletişimden Gelenler</h1>
+      <div className="flex flex-row gap-3 items-center mb-4">
+        <select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }} className="text-black rounded px-2 py-1">
+          {PAGE_SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <button onClick={exportCSV} className="bg-green-600 text-white rounded px-3 py-1 font-semibold">Excel (CSV) İndir</button>
+        <button onClick={() => setShowRemoved(!showRemoved)} className="bg-yellow-700 text-white rounded px-3 py-1 font-semibold">
+          {showRemoved ? "Kaldırılanları Gizle" : "Kaldırılanları Göster"}
+        </button>
+        <button onClick={fetchForms} className="bg-gray-700 text-white rounded px-3 py-1 font-semibold">Şimdi Yenile</button>
+      </div>
 
-      <div className="overflow-x-auto border border-[#bfa658] rounded-xl mt-4">
+      <div className="rounded-xl border-2 border-[#FFD700] overflow-x-auto">
         {loading ? (
-          <div className="p-8 text-center text-gray-400">Yükleniyor...</div>
+          <p className="text-center py-6 text-gray-300">Yükleniyor...</p>
         ) : error ? (
-          <div className="p-8 text-center text-red-500">Kayıtlar alınamadı</div>
+          <p className="text-center py-6 text-red-400">Kayıtlar alınamadı</p>
+        ) : forms.length === 0 ? (
+          <p className="text-center py-6 text-gray-300">Hiç kayıt yok.</p>
         ) : (
-          <table className="min-w-full text-sm text-center">
+          <table className="w-full text-sm text-center">
             <thead>
-              <tr className="bg-[#bfa658] text-black font-semibold">
-                {columns.map(col => <th key={col.key} className="px-2 py-2">{col.label}</th>)}
+              <tr className="bg-[#FFD700] text-black">
+                <th>Kayıt No</th>
+                <th>Tarih</th>
+                <th>Ad</th>
+                <th>Soyad</th>
+                <th>Telefon</th>
+                <th>E-posta</th>
+                <th>Mesaj</th>
+                <th>Neden</th>
+                <th>Tercih</th>
+                <th>KVKK</th>
+                <th>İşlem</th>
               </tr>
             </thead>
             <tbody>
-              {data.map(row => (
-                <tr key={row._id} className="border-t border-[#bfa658] text-gray-200">
-                  {columns.map(col => (
-                    <td key={col.key} className="px-2 py-2">
-                      {col.key === "createdAt" ? formatDate(row[col.key])
-                        : col.key === "kvkkOnay" ? (row.kvkkOnay ? "✔" : "✗")
-                        : row[col.key]}
-                    </td>
-                  ))}
+              {forms.map(form => (
+                <tr key={form._id} className={form.kaldirildi ? "bg-[#331] text-gray-500" : ""}>
+                  <td>{form.kayitNo || "-"}</td>
+                  <td>{form.createdAt ? new Date(form.createdAt).toLocaleString("tr-TR") : "-"}</td>
+                  <td>{form.ad}</td>
+                  <td>{form.soyad}</td>
+                  <td>{form.telefon}</td>
+                  <td>{form.email}</td>
+                  <td>{form.mesaj}</td>
+                  <td>{form.neden}</td>
+                  <td>{form.iletisimTercihi}</td>
+                  <td>{form.kvkkOnay ? "✓" : "X"}</td>
+                  <td>
+                    {!form.kaldirildi ? (
+                      <button onClick={() => handleToggleRemove(form._id, true)} className="text-red-500 hover:underline">Kaldır</button>
+                    ) : (
+                      <button onClick={() => handleToggleRemove(form._id, false)} className="text-green-400 hover:underline">Geri Al</button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
+      </div>
+      {/* Sayfalama */}
+      <div className="flex justify-center gap-2 mt-5">
+        {Array(pageCount).fill(0).map((_, i) => (
+          <button key={i} onClick={() => goToPage(i + 1)}
+            className={`px-3 py-1 rounded ${page === i + 1 ? "bg-[#FFD700] text-black font-bold" : "bg-[#222] text-white"}`}>
+            {i + 1}
+          </button>
+        ))}
       </div>
     </main>
   );
