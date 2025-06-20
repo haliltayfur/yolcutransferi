@@ -5,6 +5,7 @@ export default function Kvkk() {
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
       <section className="w-full max-w-4xl mx-auto bg-gradient-to-br from-black via-[#19160a] to-[#302811] border border-[#bfa658] rounded-3xl shadow-2xl p-8 md:p-14 mt-16 mb-10">
+        {/* VIP güvenlik ve kurumsal güven vurgusu */}
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-[#bfa658] tracking-tight drop-shadow-lg text-center mb-2">
             KVKK Politikası
@@ -19,6 +20,19 @@ export default function Kvkk() {
           </p>
         </div>
 
+        {/* Kurumsal ve yasal güven mesajı */}
+        <div className="mb-4 text-base text-[#e6d199] text-center font-medium">
+          YolcuTransferi.com, <b>Türkiye Cumhuriyeti kanunlarına uygun</b> ve <b>KVKK mevzuatına tam uyumlu</b> hizmet sunar.<br />
+          Kişisel verileriniz, <b>en üst düzey güvenlik</b> ve gizlilik önlemleriyle korunur.
+        </div>
+
+        {/* VIP gizlilik ve teknik güvenlik garantisi */}
+        <div className="mb-6 text-sm text-[#c9bb90] border border-[#bfa658] rounded-xl bg-black/60 p-4 text-center font-light">
+          VIP yolculuk bilgileriniz ve tüm kişisel talepleriniz %100 gizlilikle, şifreli sunucularda saklanır.<br />
+          Yasal zorunluluk dışında <b>asla paylaşılmaz</b> ve asla pazarlama amacıyla kullanılmaz.
+        </div>
+
+        {/* KVKK ana metin */}
         <div className="space-y-6 text-base text-[#f2ecd3] leading-relaxed font-light">
           <div>
             <h2 className="text-[#bfa658] font-semibold text-xl mb-1">Veri Sorumlusu</h2>
@@ -57,11 +71,13 @@ export default function Kvkk() {
           </div>
         </div>
 
-        {/* Butondan hemen önce bilgi cümlesi */}
+        {/* Form ve başvuru süreci açıklaması */}
         <div className="mt-8 text-base text-[#ffeec2] text-center font-medium">
-          KVKK kapsamındaki haklarınızı kullanmak veya başvuruda bulunmak için aşağıdaki formu doldurabilirsiniz.
+          KVKK kapsamındaki haklarınızı kullanmak veya başvuruda bulunmak için aşağıdaki formu doldurabilirsiniz. <br />
+          Tüm başvurularınıza <b>en geç 30 gün içinde</b> yanıt verilir.
         </div>
 
+        {/* Buton */}
         <div className="flex justify-center mt-5 border-t border-[#a38c40] pt-8">
           <Link
             href="/kvkk/form"
@@ -69,6 +85,11 @@ export default function Kvkk() {
           >
             Başvuru Formu Doldur
           </Link>
+        </div>
+
+        {/* İngilizce bilgi alanı (isteğe bağlı, kaldırılabilir) */}
+        <div className="mt-8 text-xs text-[#a18b57] text-center">
+          For English information about our data protection policy, please contact us via <b>info@yolcutransferi.com</b>
         </div>
       </section>
     </main>
