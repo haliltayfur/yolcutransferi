@@ -1,5 +1,7 @@
 // ... importlar ve useState, useEffect kodları aynı ...
-
+"use client";
+import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
 function kisaAciklama(str) {
   if (!str) return "";
   return str.length > 15 ? str.slice(0, 15) + "..." : str;
