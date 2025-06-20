@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 // Tablo için kısa açıklama
 function kisaAciklama(str) {
@@ -34,6 +36,7 @@ export default function AdminKvkk() {
   const [refreshFlag, setRefreshFlag] = useState(false);
   const pollingRef = useRef();
 
+  // Backend verisini çek
   async function fetchForms() {
     setLoading(true);
     try {
@@ -55,11 +58,9 @@ export default function AdminKvkk() {
     setLoading(false);
   }
 
-  // Kaldır
+  // Kaldır (backend'e kalıcı yaz)
   async function handleKaldir(_id) {
-    // backend'de kaldır
     await fetch(`/api/kvkk/forms/${_id}/kaldir`, { method: "POST" });
-    // anında UI güncelle
     setForms(f => f.map(row => row._id === _id ? { ...row, kaldirildi: true } : row));
     setFiltered(f => f.filter(row => row._id !== _id));
     setRemovedForms(f => [
@@ -69,7 +70,7 @@ export default function AdminKvkk() {
     setModalForm(null);
   }
 
-  // Sil
+  // Sil (backend'den tamamen sil)
   async function handleSil(_id) {
     await fetch(`/api/kvkk/forms/${_id}`, { method: "DELETE" });
     setForms(f => f.filter(row => row._id !== _id));
@@ -111,37 +112,31 @@ export default function AdminKvkk() {
     setRefreshFlag(f => !f);
   }
 
-  function exportCSV() {
+  // XLSX (gerçek Excel dosyası) export
+  function exportExcel() {
     const arr = showRemoved ? removedForms : filtered;
     if (!arr.length) return;
-    const keys = [
-      "Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Talep Türü", "Açıklama"
+    const sheetData = [
+      ["Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Talep Türü", "Açıklama"],
+      ...arr.map((f, i) => [
+        kayitNoUret(f, i),
+        f.tarih
+          ? format(new Date(f.tarih), "dd.MM.yyyy HH:mm")
+          : f.createdAt
+          ? format(new Date(f.createdAt), "dd.MM.yyyy HH:mm")
+          : "",
+        f.adsoyad || "",
+        f.telefon || "",
+        f.eposta || "",
+        f.talep || "",
+        f.aciklama || "",
+      ]),
     ];
-    const rows = [
-      keys.join(";"),
-      ...arr.map((f, i) =>
-        [
-          kayitNoUret(f, i),
-          f.tarih
-            ? format(new Date(f.tarih), "dd.MM.yyyy HH:mm")
-            : f.createdAt
-            ? format(new Date(f.createdAt), "dd.MM.yyyy HH:mm")
-            : "",
-          f.adsoyad || "",
-          f.telefon || "",
-          f.eposta || "",
-          f.talep || "",
-          (f.aciklama || "").replace(/;/g, " "),
-        ].join(";")
-      ),
-    ].join("\n");
-    const blob = new Blob([rows], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "kvkk_basvurulari.csv";
-    a.click();
-    URL.revokeObjectURL(url);
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "KVKK Başvuruları");
+    const wbout = XLSX.write(wb, { type: "array", bookType: "xlsx" });
+    saveAs(new Blob([wbout], { type: "application/octet-stream" }), "kvkk_basvurulari.xlsx");
   }
 
   const dataArr = showRemoved ? removedForms : filtered;
@@ -163,9 +158,9 @@ export default function AdminKvkk() {
         >
           {[5, 10, 25, 50, 100].map((v) => <option key={v} value={v}>{v}</option>)}
         </select>
-        <button onClick={exportCSV}
+        <button onClick={exportExcel}
           className="bg-[#bfa658] text-black px-4 py-2 rounded font-bold hover:opacity-80 text-sm shadow">
-          Excel (CSV) İndir
+          Excel (XLSX) İndir
         </button>
         <button
           onClick={handleShowRemoved}
