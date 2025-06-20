@@ -34,7 +34,6 @@ export default function AdminKvkk() {
   const [refreshFlag, setRefreshFlag] = useState(false);
   const pollingRef = useRef();
 
-  // Backend verisini çek
   async function fetchForms() {
     setLoading(true);
     try {
@@ -56,10 +55,32 @@ export default function AdminKvkk() {
     setLoading(false);
   }
 
-  // İlk açılışta ve manuel yenilemede
+  // Kaldır
+  async function handleKaldir(_id) {
+    // backend'de kaldır
+    await fetch(`/api/kvkk/forms/${_id}/kaldir`, { method: "POST" });
+    // anında UI güncelle
+    setForms(f => f.map(row => row._id === _id ? { ...row, kaldirildi: true } : row));
+    setFiltered(f => f.filter(row => row._id !== _id));
+    setRemovedForms(f => [
+      ...forms.filter(x => x._id === _id).map(x => ({ ...x, kaldirildi: true })),
+      ...removedForms,
+    ]);
+    setModalForm(null);
+  }
+
+  // Sil
+  async function handleSil(_id) {
+    await fetch(`/api/kvkk/forms/${_id}`, { method: "DELETE" });
+    setForms(f => f.filter(row => row._id !== _id));
+    setFiltered(f => f.filter(row => row._id !== _id));
+    setRemovedForms(f => f.filter(row => row._id !== _id));
+    setModalForm(null);
+  }
+
+  // İlk açılış ve manuel yenilemede
   useEffect(() => {
     fetchForms();
-    // Arka planda sürekli kontrol (5sn'de bir yeni kayıt varsa ekle)
     pollingRef.current = setInterval(async () => {
       try {
         const res = await fetch("/api/kvkk/forms");
@@ -69,7 +90,7 @@ export default function AdminKvkk() {
           ...x,
           kaldirildi: x.kaldirildi || false,
         }));
-        // Yeni kayıt var mı?
+        // Yeni kayıt kontrolü
         if (arr.length !== forms.length) {
           setForms(arr);
           setFiltered(arr.filter(f => !f.kaldirildi));
@@ -81,38 +102,15 @@ export default function AdminKvkk() {
     // eslint-disable-next-line
   }, [refreshFlag]);
 
-  // Kaldır
-  function handleKaldir(_id) {
-    setForms(f => f.map(row => row._id === _id ? { ...row, kaldirildi: true } : row));
-    setFiltered(f => f.filter(row => row._id !== _id));
-    setRemovedForms(f => [
-      ...forms.filter(x => x._id === _id).map(x => ({ ...x, kaldirildi: true })),
-      ...removedForms,
-    ]);
-    // Backend'e "kaldırıldı" flag'ini güncelle (isteğe bağlı, burada localde)
-    fetch(`/api/kvkk/forms/${_id}/kaldir`, { method: "POST" });
-  }
-
-  // Sil (DB'den tamamen sil)
-  async function handleSil(_id) {
-    await fetch(`/api/kvkk/forms/${_id}`, { method: "DELETE" });
-    setForms(f => f.filter(row => row._id !== _id));
-    setFiltered(f => f.filter(row => row._id !== _id));
-    setRemovedForms(f => f.filter(row => row._id !== _id));
-  }
-
-  // Kaldırılanları göster/gizle
   function handleShowRemoved() {
     setShowRemoved(s => !s);
     setPage(1);
   }
 
-  // Manuel yenile
   function handleRefresh() {
     setRefreshFlag(f => !f);
   }
 
-  // Excel Export
   function exportCSV() {
     const arr = showRemoved ? removedForms : filtered;
     if (!arr.length) return;
@@ -146,12 +144,10 @@ export default function AdminKvkk() {
     URL.revokeObjectURL(url);
   }
 
-  // Sayfalama
   const dataArr = showRemoved ? removedForms : filtered;
   const totalPages = Math.ceil(dataArr.length / perPage);
   const pagedForms = dataArr.slice((page - 1) * perPage, page * perPage);
 
-  // Tablo başlıkları
   const columns = [
     "Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Talep Türü", "Açıklama", "İşlem"
   ];
@@ -159,10 +155,7 @@ export default function AdminKvkk() {
   return (
     <main className="max-w-6xl mx-auto px-2 py-8">
       <h1 className="text-3xl font-bold text-[#bfa658] mb-8">KVKK Başvuruları</h1>
-
-      {/* Üst Butonlar */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        {/* Kaç kayıt gösterileceği */}
         <select
           value={perPage}
           onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }}
@@ -188,8 +181,6 @@ export default function AdminKvkk() {
         </button>
         <span className="ml-2 text-sm text-gray-400">{dataArr.length} başvuru bulundu.</span>
       </div>
-
-      {/* Tablo */}
       <div className="overflow-x-auto bg-black/80 rounded-2xl border-2 border-[#bfa658]">
         <table className="min-w-full text-sm border-separate border-spacing-0">
           <thead>
@@ -231,14 +222,11 @@ export default function AdminKvkk() {
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.eposta}</td>
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.talep}</td>
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
-                    <span>
-                      {kisaAciklama(form.aciklama)}
-                      <button
-                        className="ml-2 underline text-[#FFD700] cursor-pointer text-xs"
-                        onClick={() => setModalForm(form)}
-                        type="button"
-                      >Oku</button>
-                    </span>
+                    <button
+                      className="bg-[#bfa658] text-black px-3 py-1 rounded font-bold text-xs mr-1 hover:opacity-80 shadow"
+                      onClick={() => setModalForm(form)}
+                      type="button"
+                    >Oku</button>
                   </td>
                   <td className="p-2 border-b border-[#bfa658] text-center min-w-[120px]">
                     {!form.kaldirildi && (
@@ -258,8 +246,6 @@ export default function AdminKvkk() {
           </tbody>
         </table>
       </div>
-
-      {/* Sayfalama */}
       {totalPages > 1 && (
         <div className="flex justify-center gap-1 mt-5">
           {Array.from({ length: totalPages }, (_, i) => (
@@ -276,36 +262,52 @@ export default function AdminKvkk() {
           ))}
         </div>
       )}
-
-      {/* Oku Popup */}
+      {/* Popup mail okur gibi */}
       {modalForm && (
         <div
           className="fixed left-0 top-0 w-full h-full bg-black/80 flex items-center justify-center z-50"
           onClick={() => setModalForm(null)}
         >
           <div
-            className="bg-white text-black p-7 rounded-2xl max-w-2xl w-full shadow-2xl relative"
+            className="bg-white text-black p-0 rounded-xl max-w-2xl w-full shadow-2xl relative overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
-            <button
-              className="absolute top-3 right-4 text-lg bg-gray-200 px-2 rounded hover:bg-gray-400"
-              onClick={() => setModalForm(null)}
-            >✕</button>
-            <div className="mb-3 text-xl font-bold text-[#bfa658]">Başvuru Detayı</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-[16px]">
-              <div><b>Kayıt No:</b> {kayitNoUret(modalForm, 0)}</div>
-              <div><b>Tarih:</b> {modalForm.tarih ? format(new Date(modalForm.tarih), "dd.MM.yyyy HH:mm") : modalForm.createdAt ? format(new Date(modalForm.createdAt), "dd.MM.yyyy HH:mm") : ""}</div>
-              <div><b>Ad Soyad:</b> {modalForm.adsoyad}</div>
-              <div><b>Telefon:</b> {modalForm.telefon}</div>
-              <div><b>E-posta:</b> {modalForm.eposta}</div>
-              <div><b>Talep Türü:</b> {modalForm.talep}</div>
-              <div className="sm:col-span-2"><b>Açıklama:</b><br />
-                <span className="block p-2 rounded bg-gray-100 text-gray-800 mt-1 whitespace-pre-line min-h-[50px]">{modalForm.aciklama}</span>
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end">
+            {/* Header */}
+            <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200 bg-[#f3ecd1]">
+              <div className="text-xl font-bold text-[#bfa658]">Başvuru Detayı</div>
               <button
-                className="px-4 py-2 rounded-lg bg-black text-white border border-[#bfa658] hover:bg-[#bfa658] hover:text-black"
+                className="text-2xl text-gray-400 hover:text-black"
+                onClick={() => setModalForm(null)}
+                aria-label="Kapat"
+              >×</button>
+            </div>
+            {/* Detay İçerik */}
+            <div className="px-6 py-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-[16px] mb-4">
+                <div><b>Kayıt No:</b> {kayitNoUret(modalForm, 0)}</div>
+                <div><b>Tarih:</b> {modalForm.tarih ? format(new Date(modalForm.tarih), "dd.MM.yyyy HH:mm") : modalForm.createdAt ? format(new Date(modalForm.createdAt), "dd.MM.yyyy HH:mm") : ""}</div>
+                <div><b>Ad Soyad:</b> {modalForm.adsoyad}</div>
+                <div><b>Telefon:</b> {modalForm.telefon}</div>
+                <div><b>E-posta:</b> {modalForm.eposta}</div>
+                <div><b>Talep Türü:</b> {modalForm.talep}</div>
+              </div>
+              <div className="mb-1 text-[15px]"><b>Açıklama:</b></div>
+              <div className="bg-gray-100 rounded-md p-3 text-gray-900 font-mono max-h-48 overflow-y-auto whitespace-pre-line break-words">{modalForm.aciklama}</div>
+            </div>
+            {/* Alt Butonlar */}
+            <div className="flex gap-3 justify-end bg-[#faf8ef] px-6 py-4 border-t border-gray-200">
+              {!modalForm.kaldirildi && (
+                <button
+                  onClick={() => handleKaldir(modalForm._id)}
+                  className="bg-yellow-800 text-[#ffeec2] px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
+                >Kaldır</button>
+              )}
+              <button
+                onClick={() => handleSil(modalForm._id)}
+                className="bg-red-700 text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-red-400 hover:text-black transition"
+              >Sil</button>
+              <button
+                className="bg-black text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
                 onClick={() => setModalForm(null)}
               >
                 Kapat
