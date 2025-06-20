@@ -1,12 +1,14 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 
+// Tablo için kısa açıklama
 function kisaAciklama(str) {
   if (!str) return "";
   return str.length > 20 ? str.slice(0, 20) + "..." : str;
 }
 
+// Kayıt no üretici
 function kayitNoUret(form, i) {
   if (form.kayitNo) return form.kayitNo;
   const tarihStr = form.tarih || form.createdAt;
@@ -24,39 +26,102 @@ export default function AdminKvkk() {
   const [forms, setForms] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modalAciklama, setModalAciklama] = useState(null);
+  const [modalForm, setModalForm] = useState(null);
+  const [showRemoved, setShowRemoved] = useState(false);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(5);
+  const [removedForms, setRemovedForms] = useState([]);
+  const [refreshFlag, setRefreshFlag] = useState(false);
+  const pollingRef = useRef();
 
+  // Backend verisini çek
+  async function fetchForms() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/kvkk/forms");
+      const data = await res.json();
+      let arr = Array.isArray(data.items) ? data.items : [];
+      arr = arr.map(x => ({
+        ...x,
+        kaldirildi: x.kaldirildi || false,
+      }));
+      setForms(arr);
+      setFiltered(arr.filter(f => !f.kaldirildi));
+      setRemovedForms(arr.filter(f => f.kaldirildi));
+    } catch (e) {
+      setForms([]);
+      setFiltered([]);
+      setRemovedForms([]);
+    }
+    setLoading(false);
+  }
+
+  // İlk açılışta ve manuel yenilemede
   useEffect(() => {
-    async function fetchForms() {
-      setLoading(true);
+    fetchForms();
+    // Arka planda sürekli kontrol (5sn'de bir yeni kayıt varsa ekle)
+    pollingRef.current = setInterval(async () => {
       try {
         const res = await fetch("/api/kvkk/forms");
         const data = await res.json();
-        const arr = Array.isArray(data.items) ? data.items : [];
-        setForms(arr);
-        setFiltered(arr);
-      } catch (e) {
-        setForms([]);
-        setFiltered([]);
-      }
-      setLoading(false);
-    }
-    fetchForms();
-  }, []);
+        let arr = Array.isArray(data.items) ? data.items : [];
+        arr = arr.map(x => ({
+          ...x,
+          kaldirildi: x.kaldirildi || false,
+        }));
+        // Yeni kayıt var mı?
+        if (arr.length !== forms.length) {
+          setForms(arr);
+          setFiltered(arr.filter(f => !f.kaldirildi));
+          setRemovedForms(arr.filter(f => f.kaldirildi));
+        }
+      } catch {}
+    }, 5000);
+    return () => clearInterval(pollingRef.current);
+    // eslint-disable-next-line
+  }, [refreshFlag]);
 
-  const totalPages = Math.ceil(filtered.length / perPage);
-  const pagedForms = filtered.slice((page - 1) * perPage, page * perPage);
+  // Kaldır
+  function handleKaldir(_id) {
+    setForms(f => f.map(row => row._id === _id ? { ...row, kaldirildi: true } : row));
+    setFiltered(f => f.filter(row => row._id !== _id));
+    setRemovedForms(f => [
+      ...forms.filter(x => x._id === _id).map(x => ({ ...x, kaldirildi: true })),
+      ...removedForms,
+    ]);
+    // Backend'e "kaldırıldı" flag'ini güncelle (isteğe bağlı, burada localde)
+    fetch(`/api/kvkk/forms/${_id}/kaldir`, { method: "POST" });
+  }
 
+  // Sil (DB'den tamamen sil)
+  async function handleSil(_id) {
+    await fetch(`/api/kvkk/forms/${_id}`, { method: "DELETE" });
+    setForms(f => f.filter(row => row._id !== _id));
+    setFiltered(f => f.filter(row => row._id !== _id));
+    setRemovedForms(f => f.filter(row => row._id !== _id));
+  }
+
+  // Kaldırılanları göster/gizle
+  function handleShowRemoved() {
+    setShowRemoved(s => !s);
+    setPage(1);
+  }
+
+  // Manuel yenile
+  function handleRefresh() {
+    setRefreshFlag(f => !f);
+  }
+
+  // Excel Export
   function exportCSV() {
-    if (!filtered.length) return;
+    const arr = showRemoved ? removedForms : filtered;
+    if (!arr.length) return;
     const keys = [
       "Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Talep Türü", "Açıklama"
     ];
     const rows = [
       keys.join(";"),
-      ...filtered.map((f, i) =>
+      ...arr.map((f, i) =>
         [
           kayitNoUret(f, i),
           f.tarih
@@ -81,75 +146,111 @@ export default function AdminKvkk() {
     URL.revokeObjectURL(url);
   }
 
+  // Sayfalama
+  const dataArr = showRemoved ? removedForms : filtered;
+  const totalPages = Math.ceil(dataArr.length / perPage);
+  const pagedForms = dataArr.slice((page - 1) * perPage, page * perPage);
+
+  // Tablo başlıkları
+  const columns = [
+    "Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Talep Türü", "Açıklama", "İşlem"
+  ];
+
   return (
     <main className="max-w-6xl mx-auto px-2 py-8">
-      <h1 className="text-3xl font-bold text-[#bfa658] mb-6">KVKK Başvuruları</h1>
-      <div className="mb-3 flex flex-wrap items-center gap-3">
+      <h1 className="text-3xl font-bold text-[#bfa658] mb-8">KVKK Başvuruları</h1>
+
+      {/* Üst Butonlar */}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        {/* Kaç kayıt gösterileceği */}
         <select
           value={perPage}
           onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }}
-          className="border border-gray-500 rounded px-2 py-1 text-sm"
+          className="border border-[#bfa658] rounded px-2 py-1 text-sm bg-black text-[#bfa658] font-semibold focus:outline-none"
         >
-          {[5, 10, 25, 50, 100].map((v) => <option key={v}>{v}</option>)}
+          {[5, 10, 25, 50, 100].map((v) => <option key={v} value={v}>{v}</option>)}
         </select>
         <button onClick={exportCSV}
-          className="bg-[#bfa658] text-black px-3 py-2 rounded font-bold hover:opacity-80 text-sm">
+          className="bg-[#bfa658] text-black px-4 py-2 rounded font-bold hover:opacity-80 text-sm shadow">
           Excel (CSV) İndir
         </button>
-        <span className="ml-2 text-sm text-gray-400">{filtered.length} başvuru bulundu.</span>
+        <button
+          onClick={handleShowRemoved}
+          className="bg-[#444] border border-[#bfa658] text-[#ffeec2] font-semibold px-4 py-2 rounded hover:bg-[#bfa658] hover:text-black text-sm shadow"
+        >
+          {showRemoved ? "Aktifleri Göster" : "Kaldırılanları Göster"}
+        </button>
+        <button
+          onClick={handleRefresh}
+          className="bg-[#19160a] border border-[#bfa658] text-[#ffeec2] font-semibold px-4 py-2 rounded hover:bg-[#bfa658] hover:text-black text-sm shadow"
+        >
+          Şimdi Yenile
+        </button>
+        <span className="ml-2 text-sm text-gray-400">{dataArr.length} başvuru bulundu.</span>
       </div>
+
+      {/* Tablo */}
       <div className="overflow-x-auto bg-black/80 rounded-2xl border-2 border-[#bfa658]">
-        <table className="min-w-full text-sm">
+        <table className="min-w-full text-sm border-separate border-spacing-0">
           <thead>
             <tr>
-              <th className="p-2 border-b border-gray-600">Kayıt No</th>
-              <th className="p-2 border-b border-gray-600">Tarih</th>
-              <th className="p-2 border-b border-gray-600">Ad Soyad</th>
-              <th className="p-2 border-b border-gray-600">Telefon</th>
-              <th className="p-2 border-b border-gray-600">E-posta</th>
-              <th className="p-2 border-b border-gray-600">Talep Türü</th>
-              <th className="p-2 border-b border-gray-600">Açıklama</th>
-              <th className="p-2 border-b border-gray-600">İşlem</th>
+              {columns.map((col, i) => (
+                <th
+                  key={col}
+                  className="p-2 border-b-2 border-[#bfa658] bg-black/90 text-[#ffeec2] font-bold"
+                  style={{ borderRight: i !== columns.length - 1 ? '1px solid #bfa658' : undefined }}
+                >{col}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={8} className="text-center p-4 text-gray-400">Yükleniyor...</td>
+                <td colSpan={columns.length} className="text-center p-4 text-gray-400">Yükleniyor...</td>
               </tr>
             ) : pagedForms.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center p-4 text-gray-400">Hiç başvuru bulunamadı.</td>
+                <td colSpan={columns.length} className="text-center p-4 text-gray-400">Hiç başvuru bulunamadı.</td>
               </tr>
             ) : (
               pagedForms.map((form, i) => (
-                <tr key={form._id || i}>
-                  <td className="p-2 border-b border-gray-700">{kayitNoUret(form, i + (page-1)*perPage)}</td>
-                  <td className="p-2 border-b border-gray-700">
+                <tr key={form._id || i} className="hover:bg-[#231d10] transition">
+                  <td className="p-2 border-b border-[#bfa658] font-semibold"
+                    style={{ borderRight: '1px solid #bfa658' }}>
+                    {kayitNoUret(form, i + (page-1)*perPage)}
+                  </td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
                     {form.tarih
                       ? format(new Date(form.tarih), "dd.MM.yyyy HH:mm")
                       : form.createdAt
                       ? format(new Date(form.createdAt), "dd.MM.yyyy HH:mm")
                       : ""}
                   </td>
-                  <td className="p-2 border-b border-gray-700">{form.adsoyad}</td>
-                  <td className="p-2 border-b border-gray-700">{form.telefon}</td>
-                  <td className="p-2 border-b border-gray-700">{form.eposta}</td>
-                  <td className="p-2 border-b border-gray-700">{form.talep}</td>
-                  <td className="p-2 border-b border-gray-700">
-                    {kisaAciklama(form.aciklama)}
-                    {form.aciklama && form.aciklama.length > 20 && (
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.adsoyad}</td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.telefon}</td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.eposta}</td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.talep}</td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
+                    <span>
+                      {kisaAciklama(form.aciklama)}
                       <button
                         className="ml-2 underline text-[#FFD700] cursor-pointer text-xs"
-                        onClick={() => setModalAciklama(form.aciklama)}
+                        onClick={() => setModalForm(form)}
                         type="button"
-                      >
-                        Oku
-                      </button>
-                    )}
+                      >Oku</button>
+                    </span>
                   </td>
-                  <td className="p-2 border-b border-gray-700">
-                    {/* Silme, düzenleme vs. ekleyebilirsin */}
+                  <td className="p-2 border-b border-[#bfa658] text-center min-w-[120px]">
+                    {!form.kaldirildi && (
+                      <button
+                        onClick={() => handleKaldir(form._id)}
+                        className="bg-yellow-800 text-[#ffeec2] px-2 py-1 rounded mr-2 text-xs font-semibold border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
+                      >Kaldır</button>
+                    )}
+                    <button
+                      onClick={() => handleSil(form._id)}
+                      className="bg-red-700 text-white px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-red-400 hover:text-black transition"
+                    >Sil</button>
                   </td>
                 </tr>
               ))
@@ -157,37 +258,59 @@ export default function AdminKvkk() {
           </tbody>
         </table>
       </div>
+
+      {/* Sayfalama */}
       {totalPages > 1 && (
-        <div className="flex justify-center gap-1 mt-4">
+        <div className="flex justify-center gap-1 mt-5">
           {Array.from({ length: totalPages }, (_, i) => (
             <button
               key={i}
               onClick={() => setPage(i + 1)}
-              className={`px-3 py-1 rounded font-bold border ${page === i + 1 ? "bg-[#bfa658] text-black" : "bg-black text-[#bfa658]"}`}
+              className={`px-3 py-1 rounded font-bold border border-[#bfa658] mx-0.5 shadow-sm 
+                ${page === i + 1
+                  ? "bg-[#bfa658] text-black"
+                  : "bg-black text-[#bfa658] hover:bg-[#19160a] hover:text-white"}`}
             >
               {i + 1}
             </button>
           ))}
         </div>
       )}
-      {modalAciklama && (
+
+      {/* Oku Popup */}
+      {modalForm && (
         <div
           className="fixed left-0 top-0 w-full h-full bg-black/80 flex items-center justify-center z-50"
-          onClick={() => setModalAciklama(null)}
+          onClick={() => setModalForm(null)}
         >
           <div
-            className="bg-white text-black p-6 rounded-lg max-w-xl w-full"
-            onClick={(e) => e.stopPropagation()}
+            className="bg-white text-black p-7 rounded-2xl max-w-2xl w-full shadow-2xl relative"
+            onClick={e => e.stopPropagation()}
           >
-            <div className="mb-2 font-bold text-lg">Tüm Açıklama</div>
-            <div className="whitespace-pre-line">{modalAciklama}</div>
             <button
-              className="mt-4 px-4 py-2 bg-black text-white rounded-lg"
-              onClick={() => setModalAciklama(null)}
-              type="button"
-            >
-              Kapat
-            </button>
+              className="absolute top-3 right-4 text-lg bg-gray-200 px-2 rounded hover:bg-gray-400"
+              onClick={() => setModalForm(null)}
+            >✕</button>
+            <div className="mb-3 text-xl font-bold text-[#bfa658]">Başvuru Detayı</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-[16px]">
+              <div><b>Kayıt No:</b> {kayitNoUret(modalForm, 0)}</div>
+              <div><b>Tarih:</b> {modalForm.tarih ? format(new Date(modalForm.tarih), "dd.MM.yyyy HH:mm") : modalForm.createdAt ? format(new Date(modalForm.createdAt), "dd.MM.yyyy HH:mm") : ""}</div>
+              <div><b>Ad Soyad:</b> {modalForm.adsoyad}</div>
+              <div><b>Telefon:</b> {modalForm.telefon}</div>
+              <div><b>E-posta:</b> {modalForm.eposta}</div>
+              <div><b>Talep Türü:</b> {modalForm.talep}</div>
+              <div className="sm:col-span-2"><b>Açıklama:</b><br />
+                <span className="block p-2 rounded bg-gray-100 text-gray-800 mt-1 whitespace-pre-line min-h-[50px]">{modalForm.aciklama}</span>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                className="px-4 py-2 rounded-lg bg-black text-white border border-[#bfa658] hover:bg-[#bfa658] hover:text-black"
+                onClick={() => setModalForm(null)}
+              >
+                Kapat
+              </button>
+            </div>
           </div>
         </div>
       )}
