@@ -5,6 +5,12 @@ import { saveAs } from "file-saver";
 
 const PAGE_SIZES = [5, 10, 20, 100];
 
+// Yardımcı: Mesajı kısa göster
+function kisaMesaj(str) {
+  if (!str) return "";
+  return str.length > 15 ? str.slice(0, 15) + "..." : str;
+}
+
 export default function AdminIletisim() {
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,10 +22,10 @@ export default function AdminIletisim() {
   const [modalForm, setModalForm] = useState(null);
   const pollingRef = useRef();
 
-  // Her 10sn’de bir güncelle + “şimdi yenile” ile manuel tetikleme
+  // 180 sn'de bir güncelle
   useEffect(() => {
     fetchForms();
-    pollingRef.current = setInterval(() => fetchForms(), 10000);
+    pollingRef.current = setInterval(() => fetchForms(), 180000);
     return () => clearInterval(pollingRef.current);
     // eslint-disable-next-line
   }, [showRemoved, page, pageSize]);
@@ -53,7 +59,18 @@ export default function AdminIletisim() {
     setModalForm(null);
   };
 
-  // Excel Export (XLSX, Türkçe uyumlu)
+  // Sil
+  const handleSil = async (id) => {
+    await fetch("/api/iletisim/forms", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    fetchForms();
+    setModalForm(null);
+  };
+
+  // Excel Export (XLSX)
   const exportExcel = () => {
     const sheetData = [
       ["Kayıt No", "Tarih", "Ad", "Soyad", "Telefon", "E-posta", "Mesaj", "Neden", "Tercih", "KVKK"],
@@ -75,10 +92,15 @@ export default function AdminIletisim() {
   const pageCount = Math.ceil(total / pageSize);
   const goToPage = p => setPage(p);
 
+  // Tablodaki başlıklar
+  const columns = [
+    "Kayıt No", "Tarih", "Ad", "Soyad", "Telefon", "E-posta", "Mesaj", "Neden", "Tercih", "KVKK", "İşlem"
+  ];
+
   return (
     <main className="max-w-6xl mx-auto px-2 py-8">
-      <h1 className="text-3xl font-bold text-[#bfa658] mb-8 text-center">İletişimden Gelenler</h1>
-      <div className="flex flex-wrap items-center gap-3 mb-4">
+      <h1 className="text-3xl font-bold text-[#bfa658] mb-8 text-left">İletişimden Gelenler</h1>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <select
           value={pageSize}
           onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
@@ -105,11 +127,11 @@ export default function AdminIletisim() {
           <table className="min-w-full text-sm border-separate border-spacing-0">
             <thead>
               <tr>
-                {["Kayıt No", "Tarih", "Ad", "Soyad", "Telefon", "E-posta", "Mesaj", "Neden", "Tercih", "KVKK", "İşlem"].map((col, i, arr) => (
+                {columns.map((col, i, arr) => (
                   <th
                     key={col}
                     className="p-2 border-b-2 border-[#bfa658] bg-black/90 text-[#ffeec2] font-bold"
-                    style={{ borderRight: i !== arr.length - 1 ? '1px solid #bfa658' : undefined }}
+                    style={{ borderRight: i !== arr.length - 1 ? '1px solid #bfa658' : undefined, textAlign: "left" }}
                   >{col}</th>
                 ))}
               </tr>
@@ -123,28 +145,34 @@ export default function AdminIletisim() {
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.soyad}</td>
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.telefon}</td>
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.email}</td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
-                    <button
-                      className="bg-[#bfa658] text-black px-3 py-1 rounded font-bold text-xs mr-1 hover:opacity-80 shadow"
-                      onClick={() => setModalForm(form)}
-                      type="button"
-                    >Oku</button>
+                  <td className="p-2 border-b border-[#bfa658] font-mono" style={{ borderRight: '1px solid #bfa658' }}>
+                    {kisaMesaj(form.mesaj)}
                   </td>
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.neden}</td>
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.iletisimTercihi}</td>
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.kvkkOnay ? "✓" : "X"}</td>
-                  <td className="p-2 border-b border-[#bfa658] text-center min-w-[120px]">
+                  {/* İŞLEM sütunu: Oku, kaldır/geri al, sil */}
+                  <td className="p-2 border-b border-[#bfa658] text-right min-w-[160px] flex gap-2 justify-end items-center">
+                    <button
+                      className="bg-[#bfa658] text-black px-3 py-1 rounded font-bold text-xs hover:opacity-80 shadow"
+                      onClick={() => setModalForm(form)}
+                      type="button"
+                    >Oku</button>
                     {!form.kaldirildi ? (
                       <button
                         onClick={() => handleToggleRemove(form._id, true)}
-                        className="bg-yellow-800 text-[#ffeec2] px-2 py-1 rounded mr-2 text-xs font-semibold border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
+                        className="bg-yellow-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
                       >Kaldır</button>
                     ) : (
                       <button
                         onClick={() => handleToggleRemove(form._id, false)}
-                        className="bg-green-800 text-[#ffeec2] px-2 py-1 rounded mr-2 text-xs font-semibold border border-[#bfa658] hover:bg-green-400 hover:text-black transition"
+                        className="bg-green-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-green-400 hover:text-black transition"
                       >Geri Al</button>
                     )}
+                    <button
+                      onClick={() => handleSil(form._id)}
+                      className="bg-red-700 text-white px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-red-400 hover:text-black transition"
+                    >Sil</button>
                   </td>
                 </tr>
               ))}
@@ -214,6 +242,10 @@ export default function AdminIletisim() {
                   className="bg-green-800 text-[#ffeec2] px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-green-400 hover:text-black transition"
                 >Geri Al</button>
               )}
+              <button
+                onClick={() => handleSil(modalForm._id)}
+                className="bg-red-700 text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-red-400 hover:text-black transition"
+              >Sil</button>
               <button
                 className="bg-black text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
                 onClick={() => setModalForm(null)}
