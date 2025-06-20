@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function KvkkFormPage() {
   const [form, setForm] = useState({
@@ -10,6 +11,8 @@ export default function KvkkFormPage() {
     aciklama: ""
   });
   const [status, setStatus] = useState("idle");
+  const [kvkkOnay, setKvkkOnay] = useState(false);
+  const [kvkkError, setKvkkError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,6 +27,11 @@ export default function KvkkFormPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setKvkkError("");
+    if (!kvkkOnay) {
+      setKvkkError("KVKK metnini okuduğunuzu ve onayladığınızı belirtmelisiniz.");
+      return;
+    }
     setStatus("loading");
     try {
       const res = await fetch("/api/kvkk", {
@@ -35,6 +43,7 @@ export default function KvkkFormPage() {
       if (res.ok) {
         setStatus("success");
         setForm({ adsoyad: "", telefon: "", eposta: "", talep: "", aciklama: "" });
+        setKvkkOnay(false);
       } else {
         setStatus("error");
       }
@@ -55,19 +64,48 @@ export default function KvkkFormPage() {
       <form onSubmit={handleSubmit} className="space-y-6 text-white">
         <div>
           <label className="block mb-2 font-medium text-white">Adınız Soyadınız</label>
-          <input type="text" name="adsoyad" required onChange={handleChange} value={form.adsoyad} className="w-full p-3 rounded bg-gray-900 border border-[#bfa658] placeholder-gray-500 text-white" placeholder="Ad Soyad" />
+          <input
+            type="text"
+            name="adsoyad"
+            required
+            onChange={handleChange}
+            value={form.adsoyad}
+            className="w-full p-3 rounded bg-gray-900 border border-[#bfa658] placeholder-gray-500 text-white"
+            placeholder="Ad Soyad"
+          />
         </div>
         <div>
           <label className="block mb-2 font-medium text-white">Telefon Numaranız</label>
-          <input type="tel" name="telefon" onChange={handleChange} value={form.telefon} className="w-full p-3 rounded bg-gray-900 border border-[#bfa658] placeholder-gray-500 text-white" placeholder="05XXXXXXXXX - Cep numarası giriniz" />
+          <input
+            type="tel"
+            name="telefon"
+            onChange={handleChange}
+            value={form.telefon}
+            className="w-full p-3 rounded bg-gray-900 border border-[#bfa658] placeholder-gray-500 text-white"
+            placeholder="05XXXXXXXXX - Cep numarası giriniz"
+          />
         </div>
         <div>
           <label className="block mb-2 font-medium text-white">E-posta Adresiniz</label>
-          <input type="email" name="eposta" required onChange={handleChange} value={form.eposta} className="w-full p-3 rounded bg-gray-900 border border-[#bfa658] placeholder-gray-500 text-white" placeholder="ornek@mail.com" />
+          <input
+            type="email"
+            name="eposta"
+            required
+            onChange={handleChange}
+            value={form.eposta}
+            className="w-full p-3 rounded bg-gray-900 border border-[#bfa658] placeholder-gray-500 text-white"
+            placeholder="ornek@mail.com"
+          />
         </div>
         <div>
           <label className="block mb-2 font-medium text-white">Talep Türünüz</label>
-          <select name="talep" required onChange={handleChange} value={form.talep} className="w-full p-3 rounded bg-gray-900 border border-[#bfa658] text-white">
+          <select
+            name="talep"
+            required
+            onChange={handleChange}
+            value={form.talep}
+            className="w-full p-3 rounded bg-gray-900 border border-[#bfa658] text-white"
+          >
             <option value="">Bir seçim yapınız</option>
             <option value="veri_ogrenme">Kişisel verilerim işleniyor mu?</option>
             <option value="veri_duzeltme">Eksik veya yanlış verilerin düzeltilmesi</option>
@@ -88,7 +126,38 @@ export default function KvkkFormPage() {
             placeholder="Lütfen detaylı açıklama yazınız."
           ></textarea>
         </div>
-        <button type="submit" className="bg-[#6e5a1e] hover:bg-[#8c7327] text-white font-bold py-3 px-6 rounded-xl text-lg shadow">
+
+        {/* KVKK onay kutusu */}
+        <div className="flex items-start mt-4">
+          <input
+            type="checkbox"
+            id="kvkkOnay"
+            checked={kvkkOnay}
+            onChange={(e) => setKvkkOnay(e.target.checked)}
+            className="w-5 h-5 accent-[#bfa658] rounded border border-[#bfa658] mt-1"
+            required
+          />
+          <label htmlFor="kvkkOnay" className="ml-3 text-base text-[#e4c275]">
+            <span>
+              <Link
+                href="/kvkk"
+                target="_blank"
+                className="underline hover:text-[#bfa658] font-semibold"
+              >
+                KVKK Aydınlatma Metni’ni
+              </Link>{" "}
+              okudum ve onaylıyorum.
+            </span>
+          </label>
+        </div>
+        {kvkkError && (
+          <div className="text-red-400 text-sm mt-1">{kvkkError}</div>
+        )}
+
+        <button
+          type="submit"
+          className="bg-[#6e5a1e] hover:bg-[#8c7327] text-white font-bold py-3 px-6 rounded-xl text-lg shadow mt-2"
+        >
           Başvuruyu Gönder
         </button>
       </form>
