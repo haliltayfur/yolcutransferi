@@ -73,7 +73,7 @@ export default function Kvkk() {
 
         {/* Form ve başvuru süreci açıklaması */}
         <div className="mt-8 text-base text-[#ffeec2] text-center font-medium">
-          KVKK kapsamındaki haklarınızı kullanmak veya başvuruda bulunmak için aşağıdaki formu doldurabilirsiniz. <br />
+          KVKK kapsamındaki haklarınızı kullanmak veya başvuruda bulunmak için <b>aşağıdaki butonu kullanarak başvuru formuna ulaşabilirsiniz.</b><br />
           Tüm başvurularınıza <b>en geç 30 gün içinde</b> yanıt verilir.
         </div>
 
