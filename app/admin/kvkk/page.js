@@ -1,64 +1,40 @@
 "use client";
 import { useEffect, useState } from "react";
 
-// Modal Bileşeni
-function Modal({ open, onClose, form }) {
-  if (!open || !form) return null;
-  return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-40">
-      <div className="bg-[#191919] rounded-2xl shadow-2xl p-7 max-w-lg w-full border-2 border-[#bfa658] relative">
-        <h2 className="text-2xl font-bold mb-5 text-[#bfa658]">Başvuru Detayları</h2>
-        <div className="space-y-3 text-[1rem]">
-          <div><span className="font-bold text-[#bfa658]">Kayıt No: </span> {form.kayitNo}</div>
-          <div><span className="font-bold text-[#bfa658]">Ad Soyad: </span> {form.adsoyad}</div>
-          <div><span className="font-bold text-[#bfa658]">Telefon: </span> {form.telefon}</div>
-          <div><span className="font-bold text-[#bfa658]">E-posta: </span> {form.eposta}</div>
-          <div><span className="font-bold text-[#bfa658]">Talep Türü: </span> {form.talep}</div>
-          <div>
-            <span className="font-bold text-[#bfa658]">Açıklama: </span>
-            <div className="whitespace-pre-line bg-black/40 rounded p-2 mt-1 text-gray-200">{form.aciklama}</div>
-          </div>
-          <div><span className="font-bold text-[#bfa658]">Tarih: </span> {form.tarih}</div>
-        </div>
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-5 text-[#bfa658] hover:text-white text-2xl font-bold"
-          title="Kapat"
-        >×</button>
-      </div>
-    </div>
-  );
-}
+// Modal Bileşeni aynı kalabilir...
 
 export default function AdminKvkk() {
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
 
-  // Kayıt No otomatik üret (backendde yoksa)
   function formatKayitNo(index) {
     return `kvkkgunayyil_${(index + 1).toString().padStart(4, "0")}`;
   }
 
-  // KVKK başvurularını getir
   const fetchForms = async () => {
     setLoading(true);
-    const res = await fetch("/api/kvkk/forms");
-    const data = await res.json();
-    setForms(data);
+    try {
+      const res = await fetch("/api/kvkk/forms");
+      const data = await res.json();
+      setForms(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setForms([]);
+    }
     setLoading(false);
     localStorage.setItem("kvkkLastRead", new Date().toISOString());
   };
 
-  // 15 sn'de bir yeni kayıtları kontrol et (sayfa yenilemeden)
   useEffect(() => {
     fetchForms();
     const intv = setInterval(async () => {
-      const res = await fetch("/api/kvkk/forms");
-      const data = await res.json();
-      if (data.length > forms.length) {
-        setForms(data);
-      }
+      try {
+        const res = await fetch("/api/kvkk/forms");
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > forms.length) {
+          setForms(data);
+        }
+      } catch {}
     }, 15000);
     return () => clearInterval(intv);
     // eslint-disable-next-line
@@ -85,7 +61,7 @@ export default function AdminKvkk() {
               </tr>
             </thead>
             <tbody>
-              {forms.map((form, i) => (
+              {Array.isArray(forms) && forms.map((form, i) => (
                 <tr key={form._id || i} className="border-b border-[#bfa658]/10 hover:bg-[#191919] text-gray-300">
                   <td className="px-3 py-2">{formatKayitNo(i)}</td>
                   <td className="px-3 py-2">{form.tarih || "-"}</td>
@@ -118,8 +94,6 @@ export default function AdminKvkk() {
           </table>
         </div>
       )}
-
-      {/* Detay Modalı */}
       <Modal open={!!selected} onClose={() => setSelected(null)} form={selected} />
     </main>
   );
