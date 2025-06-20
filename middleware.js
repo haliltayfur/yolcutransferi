@@ -1,37 +1,25 @@
-// /middleware.js
+// middleware.js (proje kökünde)
 import { NextResponse } from "next/server";
 
-export function middleware(req) {
-  // Sadece /api/kvkk/forms ve /api/iletisim/forms için koruma uygula:
-  const url = req.nextUrl.pathname;
+// Hangi path'leri koruyacak?
+export const config = {
+  matcher: ["/api/:path*"],
+};
 
-  // Korunacak API endpointleri
-  const protectedAPIs = [
-    "/api/kvkk/forms",
-    "/api/iletisim/forms"
-    // Buraya başka API’leri de ekleyebilirsin!
-  ];
+export function middleware(request) {
+  // Burada gerçek admin login/session kontrolünü eklemen gerek!
+  // Örnek: Admin ise devam etsin, değilse 401 dön.
+  // Örneğin: Bir cookie (örn: "admin_auth") kontrolü yapalım:
 
-  if (protectedAPIs.some(path => url.startsWith(path))) {
-    // Admin session kontrolü (örnek: "adminpanel=1" cookie'si)
-    const cookie = req.cookies.get("adminpanel")?.value;
-    if (cookie !== "1") {
-      return NextResponse.json(
-        { error: "Yetkisiz erişim (admin girişi gerekli)" },
-        { status: 403 }
-      );
-    }
+  const adminCookie = request.cookies.get("admin_auth");
+  if (!adminCookie || adminCookie.value !== "true") {
+    // İstersen özel bir JSON response da verebilirsin:
+    return new NextResponse(
+      JSON.stringify({ error: "Yetkisiz erişim" }),
+      { status: 401, headers: { "content-type": "application/json" } }
+    );
   }
 
-  // Diğer isteklere izin ver
+  // Admin ise, istek devam etsin:
   return NextResponse.next();
 }
-
-// Hangi path’lerde çalışsın:
-export const config = {
-  matcher: [
-    "/api/kvkk/forms",
-    "/api/iletisim/forms",
-    // Diğer API path’lerini de buraya ekle!
-  ]
-};
