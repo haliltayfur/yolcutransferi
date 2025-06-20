@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-// Modal bileşeni
+// Modal Bileşeni
 function Modal({ open, onClose, form }) {
   if (!open || !form) return null;
   return (
@@ -35,12 +35,12 @@ export default function AdminKvkk() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
 
-  // Kayıt No sıralı üretme (backendde yoksa)
+  // Kayıt No otomatik üret (backendde yoksa)
   function formatKayitNo(index) {
     return `kvkkgunayyil_${(index + 1).toString().padStart(4, "0")}`;
   }
 
-  // Yeni verileri getir
+  // KVKK başvurularını getir
   const fetchForms = async () => {
     setLoading(true);
     const res = await fetch("/api/kvkk/forms");
@@ -50,7 +50,7 @@ export default function AdminKvkk() {
     localStorage.setItem("kvkkLastRead", new Date().toISOString());
   };
 
-  // 15 sn'de bir sadece yeni kayıt varsa ekle
+  // 15 sn'de bir yeni kayıtları kontrol et (sayfa yenilemeden)
   useEffect(() => {
     fetchForms();
     const intv = setInterval(async () => {
@@ -119,7 +119,7 @@ export default function AdminKvkk() {
         </div>
       )}
 
-      {/* Modal gösterimi */}
+      {/* Detay Modalı */}
       <Modal open={!!selected} onClose={() => setSelected(null)} form={selected} />
     </main>
   );
