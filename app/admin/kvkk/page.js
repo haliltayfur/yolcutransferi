@@ -11,8 +11,10 @@ function kisaAciklama(str) {
 // Yardımcı: Kayıt no üretilmesi
 function kayitNoUret(form, i) {
   if (form.kayitNo) return form.kayitNo;
-  if (form.tarih) {
-    const t = new Date(form.tarih);
+  // Hem tarih, hem createdAt olabiliyor, ikisini de kontrol et!
+  const tarihStr = form.tarih || form.createdAt;
+  if (tarihStr) {
+    const t = new Date(tarihStr);
     const yy = t.getFullYear();
     const mm = String(t.getMonth() + 1).padStart(2, "0");
     const dd = String(t.getDate()).padStart(2, "0");
@@ -35,8 +37,10 @@ export default function AdminKvkk() {
       try {
         const res = await fetch("/api/kvkk/forms");
         const data = await res.json();
-        setForms(Array.isArray(data) ? data : []);
-        setFiltered(Array.isArray(data) ? data : []);
+        // DİKKAT: Sadece items dizisini alıyoruz!
+        const arr = Array.isArray(data.items) ? data.items : [];
+        setForms(arr);
+        setFiltered(arr);
       } catch (e) {
         setForms([]);
         setFiltered([]);
@@ -61,7 +65,12 @@ export default function AdminKvkk() {
       ...filtered.map((f, i) =>
         [
           kayitNoUret(f, i),
-          f.tarih ? format(new Date(f.tarih), "dd.MM.yyyy HH:mm") : "",
+          // tarih veya createdAt
+          f.tarih
+            ? format(new Date(f.tarih), "dd.MM.yyyy HH:mm")
+            : f.createdAt
+            ? format(new Date(f.createdAt), "dd.MM.yyyy HH:mm")
+            : "",
           f.adsoyad || "",
           f.telefon || "",
           f.eposta || "",
@@ -125,7 +134,13 @@ export default function AdminKvkk() {
               pagedForms.map((form, i) => (
                 <tr key={form._id || i}>
                   <td className="p-2 border-b border-gray-700">{kayitNoUret(form, i + (page-1)*perPage)}</td>
-                  <td className="p-2 border-b border-gray-700">{form.tarih ? format(new Date(form.tarih), "dd.MM.yyyy HH:mm") : ""}</td>
+                  <td className="p-2 border-b border-gray-700">
+                    {form.tarih
+                      ? format(new Date(form.tarih), "dd.MM.yyyy HH:mm")
+                      : form.createdAt
+                      ? format(new Date(form.createdAt), "dd.MM.yyyy HH:mm")
+                      : ""}
+                  </td>
                   <td className="p-2 border-b border-gray-700">{form.adsoyad}</td>
                   <td className="p-2 border-b border-gray-700">{form.telefon}</td>
                   <td className="p-2 border-b border-gray-700">{form.eposta}</td>
