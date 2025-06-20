@@ -57,16 +57,18 @@ export default function Kvkk() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8 border-t border-[#a38c40] pt-8">
+        {/* Butondan hemen önce bilgi cümlesi */}
+        <div className="mt-8 text-base text-[#ffeec2] text-center font-medium">
+          KVKK kapsamındaki haklarınızı kullanmak veya başvuruda bulunmak için aşağıdaki formu doldurabilirsiniz.
+        </div>
+
+        <div className="flex justify-center mt-5 border-t border-[#a38c40] pt-8">
           <Link
             href="/kvkk/form"
             className="bg-gradient-to-tr from-[#cbb26a] to-[#bfa658] text-black font-bold text-lg px-7 py-3 rounded-xl shadow-lg transition hover:scale-105 hover:from-[#e6d199] hover:to-[#c4ad5f] border border-[#fff6ce]"
           >
             Başvuru Formu Doldur
           </Link>
-          <span className="text-sm text-[#c7b585]">
-            Detaylı bilgi için: <b>info@yolcutransferi.com</b>
-          </span>
         </div>
       </section>
     </main>
