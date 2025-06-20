@@ -1,97 +1,62 @@
 "use client";
-import { useState } from "react";
+import Link from "next/link";
 
-export default function KvkkFormu() {
-  const [form, setForm] = useState({
-    adsoyad: "",
-    telefon: "",
-    eposta: "",
-    talep: "",
-    aciklama: "",
-    kvkkOnay: false,
-  });
-  const [errors, setErrors] = useState({});
-  const [msg, setMsg] = useState("");
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
-    setErrors((e) => ({ ...e, [name]: undefined }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    let newErrors = {};
-    if (!form.adsoyad) newErrors.adsoyad = "Ad Soyad zorunlu";
-    if (!form.telefon) newErrors.telefon = "Telefon zorunlu";
-    if (!form.eposta) newErrors.eposta = "E-posta zorunlu";
-    if (!form.talep) newErrors.talep = "Talep Türü zorunlu";
-    if (!form.aciklama) newErrors.aciklama = "Açıklama zorunlu";
-    if (!form.kvkkOnay) newErrors.kvkkOnay = "KVKK onayı gerekli";
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
-
-    try {
-      await fetch("/api/kvkk/forms", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      setMsg("Başvurunuz alınmıştır. Teşekkür ederiz.");
-      setForm({
-        adsoyad: "",
-        telefon: "",
-        eposta: "",
-        talep: "",
-        aciklama: "",
-        kvkkOnay: false,
-      });
-    } catch {
-      setMsg("Başvuru kaydedilemedi. Lütfen tekrar deneyiniz.");
-    }
-  };
-
+export default function Kvkk() {
   return (
-<main className="max-w-2xl mx-auto px-4 py-8 mt-12">
-      <h1 className="text-2xl font-bold text-[#bfa658] mb-4">KVKK Başvuru Formu</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-black/80 rounded-2xl p-6 border-2 border-[#bfa658]">
-        <input name="adsoyad" value={form.adsoyad} onChange={handleChange} placeholder="Ad Soyad" className="p-3 rounded" />
-        {errors.adsoyad && <span className="text-red-400 text-xs">{errors.adsoyad}</span>}
+    <main className="max-w-3xl mx-auto px-4 py-12">
+      {/* Başlık */}
+      <h1 className="text-3xl md:text-4xl font-bold text-center text-[#bfa658] mb-8 tracking-tight">
+        KVKK Politikası ve Aydınlatma Metni
+      </h1>
 
-        <input name="telefon" value={form.telefon} onChange={handleChange} placeholder="Telefon" className="p-3 rounded" />
-        {errors.telefon && <span className="text-red-400 text-xs">{errors.telefon}</span>}
+      {/* Metin Kutusu */}
+      <div className="border-2 border-[#bfa658] rounded-2xl bg-black/80 px-4 md:px-8 py-8 text-white text-lg leading-relaxed shadow">
+        <p>
+          <b>YolcuTransferi.com</b> olarak kişisel verilerinizin korunmasına büyük önem veriyoruz. 
+          Kişisel verileriniz, 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) ve ilgili mevzuat kapsamında, aşağıda belirtilen esaslara uygun olarak işlenmektedir.
+        </p>
 
-        <input name="eposta" value={form.eposta} onChange={handleChange} placeholder="E-posta" className="p-3 rounded" />
-        {errors.eposta && <span className="text-red-400 text-xs">{errors.eposta}</span>}
+        <h2 className="text-2xl font-semibold text-[#bfa658] mt-6 mb-2">1. Veri Sorumlusu</h2>
+        <p>
+          YolcuTransferi.com olarak, tarafımıza iletilen veya sistemlerimiz aracılığıyla toplanan kişisel verilerin korunmasından sorumluyuz.
+        </p>
 
-        <select name="talep" value={form.talep} onChange={handleChange} className="p-3 rounded">
-          <option value="">Talep Türü Seçin</option>
-          <option value="veri_duzeltme">Veri Düzeltme</option>
-          <option value="veri_silme">Veri Silme</option>
-          <option value="veri_ogr_enme">Veri Öğrenme</option>
-          <option value="tazminat">Tazminat</option>
-        </select>
-        {errors.talep && <span className="text-red-400 text-xs">{errors.talep}</span>}
+        <h2 className="text-2xl font-semibold text-[#bfa658] mt-6 mb-2">2. Kişisel Verilerin İşlenme Amaçları</h2>
+        <p>
+          Kişisel verileriniz; rezervasyon işlemleri, hizmet taleplerinizin yerine getirilmesi, müşteri ilişkileri yönetimi, yasal yükümlülüklerimizin yerine getirilmesi, pazarlama ve analiz faaliyetleri kapsamında işlenmektedir.
+        </p>
 
-        <textarea name="aciklama" value={form.aciklama} onChange={handleChange} placeholder="Açıklama" className="p-3 rounded" />
-        {errors.aciklama && <span className="text-red-400 text-xs">{errors.aciklama}</span>}
+        <h2 className="text-2xl font-semibold text-[#bfa658] mt-6 mb-2">3. Kişisel Verilerin Aktarılması</h2>
+        <p>
+          Kişisel verileriniz, yasal yükümlülüklerimizin gerektirdiği veya hizmet gereği anlaşmalı olduğumuz üçüncü kişilerle, yetkili kamu kurum ve kuruluşlarıyla paylaşılabilir.
+        </p>
 
-        <div className="flex items-center gap-2">
-          <input type="checkbox" name="kvkkOnay" checked={form.kvkkOnay} onChange={handleChange} />
-          <span className="text-xs text-gray-200">
-            <a href="/gizlilik" target="_blank" rel="noopener noreferrer" className="underline text-[#FFD700]">
-              KVKK & Gizlilik Sözleşmesi'ni
-            </a>{" "}
-            okudum, kabul ediyorum.
-          </span>
-        </div>
-        {errors.kvkkOnay && <span className="text-red-400 text-xs">{errors.kvkkOnay}</span>}
+        <h2 className="text-2xl font-semibold text-[#bfa658] mt-6 mb-2">4. Kişisel Verilerinizin Toplanma Yöntemi ve Hukuki Sebepler</h2>
+        <p>
+          Kişisel verileriniz; web sitemiz, mobil uygulamalar, çağrı merkezi, e-posta ve benzeri kanallar aracılığıyla otomatik veya otomatik olmayan yollarla toplanabilir.
+          Hukuki sebepler, sözleşmenin kurulması ve ifası, açık rıza, yasal yükümlülüklerin yerine getirilmesi ve meşru menfaatlerimizdir.
+        </p>
 
-        <button className="py-3 rounded bg-[#bfa658] font-bold text-black" type="submit">
-          Gönder
-        </button>
-        {msg && <div className="mt-2 text-green-500 text-center">{msg}</div>}
-      </form>
+        <h2 className="text-2xl font-semibold text-[#bfa658] mt-6 mb-2">5. KVKK Kapsamındaki Haklarınız</h2>
+        <ul className="list-disc pl-6 mb-4">
+          <li>Kişisel verinizin işlenip işlenmediğini öğrenme,</li>
+          <li>İşlenmişse buna ilişkin bilgi talep etme,</li>
+          <li>Verilerin işlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme,</li>
+          <li>Yurt içinde veya yurt dışında verilerin aktarıldığı üçüncü kişileri bilme,</li>
+          <li>Eksik veya yanlış işlenmişse düzeltilmesini isteme,</li>
+          <li>Mevzuatta öngörülen şartlar çerçevesinde silinmesini/yok edilmesini isteme,</li>
+          <li>Aktarılan üçüncü kişilere yapılan işlemlerin bildirilmesini isteme,</li>
+          <li>İşlemenin hukuka aykırı olması nedeniyle zarara uğrarsanız tazminat talep etme.</li>
+        </ul>
+
+        <h2 className="text-2xl font-semibold text-[#bfa658] mt-6 mb-2">6. Başvuru ve İletişim</h2>
+        <p>
+          KVKK kapsamındaki haklarınızı kullanmak veya detaylı bilgi almak için <Link href="/iletisim" className="underline text-[#FFD700]">İletişim</Link> sayfamız üzerinden bizimle irtibata geçebilirsiniz.
+        </p>
+        <p className="mt-6 text-sm text-[#bfa658]">
+          Güncel tarih: {new Date().toLocaleDateString("tr-TR")}
+        </p>
+      </div>
     </main>
   );
 }
