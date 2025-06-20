@@ -52,7 +52,7 @@ export default function KvkkFormu() {
   };
 
   return (
-    <main className="max-w-2xl mx-auto px-4 py-8">
+<main className="max-w-2xl mx-auto px-4 py-8 mt-12">
       <h1 className="text-2xl font-bold text-[#bfa658] mb-4">KVKK Başvuru Formu</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-black/80 rounded-2xl p-6 border-2 border-[#bfa658]">
         <input name="adsoyad" value={form.adsoyad} onChange={handleChange} placeholder="Ad Soyad" className="p-3 rounded" />
