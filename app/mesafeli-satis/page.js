@@ -1,13 +1,14 @@
 "use client";
 import { useState } from "react";
 
-const POLICY_LINKS = [
-  { id: "kvkk", label: "KVKK Politikası", url: "/kvkk" },
-  { id: "gizlilik", label: "Gizlilik Politikası", url: "/gizlilik-politikasi" },
-  { id: "cerez", label: "Çerez Politikası", url: "/cerez" },
-  { id: "iade", label: "İptal & İade", url: "/iade" },
-  { id: "kullanim", label: "Kullanım Şartları", url: "/kullanim-sartlari" },
-];
+// Popup açmak için link listesi ve başlıklar
+const POLICY_LINKS = {
+  kvkk: { label: "KVKK Politikası", url: "/kvkk" },
+  gizlilik: { label: "Gizlilik Politikası", url: "/gizlilik-politikasi" },
+  cerez: { label: "Çerez Politikası", url: "/cerez" },
+  iade: { label: "İptal & İade", url: "/iade" },
+  kullanim: { label: "Kullanım Şartları", url: "/kullanim-sartlari" },
+};
 
 export default function MesafeliSatisSozlesmesi() {
   const [showPopup, setShowPopup] = useState(false);
@@ -38,6 +39,17 @@ export default function MesafeliSatisSozlesmesi() {
       );
     }
   }
+
+  // Policy Link buton komponenti
+  const PolicyBtn = ({ name }) => (
+    <button
+      type="button"
+      className="policy-link inline"
+      onClick={() => handlePopup(POLICY_LINKS[name])}
+    >
+      {POLICY_LINKS[name].label}
+    </button>
+  );
 
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
@@ -72,8 +84,12 @@ export default function MesafeliSatisSozlesmesi() {
           <section>
             <h2 className="text-[#bfa658] font-bold text-xl mb-1">3. Rezervasyon, Ödeme ve Onay</h2>
             <ul className="list-disc pl-6 space-y-1 text-[#ffeec2]">
-              <li>Müşteri rezervasyonunu platform üzerinden online olarak tamamlar, ödeme anında alınır.</li>
-              <li>Hizmet bedeli, ilgili Hizmet Sağlayıcı ile yapılan anlaşmaya göre Platform tarafından tahsil edilir, gerekli komisyon ve vergiler düşüldükten sonra hizmet sağlayıcıya aktarılır. (Müşterinin ödediği toplam bedel ile hizmet sağlayıcıya aktarılan bedel farklı olabilir; bu konuda Platform'un ticari sır ve fiyatlandırma serbestisi saklıdır.)</li>
+              <li>
+                Müşteri rezervasyonunu platform üzerinden online olarak tamamlar, ödeme anında alınır.
+              </li>
+              <li>
+                Hizmet bedeli, ilgili Hizmet Sağlayıcı ile yapılan anlaşmaya göre Platform tarafından tahsil edilir, gerekli komisyon ve vergiler düşüldükten sonra hizmet sağlayıcıya aktarılır. (Müşterinin ödediği toplam bedel ile hizmet sağlayıcıya aktarılan bedel farklı olabilir; bu konuda Platform'un ticari sır ve fiyatlandırma serbestisi saklıdır.)
+              </li>
             </ul>
           </section>
 
@@ -81,10 +97,18 @@ export default function MesafeliSatisSozlesmesi() {
           <section>
             <h2 className="text-[#bfa658] font-bold text-xl mb-1">4. İptal, İade ve Değişiklik Şartları</h2>
             <ul className="list-disc pl-6 space-y-1 text-[#ffeec2]">
-              <li><b>Bireysel Transferlerde:</b> Müşteri, transfer saatinden en az <b>8 saat</b> önce iptal talebini <a href="mailto:info@yolcutransferi.com" className="policy-link">info@yolcutransferi.com</a> adresine bildirirse, ödemesi işlem/komisyon masrafları kesilerek iade edilir. 8 saatten kısa sürede yapılan iptallerde iade yapılmaz.</li>
-              <li><b>Kurumsal transfer, minibüs, otobüs, dron ve tekne/organizasyonlarda:</b> İptal hakkı transfer saatinden <b>en az 5 gün</b> önce bildirilirse geçerlidir. Aksi halde iade yapılmaz. Tekne ve dron rezervasyonlarında iptal süresi <b>7 iş günü</b>dür.</li>
-              <li><b>Değişiklik:</b> Transfer saatinden <b>en az 24 saat</b> önce yapılan değişiklik talepleri, Hizmet Sağlayıcı'nın uygunluk durumuna göre değerlendirilir. 1 saatten fazla değişiklikler için yeniden ücretlendirme yapılır.</li>
-              <li><b>Paylaşımlı/promosyonlu transferler:</b> ve özel kampanyalı transferlerde iptal ve iade yapılamaz. Promosyon ve indirimler birleştirilemez.</li>
+              <li>
+                <b>Bireysel Transferlerde:</b> Müşteri, transfer saatinden en az <b>8 saat</b> önce iptal talebini <a href="mailto:info@yolcutransferi.com" className="policy-link">info@yolcutransferi.com</a> adresine bildirirse, ödemesi işlem/komisyon masrafları kesilerek iade edilir. 8 saatten kısa sürede yapılan iptallerde iade yapılmaz. Ayrıntılı bilgi için <PolicyBtn name="iade" /> bölümünü inceleyiniz.
+              </li>
+              <li>
+                <b>Kurumsal transfer, minibüs, otobüs, dron ve tekne/organizasyonlarda:</b> İptal hakkı transfer saatinden <b>en az 5 gün</b> önce bildirilirse geçerlidir. Aksi halde iade yapılmaz. Tekne ve dron rezervasyonlarında iptal süresi <b>7 iş günü</b>dür.
+              </li>
+              <li>
+                <b>Değişiklik:</b> Transfer saatinden <b>en az 24 saat</b> önce yapılan değişiklik talepleri, Hizmet Sağlayıcı'nın uygunluk durumuna göre değerlendirilir. 1 saatten fazla değişiklikler için yeniden ücretlendirme yapılır.
+              </li>
+              <li>
+                <b>Paylaşımlı/promosyonlu transferler:</b> ve özel kampanyalı transferlerde iptal ve iade yapılamaz. Promosyon ve indirimler birleştirilemez.
+              </li>
             </ul>
           </section>
 
@@ -99,51 +123,29 @@ export default function MesafeliSatisSozlesmesi() {
             </p>
           </section>
 
+          {/* Politika - KVKK, Gizlilik, Çerez */}
+          <section>
+            <h2 className="text-[#bfa658] font-bold text-xl mb-1">6. KVKK, Gizlilik ve Çerez Politikası</h2>
+            <p>
+              YolcuTransferi.com, tüm müşteri ve kullanıcı verilerini <PolicyBtn name="kvkk" />, <PolicyBtn name="gizlilik" /> ve <PolicyBtn name="cerez" /> hükümlerine uygun olarak işler, korur ve saklar. Çerezler ve kişisel veriler ile ilgili ayrıntılı bilgi almak için ilgili politika metinlerine başvurabilirsiniz.
+            </p>
+          </section>
+
+          {/* Kullanım Şartları */}
+          <section>
+            <h2 className="text-[#bfa658] font-bold text-xl mb-1">7. Diğer Koşullar ve Kullanım</h2>
+            <p>
+              Platformu kullanan her kullanıcı <PolicyBtn name="kullanim" /> metninde yer alan tüm kullanım şartlarını peşinen kabul etmiş sayılır.
+            </p>
+          </section>
+
           {/* Yetkili Mahkeme */}
           <section>
-            <h2 className="text-[#bfa658] font-bold text-xl mb-1">6. Yetkili Mahkeme</h2>
+            <h2 className="text-[#bfa658] font-bold text-xl mb-1">8. Yetkili Mahkeme</h2>
             <p>
               Tüm uyuşmazlıklarda İstanbul Anadolu Mahkemeleri ve İcra Daireleri yetkilidir.
             </p>
           </section>
-        </div>
-
-        {/* Politika linkleri - popup'lı */}
-        <div className="flex flex-wrap gap-x-5 gap-y-2 justify-center mt-12 text-[1.06rem] font-semibold">
-          {POLICY_LINKS.map((link, idx) => (
-            <span key={link.id} className="flex items-center">
-              <button
-                type="button"
-                className="policy-link"
-                onClick={() => handlePopup(link)}
-                style={{
-                  color: "#ffeec2",
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  margin: 0,
-                  font: "inherit",
-                  cursor: "pointer"
-                }}
-              >
-                {link.label}
-              </button>
-              {idx < POLICY_LINKS.length - 1 && (
-                <span className="mx-2 text-[#bfa658]">|</span>
-              )}
-            </span>
-          ))}
-        </div>
-
-        {/* Slogan */}
-        <div
-          className="text-center text-xl font-extrabold mt-10 mb-1 tracking-tight"
-          style={{
-            color: "#ffd700",
-            letterSpacing: ".01em",
-            textShadow: "0 2px 12px #0007"
-          }}>
-          YolcuTransferi.com – Sizi, hizmeti sunanı ve tarafları koruyan adil sözleşme.
         </div>
 
         {/* Popup */}
