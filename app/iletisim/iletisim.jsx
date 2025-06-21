@@ -1,19 +1,134 @@
 "use client";
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// (Tüm yardımcı fonksiyonlar ve validasyonlar değişmedi, senin verdiğin gibi kullanılıyor.)
+// --- Yardımcı fonksiyonlar ---
+function isRealEmail(val) {
+  if (!val) return false;
+  const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
+  return regex.test(val);
+}
+function isRealName(val) {
+  if (!val || val.length < 3) return false;
+  if (!/^[a-zA-ZığüşöçİĞÜŞÖÇ ]+$/.test(val)) return false;
+  let v = val.trim().toLowerCase();
+  if (["asd", "qwe", "poi", "test", "xxx", "zzz", "klm", "asdf", "deneme"].includes(v)) return false;
+  if (/^([a-zA-ZğüşöçİĞÜŞÖÇ])\1+$/.test(v)) return false;
+  return true;
+}
+function isRealPhone(val) {
+  if (!val) return false;
+  return /^05\d{9}$/.test(val);
+}
+function isRealMsg(val) {
+  if (!val || val.length < 15) return false;
+  let wordCount = val.trim().split(/\s+/).length;
+  if (wordCount < 3) return false;
+  if (/([a-z])\1{3,}/.test(val.toLowerCase())) return false;
+  return true;
+}
+function formatDuration(ms) {
+  if (!ms || ms < 1000) return "1 sn";
+  const totalSec = Math.ceil(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return `${min > 0 ? min + "dk " : ""}${sec}sn`;
+}
+// Basit rate limit (demo amaçlı - prod için backendde olmalı)
+function useRateLimit() {
+  const [blocked, setBlocked] = useState(false);
+  const [remaining, setRemaining] = useState(0);
+  useEffect(() => {
+    let id = setInterval(() => {
+      let last = Number(localStorage.getItem("iletisim_last") || "0");
+      let now = Date.now();
+      if (now - last < 5000) {
+        setBlocked(true);
+        setRemaining(5000 - (now - last));
+      } else {
+        setBlocked(false);
+        setRemaining(0);
+      }
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+  function kaydet() {
+    localStorage.setItem("iletisim_last", Date.now().toString());
+  }
+  return [blocked, kaydet, remaining];
+}
 
-// ...burada yardımcı fonksiyonlar (useRateLimit, formatDuration, getBlockedWords, isRealEmail, vs.)...
-
-// (Kod uzunluğu sebebiyle tekrar kopyalamıyorum, senin kodunla birebir aynı şekilde alta koyabilirsin!)
+const ILETISIM_NEDENLERI = [
+  "Bilgi Talebi", "Transfer Rezervasyonu", "Teklif Almak İstiyorum",
+  "İş Birliği / Ortaklık", "Geri Bildirim / Öneri", "Şikayet Bildirimi", "Diğer"
+];
+const ILETISIM_TERCIHLERI = [
+  { label: "WhatsApp", value: "WhatsApp", icon: <FaWhatsapp className="text-[#25d366] mr-1" size={16} /> },
+  { label: "Telefon", value: "Telefon", icon: <FaPhone className="text-[#51A5FB] mr-1" size={16} /> },
+  { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
+];
 
 export default function Iletisim() {
-  // ... senin kodundaki tüm state ve helperlar aynen ...
+  const [form, setForm] = useState({
+    ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "",
+    iletisimTercihi: "", kvkkOnay: false
+  });
+  const [errors, setErrors] = useState({});
+  const [buttonStatus, setButtonStatus] = useState("normal");
+  const [buttonMsg, setButtonMsg] = useState("Mesajı Gönder");
+  const [blocked, kaydet, remaining] = useRateLimit();
 
-  // (tüm form logic'i vs. SENİN GÖNDERDİĞİN GİBİ)
+  // Validasyonlar
+  const adValid = isRealName(form.ad);
+  const soyadValid = isRealName(form.soyad);
+  const phoneValid = isRealPhone(form.telefon);
+  const emailValid = isRealEmail(form.email);
+  const msgValid = isRealMsg(form.mesaj);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+    setErrors({ ...errors, [name]: undefined });
+  };
+  const handleIletisimTercihiChange = (value) => {
+    setForm({ ...form, iletisimTercihi: value });
+    setErrors({ ...errors, iletisimTercihi: undefined });
+  };
+
+  function resetButton() {
+    setTimeout(() => { setButtonMsg("Mesajı Gönder"); setButtonStatus("normal"); }, 6000);
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    let newErrors = {};
+    if (blocked) newErrors.global = "Çok hızlı gönderdiniz, lütfen biraz bekleyin.";
+    if (!adValid) newErrors.ad = "Adınız en az 3 harf olmalı.";
+    if (!soyadValid) newErrors.soyad = "Soyadınız en az 3 harf olmalı.";
+    if (!phoneValid) newErrors.telefon = "Telefon hatalı.";
+    if (!emailValid) newErrors.email = "Geçersiz e-posta.";
+    if (!msgValid) newErrors.mesaj = "Mesaj en az 15 karakter, 3 kelime olmalı.";
+    if (!form.iletisimTercihi) newErrors.iletisimTercihi = "İletişim tercihi zorunlu.";
+    if (!form.kvkkOnay) newErrors.kvkkOnay = "KVKK & Gizlilik Sözleşmesi'ni kabul etmelisiniz.";
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      setButtonStatus("error"); setButtonMsg("Eksik alanlar var"); resetButton(); return;
+    }
+    setButtonStatus("success"); setButtonMsg("Teşekkürler, mesajınız alındı."); resetButton(); kaydet();
+    try {
+      await fetch("/api/iletisim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+    }
+    catch {
+      setButtonStatus("error"); setButtonMsg("Sunucu hatası, tekrar deneyin."); resetButton();
+    }
+    setForm({ ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "", iletisimTercihi: "", kvkkOnay: false });
+  };
 
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
@@ -50,7 +165,7 @@ export default function Iletisim() {
             ))}
           </select>
           <textarea name="mesaj" placeholder="Mesajınız" value={form.mesaj} onChange={handleChange}
-            className={`p-3 rounded-lg border ${msgValid && !censored.hasBlocked ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={15} required rows={3} />
+            className={`p-3 rounded-lg border ${msgValid ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={15} required rows={3} />
           <span className="text-sm text-gray-300 font-bold ml-1 mt-2">İletişim tercihinizi seçiniz</span>
           <div className="flex flex-row gap-3 w-full mb-2 flex-wrap">
             {ILETISIM_TERCIHLERI.map((item) => (
@@ -103,7 +218,7 @@ export default function Iletisim() {
             disabled={blocked}
           >
             {blocked
-              ? `Güvenlik nedeniyle kısa süreli bekleme. ${formatDuration(remaining)} sonra tekrar deneyebilirsiniz.`
+              ? `Çok hızlı gönderdiniz. ${formatDuration(remaining)} sonra tekrar deneyin.`
               : buttonMsg}
           </button>
           {Object.keys(errors).length > 0 && (
@@ -115,7 +230,7 @@ export default function Iletisim() {
           )}
         </form>
 
-        {/* Sosyal medya ve iletişim bilgileri (kutunun içinde, şık gold çizgiyle ayrılmış) */}
+        {/* Sosyal medya ve iletişim bilgileri */}
         <div className="w-full border-t border-[#bfa658] mt-10 pt-6">
           <div className="flex flex-wrap gap-4 mb-3 justify-center">
             <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="WhatsApp"><FaWhatsapp size={28} /></a>
@@ -128,7 +243,6 @@ export default function Iletisim() {
             <span className="flex items-center gap-2"><FaMapMarkerAlt className="opacity-80" />Ümraniye, İnkılap Mah. Plazalar Bölgesi</span>
           </div>
         </div>
-
         {/* Konum haritası */}
         <div className="w-full flex justify-center mt-8">
           <div style={{ width: "100%", maxWidth: "900px", height: "210px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
@@ -144,18 +258,6 @@ export default function Iletisim() {
           </div>
         </div>
       </section>
-      <style>{`
-        .animate-gradient-move {
-          background-size: 300% 100%;
-          animation: gradientMove 2.5s linear infinite alternate;
-        }
-        @keyframes gradientMove {
-          0% { background-position-x: 0%; }
-          100% { background-position-x: 100%; }
-        }
-        .animate-fade-in { animation: fadeIn .7s; }
-        @keyframes fadeIn { 0% { opacity: 0; transform: translateY(15px);} 100% { opacity: 1; transform: translateY(0);} }
-      `}</style>
     </main>
   );
 }
