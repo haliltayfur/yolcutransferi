@@ -77,6 +77,7 @@ export default function Footer() {
           <Image src="/mastercard.png" alt="MasterCard" width={44} height={28} className="footer-card-img" style={{objectFit:"contain"}} />
           <Image src="/visa.png" alt="Visa" width={44} height={28} className="footer-card-img" style={{objectFit:"contain"}} />
           <Image src="/Troy.png" alt="TROY" width={44} height={28} className="footer-card-img" style={{objectFit:"contain"}} />
+          <Image src="/iyzico.png" alt="iyzico" width={54} height={30} className="footer-card-img" style={{objectFit:"contain"}} />
         </div>
         {/* Sağ Menü */}
         <div className="flex gap-3 flex-1 justify-end items-center text-base">
