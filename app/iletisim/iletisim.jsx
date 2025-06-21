@@ -35,7 +35,6 @@ function formatDuration(ms) {
   const sec = totalSec % 60;
   return `${min > 0 ? min + "dk " : ""}${sec}sn`;
 }
-// Basit rate limit (demo amaçlı - prod için backendde olmalı)
 function useRateLimit() {
   const [blocked, setBlocked] = useState(false);
   const [remaining, setRemaining] = useState(0);
@@ -69,6 +68,46 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
+// Popup helper
+function PopupContent({ path, open, onClose }) {
+  const [loading, setLoading] = useState(false);
+  const [mainHtml, setMainHtml] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    setLoading(true);
+    fetch(path)
+      .then(r => r.text())
+      .then(html => {
+        // Sadece <main> içeriğini al
+        const match = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+        setMainHtml(match ? match[1] : "İçerik yüklenemedi.");
+      })
+      .catch(() => setMainHtml("İçerik alınamadı."))
+      .finally(() => setLoading(false));
+  }, [open, path]);
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75">
+      <div className="bg-[#1b1b1b] rounded-2xl max-w-2xl w-full p-7 overflow-y-auto max-h-[82vh] border-2 border-[#bfa658] shadow-2xl relative">
+        <button
+          className="absolute top-3 right-6 text-[#ffeec2] font-bold text-xl px-3 py-1 rounded-full bg-[#bfa658]/20 hover:bg-[#bfa658]/40 transition"
+          onClick={onClose}
+          aria-label="Kapat"
+        >
+          Kapat
+        </button>
+        <div className="mt-2 space-y-3 text-[#ecd9aa]">
+          {loading
+            ? <div className="text-center text-[#ffeec2] py-8">Yükleniyor...</div>
+            : <div dangerouslySetInnerHTML={{ __html: mainHtml }} />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Iletisim() {
   const [form, setForm] = useState({
     ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "",
@@ -78,6 +117,8 @@ export default function Iletisim() {
   const [buttonStatus, setButtonStatus] = useState("normal");
   const [buttonMsg, setButtonMsg] = useState("Mesajı Gönder");
   const [blocked, kaydet, remaining] = useRateLimit();
+
+  const [popupOpen, setPopupOpen] = useState(false);
 
   // Validasyonlar
   const adValid = isRealName(form.ad);
@@ -202,9 +243,14 @@ export default function Iletisim() {
               className="accent-[#FFD700] w-4 h-4"
             />
             <span className="text-xs text-gray-200">
-              <a href="/mesafeli-satis" className="underline text-[#FFD700]" target="_blank" rel="noopener noreferrer">
+              <button
+                type="button"
+                onClick={() => setPopupOpen(true)}
+                className="underline text-[#FFD700] hover:text-[#bfa658] cursor-pointer outline-none"
+                style={{ padding: 0, border: "none", background: "transparent" }}
+              >
                 YolcuTransferi.com politika ve koşullarını
-              </a>{" "}
+              </button>{" "}
               okudum, kabul ediyorum.
             </span>
           </div>
@@ -261,6 +307,8 @@ export default function Iletisim() {
           </div>
         </div>
       </section>
+      {/* Politika ve şartlar popupu */}
+      <PopupContent path="/mesafeli-satis" open={popupOpen} onClose={() => setPopupOpen(false)} />
     </main>
   );
 }
