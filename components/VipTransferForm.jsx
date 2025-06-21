@@ -40,9 +40,6 @@ export default function VipTransferForm() {
     fetch("/dumps/adresler.json")
       .then(r => r.json())
       .then(data => {
-        // JSON şu yapıda olmalı:
-        // { il: "...", ilce: "...", mahalle: "...", sokak: "..." }
-        // Tek satırlık gösterim: il/ilçe/mahalle/sokak
         const list = data.map(obj =>
           [obj.il, obj.ilce, obj.mahalle, obj.sokak].filter(Boolean).join(" / ")
         );
@@ -80,12 +77,12 @@ export default function VipTransferForm() {
 
   return (
     <form
-      className="w-full max-w-3xl mx-auto bg-black/80 rounded-2xl shadow-lg px-8 py-6 border border-gold mt-8"
+      className="w-full md:w-[340px] h-[300px] bg-black/80 rounded-2xl shadow-lg px-6 py-6 border border-gold flex flex-col justify-center items-center"
       onSubmit={handleSubmit}
     >
-      <div className="flex flex-col md:flex-row gap-2 mb-2">
+      <div className="flex flex-col gap-2 w-full mb-2">
         {/* AUTOCOMPLETE FROM */}
-        <div className="relative flex-1">
+        <div className="relative">
           <input
             type="text"
             placeholder="Nereden? (il/ilçe/mahalle/sokak)"
@@ -109,7 +106,7 @@ export default function VipTransferForm() {
           )}
         </div>
         {/* AUTOCOMPLETE TO */}
-        <div className="relative flex-1">
+        <div className="relative">
           <input
             type="text"
             placeholder="Nereye? (il/ilçe/mahalle/sokak)"
@@ -132,8 +129,10 @@ export default function VipTransferForm() {
             </ul>
           )}
         </div>
+      </div>
+      <div className="flex gap-2 w-full mb-2">
         {/* ARAÇ TİPİ */}
-        <div className="flex-1 min-w-[130px]">
+        <div className="flex-1 min-w-[100px]">
           <select
             className="input w-full"
             value={vehicle}
@@ -145,7 +144,7 @@ export default function VipTransferForm() {
           </select>
         </div>
         {/* YOLCU SAYISI */}
-        <div className="flex-1 min-w-[110px]">
+        <div className="flex-1 min-w-[80px]">
           <select
             className="input w-full"
             value={people}
@@ -156,30 +155,33 @@ export default function VipTransferForm() {
             )}
           </select>
         </div>
-      </div>
-      {/* TARİH & SAAT */}
-      <div className="flex gap-2 mb-4">
-        <input
-          type="date"
-          className="input flex-1"
-          value={date}
-          onChange={e => setDate(e.target.value)}
-          min={new Date().toISOString().split('T')[0]}
-        />
-        <select
-          className="input flex-1"
-          value={time}
-          onChange={e => setTime(e.target.value)}
-        >
-          <option value="">Saat seç</option>
-          {saatler.map((saat, i) => (
-            <option key={i} value={saat}>{saat}</option>
-          ))}
-        </select>
+        {/* TARİH */}
+        <div className="flex-1 min-w-[110px]">
+          <input
+            type="date"
+            className="input w-full"
+            value={date}
+            onChange={e => setDate(e.target.value)}
+            min={new Date().toISOString().split('T')[0]}
+          />
+        </div>
+        {/* SAAT */}
+        <div className="flex-1 min-w-[100px]">
+          <select
+            className="input w-full"
+            value={time}
+            onChange={e => setTime(e.target.value)}
+          >
+            <option value="">Saat seç</option>
+            {saatler.map((saat, i) => (
+              <option key={i} value={saat}>{saat}</option>
+            ))}
+          </select>
+        </div>
       </div>
       <button
         type="submit"
-        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-3 px-8 rounded-xl mt-2 w-full text-lg shadow hover:scale-105 transition"
+        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-2 px-6 rounded-xl mt-2 w-full text-lg shadow hover:scale-105 transition"
       >
         Transfer Planla
       </button>
