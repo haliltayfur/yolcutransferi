@@ -30,7 +30,7 @@ export default function Footer() {
               <li><a href="/gizlilik-politikasi" className="footer-link">Gizlilik Politikası</a></li>
               <li><a href="/kullanim-sartlari" className="footer-link">Kullanım Şartları</a></li>
               <li><a href="/mesafeli-satis" className="footer-link">Mesafeli Satış</a></li>
-              <li><a href="/iptal-iade" className="footer-link">İptal ve İade</a></li>
+              <li><a href="/iade" className="footer-link">İptal ve İade</a></li>
               <li><a href="/sss" className="footer-link">S.S.S.</a></li>
             </ul>
           </div>
