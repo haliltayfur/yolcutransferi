@@ -13,7 +13,7 @@ export default function HeroVideo() {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
             // Video ekranda %50'den fazla görünüyorsa devam ettir, sesi aç
             videoRef.current.muted = false;
-            videoRef.current.volume = 1;
+            videoRef.current.volume = 5;
             videoRef.current.play().catch(() => {});
           } else {
             // Video ekranda değilse durdur
