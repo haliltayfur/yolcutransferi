@@ -34,18 +34,15 @@ export default function MesafeliSatisSozlesmesi() {
   const [popupContent, setPopupContent] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
 
-  // Pop-up'a ilgili sayfanın içeriğini dinamik çek
   async function handlePopup(link) {
     setPopupTitle(link.label);
     setShowPopup(true);
     setPopupContent(
       <div className="text-[#ecd9aa] text-center py-6">Yükleniyor...</div>
     );
-    // Next.js route'dan dinamik olarak çeker
     try {
       const res = await fetch(link.url);
       const html = await res.text();
-      // Sadece <main> içindeki metni çekmek için regex kullanılır
       const mainMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
       setPopupContent(
         <div
@@ -62,6 +59,37 @@ export default function MesafeliSatisSozlesmesi() {
     }
   }
 
+  // Link satırı (anlamlı cümleye gömülü şekilde)
+  const linkBar = (
+    <span>
+      Detaylar için&nbsp;
+      {POLICY_LINKS.map((link, idx) => (
+        <span key={link.id}>
+          <button
+            type="button"
+            className="policy-link underline decoration-dotted decoration-2 underline-offset-2"
+            onClick={() => handlePopup(link)}
+            style={{
+              color: "#ffeec2",
+              cursor: "pointer",
+              padding: "0 1.5px",
+              background: "none",
+              border: "none",
+              fontWeight: 500,
+              fontSize: "1em"
+            }}
+          >
+            {link.label}
+          </button>
+          {idx < POLICY_LINKS.length - 1 && (
+            <span className="mx-1 text-[#bfa658]">|</span>
+          )}
+        </span>
+      ))}
+      &nbsp;sayfalarına bakabilirsiniz.
+    </span>
+  );
+
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
       <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] mt-16 mb-10">
@@ -72,53 +100,31 @@ export default function MesafeliSatisSozlesmesi() {
         <div className="text-lg text-[#ffeec2] font-semibold text-center mb-8">
           YolcuTransferi.com'dan yapılan her rezervasyon aşağıdaki sözleşme koşullarına tabidir.
         </div>
-
-        {/* Sözleşme metni */}
-        <div className="text-base md:text-lg text-[#ecd9aa] leading-relaxed font-normal space-y-8">
-          {/* ... [Tüm önceki sözleşme bölümleri buraya aynı şekilde gelir, kısaltıldı] ... */}
-
-          {/* Örnek bir blok */}
+        
+        {/* Sözleşme örnek */}
+        <div className="text-base md:text-lg text-[#ecd9aa] leading-relaxed font-normal space-y-7">
           <section>
-            <h2 className="text-[#bfa658] font-bold text-xl mb-1">5. Sorumluluk Reddi</h2>
+            <h2 className="text-[#bfa658] font-bold text-xl mb-1">Sorumluluk Reddi</h2>
             <p>
-              Platform, hizmetin güvenli, zamanında ve sorunsuz gerçekleşmesi için Hizmet Sağlayıcı seçimini titizlikle yapar; ancak aracın arızalanması, trafik, hava koşulları, kaptan/şoför davranışı, kaza, ceza, gecikme, iptal, mücbir sebepler ve üçüncü kişilerden kaynaklanan herhangi bir zarar, kayıp, iptal, hasar veya gecikmeden doğrudan sorumlu değildir. Tüm operasyonel sorumluluk Hizmet Sağlayıcı'ya aittir.
+              Platform, hizmetin güvenli, zamanında ve sorunsuz gerçekleşmesi için Hizmet Sağlayıcı seçimini titizlikle yapar; ancak araç arızası, trafik, hava koşulları, kaptan/şoför davranışı, gecikme, iptal, mücbir sebepler ve üçüncü kişilerden kaynaklanan her türlü zarardan doğrudan sorumlu değildir. Operasyonel tüm sorumluluk Hizmet Sağlayıcı'ya aittir.
+            </p>
+            <p className="mt-4">
+              {linkBar}
             </p>
           </section>
-
-          {/* Linkli politika satırı */}
-          <div className="flex flex-wrap gap-x-3 gap-y-2 justify-center items-center mt-10 mb-2 text-[1.06rem] font-semibold">
-            {POLICY_LINKS.map((link, idx) => (
-              <span key={link.id} className="inline-flex items-center">
-                <button
-                  type="button"
-                  className="policy-link underline decoration-dotted decoration-2 underline-offset-2"
-                  onClick={() => handlePopup(link)}
-                  style={{
-                    color: "#ffeec2",
-                    cursor: "pointer",
-                    padding: "0 2px",
-                  }}
-                >
-                  {link.label}
-                </button>
-                {idx < POLICY_LINKS.length - 1 && (
-                  <span className="mx-2 text-[#ffd700a0] font-bold">|</span>
-                )}
-              </span>
-            ))}
-          </div>
         </div>
 
         {/* Slogan */}
         <div
-          className="text-center text-lg font-bold mt-10 mb-1 tracking-tight"
+          className="text-center font-bold mt-10 mb-1 tracking-tight"
           style={{
-            color: "#ffeec2",
-            textShadow: "0 2px 9px #0008",
-            fontSize: "1.23rem",
+            color: "#bfa658",
+            textShadow: "0 2px 8px #0009",
+            fontSize: "1.13rem",
+            letterSpacing: ".01em"
           }}
         >
-          YolcuTransferi.com olarak; hem sizi hem hizmeti sunanı koruyan, tarafları adil ve şeffaf biçimde gözeten bu sözleşmeyle, en iyi deneyimi ve güvenli yolculuğu garanti ediyoruz.
+          Sizi, hizmeti sunanı ve karşı tarafı adil şekilde koruyan; en iyi hizmet için tasarlanmış sözleşme.
         </div>
 
         {/* Dinamik Popup */}
