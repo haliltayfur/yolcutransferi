@@ -92,21 +92,11 @@ export default function KullanimSartlari() {
           </div>
         </div>
 
-        {/* Alt uyarı ve başvuru butonu */}
-        <div className="pt-3 border-t border-[#bfa658] text-[#ffeec2]">
+        {/* Alt uyarı ve başvuru (buton kaldırıldı) */}
+        <div className="pt-3 border-t border-[#bfa658] text-[#ffeec2] mt-6">
           YolcuTransferi.com’u kullanan herkes bu şartları ve güncel politikaları kabul etmiş sayılır. Sorunuz veya yasal başvurunuz için&nbsp;
           <Link href="/iletisim" className="underline text-[#ffeec2] hover:text-[#bfa658]">İletişim</Link>
           &nbsp;sayfamızı kullanabilirsiniz.
-        </div>
-
-        {/* Başvuru butonu */}
-        <div className="flex justify-start mt-8">
-          <Link
-            href="/kvkk/form"
-            className="bg-gradient-to-tr from-[#cbb26a] to-[#bfa658] text-black font-bold text-lg px-7 py-3 rounded-xl shadow-md transition hover:scale-105 hover:from-[#e6d199] hover:to-[#c4ad5f] border border-[#fff6ce]"
-          >
-            KVKK Başvuru Formu
-          </Link>
         </div>
       </section>
     </main>
