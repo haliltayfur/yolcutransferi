@@ -10,56 +10,45 @@ export default function Iade() {
           İptal &amp; İade Koşulları
         </h1>
         <div className="text-lg text-[#ffeec2] font-semibold text-center mb-8">
-          VIP dünyasında; zamanınız, güvenliğiniz ve konforunuz en yüksek önceliğimizdir.
+          Her yolculuk sizin için özenle hazırlanır.
         </div>
         <div className="text-base md:text-lg text-[#ecd9aa] leading-relaxed font-normal space-y-6">
           <p>
-            Her transfer, <b>size özel olarak atanmış profesyonel şoförünüz</b> ve özenle hazırlanmış aracınızla gerçekleştirilir. Yolculuğunuzun her dakikasına hak ettiğiniz değeri veriyoruz: 
-            <b> Sizin için zaman ayırıyor, bir başkasının rezervasyonunu asla kabul etmiyoruz.</b>
+            YolcuTransferi.com olarak her rezervasyonu, size özel şoför ve araç planlamasıyla hazırlarız.
+            Tüm hazırlıklarımızı, yolculuğunuzun sorunsuz ve konforlu geçmesi için büyük bir titizlikle gerçekleştiriyoruz.
           </p>
-          <div className="bg-[#231d10]/70 p-5 rounded-2xl border border-[#bfa658] mb-4">
-            <b className="text-[#bfa658]">İptal ve İade Kuralları (VIP Standart):</b>
-            <ul className="list-disc pl-6 space-y-1 mt-3 text-[#ffeec2]">
+          <div>
+            <h2 className="text-[#bfa658] font-bold text-xl mb-1">İptal ve İade Süreci</h2>
+            <ul className="list-disc pl-6 text-[#ffeec2] space-y-1">
               <li>
-                <b>Yolculuk öncesi 8 saat ve daha fazla süre kala</b> yapılan iptallerde, ödemeniz <b>tamamen iade edilir</b>. Hiçbir kesinti uygulanmaz.
+                <b>Yolculuğunuzdan 8 saat öncesine kadar</b> yapılan iptallerde, ücretinizin tamamı iade edilir. Herhangi bir kesinti uygulanmaz.
               </li>
               <li>
-                <b>Yolculuk öncesi son 8 saat</b> içinde iptal durumunda, 
-                şoför ve aracınız yalnızca sizin için hazırlandığı ve başka hiçbir misafirimize tahsis edilmediği için <b>ücret iadesi yapılamaz</b>.
+                <b>Yolculuk saatine 8 saatten az kala</b> yapılan iptallerde ise, hazırlık süreci tamamlandığı için iade yapılamamaktadır.
               </li>
               <li>
-                Yolculuğa gelinmemesi veya 8 saatten kısa sürede iptal talepleri, 
-                VIP hazırlık ve rezervasyon bedeli olarak tamamen saklı tutulur.
+                Son 8 saat içerisinde gelmeme veya rezervasyonun iptal edilmemesi durumunda da, hizmete özel hazırlıklar sebebiyle ücret iadesi gerçekleştirilemez.
               </li>
             </ul>
           </div>
           <div>
-            <h2 className="text-[#bfa658] font-bold text-xl mb-1">VIP Standartları Neden Katı?</h2>
+            <h2 className="text-[#bfa658] font-bold text-xl mb-1">Neden Bu Uygulama?</h2>
             <p>
-              Sıradan bir taksi veya transferde, araç ve şoför “boşa” gittiğinde kayıp azdır. Bizim sistemimizde ise; sizin konforunuz için özel araç ve şoför, <b>öncesinde başka hiçbir misafire tahsis edilmez</b>. 
-              <br /><br />
-              <b>Sizin için ayrılan lüks, başkasına sunulmaz.</b> Bu, seçkin yolcularımıza verdiğimiz bir güvence ve ayrıcalıktır.
+              Her rezervasyon sonrası, şoför ve araç sadece size ayrılır; titiz bir temizlik ve detaylı hazırlık süreci başlatılır. 
+              Siz değerli misafirlerimize en iyi deneyimi sunmak ve güvenliğinizi sağlamak için bu sürecin iptal edilebilmesi belirli bir zaman dilimi ile sınırlıdır.
             </p>
           </div>
           <div>
-            <h2 className="text-[#bfa658] font-bold text-xl mb-1">Sektörle Farkımız</h2>
+            <h2 className="text-[#bfa658] font-bold text-xl mb-1">İade Süresi</h2>
             <p>
-              Çoğu transfer firması 4–6 saat önce yapılan iptalleri iade kapsamına alır. <b>YolcuTransferi.com ise,</b> konforunuzdan ve etik değerlerimizden ödün vermemek için, iptal süresini daha uzun tutar: 
-              <span className="block font-bold mt-1">VIP ayrıcalığınız, size özel ayrılmış kapasitemizi korur.</span>
+              İade hakkı oluşan durumlarda, ödeme işleminiz 7 iş günü içinde, kullandığınız yöntem üzerinden tarafınıza otomatik olarak iade edilir.
             </p>
           </div>
           <div>
-            <h2 className="text-[#bfa658] font-bold text-xl mb-1">İade Süreci</h2>
+            <h2 className="text-[#bfa658] font-bold text-xl mb-1">Daha Fazla Bilgi</h2>
             <p>
-              İade hakkınız doğarsa, <b>ödemeniz 7 iş günü içinde</b> aynı kanaldan otomatik olarak geri ödenir. Detaylı bilgi için müşteri destek ekibimiz her an yanınızdadır.
-            </p>
-          </div>
-          <div>
-            <h2 className="text-[#bfa658] font-bold text-xl mb-1">Destek ve Şeffaflık</h2>
-            <p>
-              Sorularınız için <Link href="/iletisim" className="underline text-[#ffeec2] hover:text-[#bfa658]">İletişim</Link> hattımız 7/24 açıktır.  
-              YolcuTransferi.com, sektörde ilk defa bu kadar yüksek hizmet standardı ile 
-              <b>VIP müşterilerinin konforunu, güvenini ve haklarını korumayı</b> taahhüt eder.
+              Soru ve talepleriniz için <Link href="/iletisim" className="underline text-[#ffeec2] hover:text-[#bfa658]">İletişim</Link> sayfamızdan bize ulaşabilirsiniz.  
+              Her adımda yanınızdayız.
             </p>
           </div>
         </div>
@@ -68,7 +57,7 @@ export default function Iade() {
             href="/rezervasyon"
             className="bg-gradient-to-tr from-[#cbb26a] to-[#bfa658] text-black font-bold text-lg px-7 py-3 rounded-xl shadow-md transition hover:scale-105 hover:from-[#e6d199] hover:to-[#c4ad5f] border border-[#fff6ce]"
           >
-            VIP Rezervasyon Yap
+            Rezervasyon Yap
           </Link>
         </div>
       </section>
