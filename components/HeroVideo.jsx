@@ -5,17 +5,14 @@ export default function HeroVideo() {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (videoRef.current && videoRef.current.paused) {
-        videoRef.current.muted = false;
-        videoRef.current.volume = 1;
-        videoRef.current.play().catch(() => {
-          videoRef.current.muted = true;
-          videoRef.current.play().catch(() => {});
-        });
-      }
-    }, 5000);
-    return () => clearTimeout(timer);
+    // Video sesi açık başlatma (çoğu tarayıcıda otomatik sesi açık başlatmaya izin vermez, kullanıcı tıklar tıklamaz ses açılır)
+    if (videoRef.current) {
+      videoRef.current.muted = false;
+      videoRef.current.volume = 1;
+      videoRef.current.play().catch(() => {
+        // Eğer sesli başlatamazsa, kullanıcı play tuşuna tıkladığında ses açılır
+      });
+    }
   }, []);
 
   return (
@@ -23,7 +20,8 @@ export default function HeroVideo() {
       ref={videoRef}
       src="/reklam.mp4"
       controls
-      className="w-full h-full object-contain rounded-2xl bg-black"
+      className="w-[300px] h-[600px] object-cover rounded-2xl bg-black"
+      style={{ border: "none" }}
     />
   );
 }
