@@ -110,7 +110,7 @@ export default function Iletisim() {
     if (!emailValid) newErrors.email = "Geçersiz e-posta.";
     if (!msgValid) newErrors.mesaj = "Mesaj en az 15 karakter, 3 kelime olmalı.";
     if (!form.iletisimTercihi) newErrors.iletisimTercihi = "İletişim tercihi zorunlu.";
-    if (!form.kvkkOnay) newErrors.kvkkOnay = "KVKK & Gizlilik Sözleşmesi'ni kabul etmelisiniz.";
+    if (!form.kvkkOnay) newErrors.kvkkOnay = "Koşulları kabul etmelisiniz.";
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
@@ -202,7 +202,10 @@ export default function Iletisim() {
               className="accent-[#FFD700] w-4 h-4"
             />
             <span className="text-xs text-gray-200">
-              <a href="/gizlilik" className="underline text-[#FFD700]" target="_blank" rel="noopener noreferrer">KVKK & Gizlilik Sözleşmesi'ni</a> okudum, kabul ediyorum.
+              <a href="/mesafeli-satis" className="underline text-[#FFD700]" target="_blank" rel="noopener noreferrer">
+                YolcuTransferi.com politika ve koşullarını
+              </a>{" "}
+              okudum, kabul ediyorum.
             </span>
           </div>
           {errors.kvkkOnay && <span className="text-xs text-red-400 font-bold pl-2">{errors.kvkkOnay}</span>}
