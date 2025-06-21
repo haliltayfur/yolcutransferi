@@ -42,14 +42,29 @@ export default function MesafeliSatisSozlesmesi() {
 
   // Policy Link buton komponenti
   const PolicyBtn = ({ name }) => (
-    <button
-      type="button"
-      className="policy-link inline"
-      onClick={() => handlePopup(POLICY_LINKS[name])}
-    >
-      {POLICY_LINKS[name].label}
-    </button>
-  );
+  <button
+    type="button"
+    className="policy-link inline"
+    onClick={() => handlePopup(POLICY_LINKS[name])}
+    style={{
+      borderBottom: '1.5px dashed #ffeec2',
+      textDecoration: 'none',
+      transition: 'border-bottom 0.16s, color 0.16s',
+      paddingBottom: '2px',
+      cursor: 'pointer'
+    }}
+    onMouseOver={e => {
+      e.target.style.borderBottom = '2px solid #bfa658';
+      e.target.style.color = '#bfa658';
+    }}
+    onMouseOut={e => {
+      e.target.style.borderBottom = '1.5px dashed #ffeec2';
+      e.target.style.color = '#ffeec2';
+    }}
+  >
+    {POLICY_LINKS[name].label}
+  </button>
+);
 
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
