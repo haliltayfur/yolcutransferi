@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { vehicles } from "../data/vehicles";
-import { rotarList } from "../data/rotarOptions";
+import DatePicker from "react-datepicker"; // ÖNERİ: npm install react-datepicker
+import "react-datepicker/dist/react-datepicker.css";
 
 const saatler = [
   "00:00", "00:30", "01:00", "01:30", "02:00", "02:30", "03:00", "03:30",
@@ -13,49 +14,42 @@ const saatler = [
   "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00", "23:30"
 ];
 
-// Türkçe karakter normalize fonksiyonu
-const normalize = s => s
-  .toLowerCase()
-  .replace(/ç/g,"c").replace(/ğ/g,"g").replace(/ı/g,"i")
-  .replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u")
-  .replace(/[\s\-\.]/g,"");
-
 export default function VipTransferForm() {
   const router = useRouter();
 
+  // STATE (localStorage’dan da al)
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(null);
   const [time, setTime] = useState("");
   const [vehicle, setVehicle] = useState(vehicles[0]?.value || "");
   const [people, setPeople] = useState(1);
-  const [addressList, setAddressList] = useState([]);
-  const [fromSuggestions, setFromSuggestions] = useState([]);
-  const [toSuggestions, setToSuggestions] = useState([]);
 
-  const maxPeople = vehicles.find((v) => v.value === vehicle)?.max || 10;
-
+  // Mount olduğunda localStorage’dan çek
   useEffect(() => {
-    fetch("/dumps/adresler.json")
-      .then(r => r.json())
-      .then(data => {
-        const list = data.map(obj =>
-          [obj.il, obj.ilce, obj.mahalle, obj.sokak].filter(Boolean).join(" / ")
-        );
-        setAddressList([...new Set(list.filter(Boolean))]);
-      });
+    const draft = JSON.parse(localStorage.getItem("reservationDraft") || "{}");
+    if (draft.from) setFrom(draft.from);
+    if (draft.to) setTo(draft.to);
+    if (draft.date) setDate(new Date(draft.date));
+    if (draft.time) setTime(draft.time);
+    if (draft.vehicle) setVehicle(draft.vehicle);
+    if (draft.people) setPeople(draft.people);
   }, []);
 
-  function getSuggestions(input) {
-    if (!input || input.length < 2) return [];
-    const q = normalize(input);
-    return addressList.filter(item =>
-      normalize(item).includes(q)
-    ).slice(0, 8);
-  }
-
-  useEffect(() => { setFromSuggestions(getSuggestions(from)); }, [from, addressList]);
-  useEffect(() => { setToSuggestions(getSuggestions(to)); }, [to, addressList]);
+  // Girdi değişince localStorage’a kaydet
+  useEffect(() => {
+    localStorage.setItem(
+      "reservationDraft",
+      JSON.stringify({
+        from,
+        to,
+        date: date ? date.toISOString() : "",
+        time,
+        vehicle,
+        people,
+      })
+    );
+  }, [from, to, date, time, vehicle, people]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -64,7 +58,7 @@ export default function VipTransferForm() {
       return;
     }
     const params = new URLSearchParams({
-      from, to, date, time, vehicle, people
+      from, to, date: date.toISOString().split("T")[0], time, vehicle, people
     }).toString();
     router.push(`/rezervasyon?${params}`);
   }
@@ -77,53 +71,23 @@ export default function VipTransferForm() {
     >
       <div className="flex flex-col gap-4 w-full mb-4">
         {/* FROM */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Nereden? (il/ilçe/mahalle/sokak)"
-            className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-600 transition"
-            value={from}
-            onChange={e => setFrom(e.target.value)}
-            autoComplete="off"
-          />
-          {fromSuggestions.length > 0 && (
-            <ul className="bg-white border mt-1 rounded shadow absolute z-50 w-full text-black max-h-52 overflow-auto">
-              {fromSuggestions.map((t, i) => (
-                <li
-                  key={i}
-                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => setFrom(t)}
-                >
-                  {t}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <input
+          type="text"
+          placeholder="Nereden? (il/ilçe/mahalle/sokak)"
+          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
+          value={from}
+          onChange={e => setFrom(e.target.value)}
+          autoComplete="off"
+        />
         {/* TO */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Nereye? (il/ilçe/mahalle/sokak)"
-            className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-600 transition"
-            value={to}
-            onChange={e => setTo(e.target.value)}
-            autoComplete="off"
-          />
-          {toSuggestions.length > 0 && (
-            <ul className="bg-white border mt-1 rounded shadow absolute z-50 w-full text-black max-h-52 overflow-auto">
-              {toSuggestions.map((t, i) => (
-                <li
-                  key={i}
-                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => setTo(t)}
-                >
-                  {t}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <input
+          type="text"
+          placeholder="Nereye? (il/ilçe/mahalle/sokak)"
+          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
+          value={to}
+          onChange={e => setTo(e.target.value)}
+          autoComplete="off"
+        />
       </div>
       <div className="flex flex-row gap-4 w-full mb-4">
         {/* Araç Tipi */}
@@ -142,17 +106,20 @@ export default function VipTransferForm() {
           value={people}
           onChange={e => setPeople(Number(e.target.value))}
         >
-          {Array.from({ length: maxPeople }, (_, i) => i + 1).map(val =>
+          {Array.from({ length: 16 }, (_, i) => i + 1).map(val =>
             <option key={val} value={val}>{val}</option>
           )}
         </select>
-        {/* Tarih */}
-        <input
-          type="date"
-          className="w-1/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
-          value={date}
-          onChange={e => setDate(e.target.value)}
-          min={new Date().toISOString().split('T')[0]}
+        {/* Tarih (Modern Calendar) */}
+        <DatePicker
+          selected={date}
+          onChange={date => setDate(date)}
+          dateFormat="dd.MM.yyyy"
+          minDate={new Date()}
+          placeholderText="Tarih Seç"
+          className="w-1/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
+          popperPlacement="bottom"
+          calendarClassName="bg-black text-white"
         />
         {/* Saat */}
         <select
