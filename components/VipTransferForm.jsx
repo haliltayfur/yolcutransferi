@@ -35,7 +35,6 @@ export default function VipTransferForm() {
 
   const maxPeople = vehicles.find((v) => v.value === vehicle)?.max || 10;
 
-  // ---- YENİ TEK JSON'DAN ADRESLERİ YÜKLE ----
   useEffect(() => {
     fetch("/dumps/adresler.json")
       .then(r => r.json())
@@ -47,7 +46,6 @@ export default function VipTransferForm() {
       });
   }, []);
 
-  // AUTOCOMPLETE FONKSİYONU - Türkçe uyumlu
   function getSuggestions(input) {
     if (!input || input.length < 2) return [];
     const q = normalize(input);
@@ -56,12 +54,8 @@ export default function VipTransferForm() {
     ).slice(0, 8);
   }
 
-  useEffect(() => {
-    setFromSuggestions(getSuggestions(from));
-  }, [from, addressList]);
-  useEffect(() => {
-    setToSuggestions(getSuggestions(to));
-  }, [to, addressList]);
+  useEffect(() => { setFromSuggestions(getSuggestions(from)); }, [from, addressList]);
+  useEffect(() => { setToSuggestions(getSuggestions(to)); }, [to, addressList]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -76,17 +70,18 @@ export default function VipTransferForm() {
   }
 
   return (
-<form
-  className="w-full h-full flex flex-col justify-center"
-  onSubmit={handleSubmit}
->
-      <div className="flex flex-col gap-2 w-full mb-2">
-        {/* AUTOCOMPLETE FROM */}
+    <form
+      className="w-full h-full flex flex-col justify-center px-8 py-6"
+      style={{ maxWidth: "900px", maxHeight: "600px" }}
+      onSubmit={handleSubmit}
+    >
+      <div className="flex flex-col gap-4 w-full mb-4">
+        {/* FROM */}
         <div className="relative">
           <input
             type="text"
             placeholder="Nereden? (il/ilçe/mahalle/sokak)"
-            className="input w-full"
+            className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-600 transition"
             value={from}
             onChange={e => setFrom(e.target.value)}
             autoComplete="off"
@@ -96,7 +91,7 @@ export default function VipTransferForm() {
               {fromSuggestions.map((t, i) => (
                 <li
                   key={i}
-                  className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => setFrom(t)}
                 >
                   {t}
@@ -105,12 +100,12 @@ export default function VipTransferForm() {
             </ul>
           )}
         </div>
-        {/* AUTOCOMPLETE TO */}
+        {/* TO */}
         <div className="relative">
           <input
             type="text"
             placeholder="Nereye? (il/ilçe/mahalle/sokak)"
-            className="input w-full"
+            className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-600 transition"
             value={to}
             onChange={e => setTo(e.target.value)}
             autoComplete="off"
@@ -120,7 +115,7 @@ export default function VipTransferForm() {
               {toSuggestions.map((t, i) => (
                 <li
                   key={i}
-                  className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => setTo(t)}
                 >
                   {t}
@@ -130,58 +125,50 @@ export default function VipTransferForm() {
           )}
         </div>
       </div>
-      <div className="flex gap-2 w-full mb-2">
-        {/* ARAÇ TİPİ */}
-        <div className="flex-1 min-w-[100px]">
-          <select
-            className="input w-full"
-            value={vehicle}
-            onChange={e => setVehicle(e.target.value)}
-          >
-            {vehicles.map((v, i) => (
-              <option key={i} value={v.value}>{v.label}</option>
-            ))}
-          </select>
-        </div>
-        {/* YOLCU SAYISI */}
-        <div className="flex-1 min-w-[80px]">
-          <select
-            className="input w-full"
-            value={people}
-            onChange={e => setPeople(Number(e.target.value))}
-          >
-            {Array.from({ length: maxPeople }, (_, i) => i + 1).map(val =>
-              <option key={val} value={val}>{val}</option>
-            )}
-          </select>
-        </div>
-        {/* TARİH */}
-        <div className="flex-1 min-w-[110px]">
-          <input
-            type="date"
-            className="input w-full"
-            value={date}
-            onChange={e => setDate(e.target.value)}
-            min={new Date().toISOString().split('T')[0]}
-          />
-        </div>
-        {/* SAAT */}
-        <div className="flex-1 min-w-[100px]">
-          <select
-            className="input w-full"
-            value={time}
-            onChange={e => setTime(e.target.value)}
-          >
-            <option value="">Saat seç</option>
-            {saatler.map((saat, i) => (
-              <option key={i} value={saat}>{saat}</option>
-            ))}
-          </select>
-        </div>
+      <div className="flex flex-row gap-4 w-full mb-4">
+        {/* Araç Tipi */}
+        <select
+          className="w-1/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+          value={vehicle}
+          onChange={e => setVehicle(e.target.value)}
+        >
+          {vehicles.map((v, i) => (
+            <option key={i} value={v.value}>{v.label}</option>
+          ))}
+        </select>
+        {/* Kişi */}
+        <select
+          className="w-1/6 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+          value={people}
+          onChange={e => setPeople(Number(e.target.value))}
+        >
+          {Array.from({ length: maxPeople }, (_, i) => i + 1).map(val =>
+            <option key={val} value={val}>{val}</option>
+          )}
+        </select>
+        {/* Tarih */}
+        <input
+          type="date"
+          className="w-1/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+          value={date}
+          onChange={e => setDate(e.target.value)}
+          min={new Date().toISOString().split('T')[0]}
+        />
+        {/* Saat */}
+        <select
+          className="w-1/4 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+          value={time}
+          onChange={e => setTime(e.target.value)}
+        >
+          <option value="">Saat seç</option>
+          {saatler.map((saat, i) => (
+            <option key={i} value={saat}>{saat}</option>
+          ))}
+        </select>
       </div>
       <button
         type="submit"
-        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-2 px-6 rounded-xl mt-2 w-full text-lg shadow hover:scale-105 transition"
+        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-8 rounded-xl w-full text-xl shadow hover:scale-105 transition"
       >
         Transfer Planla
       </button>
