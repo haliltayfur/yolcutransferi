@@ -11,7 +11,7 @@ export default function HeroVideo() {
     if (videoRef.current) {
       observer = new window.IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
             // Video en az %50 görünüyorsa devam et
             videoRef.current.play().catch(() => {});
             // Kullanıcı sesi açtıysa, sesi açık devam
