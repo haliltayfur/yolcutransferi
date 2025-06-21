@@ -19,14 +19,12 @@ export default function HeroVideo() {
   }, []);
 
   return (
-    <div className="w-full h-full rounded-2xl shadow-lg overflow-hidden bg-black flex items-center justify-center">
-      <video
-        ref={videoRef}
-        src="/reklam.mp4"
-        controls
-        className="w-full h-full object-contain rounded-2xl bg-black"
-        style={{ maxWidth: "220px", maxHeight: "320px" }}
-      />
-    </div>
+    <video
+      ref={videoRef}
+      src="/reklam.mp4"
+      controls
+      className="w-full h-full object-contain rounded-2xl bg-black"
+      style={{ maxWidth: "220px", maxHeight: "320px" }}
+    />
   );
 }
