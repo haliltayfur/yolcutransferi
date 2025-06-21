@@ -69,7 +69,7 @@ export default function AdminIletisim() {
     setModalForm(null);
   };
 
-  // Excel Export (XLSX)
+  // Excel Export (XLSX) - TÜM alanları export etmeye devam!
   const exportExcel = () => {
     const sheetData = [
       ["Kayıt No", "Tarih", "Ad", "Soyad", "Telefon", "E-posta", "Mesaj", "Neden", "Tercih", "KVKK"],
@@ -91,17 +91,14 @@ export default function AdminIletisim() {
   const pageCount = Math.ceil(total / pageSize);
   const goToPage = p => setPage(p);
 
-  // Tablo başlık ve genişlik ayarları (VIP stil)
+  // SADE ANA SÜTUNLAR:
   const columns = [
-    { name: "Kayıt No", className: "min-w-[140px] text-left" },
+    { name: "Kayıt No", className: "min-w-[135px] text-left" },
     { name: "Tarih", className: "min-w-[140px] text-left" },
     { name: "Ad", className: "min-w-[80px] text-left" },
     { name: "Soyad", className: "min-w-[80px] text-left" },
     { name: "Telefon", className: "min-w-[120px] text-left" },
-    { name: "E-posta", className: "max-w-[160px] text-left" },
-    { name: "Mesaj", className: "max-w-[120px] text-left" },
-    { name: "Neden", className: "max-w-[120px] text-left" },
-    { name: "Tercih", className: "min-w-[80px] text-left" },
+    { name: "Mesaj", className: "max-w-[110px] text-left" },
     { name: "KVKK", className: "min-w-[45px] text-center" },
     { name: "İşlem", className: "min-w-[200px] text-right" }
   ];
@@ -133,7 +130,7 @@ export default function AdminIletisim() {
         ) : forms.length === 0 ? (
           <p className="text-center py-6 text-gray-300">Hiç kayıt yok.</p>
         ) : (
-          <table className="w-full border-collapse min-w-[1100px] text-sm">
+          <table className="w-full border-collapse min-w-[800px] text-sm">
             <thead>
               <tr>
                 {columns.map((col, i) => (
@@ -153,10 +150,7 @@ export default function AdminIletisim() {
                   <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{form.ad}</td>
                   <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{form.soyad}</td>
                   <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{form.telefon}</td>
-                  <td className="p-2 border-b border-[#bfa658] max-w-[160px] truncate">{kisaMetin(form.email, 18)}</td>
-                  <td className="p-2 border-b border-[#bfa658] max-w-[120px] truncate">{kisaMetin(form.mesaj, 15)}</td>
-                  <td className="p-2 border-b border-[#bfa658] max-w-[120px] truncate">{kisaMetin(form.neden, 15)}</td>
-                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{form.iletisimTercihi}</td>
+                  <td className="p-2 border-b border-[#bfa658] max-w-[110px] truncate">{kisaMetin(form.mesaj, 15)}</td>
                   <td className="p-2 border-b border-[#bfa658] text-center">{form.kvkkOnay ? "✓" : "X"}</td>
                   <td className="p-2 border-b border-[#bfa658] text-right">
                     <button
@@ -200,7 +194,7 @@ export default function AdminIletisim() {
           ))}
         </div>
       )}
-      {/* Popup mail okur gibi */}
+      {/* Popup mail okur gibi TÜM detaylar */}
       {modalForm && (
         <div
           className="fixed left-0 top-0 w-full h-full bg-black/80 flex items-center justify-center z-50"
