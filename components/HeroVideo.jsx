@@ -5,7 +5,7 @@ export default function HeroVideo() {
   const videoRef = useRef(null);
   const [userHasUnmuted, setUserHasUnmuted] = useState(false);
 
-  // Intersection Observer: sadece play/pause için, mute kontrolü için değil!
+  // Intersection Observer: %25 görünürlük kontrolü
   useEffect(() => {
     let observer;
     if (videoRef.current) {
@@ -13,23 +13,29 @@ export default function HeroVideo() {
         ([entry]) => {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
             videoRef.current.play().catch(() => {});
+            if (userHasUnmuted) {
+              videoRef.current.muted = false;
+              videoRef.current.volume = 0.9;
+            } else {
+              videoRef.current.muted = true;
+            }
           } else {
             videoRef.current.pause();
           }
         },
-        { threshold: [0, 0.5, 1] }
+        { threshold: [0, 0.25, 0.5, 1] }
       );
       observer.observe(videoRef.current);
     }
     return () => observer && observer.disconnect();
-  }, []);
+  }, [userHasUnmuted]);
 
-  // Sadece tıklayınca: sesi aç, başa sar, userHasUnmuted'ı bir daha değişme
+  // TIKLAMA: Her tıklamada başa sar, sesi aç, volume 0.9 yap ve flag'i ayarla
   const handleUnmuteAndRestart = () => {
-    if (!userHasUnmuted && videoRef.current) {
+    if (videoRef.current) {
       videoRef.current.currentTime = 0;
       videoRef.current.muted = false;
-      videoRef.current.volume = 1;
+      videoRef.current.volume = 0.9;
       videoRef.current.play();
       setUserHasUnmuted(true);
     }
