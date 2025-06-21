@@ -56,7 +56,7 @@ export default function KullanimSartlari() {
             <h2 className="text-[#bfa658] font-bold text-xl mb-1">5. Gizlilik ve Kişisel Veriler</h2>
             <p>
               Kullanıcı verileri, KVKK ve Gizlilik Politikası’na uygun olarak işlenir ve korunur. Detaylı bilgi için&nbsp;
-              <Link href="/gizlilik" className="underline text-[#ffeec2] hover:text-[#bfa658]">Gizlilik Politikası</Link>
+              <Link href="/gizlilik-politikasi" className="underline text-[#ffeec2] hover:text-[#bfa658]">Gizlilik Politikası</Link>
               &nbsp;ve&nbsp;
               <Link href="/kvkk" className="underline text-[#ffeec2] hover:text-[#bfa658]">KVKK Aydınlatma Metni</Link>
               &nbsp;sayfalarını inceleyebilirsiniz.
