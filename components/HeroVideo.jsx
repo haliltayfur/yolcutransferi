@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 export default function HeroVideo() {
   const videoRef = useRef(null);
   const [firstClickDone, setFirstClickDone] = useState(false);
+  const [isIntersecting, setIsIntersecting] = useState(true);
+  const [isPageVisible, setIsPageVisible] = useState(true);
 
   // Intersection Observer: %25 görünürlükte play/pause
   useEffect(() => {
@@ -11,11 +13,7 @@ export default function HeroVideo() {
     if (videoRef.current) {
       observer = new window.IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
-            videoRef.current.play().catch(() => {});
-          } else {
-            videoRef.current.pause();
-          }
+          setIsIntersecting(entry.isIntersecting && entry.intersectionRatio >= 0.25);
         },
         { threshold: [0, 0.25, 0.5, 1] }
       );
@@ -24,10 +22,30 @@ export default function HeroVideo() {
     return () => observer && observer.disconnect();
   }, []);
 
+  // Sayfa görünürlük kontrolü (başka sekmeye geçti mi?)
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      setIsPageVisible(document.visibilityState === "visible");
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, []);
+
+  // Video oynatma/pause kontrolü
+  useEffect(() => {
+    if (videoRef.current) {
+      if (isIntersecting && isPageVisible) {
+        videoRef.current.play().catch(() => {});
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  }, [isIntersecting, isPageVisible]);
+
   // Sadece ilk tıklamada: başa sar, sesi aç, volume 0.9, sonraki tıklamalar standart
   const handleFirstClick = (e) => {
     if (!firstClickDone && videoRef.current) {
-      e.preventDefault(); // Tıklamanın varsayılan etkisini durdur
+      e.preventDefault();
       videoRef.current.currentTime = 0;
       videoRef.current.muted = false;
       videoRef.current.volume = 0.9;
