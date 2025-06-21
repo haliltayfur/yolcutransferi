@@ -24,7 +24,6 @@ export default function HeroVideo() {
       src="/reklam.mp4"
       controls
       className="w-full h-full object-contain rounded-2xl bg-black"
-      style={{ maxWidth: "220px", maxHeight: "320px" }}
     />
   );
 }
