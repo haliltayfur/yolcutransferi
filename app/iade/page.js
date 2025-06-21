@@ -1,66 +1,74 @@
+// app/iade/page.js
 "use client";
 import Link from "next/link";
 
-export default function IptalIade() {
+export default function Iade() {
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
       <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] mt-16 mb-10">
-        {/* Başlık */}
         <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-1 text-center">
-          İptal & İade Koşulları
+          İptal &amp; İade Koşulları
         </h1>
-        {/* Slogan */}
         <div className="text-lg text-[#ffeec2] font-semibold text-center mb-8">
-          Size özel hazırlık, tam VIP hizmet — keyfiniz için her şey özenle tasarlandı.
+          VIP dünyasında; zamanınız, güvenliğiniz ve konforunuz en yüksek önceliğimizdir.
         </div>
-        {/* İçerik */}
         <div className="text-base md:text-lg text-[#ecd9aa] leading-relaxed font-normal space-y-6">
           <p>
-            Yolculuğunuz başlamadan <b>en az 8 saat önce</b> yapılan iptaller için ödediğiniz ücret tamamen iade edilir. Çünkü bu sürede şoförünüz, aracınız, dezenfeksiyon ve özel ekipmanlarınız hazırlandı.
+            Her transfer, <b>size özel olarak atanmış profesyonel şoförünüz</b> ve özenle hazırlanmış aracınızla gerçekleştirilir. Yolculuğunuzun her dakikasına hak ettiğiniz değeri veriyoruz: 
+            <b> Sizin için zaman ayırıyor, bir başkasının rezervasyonunu asla kabul etmiyoruz.</b>
           </p>
-          <p>
-            Eğer 8 saatten daha az süre kala iptal ederseniz, maalesef bu hazırlık sürecini iptal edemiyoruz.  
-            <b>Bu yüzden VIP hizmetinize özel ayrılan kaynaklar iade edilemez.</b> Geçmiş olsun, ama özenli konforunuz için plan sürüyor.
-          </p>
-          <p>
-            <b>7 saat kala</b> iptal yapmanız hâlâ VIP prensibimize dahil değildir; araç ve şoförünüz özel olarak hazırlanmış, bu nedenle dönüş olmaksızın işlem tamamlanmıştır.
-          </p>
-          <div>
-            <h2 className="text-[#bfa658] font-bold text-xl mb-1">Neden Bu Koşul?</h2>
-            <ul className="list-disc pl-6 space-y-2 text-[#ffeec2]">
-              <li>Şoförünüz ve aracınız sadece **sizin için rezerve edilir**, başka yolcu alınmaz.</li>
-              <li>Araçlar **detaylı temizlik ve dezenfeksiyondan** geçirilir.</li>
-              <li>Her yolculukta VIP deneyim ve ekstra özen sağlanır — iptal süresi bu planlara dahil değildir.</li>
+          <div className="bg-[#231d10]/70 p-5 rounded-2xl border border-[#bfa658] mb-4">
+            <b className="text-[#bfa658]">İptal ve İade Kuralları (VIP Standart):</b>
+            <ul className="list-disc pl-6 space-y-1 mt-3 text-[#ffeec2]">
+              <li>
+                <b>Yolculuk öncesi 8 saat ve daha fazla süre kala</b> yapılan iptallerde, ödemeniz <b>tamamen iade edilir</b>. Hiçbir kesinti uygulanmaz.
+              </li>
+              <li>
+                <b>Yolculuk öncesi son 8 saat</b> içinde iptal durumunda, 
+                şoför ve aracınız yalnızca sizin için hazırlandığı ve başka hiçbir misafirimize tahsis edilmediği için <b>ücret iadesi yapılamaz</b>.
+              </li>
+              <li>
+                Yolculuğa gelinmemesi veya 8 saatten kısa sürede iptal talepleri, 
+                VIP hazırlık ve rezervasyon bedeli olarak tamamen saklı tutulur.
+              </li>
             </ul>
           </div>
           <div>
-            <h2 className="text-[#bfa658] font-bold text-xl mb-1">Sektörde Ne Var?</h2>
+            <h2 className="text-[#bfa658] font-bold text-xl mb-1">VIP Standartları Neden Katı?</h2>
             <p>
-              Rakipler genelde 4–6 saat önceden iade sağlarken biz; siz değer verdiğimiz için ekstra adım attık.  
-              **8 saat öncesi ücretsiz, sonrası ise VIP hazırlık bedeli kabul edilmiştir.**
+              Sıradan bir taksi veya transferde, araç ve şoför “boşa” gittiğinde kayıp azdır. Bizim sistemimizde ise; sizin konforunuz için özel araç ve şoför, <b>öncesinde başka hiçbir misafire tahsis edilmez</b>. 
+              <br /><br />
+              <b>Sizin için ayrılan lüks, başkasına sunulmaz.</b> Bu, seçkin yolcularımıza verdiğimiz bir güvence ve ayrıcalıktır.
             </p>
           </div>
           <div>
-            <h2 className="text-[#bfa658] font-bold text-xl mb-1">Nasıl İade Alırım?</h2>
+            <h2 className="text-[#bfa658] font-bold text-xl mb-1">Sektörle Farkımız</h2>
             <p>
-              İptal işlemi sonrasında ödemeniz, sistem tarafından otomatik işlenir ve <b>7 iş günü içinde</b> aynı ödeme yöntemine iade edilir.
+              Çoğu transfer firması 4–6 saat önce yapılan iptalleri iade kapsamına alır. <b>YolcuTransferi.com ise,</b> konforunuzdan ve etik değerlerimizden ödün vermemek için, iptal süresini daha uzun tutar: 
+              <span className="block font-bold mt-1">VIP ayrıcalığınız, size özel ayrılmış kapasitemizi korur.</span>
             </p>
           </div>
           <div>
-            <h2 className="text-[#bfa658] font-bold text-xl mb-1">Destek</h2>
+            <h2 className="text-[#bfa658] font-bold text-xl mb-1">İade Süreci</h2>
             <p>
-              Sorularınız varsa <Link href="/iletisim" className="underline text-[#ffeec2] hover:text-[#bfa658]">İletişim</Link> sayfamızdan bize ulaşabilirsiniz. Ekibimiz her zaman destek için hazır.
+              İade hakkınız doğarsa, <b>ödemeniz 7 iş günü içinde</b> aynı kanaldan otomatik olarak geri ödenir. Detaylı bilgi için müşteri destek ekibimiz her an yanınızdadır.
+            </p>
+          </div>
+          <div>
+            <h2 className="text-[#bfa658] font-bold text-xl mb-1">Destek ve Şeffaflık</h2>
+            <p>
+              Sorularınız için <Link href="/iletisim" className="underline text-[#ffeec2] hover:text-[#bfa658]">İletişim</Link> hattımız 7/24 açıktır.  
+              YolcuTransferi.com, sektörde ilk defa bu kadar yüksek hizmet standardı ile 
+              <b>VIP müşterilerinin konforunu, güvenini ve haklarını korumayı</b> taahhüt eder.
             </p>
           </div>
         </div>
-
-        {/* Buton */}
         <div className="flex justify-start mt-8">
           <Link
             href="/rezervasyon"
             className="bg-gradient-to-tr from-[#cbb26a] to-[#bfa658] text-black font-bold text-lg px-7 py-3 rounded-xl shadow-md transition hover:scale-105 hover:from-[#e6d199] hover:to-[#c4ad5f] border border-[#fff6ce]"
           >
-            Rezervasyon Yap
+            VIP Rezervasyon Yap
           </Link>
         </div>
       </section>
