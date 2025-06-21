@@ -8,13 +8,13 @@ export default function Home() {
   return (
     <main>
       <HeroSlider />
-      <section className="flex flex-col md:flex-row justify-center items-center gap-8 px-4 max-w-[1240px] mx-auto mt-12 mb-14">
+      <section className="flex flex-col md:flex-row justify-center items-center gap-8 px-4 max-w-[1150px] mx-auto mt-12 mb-14">
         {/* Sol blok: Form */}
-        <div className="flex items-center justify-center rounded-2xl border border-gold bg-black/80 shadow-lg w-[900px] h-[600px] min-w-[300px]">
+        <div className="flex items-center justify-center rounded-2xl border border-gold bg-black/80 shadow-lg w-[750px] h-[600px] min-w-[300px]">
           <VipTransferForm />
         </div>
         {/* Sağ blok: Video */}
-        <div className="flex items-center justify-center rounded-2xl border border-gold bg-black/80 shadow-lg w-[300px] h-[600px]">
+        <div className="flex items-center justify-center rounded-2xl border border-gold bg-black/80 shadow-lg w-[400px] h-[600px]">
           <HeroVideo />
         </div>
       </section>
