@@ -5,24 +5,15 @@ export default function HeroVideo() {
   const videoRef = useRef(null);
   const [userHasUnmuted, setUserHasUnmuted] = useState(false);
 
-  // Intersection Observer (scroll ile pause/play + mute kontrolü)
+  // Intersection Observer: sadece play/pause için, mute kontrolü için değil!
   useEffect(() => {
     let observer;
     if (videoRef.current) {
       observer = new window.IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
-            // Video en az %50 görünüyorsa devam et
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
             videoRef.current.play().catch(() => {});
-            // Kullanıcı sesi açtıysa, sesi açık devam
-            if (userHasUnmuted) {
-              videoRef.current.muted = false;
-              videoRef.current.volume = 1;
-            } else {
-              videoRef.current.muted = true;
-            }
           } else {
-            // Video ekranda değilse durdur
             videoRef.current.pause();
           }
         },
@@ -31,11 +22,11 @@ export default function HeroVideo() {
       observer.observe(videoRef.current);
     }
     return () => observer && observer.disconnect();
-  }, [userHasUnmuted]);
+  }, []);
 
-  // Kullanıcı videoya tıkladıysa veya mouse ile üzerine geldiyse baştan ve sesli başlat
+  // Sadece tıklayınca: sesi aç, başa sar, userHasUnmuted'ı bir daha değişme
   const handleUnmuteAndRestart = () => {
-    if (videoRef.current) {
+    if (!userHasUnmuted && videoRef.current) {
       videoRef.current.currentTime = 0;
       videoRef.current.muted = false;
       videoRef.current.volume = 1;
@@ -50,10 +41,9 @@ export default function HeroVideo() {
       src="/reklam.mp4"
       controls
       autoPlay
-      muted
+      muted={!userHasUnmuted}
       className="w-[400px] h-[600px] object-cover rounded-2xl bg-black"
       style={{ border: "none", cursor: "pointer" }}
-      onMouseEnter={handleUnmuteAndRestart}
       onClick={handleUnmuteAndRestart}
     />
   );
