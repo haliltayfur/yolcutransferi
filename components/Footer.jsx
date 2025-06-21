@@ -13,12 +13,12 @@ export default function Footer() {
           <div>
             <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">VIP Hizmetler</h3>
             <ul className="flex flex-col gap-2 text-[1rem]">
-              <li><a href="/hizmetler" className="footer-link">Havalimanı VIP Transfer</a></li>
-              <li><a href="/hizmetler" className="footer-link">Şehirlerarası Transfer</a></li>
-              <li><a href="/hizmetler" className="footer-link">Kurumsal Transfer</a></li>
+              <li><a href="/vip-havalimani" className="footer-link">Havalimanı VIP Transfer</a></li>
+              <li><a href="/sehirler-arasi" className="footer-link">Şehirlerarası Transfer</a></li>
+              <li><a href="/kurumsal" className="footer-link">Kurumsal Transfer</a></li>
               <li><a href="/araclar" className="footer-link">VIP Araçlar</a></li>
               <li><a href="/rezervasyon" className="footer-link">Online Rezervasyon</a></li>
-              <li><a href="/sofor-basvuru" className="footer-link">Şoför Başvurusu</a></li>
+              <li><a href="/uyeol_sofor" className="footer-link">Şoför Başvurusu</a></li>
             </ul>
           </div>
           {/* 2. Kurumsal & Yasal */}
