@@ -2,10 +2,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const borderColor = "#6e5a1e";
-const buttonBg = "#6e5a1e";
-const buttonHover = "#8c7327";
-
 const tours = [
   {
     title: "İstanbul VIP Şehir Turu (Araçlı)",
@@ -63,11 +59,8 @@ function oldPrice(price, discount) {
 
 export default function TurGezi() {
   return (
-    <main className="max-w-5xl mx-auto px-2 sm:px-6 py-7 sm:py-12">
-      <div
-        className="border-4 rounded-[18px] bg-black/75 p-4 sm:p-10 shadow-2xl mb-8 sm:mb-12"
-        style={{ borderColor }}
-      >
+    <main className="max-w-4xl mx-auto px-4 py-14">
+      <div className="border-4 border-[#6e5a1e] rounded-2xl bg-black/70 p-7 md:p-12 shadow-2xl">
         <Image
           src="/tur-gezi-banner.png"
           alt="Tur & Gezi Transferi"
@@ -76,63 +69,34 @@ export default function TurGezi() {
           className="w-full rounded-[12px] mb-6 object-cover"
           priority
         />
-        <h1
-          className="text-2xl sm:text-3xl font-extrabold mb-4"
-          style={{ color: borderColor, textAlign: "left" }}
-        >
-          Tur & Gezi Transferi
-        </h1>
-        <p className="mb-4 text-white font-medium text-base sm:text-lg text-left">
-          Kendinize özel bir tur planı oluşturabilir veya aşağıdaki seçkin turlardan birini tercih edebilirsiniz.
+        <h1 className="text-3xl font-extrabold text-[#6e5a1e] mb-4">Tur & Gezi Transferi</h1>
+        <p className="mb-5 text-gray-200 text-base sm:text-lg">
+          YolcuTransferi ile dilediğiniz tur rotasını oluşturabilir veya aşağıdaki seçkin turlardan birini tercih edebilirsiniz. Ekonomik ve ultra lüks transfer seçenekleriyle, tatil, şehir turu ve özel gezi organizasyonlarınızda VIP hizmetin yeni standardını sunuyoruz.
         </p>
-        <p className="mb-1 text-white font-normal text-base sm:text-lg text-left">
-          YolcuTransferi, ekonomik ve ultra lüks transfer seçenekleriyle VIP hizmetin yeni standardını sunar. Tatil, şehir turu ve özel gezi organizasyonlarınızda, profesyonel sürücülerimiz ve geniş araç filomuzla konforlu ve güvenli ulaşım sağlıyoruz.
-        </p>
-      </div>
-      <div className="mb-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="mb-10 grid grid-cols-1 md:grid-cols-2 gap-8">
           {tours.map((tour, idx) => {
             const eski = oldPrice(tour.price, tour.discount);
             return (
               <div
                 key={idx}
-                className="border-4 rounded-2xl bg-black/80 p-5 shadow-xl flex flex-col min-w-[240px] max-w-[450px] mx-auto h-full"
-                style={{ borderColor }}
+                className="border-4 rounded-2xl bg-black/80 p-4 shadow-xl flex flex-col h-full"
+                style={{ borderColor: "#6e5a1e" }}
               >
-                <div className="w-full flex justify-center items-center mb-3">
-                  <img
-                    src={tour.image}
-                    alt={tour.title}
-                    style={{
-                      height: "160px",
-                      width: "90%",
-                      maxWidth: "380px",
-                      borderRadius: "18px",
-                      objectFit: "cover",
-                      display: "block",
-                      margin: "0 auto",
-                      border: `2px solid ${borderColor}`,
-                    }}
-                  />
-                </div>
-                <h3
-                  className="text-xl font-bold mb-2 text-left"
-                  style={{ color: borderColor, minHeight: 50 }}
-                >
+                <img
+                  src={tour.image}
+                  alt={tour.title}
+                  className="h-[150px] w-full max-w-[400px] rounded-xl object-cover mx-auto mb-4 border-2"
+                  style={{ borderColor: "#6e5a1e" }}
+                />
+                <h3 className="text-xl font-bold mb-2" style={{ color: "#6e5a1e" }}>
                   {tour.title}
                 </h3>
-                <p className="text-white mb-3 text-left text-[15px] leading-relaxed min-h-[56px]">
-                  {tour.description}
-                </p>
-                {/* Fiyat Kutusu */}
-                <div
-                  className="flex flex-row items-end justify-start mt-auto mb-0 px-4 py-2 rounded-xl border-2"
-                  style={{
-                    borderColor,
-                    background: "#18160c",
-                    minWidth: 185,
-                  }}
-                >
+                <p className="text-gray-200 mb-3 text-[15px] leading-relaxed">{tour.description}</p>
+                <div className="flex flex-row items-end mt-auto mb-0 px-4 py-2 rounded-xl border-2" style={{
+                  borderColor: "#6e5a1e",
+                  background: "#18160c",
+                  minWidth: 185,
+                }}>
                   <div className="flex flex-col items-start flex-1">
                     <span
                       className="text-xs text-gray-400"
@@ -148,7 +112,7 @@ export default function TurGezi() {
                     <span
                       className="font-bold text-2xl"
                       style={{
-                        color: borderColor,
+                        color: "#6e5a1e",
                         letterSpacing: "0.5px",
                         lineHeight: 1.2,
                       }}
@@ -156,15 +120,12 @@ export default function TurGezi() {
                       {tour.price.toLocaleString("tr-TR")} TL
                     </span>
                   </div>
-                  <span
-                    className="text-xs font-semibold ml-4 mb-1"
-                    style={{
-                      color: "#2de186",
-                      letterSpacing: "0.2px",
-                      fontWeight: 600,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
+                  <span className="text-xs font-semibold ml-4 mb-1" style={{
+                    color: "#2de186",
+                    letterSpacing: "0.2px",
+                    fontWeight: 600,
+                    whiteSpace: "nowrap",
+                  }}>
                     %{tour.discount} indirim
                   </span>
                 </div>
@@ -172,22 +133,12 @@ export default function TurGezi() {
             );
           })}
         </div>
+        <Link href="https://yolcutransferi.com/rezervasyon">
+          <button className="bg-[#6e5a1e] hover:bg-[#8c7327] text-white font-bold py-3 px-8 rounded-xl mt-5 w-full text-lg shadow transition">
+            Rezervasyon Yap
+          </button>
+        </Link>
       </div>
-      <Link href="https://yolcutransferi.com/rezervasyon">
-        <button
-          className="font-bold py-3 px-8 rounded-2xl w-full text-lg shadow transition mt-6"
-          style={{
-            background: buttonBg,
-            color: "#fff",
-            border: "none",
-            outline: "none",
-          }}
-          onMouseOver={e => (e.currentTarget.style.background = buttonHover)}
-          onMouseOut={e => (e.currentTarget.style.background = buttonBg)}
-        >
-          Rezervasyon Yap
-        </button>
-      </Link>
     </main>
   );
 }
