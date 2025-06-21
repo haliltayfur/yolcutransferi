@@ -76,12 +76,10 @@ export default function VipTransferForm() {
   }
 
   return (
-  <form
+<form
   className="w-full h-full bg-black/80 rounded-2xl shadow-lg px-4 py-6 border border-gold flex flex-col justify-center"
   onSubmit={handleSubmit}
-
-  
-    >
+>
       <div className="flex flex-col gap-2 w-full mb-2">
         {/* AUTOCOMPLETE FROM */}
         <div className="relative">
