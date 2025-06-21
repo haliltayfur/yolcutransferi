@@ -4,6 +4,9 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap');
 
+/* React Datepicker Styles */
+@import "react-datepicker/dist/react-datepicker.css";
+
 input, select, button {
   outline: none;
   font-size: 16px;
@@ -30,7 +33,7 @@ body {
 /* Hatalı kodu kaldır! */
 .input {
   background: #fff;
-  border: 1px solid #ccc;  /* veya border-gray-400 */
+  border: 1px solid #ccc;
   border-radius: 0.75rem;
   padding: 0.8rem 1rem;
   color: #222;
