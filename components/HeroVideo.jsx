@@ -11,7 +11,7 @@ export default function HeroVideo() {
     if (videoRef.current) {
       observer = new window.IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
             videoRef.current.play().catch(() => {});
           } else {
             videoRef.current.pause();
