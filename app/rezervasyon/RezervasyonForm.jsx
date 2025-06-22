@@ -4,42 +4,58 @@ import { useSearchParams } from "next/navigation";
 import { vehicles } from "../../data/vehicles";
 import { extrasList } from "../../data/extras";
 
-// Adres otomasyonu — il, ilçe, mahalle, sokak, havalimanı
+// Tekil adres autocomplete hook'u — adresler.json üzerinden
 const useAddressData = () => {
   const [addresses, setAddresses] = useState([]);
   useEffect(() => {
-    Promise.all([
-      fetch("/dumps/adresler.json").then(r => r.json()),
-      fetch("/dumps/airports.json").then(r => r.json())
-    ]).then(([adresler, havalimanlari]) => {
-      const adresList = adresler.map(obj =>
-        [obj.il, obj.ilce, obj.mahalle, obj.sokak].filter(Boolean).join(" / ")
-      );
-      const airportList = havalimanlari.map(a => a.name);
-      setAddresses([...new Set([...adresList, ...airportList])]);
-    });
+    fetch("/dumps/adresler.json")
+      .then(r => r.json())
+      .then(setAddresses);
   }, []);
   return addresses;
 };
 
 const normalize = s =>
-  s.toLocaleLowerCase("tr-TR").replace(/[çÇ]/g,"c").replace(/[ğĞ]/g,"g")
-  .replace(/[ıİ]/g,"i").replace(/[öÖ]/g,"o").replace(/[şŞ]/g,"s")
-  .replace(/[üÜ]/g,"u").replace(/[\s\-\.]/g,"");
+  s
+    .toLocaleLowerCase("tr-TR")
+    .replace(/[çÇ]/g, "c")
+    .replace(/[ğĞ]/g, "g")
+    .replace(/[ıİ]/g, "i")
+    .replace(/[öÖ]/g, "o")
+    .replace(/[şŞ]/g, "s")
+    .replace(/[üÜ]/g, "u")
+    .replace(/[\s\-\.]/g, "");
 
+// Sadece 20 öneri gelsin, her satır bir adres
 function getSuggestions(q, addressList) {
   if (!q || q.length < 2) return [];
   const nq = normalize(q);
-  return addressList.filter(item => normalize(item).includes(nq)).slice(0, 8);
+  return addressList
+    .filter(item =>
+      (item.il && normalize(item.il).includes(nq)) ||
+      (item.ilce && normalize(item.ilce).includes(nq)) ||
+      (item.semt && normalize(item.semt).includes(nq)) ||
+      (item.mahalle && normalize(item.mahalle).includes(nq)) ||
+      (item.ad && normalize(item.ad).includes(nq))
+    )
+    .slice(0, 20)
+    .map(item => {
+      if (item.tip === "il") return item.il;
+      if (item.tip === "ilce") return `${item.il} / ${item.ilce}`;
+      if (item.tip === "semt") return `${item.il} / ${item.ilce} / ${item.semt}`;
+      if (item.tip === "mahalle")
+        return `${item.il} / ${item.ilce} / ${item.semt ? item.semt + " / " : ""}${item.mahalle}`;
+      if (item.tip === "havalimani") return item.ad;
+      return "";
+    });
 }
 
 // Saatler — sadece .00, .15, .30, .45
 const saatler = [];
-for (let h = 0; h < 24; ++h) for (let m of [0,15,30,45])
+for (let h = 0; h < 24; ++h) for (let m of [0, 15, 30, 45])
   saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
 export default function RezervasyonForm() {
-  // Parametrelerden değer oku
   const params = useSearchParams();
   const paramFrom = params.get("from") || "";
   const paramTo = params.get("to") || "";
@@ -48,11 +64,15 @@ export default function RezervasyonForm() {
   const paramVehicle = params.get("vehicle") || "";
   const paramPeople = Number(params.get("people")) || 1;
 
+  const addressList = useAddressData();
+
   // State'ler
   const [from, setFrom] = useState(paramFrom);
   const [to, setTo] = useState(paramTo);
   const [fromSug, setFromSug] = useState([]);
   const [toSug, setToSug] = useState([]);
+  const [fromFocused, setFromFocused] = useState(false);
+  const [toFocused, setToFocused] = useState(false);
   const [people, setPeople] = useState(paramPeople);
   const [segment, setSegment] = useState("ekonomik");
   const [transfer, setTransfer] = useState("");
@@ -69,12 +89,9 @@ export default function RezervasyonForm() {
   const [showSummary, setShowSummary] = useState(false);
   const [showContract, setShowContract] = useState(false);
 
-  // Adres autocomplete
-  const addressList = useAddressData();
   useEffect(() => { setFromSug(getSuggestions(from, addressList)); }, [from, addressList]);
   useEffect(() => { setToSug(getSuggestions(to, addressList)); }, [to, addressList]);
 
-  // Segment ve transferler
   const segmentOptions = [
     { key: "ekonomik", label: "Ekonomik" },
     { key: "lux", label: "Lüks" },
@@ -83,7 +100,10 @@ export default function RezervasyonForm() {
   const transferTypes = {
     ekonomik: ["Şehirlerarası Transfer", "Kurumsal & Toplu Transfer", "Tur & Gezi Transferi"],
     lux: ["VIP Havalimanı Transferi", "Şehirlerarası Transfer", "Tur & Gezi Transferi", "Kurumsal & Toplu Transfer"],
-    prime: ["VIP Havalimanı Transferi", "Şehirlerarası Transfer", "Kurumsal & Toplu Transfer", "Tur & Gezi Transferi", "Düğün & Özel Etkinlik Transferi", "Drone Yolcu Transferi"]
+    prime: [
+      "VIP Havalimanı Transferi", "Şehirlerarası Transfer", "Kurumsal & Toplu Transfer",
+      "Tur & Gezi Transferi", "Düğün & Özel Etkinlik Transferi", "Drone Yolcu Transferi"
+    ]
   };
   const availableTransfers = transferTypes[segment] || [];
   const availableVehicles = vehicles.filter(v =>
@@ -93,17 +113,14 @@ export default function RezervasyonForm() {
   );
   const maxPeople = Math.max(...availableVehicles.map(v => v.max || 1), 10);
 
-  // Ekstralar
   const availableExtras = extrasList.map(e => ({
     ...e,
     disabled: vehicle && !vehicles.find(v => v.value === vehicle)?.extras?.includes(e.key)
   }));
 
-  // Date picker — tıklayınca açılır
   const dateInputRef = useRef();
   const openDate = () => dateInputRef.current && dateInputRef.current.showPicker();
 
-  // TC/Telefon validation
   function handleTcChange(val) {
     setTc(val.replace(/\D/g, "").slice(0, 11));
   }
@@ -113,7 +130,6 @@ export default function RezervasyonForm() {
     setPhone(num.slice(0, 11));
   }
 
-  // Otomatik ad/soyad/tel için browser autofill ve localstorage önerileri
   useEffect(() => {
     try {
       const s = window.localStorage.getItem("rezv_adsoyad");
@@ -134,7 +150,6 @@ export default function RezervasyonForm() {
     }
   }, [showSummary]);
 
-  // Form gönder
   function handleSubmit(e) {
     e.preventDefault();
     if (!from || !to || !date || !time || !vehicle || !name || !surname || tc.length !== 11 || phone.length !== 11 || !mesafeliOk) {
@@ -151,50 +166,57 @@ export default function RezervasyonForm() {
           VIP Rezervasyon Formu
         </h1>
         <form onSubmit={handleSubmit} autoComplete="on" className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Nereden/Nereye */}
-          <div>
+          {/* Nereden */}
+          <div className="relative">
             <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
             <input
               type="text"
-              placeholder="İl / İlçe / Mahalle / Havalimanı"
+              placeholder="İl / İlçe / Semt / Mahalle / Havalimanı"
               className="input w-full"
               value={from}
               onChange={e => setFrom(e.target.value)}
-              onFocus={() => setFromSug(getSuggestions(from, addressList))}
+              onFocus={() => setFromFocused(true)}
+              onBlur={() => setTimeout(() => setFromFocused(false), 150)}
               autoComplete="on"
               style={{ fontFamily: "Quicksand,sans-serif" }}
             />
-            {fromSug.length > 0 && (
-              <ul className="bg-white border mt-1 rounded shadow absolute z-50 w-[97%] text-black max-h-60 overflow-auto">
-                {fromSug.map((t, i) => (
-                  <li key={i}
-                      className="px-3 py-2 hover:bg-yellow-50 cursor-pointer"
-                      onClick={() => { setFrom(t); setFromSug([]); }}>
-                    {t}
+            {fromFocused && fromSug.length > 0 && (
+              <ul className="absolute left-0 right-0 mt-1 bg-white text-black rounded-xl shadow-lg z-50 max-h-60 overflow-auto border border-[#bfa658]">
+                {fromSug.map((s, i) => (
+                  <li
+                    key={i}
+                    className="px-4 py-2 cursor-pointer hover:bg-yellow-100"
+                    onMouseDown={() => { setFrom(s); setFromSug([]); }}
+                  >
+                    {s}
                   </li>
                 ))}
               </ul>
             )}
           </div>
-          <div>
+          {/* Nereye */}
+          <div className="relative">
             <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
             <input
               type="text"
-              placeholder="İl / İlçe / Mahalle / Havalimanı"
+              placeholder="İl / İlçe / Semt / Mahalle / Havalimanı"
               className="input w-full"
               value={to}
               onChange={e => setTo(e.target.value)}
-              onFocus={() => setToSug(getSuggestions(to, addressList))}
+              onFocus={() => setToFocused(true)}
+              onBlur={() => setTimeout(() => setToFocused(false), 150)}
               autoComplete="on"
               style={{ fontFamily: "Quicksand,sans-serif" }}
             />
-            {toSug.length > 0 && (
-              <ul className="bg-white border mt-1 rounded shadow absolute z-50 w-[97%] text-black max-h-60 overflow-auto">
-                {toSug.map((t, i) => (
-                  <li key={i}
-                      className="px-3 py-2 hover:bg-yellow-50 cursor-pointer"
-                      onClick={() => { setTo(t); setToSug([]); }}>
-                    {t}
+            {toFocused && toSug.length > 0 && (
+              <ul className="absolute left-0 right-0 mt-1 bg-white text-black rounded-xl shadow-lg z-50 max-h-60 overflow-auto border border-[#bfa658]">
+                {toSug.map((s, i) => (
+                  <li
+                    key={i}
+                    className="px-4 py-2 cursor-pointer hover:bg-yellow-100"
+                    onMouseDown={() => { setTo(s); setToSug([]); }}
+                  >
+                    {s}
                   </li>
                 ))}
               </ul>
@@ -206,7 +228,7 @@ export default function RezervasyonForm() {
             <select className="input w-full"
                     value={people}
                     onChange={e => setPeople(Number(e.target.value))}>
-              {Array.from({length: maxPeople}, (_,i)=>i+1).map(val =>
+              {Array.from({ length: maxPeople }, (_, i) => i + 1).map(val =>
                 <option key={val} value={val}>{val}</option>
               )}
             </select>
@@ -411,7 +433,6 @@ function MesafeliPopup({ onClose }) {
     fetch("/mesafeli-satis")
       .then(r => r.text())
       .then(html => {
-        // Sadece içerik kısmını çek, header/footer'ı atla (örnek olarak <main> içini al)
         const main = html.match(/<main[^>]*>([\s\S]*?)<\/main>/);
         setContent(main ? main[1] : html);
       });
@@ -428,8 +449,6 @@ function MesafeliPopup({ onClose }) {
 
 // Sipariş Özeti Pop-up
 function SummaryPopup({ from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, onClose }) {
-  // Burada fiyatlandırma/ekstra dinamiklerini ekleyebilirsin
-  // Kişi isterse burada "Öde" adımına ilerler.
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
       <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
