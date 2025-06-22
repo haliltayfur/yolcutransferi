@@ -1,0 +1,57 @@
+// Hook ile adresleri yükle
+import { useState, useEffect } from "react";
+
+const useAddressData = () => {
+  const [addresses, setAddresses] = useState([]);
+  useEffect(() => {
+    fetch("/dumps/adresler.json")
+      .then(r => r.json())
+      .then(setAddresses);
+  }, []);
+  return addresses;
+};
+
+// Öneri fonksiyonu
+function getSuggestions(q, addressList) {
+  if (!q || q.length < 2) return [];
+  const nq = q.toLocaleLowerCase("tr-TR");
+  return addressList
+    .filter(item =>
+      (item.il && item.il.toLocaleLowerCase("tr-TR").includes(nq)) ||
+      (item.ilce && item.ilce.toLocaleLowerCase("tr-TR").includes(nq)) ||
+      (item.semt && item.semt.toLocaleLowerCase("tr-TR").includes(nq)) ||
+      (item.mahalle && item.mahalle.toLocaleLowerCase("tr-TR").includes(nq)) ||
+      (item.ad && item.ad.toLocaleLowerCase("tr-TR").includes(nq))
+    )
+    .slice(0, 24)
+    .map(item => {
+      if (item.tip === "il") return item.il;
+      if (item.tip === "ilce") return `${item.il} / ${item.ilce}`;
+      if (item.tip === "semt") return `${item.il} / ${item.ilce} / ${item.semt}`;
+      if (item.tip === "mahalle") return `${item.il} / ${item.ilce} / ${item.semt ? item.semt + " / " : ""}${item.mahalle}`;
+      if (item.tip === "havalimani") return item.ad;
+      return "";
+    });
+}
+
+// Kullanımı:
+const addressList = useAddressData();
+const [from, setFrom] = useState("");
+const [fromSug, setFromSug] = useState([]);
+
+useEffect(() => {
+  setFromSug(getSuggestions(from, addressList));
+}, [from, addressList]);
+<input
+  type="text"
+  value={from}
+  onChange={e => setFrom(e.target.value)}
+  // ...
+/>
+{fromSug.length > 0 && (
+  <ul>
+    {fromSug.map((t, i) => (
+      <li key={i} onClick={() => { setFrom(t); setFromSug([]); }}>{t}</li>
+    ))}
+  </ul>
+)}
