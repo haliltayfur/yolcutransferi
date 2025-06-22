@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { vehicles } from "../data/vehicleList"; // Doğru import
+import { vehicles } from "../data/vehicleList";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+
+// (Eğer segment ve transfer de eklenecekse bunları bir şekilde state olarak alırsın. Burada örnek olarak altta örnek select var.)
 
 const saatler = [
   "00:00", "00:30", "01:00", "01:30", "02:00", "02:30", "03:00", "03:30",
@@ -14,14 +16,28 @@ const saatler = [
   "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00", "23:30"
 ];
 
+// NORMALİZE fonksiyonu: Büyük/küçük harf, &/ve, fazladan boşlukları düzeltir
+function normalize(str) {
+  return (str || "")
+    .toLowerCase()
+    .replace(/&/g, "ve")
+    .replace(/[,\.]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export default function VipTransferForm() {
   const router = useRouter();
+
+  // SEÇİMLER (Segment ve Transfer için örnek)
+  const [segment, setSegment] = useState(""); // "Ekonomik", "Lüks", "Prime+" vb.
+  const [transfer, setTransfer] = useState(""); // "VIP Havalimanı Transferi" vb.
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState(null);
   const [time, setTime] = useState("");
-  const [vehicle, setVehicle] = useState(vehicles[0]?.value || "");
+  const [vehicle, setVehicle] = useState(""); // Seçili araç
   const [people, setPeople] = useState(1);
 
   useEffect(() => {
@@ -32,6 +48,8 @@ export default function VipTransferForm() {
     if (draft.time) setTime(draft.time);
     if (draft.vehicle) setVehicle(draft.vehicle);
     if (draft.people) setPeople(draft.people);
+    if (draft.segment) setSegment(draft.segment);
+    if (draft.transfer) setTransfer(draft.transfer);
   }, []);
 
   useEffect(() => {
@@ -44,9 +62,38 @@ export default function VipTransferForm() {
         time,
         vehicle,
         people,
+        segment,
+        transfer
       })
     );
-  }, [from, to, date, time, vehicle, people]);
+  }, [from, to, date, time, vehicle, people, segment, transfer]);
+
+  // **FİLTRELEME - AKILLI**
+  const availableVehicles = vehicles.filter(v => {
+    // Segment seçilmişse normalleştirerek eşleştir
+    if (segment && normalize(v.segment) !== normalize(segment)) return false;
+    // Kişi kapasitesi
+    if (people && v.max < people) return false;
+    // Transfer türü seçilmişse, normalize ederek array’de var mı bak
+    if (transfer) {
+      const transferNorm = normalize(transfer);
+      const arr = (v.transferTypes || []).map(normalize);
+      if (!arr.some(t => t === transferNorm)) return false;
+    }
+    return true;
+  });
+
+  // Seçili araç, filtre dışına çıkarsa ilk uygun aracı seç
+  useEffect(() => {
+    if (availableVehicles.length > 0) {
+      if (!availableVehicles.find(v => v.value === vehicle)) {
+        setVehicle(availableVehicles[0].value);
+      }
+    } else {
+      setVehicle("");
+    }
+    // eslint-disable-next-line
+  }, [segment, transfer, people, vehicles]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -55,7 +102,7 @@ export default function VipTransferForm() {
       return;
     }
     const params = new URLSearchParams({
-      from, to, date: date.toISOString().split("T")[0], time, vehicle, people
+      from, to, date: date.toISOString().split("T")[0], time, vehicle, people, segment, transfer
     }).toString();
     router.push(`/rezervasyon?${params}`);
   }
@@ -63,11 +110,10 @@ export default function VipTransferForm() {
   return (
     <form
       className="w-full h-full flex flex-col justify-center px-8 py-6"
-      style={{ maxWidth: "900px", maxHeight: "600px" }}
+      style={{ maxWidth: "900px", maxHeight: "700px" }}
       onSubmit={handleSubmit}
     >
       <div className="flex flex-col gap-4 w-full mb-4">
-        {/* FROM */}
         <input
           type="text"
           placeholder="Nereden? (il/ilçe/mahalle/sokak)"
@@ -76,7 +122,6 @@ export default function VipTransferForm() {
           onChange={e => setFrom(e.target.value)}
           autoComplete="off"
         />
-        {/* TO */}
         <input
           type="text"
           placeholder="Nereye? (il/ilçe/mahalle/sokak)"
@@ -86,6 +131,37 @@ export default function VipTransferForm() {
           autoComplete="off"
         />
       </div>
+
+      {/* Segment ve Transfer Seçimi */}
+      <div className="flex flex-row gap-4 w-full mb-4">
+        {/* Segment */}
+        <select
+          className="w-1/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+          value={segment}
+          onChange={e => setSegment(e.target.value)}
+        >
+          <option value="">Segment Seç</option>
+          <option value="Ekonomik">Ekonomik</option>
+          <option value="Lüks">Lüks</option>
+          <option value="Prime+">Prime+</option>
+        </select>
+        {/* Transfer Türü */}
+        <select
+          className="w-2/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+          value={transfer}
+          onChange={e => setTransfer(e.target.value)}
+        >
+          <option value="">Transfer Türü Seç</option>
+          <option value="VIP Havalimanı Transferi">VIP Havalimanı Transferi</option>
+          <option value="Şehirler Arası Transfer">Şehirler Arası Transfer</option>
+          <option value="Özel Etkinlik">Özel Etkinlik</option>
+          <option value="Kurumsal Etkinlik">Kurumsal Etkinlik</option>
+          <option value="Tur & Gezi">Tur & Gezi</option>
+          <option value="Toplu Transfer">Toplu Transfer</option>
+          <option value="Düğün vb Organizasyonlar">Düğün vb Organizasyonlar</option>
+        </select>
+      </div>
+
       <div className="flex flex-row gap-4 w-full mb-4">
         {/* Araç Tipi */}
         <select
@@ -93,7 +169,8 @@ export default function VipTransferForm() {
           value={vehicle}
           onChange={e => setVehicle(e.target.value)}
         >
-          {vehicles.map((v, i) => (
+          {availableVehicles.length === 0 && <option value="">Uygun araç yok</option>}
+          {availableVehicles.map((v, i) => (
             <option key={i} value={v.value}>{v.label}</option>
           ))}
         </select>
@@ -103,7 +180,7 @@ export default function VipTransferForm() {
           value={people}
           onChange={e => setPeople(Number(e.target.value))}
         >
-          {Array.from({ length: 16 }, (_, i) => i + 1).map(val =>
+          {Array.from({ length: 24 }, (_, i) => i + 1).map(val =>
             <option key={val} value={val}>{val}</option>
           )}
         </select>
