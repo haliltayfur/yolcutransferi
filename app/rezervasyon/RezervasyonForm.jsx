@@ -5,7 +5,6 @@ import { vehicles } from "../../data/vehicles";
 import { extrasList } from "../../data/extras";
 import AdresAutoComplete from "./AdresAutoComplete";
 
-// Saatler — .00, .15, .30, .45
 const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
@@ -20,8 +19,8 @@ export default function RezervasyonForm() {
   const paramPeople = Number(params.get("people")) || 1;
 
   // State'ler
-const [from, setFrom] = useState("");
-const [to, setTo] = useState("");
+  const [from, setFrom] = useState(paramFrom);
+  const [to, setTo] = useState(paramTo);
   const [people, setPeople] = useState(paramPeople);
   const [segment, setSegment] = useState("ekonomik");
   const [transfer, setTransfer] = useState("");
@@ -32,24 +31,39 @@ const [to, setTo] = useState("");
   const [surname, setSurname] = useState("");
   const [tc, setTc] = useState("");
   const [phone, setPhone] = useState("");
+  const [pnr, setPnr] = useState("");
   const [note, setNote] = useState("");
   const [extras, setExtras] = useState([]);
   const [mesafeliOk, setMesafeliOk] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showContract, setShowContract] = useState(false);
 
-  // Segment/Transfer logic
+  // SEGMENTLER
   const segmentOptions = [
     { key: "ekonomik", label: "Ekonomik" },
     { key: "lux", label: "Lüks" },
     { key: "prime", label: "Prime+" }
   ];
   const transferTypes = {
-    ekonomik: ["Şehirlerarası Transfer", "Kurumsal & Toplu Transfer", "Tur & Gezi Transferi"],
-    lux: ["VIP Havalimanı Transferi", "Şehirlerarası Transfer", "Tur & Gezi Transferi", "Kurumsal & Toplu Transfer"],
+    ekonomik: [
+      "VIP Havalimanı Transferi",
+      "Şehirlerarası Transfer",
+      "Kurumsal & Toplu Transfer",
+      "Tur & Gezi Transferi"
+    ],
+    lux: [
+      "VIP Havalimanı Transferi",
+      "Şehirlerarası Transfer",
+      "Kurumsal & Toplu Transfer",
+      "Tur & Gezi Transferi"
+    ],
     prime: [
-      "VIP Havalimanı Transferi", "Şehirlerarası Transfer", "Kurumsal & Toplu Transfer",
-      "Tur & Gezi Transferi", "Düğün & Özel Etkinlik Transferi", "Drone Yolcu Transferi"
+      "VIP Havalimanı Transferi",
+      "Şehirlerarası Transfer",
+      "Kurumsal & Toplu Transfer",
+      "Tur & Gezi Transferi",
+      "Düğün & Özel Etkinlik Transferi",
+      "Drone Yolcu Transferi"
     ]
   };
   const availableTransfers = transferTypes[segment] || [];
@@ -77,36 +91,71 @@ const [to, setTo] = useState("");
     setPhone(num.slice(0, 11));
   }
 
-  // LocalStorage autofill
+  // AD / SOYAD / TEL CACHE (browser + localStorage)
   useEffect(() => {
     try {
-      const s = window.localStorage.getItem("rezv_adsoyad");
-      if (s) {
-        const [n, sn] = s.split(" ");
-        if (!name) setName(n || "");
-        if (!surname) setSurname(sn || "");
+      if (!name) {
+        let isim = window.localStorage.getItem("rezv_ad");
+        if (!isim) isim = window.sessionStorage.getItem("rezv_ad");
+        if (!isim && window.navigator.userAgent.includes("Chrome")) {
+          isim = window.localStorage.getItem("ad") || "";
+        }
+        if (isim) setName(isim);
       }
-      const tel = window.localStorage.getItem("rezv_tel");
-      if (tel && !phone) setPhone(tel);
-    } catch {}
+      if (!surname) {
+        let soyad = window.localStorage.getItem("rezv_soyad");
+        if (!soyad) soyad = window.sessionStorage.getItem("rezv_soyad");
+        if (!soyad && window.navigator.userAgent.includes("Chrome")) {
+          soyad = window.localStorage.getItem("soyad") || "";
+        }
+        if (soyad) setSurname(soyad);
+      }
+      if (!phone) {
+        let tel = window.localStorage.getItem("rezv_tel") || window.sessionStorage.getItem("rezv_tel");
+        if (!tel && window.navigator.userAgent.includes("Chrome")) {
+          tel = window.localStorage.getItem("tel") || "";
+        }
+        if (tel) setPhone(tel);
+      }
+    } catch { }
   }, []);
 
   useEffect(() => {
     if (showSummary) {
-      window.localStorage.setItem("rezv_adsoyad", `${name} ${surname}`);
+      window.localStorage.setItem("rezv_ad", name);
+      window.localStorage.setItem("rezv_soyad", surname);
       window.localStorage.setItem("rezv_tel", phone);
     }
-  }, [showSummary]);
+  }, [showSummary, name, surname, phone]);
+
+  // HAVALİMANI ALGILAMA
+  const isAirport = str =>
+    str && typeof str === "string" && (
+      str.toLowerCase().includes("havaalan") ||
+      str.toLowerCase().includes("havaliman") ||
+      str.toLowerCase().includes("airport")
+    );
+  const showPnr =
+    isAirport(from) || isAirport(to) || (transfer && transfer.toLowerCase().includes("hava"));
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!from || !to || !date || !time || !vehicle || !name || !surname || tc.length !== 11 || phone.length !== 11 || !mesafeliOk) {
+    if (!from || !to || !date || !time || !vehicle || !name || !surname || tc.length !== 11 || phone.length !== 11 || !mesafeliOk || (showPnr && !pnr)) {
       alert("Lütfen tüm alanları eksiksiz ve doğru doldurun!");
       return;
     }
     setShowSummary(true);
   }
 
+  // Vercel debug bar gizle (prod için)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const el = document.querySelector('[class*="vercel-toolbar"]');
+      if (el && process.env.NODE_ENV === "production") el.style.display = "none";
+    }
+  }, []);
+
+  // -- RETURN HTML --
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-[#19160a] to-[#302811]">
       <section className="w-full max-w-2xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] my-16">
@@ -115,23 +164,23 @@ const [to, setTo] = useState("");
         </h1>
         <form onSubmit={handleSubmit} autoComplete="on" className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Nereden */}
-         <div>
-  <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
-  <AdresAutoComplete
-    value={from}
-    onChange={setFrom}
-    placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
-  />
-</div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
+            <AdresAutoComplete
+              value={from}
+              onChange={setFrom}
+              placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
+            />
+          </div>
           {/* Nereye */}
-        <div>
-  <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
-  <AdresAutoComplete
-    value={to}
-    onChange={setTo}
-    placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
-  />
-</div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
+            <AdresAutoComplete
+              value={to}
+              onChange={setTo}
+              placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
+            />
+          </div>
           {/* Kişi ve Segment */}
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
@@ -176,6 +225,20 @@ const [to, setTo] = useState("");
               )}
             </select>
           </div>
+          {/* PNR (Havalimanı) */}
+          {showPnr && (
+            <div className="md:col-span-2">
+              <label className="font-bold text-[#bfa658] mb-1 block">PNR / Uçuş Kodu</label>
+              <input
+                type="text"
+                className="input w-full"
+                value={pnr}
+                onChange={e => setPnr(e.target.value)}
+                placeholder="Uçuş Rezervasyon Kodu (PNR)"
+                style={{ fontFamily: "Quicksand,sans-serif" }}
+              />
+            </div>
+          )}
           {/* Tarih ve Saat */}
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
@@ -265,10 +328,18 @@ const [to, setTo] = useState("");
           </div>
           {/* Ekstralar */}
           <div className="md:col-span-2">
-            <label className="font-bold text-[#bfa658] mb-1 block">Ekstralar</label>
-            <div className="flex flex-wrap gap-3">
+            <label className="font-bold text-[#bfa658] mb-2 block text-lg">Ekstralar</label>
+            <div className="flex flex-wrap gap-4">
               {availableExtras.map(extra =>
-                <label key={extra.key} className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-black/80 border ${extra.disabled ? "border-gray-500 text-gray-500" : "border-yellow-700"} cursor-pointer`}>
+                <label
+                  key={extra.key}
+                  className={`flex items-center gap-2 px-4 py-3 rounded-xl shadow-md text-base font-semibold
+                    ${extra.disabled
+                    ? "bg-[#232117] border border-gray-500 text-gray-400 cursor-not-allowed"
+                    : "bg-[#1c1912] border border-[#bfa658] text-[#ffeec2] hover:scale-105 transition-transform duration-150 cursor-pointer"
+                  }`}
+                  style={{ minWidth: 180, justifyContent: "flex-start", letterSpacing: "0.02em" }}
+                >
                   <input
                     type="checkbox"
                     disabled={extra.disabled}
@@ -280,7 +351,7 @@ const [to, setTo] = useState("");
                         setExtras(extras.filter(k => k !== extra.key));
                     }}
                   />
-                  {extra.label} {extra.price ? `(+${extra.price}₺)` : ""}
+                  {extra.label} {extra.price ? <span className="text-[#bfa658] font-bold ml-1">+{extra.price}₺</span> : ""}
                 </label>
               )}
             </div>
@@ -328,6 +399,7 @@ const [to, setTo] = useState("");
             phone={phone}
             note={note}
             extras={extras}
+            pnr={pnr}
             onClose={() => setShowSummary(false)}
           />
         )}
@@ -336,7 +408,7 @@ const [to, setTo] = useState("");
   );
 }
 
-// Mesafeli popup (canlıdan çeker, header/footer yok, modal)
+// Mesafeli popup
 function MesafeliPopup({ onClose }) {
   const [content, setContent] = useState("Yükleniyor...");
   useEffect(() => {
@@ -358,7 +430,7 @@ function MesafeliPopup({ onClose }) {
 }
 
 // Sipariş Özeti Pop-up
-function SummaryPopup({ from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, onClose }) {
+function SummaryPopup({ from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, pnr, onClose }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
       <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
@@ -373,6 +445,7 @@ function SummaryPopup({ from, to, people, segment, transfer, vehicle, date, time
           <div><b>Tarih:</b> {date} {time}</div>
           <div><b>Ad Soyad:</b> {name} {surname} – T.C.: {tc}</div>
           <div><b>Telefon:</b> {phone}</div>
+          {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
           {note && <div><b>Ek Not:</b> {note}</div>}
           <div><b>Ekstralar:</b> {extras.length > 0 ? extras.join(", ") : "Yok"}</div>
         </div>
