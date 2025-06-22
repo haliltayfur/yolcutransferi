@@ -6,7 +6,7 @@ export const vehicles = [
     label: "VW Transporter",
     max: 6,
     segment: "Ekonomik",
-    transferTypes: ["Havalimanı", "Şehirlerarası", "Kurumsal"],
+    transferTypes: ["Havalimanı", "Şehirlerarası", "Kurumsal","Özel Etkinlik"],
     extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti"]
   },
   {
@@ -46,7 +46,7 @@ export const vehicles = [
     label: "VW Caddy",
     max: 3,
     segment: "Ekonomik",
-    transferTypes: ["Özel Etkinlik", "Kurumsal"],
+    transferTypes: ["Özel Etkinlik", "Kurumsal","Havalimanı"],
     extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti"]
   },
   {
@@ -78,7 +78,7 @@ export const vehicles = [
     label: "Mercedes V-Class Exclusive",
     max: 6,
     segment: "Prime+",
-    transferTypes: ["Havalimanı", "Kurumsal", "Prime+"],
+    transferTypes: ["Havalimanı", "Kurumsal", "Prime+", "Özel Etkinlik"],
     extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "tablet", "mini_bar", "bira_3lu", "sampanya", "viski", "hostes", "ozel_karsilama", "cicek", "gazete", "telefon_sarj_kiti"]
   },
   {
@@ -86,7 +86,7 @@ export const vehicles = [
     label: "Mercedes E-Class",
     max: 4,
     segment: "Lüks",
-    transferTypes: ["Havalimanı", "Kurumsal", "Özel Etkinlik"],
+    transferTypes: ["Havalimanı", "Kurumsal", "Prime+", "Özel Etkinlik"],
     extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "gazete", "telefon_sarj_kiti"]
   },
   {
@@ -134,7 +134,7 @@ export const vehicles = [
     label: "Mercedes Sprinter VIP",
     max: 11,
     segment: "Prime+",
-    transferTypes: ["Şehirlerarası", "Tur & Gezi", "Kurumsal", "Prime+"],
+    transferTypes: ["Şehirlerarası", "Tur & Gezi", "Kurumsal", "Özel Etkinlik", "Prime+", "Havalimanı"],
     extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "tablet", "mini_bar", "hostes", "ogle_yemegi", "gazete", "ozel_karsilama", "welcoming", "cicek"]
   },
   {
@@ -142,7 +142,7 @@ export const vehicles = [
     label: "Mercedes Sprinter Ultra VIP",
     max: 11,
     segment: "Prime+",
-    transferTypes: ["Tur & Gezi", "Kurumsal", "Prime+"],
+    transferTypes: ["Şehirlerarası", "Tur & Gezi", "Kurumsal", "Özel Etkinlik", "Prime+", "Havalimanı"],
     extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "tablet", "mini_bar", "hostes", "ogle_yemegi", "gazete", "ozel_karsilama", "welcoming", "cicek"]
   },
   {
@@ -150,7 +150,7 @@ export const vehicles = [
     label: "VW Crafter",
     max: 13,
     segment: "Lüks",
-    transferTypes: ["Şehirlerarası", "Tur & Gezi"],
+    transferTypes: ["Şehirlerarası", "Tur & Gezi", "Kurumsal", "Özel Etkinlik"],
     extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti", "wifi", "gazete", "ozel_karsilama", "welcoming"]
   },
   {
@@ -158,7 +158,7 @@ export const vehicles = [
     label: "VW Crafter VIP",
     max: 13,
     segment: "Prime+",
-    transferTypes: ["Tur & Gezi", "Kurumsal", "Prime+"],
+    transferTypes: ["Tur & Gezi", "Kurumsal", "Prime+", "Özel Etkinlik" ],
     extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "tablet", "mini_bar", "hostes", "ogle_yemegi", "gazete", "ozel_karsilama", "welcoming", "cicek"]
   },
   {
@@ -166,7 +166,7 @@ export const vehicles = [
     label: "Ford Transit Minibus",
     max: 15,
     segment: "Ekonomik",
-    transferTypes: ["Tur & Gezi", "Şehirlerarası", "Kurumsal"],
+    transferTypes: ["Tur & Gezi", "Şehirlerarası", "Kurumsal", "Özel Etkinlik"],
     extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti"]
   },
   {
@@ -174,7 +174,7 @@ export const vehicles = [
     label: "Iveco Daily Minibus",
     max: 16,
     segment: "Ekonomik",
-    transferTypes: ["Tur & Gezi", "Şehirlerarası", "Kurumsal"],
+    transferTypes: ["Tur & Gezi", "Şehirlerarası", "Kurumsal", "Özel Etkinlik"],
     extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti"]
   },
   {
@@ -182,7 +182,7 @@ export const vehicles = [
     label: "Temsa Prestij VIP",
     max: 27,
     segment: "Prime+",
-    transferTypes: ["Tur & Gezi", "Kurumsal", "Toplu Transfer", "Prime+"],
+    transferTypes: ["Tur & Gezi", "Kurumsal", "Toplu Transfer", "Prime+", "Özel Etkinlik"],
     extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "hostes", "ogle_yemegi", "gazete", "ozel_karsilama", "welcoming", "cicek"]
   },
   {
@@ -190,7 +190,7 @@ export const vehicles = [
     label: "Isuzu Novo Ultra VIP",
     max: 27,
     segment: "Prime+",
-    transferTypes: ["Tur & Gezi", "Kurumsal", "Toplu Transfer", "Prime+"],
+    transferTypes: ["Tur & Gezi", "Kurumsal", "Toplu Transfer", "Prime+", "Özel Etkinlik" ],
     extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "hostes", "ogle_yemegi", "gazete", "ozel_karsilama", "welcoming", "cicek"]
   },
   {
@@ -198,7 +198,7 @@ export const vehicles = [
     label: "Chrysler 300C Limo",
     max: 7,
     segment: "Prime+",
-    transferTypes: ["Özel Etkinlik", "Düğün", "Prime+"],
+    transferTypes: ["Özel Etkinlik", "Düğün", "Özel Etkinlik",  "Prime+"],
     extras: ["su", "kola", "bira_3lu", "sampanya", "viski", "sandvic", "kuruyemis", "hostes", "ozel_karsilama", "cicek", "gazete", "mini_bar"]
   },
   {
