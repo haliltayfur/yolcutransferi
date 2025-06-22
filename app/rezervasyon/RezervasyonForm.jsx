@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { vehicles } from "../../data/vehicles";
 import { extrasList } from "../../data/extras";
 
-// JSON'dan autocomplete için tüm adresleri topla
+// Adres otomasyonu — il, ilçe, mahalle, sokak, havalimanı
 const useAddressData = () => {
   const [addresses, setAddresses] = useState([]);
   useEffect(() => {
@@ -22,7 +22,6 @@ const useAddressData = () => {
   return addresses;
 };
 
-// Autocomplete yardımcı fonksiyon
 const normalize = s =>
   s.toLocaleLowerCase("tr-TR").replace(/[çÇ]/g,"c").replace(/[ğĞ]/g,"g")
   .replace(/[ıİ]/g,"i").replace(/[öÖ]/g,"o").replace(/[şŞ]/g,"s")
@@ -34,8 +33,13 @@ function getSuggestions(q, addressList) {
   return addressList.filter(item => normalize(item).includes(nq)).slice(0, 8);
 }
 
+// Saatler — sadece .00, .15, .30, .45
+const saatler = [];
+for (let h = 0; h < 24; ++h) for (let m of [0,15,30,45])
+  saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
+
 export default function RezervasyonForm() {
-  // Parametrelerden değer al
+  // Parametrelerden değer oku
   const params = useSearchParams();
   const paramFrom = params.get("from") || "";
   const paramTo = params.get("to") || "";
@@ -65,13 +69,12 @@ export default function RezervasyonForm() {
   const [showSummary, setShowSummary] = useState(false);
   const [showContract, setShowContract] = useState(false);
 
+  // Adres autocomplete
   const addressList = useAddressData();
-
-  // Nereden/Nereye autocomplete
   useEffect(() => { setFromSug(getSuggestions(from, addressList)); }, [from, addressList]);
   useEffect(() => { setToSug(getSuggestions(to, addressList)); }, [to, addressList]);
 
-  // Araç/ekstra dinamikleri
+  // Segment ve transferler
   const segmentOptions = [
     { key: "ekonomik", label: "Ekonomik" },
     { key: "lux", label: "Lüks" },
@@ -88,26 +91,17 @@ export default function RezervasyonForm() {
     (!segment || v.segment?.toLowerCase() === segment) &&
     (!people || (v.max || 1) >= people)
   );
-  const maxPeople = Math.max(...availableVehicles.map(v => v.max || 1), 1);
+  const maxPeople = Math.max(...availableVehicles.map(v => v.max || 1), 10);
 
-  // Ekstralar: önce tümünü göster, sonra uygun olmayanları disable
+  // Ekstralar
   const availableExtras = extrasList.map(e => ({
     ...e,
     disabled: vehicle && !vehicles.find(v => v.value === vehicle)?.extras?.includes(e.key)
   }));
 
-  // AutoComplete için inputa tıklanınca önerileri aç
-  const fromInputRef = useRef();
-  const toInputRef = useRef();
-
-  // Takvim açılır - inputa tıklandığında açılmalı
+  // Date picker — tıklayınca açılır
   const dateInputRef = useRef();
   const openDate = () => dateInputRef.current && dateInputRef.current.showPicker();
-
-  // Saatler 00, 15, 30, 45 dakikalık olmalı
-  const saatler = [];
-  for (let h = 0; h < 24; ++h) for (let m of [0,15,30,45])
-    saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
   // TC/Telefon validation
   function handleTcChange(val) {
@@ -133,7 +127,6 @@ export default function RezervasyonForm() {
     } catch {}
   }, []);
 
-  // Sipariş özeti açılınca verileri localstorage'a kaydet
   useEffect(() => {
     if (showSummary) {
       window.localStorage.setItem("rezv_adsoyad", `${name} ${surname}`);
@@ -141,7 +134,7 @@ export default function RezervasyonForm() {
     }
   }, [showSummary]);
 
-  // Form gönderme
+  // Form gönder
   function handleSubmit(e) {
     e.preventDefault();
     if (!from || !to || !date || !time || !vehicle || !name || !surname || tc.length !== 11 || phone.length !== 11 || !mesafeliOk) {
@@ -151,26 +144,25 @@ export default function RezervasyonForm() {
     setShowSummary(true);
   }
 
-  // Fiyat pop-up, mesafeli satış pop-up ve summary için sonraki mesajda devam edeceğim.
-  // (Burası ana form ve ana mantık, pop-up'ları hemen ekliyorum.)
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-[#19160a] to-[#302811] flex items-center justify-center py-12">
-      <div className="w-full max-w-2xl rounded-3xl shadow-2xl border border-yellow-700 p-10 bg-black/90 relative">
-        <h1 className="text-3xl font-bold mb-7 text-center text-yellow-400 tracking-wide" style={{letterSpacing: ".02em", marginTop: "-12px"}}>VIP Rezervasyon Formu</h1>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-[#19160a] to-[#302811]">
+      <section className="w-full max-w-2xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] my-16">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand">
+          VIP Rezervasyon Formu
+        </h1>
         <form onSubmit={handleSubmit} autoComplete="on" className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Nereden/Nereye */}
           <div>
-            <label className="font-bold text-yellow-400 mb-1 block">Nereden?</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
             <input
               type="text"
-              ref={fromInputRef}
               placeholder="İl / İlçe / Mahalle / Havalimanı"
               className="input w-full"
               value={from}
               onChange={e => setFrom(e.target.value)}
               onFocus={() => setFromSug(getSuggestions(from, addressList))}
               autoComplete="on"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
             />
             {fromSug.length > 0 && (
               <ul className="bg-white border mt-1 rounded shadow absolute z-50 w-[97%] text-black max-h-60 overflow-auto">
@@ -185,16 +177,16 @@ export default function RezervasyonForm() {
             )}
           </div>
           <div>
-            <label className="font-bold text-yellow-400 mb-1 block">Nereye?</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
             <input
               type="text"
-              ref={toInputRef}
               placeholder="İl / İlçe / Mahalle / Havalimanı"
               className="input w-full"
               value={to}
               onChange={e => setTo(e.target.value)}
               onFocus={() => setToSug(getSuggestions(to, addressList))}
               autoComplete="on"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
             />
             {toSug.length > 0 && (
               <ul className="bg-white border mt-1 rounded shadow absolute z-50 w-[97%] text-black max-h-60 overflow-auto">
@@ -210,7 +202,7 @@ export default function RezervasyonForm() {
           </div>
           {/* Kişi ve Segment */}
           <div>
-            <label className="font-bold text-yellow-400 mb-1 block">Kişi Sayısı</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
             <select className="input w-full"
                     value={people}
                     onChange={e => setPeople(Number(e.target.value))}>
@@ -220,7 +212,7 @@ export default function RezervasyonForm() {
             </select>
           </div>
           <div>
-            <label className="font-bold text-yellow-400 mb-1 block">Segment</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
             <select className="input w-full"
                     value={segment}
                     onChange={e => setSegment(e.target.value)}>
@@ -231,7 +223,7 @@ export default function RezervasyonForm() {
           </div>
           {/* Transfer ve Araç */}
           <div>
-            <label className="font-bold text-yellow-400 mb-1 block">Transfer Türü</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
             <select className="input w-full"
                     value={transfer}
                     onChange={e => setTransfer(e.target.value)}>
@@ -242,7 +234,7 @@ export default function RezervasyonForm() {
             </select>
           </div>
           <div>
-            <label className="font-bold text-yellow-400 mb-1 block">Araç</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Araç</label>
             <select className="input w-full"
                     value={vehicle}
                     onChange={e => setVehicle(e.target.value)}>
@@ -254,7 +246,7 @@ export default function RezervasyonForm() {
           </div>
           {/* Tarih ve Saat */}
           <div>
-            <label className="font-bold text-yellow-400 mb-1 block">Tarih</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
             <input
               type="date"
               className="input w-full"
@@ -265,10 +257,11 @@ export default function RezervasyonForm() {
               onChange={e => setDate(e.target.value)}
               min={new Date().toISOString().split("T")[0]}
               autoComplete="on"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
             />
           </div>
           <div>
-            <label className="font-bold text-yellow-400 mb-1 block">Saat</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
             <select className="input w-full"
                     value={time}
                     onChange={e => setTime(e.target.value)}>
@@ -278,28 +271,30 @@ export default function RezervasyonForm() {
           </div>
           {/* Ad Soyad */}
           <div>
-            <label className="font-bold text-yellow-400 mb-1 block">Ad</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Ad</label>
             <input
               type="text"
               className="input w-full"
               value={name}
               onChange={e => setName(e.target.value)}
               autoComplete="given-name"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
             />
           </div>
           <div>
-            <label className="font-bold text-yellow-400 mb-1 block">Soyad</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Soyad</label>
             <input
               type="text"
               className="input w-full"
               value={surname}
               onChange={e => setSurname(e.target.value)}
               autoComplete="family-name"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
             />
           </div>
           {/* TC ve Telefon */}
           <div>
-            <label className="font-bold text-yellow-400 mb-1 block">T.C. Kimlik No</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">T.C. Kimlik No</label>
             <input
               type="text"
               className="input w-full"
@@ -308,10 +303,11 @@ export default function RezervasyonForm() {
               value={tc}
               onChange={e => handleTcChange(e.target.value)}
               autoComplete="off"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
             />
           </div>
           <div>
-            <label className="font-bold text-yellow-400 mb-1 block">Telefon</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Telefon</label>
             <input
               type="text"
               className="input w-full"
@@ -320,22 +316,24 @@ export default function RezervasyonForm() {
               value={phone}
               onChange={e => handlePhoneChange(e.target.value)}
               autoComplete="tel"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
             />
           </div>
           {/* Ek Not */}
           <div className="md:col-span-2">
-            <label className="font-bold text-yellow-400 mb-1 block">Ek Not</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
             <textarea
               className="input w-full"
               rows={2}
               value={note}
               onChange={e => setNote(e.target.value)}
               placeholder="Eklemek istediğiniz bir not var mı?"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
             />
           </div>
           {/* Ekstralar */}
           <div className="md:col-span-2">
-            <label className="font-bold text-yellow-400 mb-1 block">Ekstralar</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Ekstralar</label>
             <div className="flex flex-wrap gap-3">
               {availableExtras.map(extra =>
                 <label key={extra.key} className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-black/80 border ${extra.disabled ? "border-gray-500 text-gray-500" : "border-yellow-700"} cursor-pointer`}>
@@ -365,7 +363,7 @@ export default function RezervasyonForm() {
               id="mesafeliBox"
             />
             <label htmlFor="mesafeliBox" className="text-sm text-gray-200">
-              <button type="button" className="underline text-yellow-400" onClick={e => { e.preventDefault(); setShowContract(true); }}>
+              <button type="button" className="underline text-[#bfa658]" onClick={e => { e.preventDefault(); setShowContract(true); }}>
                 Mesafeli Satış Sözleşmesini
               </button> okudum ve onaylıyorum.
             </label>
@@ -378,12 +376,30 @@ export default function RezervasyonForm() {
             </button>
           </div>
         </form>
-        {/* Pop-up'lar buraya */}
+        {/* Pop-up'lar */}
         {showContract && (
           <MesafeliPopup onClose={() => setShowContract(false)} />
         )}
-        {/* Sipariş özeti pop-up ve ödeme burada olacak */}
-      </div>
+        {showSummary && (
+          <SummaryPopup
+            from={from}
+            to={to}
+            people={people}
+            segment={segment}
+            transfer={transfer}
+            vehicle={vehicle}
+            date={date}
+            time={time}
+            name={name}
+            surname={surname}
+            tc={tc}
+            phone={phone}
+            note={note}
+            extras={extras}
+            onClose={() => setShowSummary(false)}
+          />
+        )}
+      </section>
     </div>
   );
 }
@@ -405,6 +421,36 @@ function MesafeliPopup({ onClose }) {
       <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
         <button onClick={onClose} className="absolute top-3 right-5 text-2xl font-bold text-red-500 hover:text-red-700">×</button>
         <div className="text-gray-800 prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
+      </div>
+    </div>
+  );
+}
+
+// Sipariş Özeti Pop-up
+function SummaryPopup({ from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, onClose }) {
+  // Burada fiyatlandırma/ekstra dinamiklerini ekleyebilirsin
+  // Kişi isterse burada "Öde" adımına ilerler.
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
+      <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
+        <button onClick={onClose} className="absolute top-3 right-5 text-2xl font-bold text-red-500 hover:text-red-700">×</button>
+        <h2 className="text-2xl font-bold mb-5 text-[#bfa658] text-center">Rezervasyon Özeti</h2>
+        <div className="text-black space-y-2">
+          <div><b>Transfer:</b> {transfer || "-"}</div>
+          <div><b>Araç:</b> {vehicle || "-"}</div>
+          <div><b>Kişi:</b> {people}</div>
+          <div><b>Nereden:</b> {from}</div>
+          <div><b>Nereye:</b> {to}</div>
+          <div><b>Tarih:</b> {date} {time}</div>
+          <div><b>Ad Soyad:</b> {name} {surname} – T.C.: {tc}</div>
+          <div><b>Telefon:</b> {phone}</div>
+          {note && <div><b>Ek Not:</b> {note}</div>}
+          <div><b>Ekstralar:</b> {extras.length > 0 ? extras.join(", ") : "Yok"}</div>
+        </div>
+        <button
+          onClick={() => { alert("Demo: Ödeme sayfasına yönlendirme yapılacak!"); onClose(); }}
+          className="w-full py-3 rounded-xl bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition mt-6"
+        >Onayla ve Öde</button>
       </div>
     </div>
   );
