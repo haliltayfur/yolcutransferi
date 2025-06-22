@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 
-// Ortak adres datasını oku
-export function useAddressData() {
-  const [addresses, setAddresses] = useState([]);
+// JSON dosyalarını fetch’le
+const useAdresData = () => {
+  const [options, setOptions] = useState([]);
   useEffect(() => {
     Promise.all([
       fetch("/dumps/sehirler.json").then(r => r.json()),
@@ -11,93 +11,68 @@ export function useAddressData() {
       fetch("/dumps/mahalleler.json").then(r => r.json()),
       fetch("/dumps/airports.json").then(r => r.json())
     ]).then(([sehirler, ilceler, mahalleler, airports]) => {
-      // Şehir
-      const sehirList = sehirler.map(s => ({
-        label: s.sehir_adi,
-        value: s.sehir_adi,
-        tip: "il"
+      let arr = [];
+      // Şehirler
+      arr.push(...sehirler.map(x => ({ text: x.sehir_adi, type: "il" })));
+      // İlçeler
+      arr.push(...ilceler.map(x => ({
+        text: `${sehirler.find(s => s.sehir_ID === x.sehir_ID)?.sehir_adi || ""} / ${x.ilce_adi}`,
+        type: "ilce"
+      })));
+      // Mahalleler
+      arr.push(...mahalleler.map(x => {
+        const ilce = ilceler.find(i => i.ilce_ID === x.ilce_ID);
+        const il = sehirler.find(s => s.sehir_ID === ilce?.sehir_ID);
+        return {
+          text: `${il?.sehir_adi || ""} / ${ilce?.ilce_adi || ""} / ${x.mahalle_adi}`,
+          type: "mahalle"
+        }
       }));
-      // İlçe
-      const ilceList = ilceler.map(i => ({
-        label: `${i.sehir_adi} / ${i.ilce_adi}`,
-        value: `${i.sehir_adi} / ${i.ilce_adi}`,
-        tip: "ilce"
-      }));
-      // Mahalle
-      const mahalleList = mahalleler.map(m => ({
-        label: `${m.sehir_adi} / ${m.ilce_adi} / ${m.mahalle_adi}`,
-        value: `${m.sehir_adi} / ${m.ilce_adi} / ${m.mahalle_adi}`,
-        tip: "mahalle"
-      }));
-      // Havalimanı
-      const havalimaniList = airports.map(a => ({
-        label: a.name,
-        value: a.name,
-        tip: "havalimani"
-      }));
-      setAddresses([...sehirList, ...ilceList, ...mahalleList, ...havalimaniList]);
+      // Havalimanları
+      arr.push(...airports.map(x => ({ text: x.name, type: "havalimani" })));
+      setOptions(arr);
     });
   }, []);
-  return addresses;
-}
+  return options;
+};
 
-// Normalleştirme fonksiyonu
-function normalize(s) {
-  return s
-    .toLocaleLowerCase("tr-TR")
-    .replace(/[çÇ]/g,"c").replace(/[ğĞ]/g,"g").replace(/[ıİ]/g,"i")
-    .replace(/[öÖ]/g,"o").replace(/[şŞ]/g,"s").replace(/[üÜ]/g,"u")
-    .replace(/[\s\-\.]/g,"");
-}
-
-// Otomatik tamamlama component'i
-export default function AdresAutoComplete({ label, value, onChange, placeholder = "İl / İlçe / Mahalle / Havalimanı" }) {
-  const addressList = useAddressData();
-  const [query, setQuery] = useState(value || "");
-  const [suggestions, setSuggestions] = useState([]);
-  useEffect(() => { setQuery(value); }, [value]);
+export default function AdresAutoComplete({ value, onChange, placeholder = "Adres girin..." }) {
+  const options = useAdresData();
+  const [input, setInput] = useState(value || "");
+  const [suggest, setSuggest] = useState([]);
+  const [focused, setFocused] = useState(false);
 
   useEffect(() => {
-    if (!query || query.length < 2) {
-      setSuggestions([]);
-      return;
-    }
-    const q = normalize(query);
-    setSuggestions(
-      addressList
-        .filter(item => normalize(item.label).includes(q))
-        .slice(0, 10)
+    if (!input || input.length < 2) return setSuggest([]);
+    const q = input.toLocaleLowerCase("tr-TR");
+    setSuggest(
+      options.filter(opt =>
+        opt.text.toLocaleLowerCase("tr-TR").includes(q)
+      ).slice(0, 15)
     );
-  }, [query, addressList]);
+  }, [input, options]);
 
   return (
-    <div className="relative w-full">
-      {label && <label className="font-bold text-[#bfa658] mb-1 block">{label}</label>}
+    <div style={{ position: "relative" }}>
       <input
-        type="text"
         className="input w-full"
-        value={query}
+        type="text"
         placeholder={placeholder}
-        onChange={e => {
-          setQuery(e.target.value);
-          onChange(e.target.value);
-        }}
-        onFocus={() => setSuggestions(query.length >= 2 ? suggestions : [])}
-        autoComplete="off"
+        value={input}
+        onChange={e => { setInput(e.target.value); onChange && onChange(""); }}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setTimeout(() => setFocused(false), 120)}
+        style={{ fontFamily: "Quicksand, sans-serif" }}
       />
-      {suggestions.length > 0 && (
-        <ul className="absolute left-0 w-full bg-white text-black rounded shadow z-50 mt-1 max-h-60 overflow-auto">
-          {suggestions.map((s, i) => (
+      {focused && suggest.length > 0 && (
+        <ul className="bg-white text-black rounded-xl shadow-lg absolute left-0 right-0 mt-1 z-50 max-h-56 overflow-auto border border-[#bfa658]">
+          {suggest.map((item, i) => (
             <li
               key={i}
-              className="px-3 py-2 hover:bg-[#fffbec] cursor-pointer"
-              onClick={() => {
-                setQuery(s.label);
-                onChange(s.label);
-                setSuggestions([]);
-              }}
+              className="px-4 py-2 cursor-pointer hover:bg-yellow-100"
+              onMouseDown={() => { setInput(item.text); onChange && onChange(item.text); setSuggest([]); }}
             >
-              {s.label}
+              {item.text}
             </li>
           ))}
         </ul>
