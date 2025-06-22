@@ -13,7 +13,7 @@ export default function Home() {
         className="
           flex flex-col items-center
           md:flex-row md:justify-center md:items-start
-          gap-0 md:gap-[10px]
+          gap-0 md:gap-[5px]
           px-2 md:px-0
           max-w-[1200px] mx-auto
           mt-8 md:mt-12
@@ -23,7 +23,7 @@ export default function Home() {
         {/* FORM */}
         <div
           className="
-            w-full max-w-[340px] md:max-w-[840px] 
+            w-full max-w-[340px] md:max-w-[810px] 
             md:h-[600px]
             flex items-center justify-center
             rounded-2xl
