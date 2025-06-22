@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { vehicles } from "../data/vehicles";
+import { vehicles } from "../data/vehicleList"; // SADECE BURAYI DÜZELTTİM
 import DatePicker from "react-datepicker"; // ÖNERİ: npm install react-datepicker
 import "react-datepicker/dist/react-datepicker.css";
 
