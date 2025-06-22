@@ -1,6 +1,6 @@
-// Hook ile adresleri yükle
 import { useState, useEffect } from "react";
 
+// Hook: Adresleri yükle
 const useAddressData = () => {
   const [addresses, setAddresses] = useState([]);
   useEffect(() => {
@@ -34,24 +34,53 @@ function getSuggestions(q, addressList) {
     });
 }
 
-// Kullanımı:
-const addressList = useAddressData();
-const [from, setFrom] = useState("");
-const [fromSug, setFromSug] = useState([]);
+// ----------- BURADAN SONRA COMPONENT'İN İÇİ -----------
+export default function OrnekAdresInput() {
+  const addressList = useAddressData();
+  const [from, setFrom] = useState("");
+  const [fromSug, setFromSug] = useState([]);
 
-useEffect(() => {
-  setFromSug(getSuggestions(from, addressList));
-}, [from, addressList]);
-<input
-  type="text"
-  value={from}
-  onChange={e => setFrom(e.target.value)}
-  // ...
-/>
-{fromSug.length > 0 && (
-  <ul>
-    {fromSug.map((t, i) => (
-      <li key={i} onClick={() => { setFrom(t); setFromSug([]); }}>{t}</li>
-    ))}
-  </ul>
-)}
+  useEffect(() => {
+    setFromSug(getSuggestions(from, addressList));
+  }, [from, addressList]);
+
+  return (
+    <div style={{ maxWidth: 400, margin: "0 auto" }}>
+      <input
+        type="text"
+        value={from}
+        onChange={e => setFrom(e.target.value)}
+        placeholder="Nereden?"
+        style={{ width: "100%", padding: 8, border: "1px solid #aaa", borderRadius: 6 }}
+      />
+      {fromSug.length > 0 && (
+        <ul style={{
+          background: "#fff",
+          border: "1px solid #eee",
+          borderRadius: 6,
+          margin: 0,
+          marginTop: 2,
+          padding: 0,
+          position: "absolute",
+          width: "100%",
+          zIndex: 99,
+          listStyle: "none",
+          maxHeight: 180,
+          overflowY: "auto"
+        }}>
+          {fromSug.map((t, i) => (
+            <li
+              key={i}
+              onClick={() => { setFrom(t); setFromSug([]); }}
+              style={{
+                padding: 8,
+                cursor: "pointer",
+                borderBottom: "1px solid #eee"
+              }}
+            >{t}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
