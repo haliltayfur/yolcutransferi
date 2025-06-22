@@ -1,228 +1,287 @@
-// /data/vehicles.js
-
 export const vehicles = [
-  {
-    value: "vw_transporter",
-    label: "VW Transporter",
-    max: 6,
-    segment: "Ekonomik",
-    transferTypes: ["Havalimanı", "Şehirlerarası", "Kurumsal","Özel Etkinlik"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti"]
-  },
-  {
-    value: "skoda_superb",
-    label: "Skoda Superb",
-    max: 4,
-    segment: "Ekonomik",
-    transferTypes: ["Havalimanı", "Kurumsal"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti"]
-  },
-  {
-    value: "ford_tourneo_custom",
-    label: "Ford Tourneo Custom",
-    max: 6,
-    segment: "Ekonomik",
-    transferTypes: ["Havalimanı", "Şehirlerarası", "Kurumsal"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti"]
-  },
-  {
-    value: "renault_trafic",
-    label: "Renault Trafic",
-    max: 6,
-    segment: "Ekonomik",
-    transferTypes: ["Havalimanı", "Şehirlerarası", "Kurumsal"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti"]
-  },
+  // EKONOMİK SEGMENT
   {
     value: "ford_tourneo_courier",
     label: "Ford Tourneo Courier",
-    max: 3,
+    max: 3, // sedan hatchback küçük araçlarda 3 yetişkin arka, 1 öne gerekirse
     segment: "Ekonomik",
-    transferTypes: ["Özel Etkinlik", "Kurumsal"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti"]
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
   },
   {
     value: "vw_caddy",
     label: "VW Caddy",
     max: 3,
     segment: "Ekonomik",
-    transferTypes: ["Özel Etkinlik", "Kurumsal","Havalimanı"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti"]
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
   },
   {
-    value: "mercedes_vito",
-    label: "Mercedes Vito",
+    value: "skoda_superb",
+    label: "Skoda Superb",
+    max: 3, // sedan, lüks değilse 3 yetişkin rahat
+    segment: "Ekonomik",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "vw_transporter",
+    label: "VW Transporter",
+    max: 6, // van tipi araçlar 6 yetişkin (lüks değil)
+    segment: "Ekonomik",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "ford_tourneo_custom",
+    label: "Ford Tourneo Custom",
     max: 6,
-    segment: "Lüks",
-    transferTypes: ["Havalimanı", "Şehirlerarası", "Kurumsal"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "tablet", "telefon_sarj_kiti", "mini_bar", "gazete"]
+    segment: "Ekonomik",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
   },
   {
-    value: "mercedes_vito_vip",
-    label: "Mercedes Vito VIP",
-    max: 5,
-    segment: "Prime+",
-    transferTypes: ["Havalimanı", "Şehirlerarası", "Kurumsal", "Prime+"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "tablet", "mini_bar", "bira_3lu", "sampanya", "viski", "hostes", "ozel_karsilama", "cicek", "gazete", "telefon_sarj_kiti"]
-  },
-  {
-    value: "mercedes_vclass",
-    label: "Mercedes V-Class",
+    value: "renault_trafic",
+    label: "Renault Trafic",
     max: 6,
-    segment: "Lüks",
-    transferTypes: ["Havalimanı", "Kurumsal", "Tur & Gezi"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "tablet", "telefon_sarj_kiti", "mini_bar", "gazete"]
-  },
-  {
-    value: "mercedes_vclass_exclusive",
-    label: "Mercedes V-Class Exclusive",
-    max: 6,
-    segment: "Prime+",
-    transferTypes: ["Havalimanı", "Kurumsal", "Prime+", "Özel Etkinlik"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "tablet", "mini_bar", "bira_3lu", "sampanya", "viski", "hostes", "ozel_karsilama", "cicek", "gazete", "telefon_sarj_kiti"]
-  },
-  {
-    value: "mercedes_eclass",
-    label: "Mercedes E-Class",
-    max: 4,
-    segment: "Lüks",
-    transferTypes: ["Havalimanı", "Kurumsal", "Prime+", "Özel Etkinlik"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "gazete", "telefon_sarj_kiti"]
-  },
-  {
-    value: "mercedes_sclass",
-    label: "Mercedes S-Class",
-    max: 4,
-    segment: "Prime+",
-    transferTypes: ["Havalimanı", "Kurumsal", "Özel Etkinlik", "Prime+"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "gazete", "telefon_sarj_kiti", "mini_bar", "sampanya", "viski", "cicek", "ozel_karsilama"]
-  },
-  {
-    value: "bmw_7_serisi",
-    label: "BMW 7 Serisi",
-    max: 4,
-    segment: "Prime+",
-    transferTypes: ["Havalimanı", "Kurumsal", "Özel Etkinlik", "Prime+"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "gazete", "telefon_sarj_kiti", "mini_bar", "sampanya", "viski", "cicek", "ozel_karsilama"]
-  },
-  {
-    value: "tesla_model_x",
-    label: "Tesla Model X",
-    max: 4,
-    segment: "Prime+",
-    transferTypes: ["Havalimanı", "Kurumsal", "Drone Yolcu Transferi"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "wifi", "telefon_sarj_kiti"]
-  },
-  {
-    value: "cadillac_escalade",
-    label: "Cadillac Escalade",
-    max: 6,
-    segment: "Prime+",
-    transferTypes: ["Havalimanı", "Kurumsal", "Prime+"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "wifi", "mini_bar", "bira_3lu", "sampanya", "viski", "cocuk_koltugu", "gazete", "telefon_sarj_kiti"]
-  },
-  {
-    value: "mercedes_sprinter",
-    label: "Mercedes Sprinter",
-    max: 13,
-    segment: "Lüks",
-    transferTypes: ["Şehirlerarası", "Tur & Gezi", "Kurumsal"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "tablet", "telefon_sarj_kiti", "gazete", "ozel_karsilama", "welcoming"]
-  },
-  {
-    value: "mercedes_sprinter_vip",
-    label: "Mercedes Sprinter VIP",
-    max: 11,
-    segment: "Prime+",
-    transferTypes: ["Şehirlerarası", "Tur & Gezi", "Kurumsal", "Özel Etkinlik", "Prime+", "Havalimanı"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "tablet", "mini_bar", "hostes", "ogle_yemegi", "gazete", "ozel_karsilama", "welcoming", "cicek"]
-  },
-  {
-    value: "mercedes_sprinter_ultra_vip",
-    label: "Mercedes Sprinter Ultra VIP",
-    max: 11,
-    segment: "Prime+",
-    transferTypes: ["Şehirlerarası", "Tur & Gezi", "Kurumsal", "Özel Etkinlik", "Prime+", "Havalimanı"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "tablet", "mini_bar", "hostes", "ogle_yemegi", "gazete", "ozel_karsilama", "welcoming", "cicek"]
-  },
-  {
-    value: "vw_crafter",
-    label: "VW Crafter",
-    max: 13,
-    segment: "Lüks",
-    transferTypes: ["Şehirlerarası", "Tur & Gezi", "Kurumsal", "Özel Etkinlik"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti", "wifi", "gazete", "ozel_karsilama", "welcoming"]
-  },
-  {
-    value: "vw_crafter_vip",
-    label: "VW Crafter VIP",
-    max: 13,
-    segment: "Prime+",
-    transferTypes: ["Tur & Gezi", "Kurumsal", "Prime+", "Özel Etkinlik" ],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "tablet", "mini_bar", "hostes", "ogle_yemegi", "gazete", "ozel_karsilama", "welcoming", "cicek"]
+    segment: "Ekonomik",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
   },
   {
     value: "ford_transit_minibus",
     label: "Ford Transit Minibus",
     max: 15,
     segment: "Ekonomik",
-    transferTypes: ["Tur & Gezi", "Şehirlerarası", "Kurumsal", "Özel Etkinlik"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti"]
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
   },
   {
     value: "iveco_daily_minibus",
     label: "Iveco Daily Minibus",
     max: 16,
     segment: "Ekonomik",
-    transferTypes: ["Tur & Gezi", "Şehirlerarası", "Kurumsal", "Özel Etkinlik"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "telefon_sarj_kiti"]
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
   },
   {
     value: "temsa_prestij_vip",
     label: "Temsa Prestij VIP",
-    max: 27,
-    segment: "Prime+",
-    transferTypes: ["Tur & Gezi", "Kurumsal", "Toplu Transfer", "Prime+", "Özel Etkinlik"],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "hostes", "ogle_yemegi", "gazete", "ozel_karsilama", "welcoming", "cicek"]
+    max: 24,
+    segment: "Ekonomik",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
   },
   {
     value: "isuzu_novo_ultra_vip",
     label: "Isuzu Novo Ultra VIP",
-    max: 27,
+    max: 24,
+    segment: "Ekonomik",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+
+  // LÜKS SEGMENT (konfor için kapasite 1 eksik)
+  {
+    value: "mercedes_eclass",
+    label: "Mercedes E-Class",
+    max: 3, // lüks sedan, öne 1 arkaya 2
+    segment: "Lüks",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "mercedes_vito",
+    label: "Mercedes Vito",
+    max: 5, // lüks van, rahat oturum için 1 azalt
+    segment: "Lüks",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "mercedes_vclass",
+    label: "Mercedes V-Class",
+    max: 5,
+    segment: "Lüks",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "mercedes_sprinter",
+    label: "Mercedes Sprinter",
+    max: 12,
+    segment: "Lüks",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "vw_crafter",
+    label: "VW Crafter",
+    max: 12,
+    segment: "Lüks",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+
+  // PRIME+ SEGMENT (premium, ultra rahat)
+  {
+    value: "mercedes_sclass",
+    label: "Mercedes S-Class",
+    max: 2, // ultra lüks sedan, arka tam lounge, 2 yetişkin rahat
     segment: "Prime+",
-    transferTypes: ["Tur & Gezi", "Kurumsal", "Toplu Transfer", "Prime+", "Özel Etkinlik" ],
-    extras: ["su", "kola", "sandvic", "kuruyemis", "cocuk_koltugu", "wifi", "hostes", "ogle_yemegi", "gazete", "ozel_karsilama", "welcoming", "cicek"]
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "bmw_7_serisi",
+    label: "BMW 7 Serisi",
+    max: 2,
+    segment: "Prime+",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "tesla_suv",
+    label: "Tesla SUV",
+    max: 3,
+    segment: "Prime+",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "dron_taksi",
+    label: "Dron Taksi (konsept)",
+    max: 2,
+    segment: "Prime+",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "mercedes_vito_vip",
+    label: "Mercedes Vito VIP",
+    max: 4, // ultra lounge
+    segment: "Prime+",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "mercedes_vclass_exclusive",
+    label: "Mercedes V-Class Exclusive",
+    max: 4,
+    segment: "Prime+",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "cadillac_escalade",
+    label: "Cadillac Escalade",
+    max: 5, // SUV, ultra rahat
+    segment: "Prime+",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "mercedes_maybach",
+    label: "Mercedes Maybach",
+    max: 2, // ultra lüks sedan lounge
+    segment: "Prime+",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
+  },
+  {
+    value: "vw_crafter_vip",
+    label: "VW Crafter VIP",
+    max: 6,
+    segment: "Prime+",
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
   },
   {
     value: "chrysler_300c_limo",
     label: "Chrysler 300C Limo",
-    max: 7,
+    max: 6,
     segment: "Prime+",
-    transferTypes: ["Özel Etkinlik", "Düğün", "Özel Etkinlik",  "Prime+"],
-    extras: ["su", "kola", "bira_3lu", "sampanya", "viski", "sandvic", "kuruyemis", "hostes", "ozel_karsilama", "cicek", "gazete", "mini_bar"]
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
   },
   {
     value: "hummer_limousine",
     label: "Hummer Limousine",
-    max: 15,
+    max: 6,
     segment: "Prime+",
-    transferTypes: ["Özel Etkinlik", "Düğün", "Prime+"],
-    extras: ["su", "kola", "bira_3lu", "sampanya", "viski", "sandvic", "kuruyemis", "hostes", "ozel_karsilama", "cicek", "gazete", "mini_bar"]
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
   },
   {
-    value: "helikopter",
-    label: "Helikopter",
-    max: 5,
+    value: "mercedes_sprinter_vip",
+    label: "Mercedes Sprinter VIP",
+    max: 10, // büyük minibüs lounge
     segment: "Prime+",
-    transferTypes: ["Drone Yolcu Transferi", "Özel Etkinlik"],
-    extras: ["su", "kola", "sampanya", "kuruyemis", "rehber", "drone_kamerasi"]
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
   },
   {
-    value: "lilium_jet_konsept",
-    label: "Lilium Jet (konsept)",
-    max: 4,
+    value: "mercedes_sprinter_ultra_vip",
+    label: "Mercedes Sprinter Ultra VIP",
+    max: 10,
     segment: "Prime+",
-    transferTypes: ["Drone Yolcu Transferi", "Prime+"],
-    extras: ["su", "kola", "sampanya", "kuruyemis", "rehber", "drone_kamerasi"]
+    transferTypes: [
+      "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
+      "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
+    ]
   }
 ];
