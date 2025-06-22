@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { vehicles } from "../data/vehicleList"; // SADECE BURAYI DÜZELTTİM
-import DatePicker from "react-datepicker"; // ÖNERİ: npm install react-datepicker
+import { vehicles } from "../data/vehicleList"; // Doğru import
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const saatler = [
@@ -17,7 +17,6 @@ const saatler = [
 export default function VipTransferForm() {
   const router = useRouter();
 
-  // STATE (localStorage’dan da al)
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState(null);
@@ -25,7 +24,6 @@ export default function VipTransferForm() {
   const [vehicle, setVehicle] = useState(vehicles[0]?.value || "");
   const [people, setPeople] = useState(1);
 
-  // Mount olduğunda localStorage’dan çek
   useEffect(() => {
     const draft = JSON.parse(localStorage.getItem("reservationDraft") || "{}");
     if (draft.from) setFrom(draft.from);
@@ -36,7 +34,6 @@ export default function VipTransferForm() {
     if (draft.people) setPeople(draft.people);
   }, []);
 
-  // Girdi değişince localStorage’a kaydet
   useEffect(() => {
     localStorage.setItem(
       "reservationDraft",
