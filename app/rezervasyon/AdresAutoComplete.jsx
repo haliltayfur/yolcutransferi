@@ -1,82 +1,98 @@
 "use client";
 import { useState, useEffect } from "react";
 
-// JSON dosyalarını fetch’le
-const useAdresData = () => {
-  const [options, setOptions] = useState([]);
+export default function AdresAutoComplete({ value, onChange, label = "Adres Seçimi" }) {
+  const [sehirler, setSehirler] = useState([]);
+  const [ilceler, setIlceler] = useState([]);
+  const [mahalleler, setMahalleler] = useState([]);
+
+  const [selectedSehir, setSelectedSehir] = useState("");
+  const [selectedIlce, setSelectedIlce] = useState("");
+  const [selectedMahalle, setSelectedMahalle] = useState("");
+
+  // Şehirleri yükle
   useEffect(() => {
-    Promise.all([
-      fetch("/dumps/sehirler.json").then(r => r.json()),
-      fetch("/dumps/ilceler.json").then(r => r.json()),
-      fetch("/dumps/mahalleler.json").then(r => r.json()),
-      fetch("/dumps/airports.json").then(r => r.json())
-    ]).then(([sehirler, ilceler, mahalleler, airports]) => {
-      let arr = [];
-      // Şehirler
-      arr.push(...sehirler.map(x => ({ text: x.sehir_adi, type: "il" })));
-      // İlçeler
-      arr.push(...ilceler.map(x => ({
-        text: `${sehirler.find(s => s.sehir_ID === x.sehir_ID)?.sehir_adi || ""} / ${x.ilce_adi}`,
-        type: "ilce"
-      })));
-      // Mahalleler
-      arr.push(...mahalleler.map(x => {
-        const ilce = ilceler.find(i => i.ilce_ID === x.ilce_ID);
-        const il = sehirler.find(s => s.sehir_ID === ilce?.sehir_ID);
-        return {
-          text: `${il?.sehir_adi || ""} / ${ilce?.ilce_adi || ""} / ${x.mahalle_adi}`,
-          type: "mahalle"
-        }
-      }));
-      // Havalimanları
-      arr.push(...airports.map(x => ({ text: x.name, type: "havalimani" })));
-      setOptions(arr);
-    });
+    fetch("/dumps/sehirler.json").then(r => r.json()).then(setSehirler);
   }, []);
-  return options;
-};
-
-export default function AdresAutoComplete({ value, onChange, placeholder = "Adres girin..." }) {
-  const options = useAdresData();
-  const [input, setInput] = useState(value || "");
-  const [suggest, setSuggest] = useState([]);
-  const [focused, setFocused] = useState(false);
-
+  // İlçeleri yükle
   useEffect(() => {
-    if (!input || input.length < 2) return setSuggest([]);
-    const q = input.toLocaleLowerCase("tr-TR");
-    setSuggest(
-      options.filter(opt =>
-        opt.text.toLocaleLowerCase("tr-TR").includes(q)
-      ).slice(0, 15)
-    );
-  }, [input, options]);
+    if (selectedSehir) {
+      fetch("/dumps/ilceler.json").then(r => r.json()).then(data => {
+        setIlceler(data.filter(i => i.sehir_ID === selectedSehir));
+        setSelectedIlce("");
+        setSelectedMahalle("");
+        setMahalleler([]);
+      });
+    }
+  }, [selectedSehir]);
+  // Mahalleleri yükle
+  useEffect(() => {
+    if (selectedIlce) {
+      fetch("/dumps/mahalleler.json").then(r => r.json()).then(data => {
+        setMahalleler(data.filter(m => m.ilce_ID === selectedIlce));
+        setSelectedMahalle("");
+      });
+    }
+  }, [selectedIlce]);
+
+  // Dışarıya birleşik value döndür
+  useEffect(() => {
+    let result = "";
+    if (selectedSehir) {
+      const s = sehirler.find(x => x.sehir_ID === selectedSehir)?.sehir_adi;
+      if (s) result += s;
+      if (selectedIlce) {
+        const i = ilceler.find(x => x.ilce_ID === selectedIlce)?.ilce_adi;
+        if (i) result += " / " + i;
+        if (selectedMahalle) {
+          const m = mahalleler.find(x => x.mahalle_ID === selectedMahalle)?.mahalle_adi;
+          if (m) result += " / " + m;
+        }
+      }
+    }
+    if (onChange) onChange(result);
+  }, [selectedSehir, selectedIlce, selectedMahalle]);
 
   return (
-    <div style={{ position: "relative" }}>
-      <input
-        className="input w-full"
-        type="text"
-        placeholder={placeholder}
-        value={input}
-        onChange={e => { setInput(e.target.value); onChange && onChange(""); }}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setTimeout(() => setFocused(false), 120)}
-        style={{ fontFamily: "Quicksand, sans-serif" }}
-      />
-      {focused && suggest.length > 0 && (
-        <ul className="bg-white text-black rounded-xl shadow-lg absolute left-0 right-0 mt-1 z-50 max-h-56 overflow-auto border border-[#bfa658]">
-          {suggest.map((item, i) => (
-            <li
-              key={i}
-              className="px-4 py-2 cursor-pointer hover:bg-yellow-100"
-              onMouseDown={() => { setInput(item.text); onChange && onChange(item.text); setSuggest([]); }}
-            >
-              {item.text}
-            </li>
+    <div>
+      <label className="block mb-1 font-bold text-[#bfa658]">{label}</label>
+      <div className="flex gap-2">
+        {/* Şehir */}
+        <select
+          className="input"
+          value={selectedSehir}
+          onChange={e => setSelectedSehir(e.target.value)}
+        >
+          <option value="">Şehir Seç</option>
+          {sehirler.map(s => (
+            <option key={s.sehir_ID} value={s.sehir_ID}>{s.sehir_adi}</option>
           ))}
-        </ul>
-      )}
+        </select>
+        {/* İlçe */}
+        <select
+          className="input"
+          value={selectedIlce}
+          onChange={e => setSelectedIlce(e.target.value)}
+          disabled={!selectedSehir}
+        >
+          <option value="">İlçe Seç</option>
+          {ilceler.map(i => (
+            <option key={i.ilce_ID} value={i.ilce_ID}>{i.ilce_adi}</option>
+          ))}
+        </select>
+        {/* Mahalle */}
+        <select
+          className="input"
+          value={selectedMahalle}
+          onChange={e => setSelectedMahalle(e.target.value)}
+          disabled={!selectedIlce}
+        >
+          <option value="">Mahalle Seç</option>
+          {mahalleler.map(m => (
+            <option key={m.mahalle_ID} value={m.mahalle_ID}>{m.mahalle_adi}</option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }
