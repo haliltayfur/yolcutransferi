@@ -8,31 +8,37 @@ export default function Home() {
   return (
     <main>
       <HeroSlider />
-      {/* Responsive: Mobilde video gizli, form tek başına ortada, çerçeve sade */}
-      <section className="flex flex-col md:flex-row justify-center items-stretch gap-5 md:gap-8 px-2 md:px-4 max-w-[1200px] mx-auto mt-8 md:mt-12 mb-8 md:mb-14">
-        {/* Form Alanı */}
+      {/* Desktop: form+video yan yana, mobile: sadece form */}
+      <section
+        className="
+          flex flex-col items-center
+          md:flex-row md:justify-center md:items-start
+          gap-0 md:gap-[10px]
+          px-2 md:px-0
+          max-w-[1200px] mx-auto
+          mt-8 md:mt-12
+          mb-8 md:mb-14
+        "
+      >
+        {/* FORM */}
         <div
           className="
-            flex-1 flex items-center justify-center
+            w-full max-w-[340px] md:max-w-[840px] 
+            md:h-[600px]
+            flex items-center justify-center
             rounded-2xl
-            border border-[#bfa658] 
-            bg-black/70 
+            border border-[#bfa658]
+            bg-black/80
             shadow-xl
-            min-w-0 w-full
-            md:max-w-[440px] 
-            py-6 px-3 md:px-8
+            py-8 md:py-0 px-2 md:px-0
             transition-all
           "
         >
           <VipTransferForm />
         </div>
-        {/* Video Alanı (sadece md ve üzeri ekranda göster) */}
+        {/* VIDEO sadece desktop */}
         <div
-          className="
-            hidden md:flex items-center justify-center 
-            flex-1 min-w-0 
-            rounded-2xl overflow-hidden
-            "
+          className="hidden md:block w-[380px] h-[600px] flex-shrink-0 overflow-hidden"
         >
           <HeroVideo />
         </div>
