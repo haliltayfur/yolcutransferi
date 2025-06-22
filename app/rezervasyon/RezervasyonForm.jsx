@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { vehicles } from "../../data/vehicles";
 import { extrasList } from "../../data/extras";
-import AdresAutoComplete from "../../components/AdresAutoComplete";
+import AdresAutoComplete from "./AdresAutoComplete";
 
 // Saatler — .00, .15, .30, .45
 const saatler = [];
@@ -20,8 +20,8 @@ export default function RezervasyonForm() {
   const paramPeople = Number(params.get("people")) || 1;
 
   // State'ler
-  const [from, setFrom] = useState(paramFrom);
-  const [to, setTo] = useState(paramTo);
+const [from, setFrom] = useState("");
+const [to, setTo] = useState("");
   const [people, setPeople] = useState(paramPeople);
   const [segment, setSegment] = useState("ekonomik");
   const [transfer, setTransfer] = useState("");
@@ -115,23 +115,23 @@ export default function RezervasyonForm() {
         </h1>
         <form onSubmit={handleSubmit} autoComplete="on" className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Nereden */}
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
-            <AdresAutoComplete
-              value={from}
-              onChange={setFrom}
-              placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
-            />
-          </div>
+         <div>
+  <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
+  <AdresAutoComplete
+    value={from}
+    onChange={setFrom}
+    placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
+  />
+</div>
           {/* Nereye */}
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
-            <AdresAutoComplete
-              value={to}
-              onChange={setTo}
-              placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
-            />
-          </div>
+        <div>
+  <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
+  <AdresAutoComplete
+    value={to}
+    onChange={setTo}
+    placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
+  />
+</div>
           {/* Kişi ve Segment */}
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
