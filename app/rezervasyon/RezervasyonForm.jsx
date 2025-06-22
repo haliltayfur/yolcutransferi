@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { vehicles } from "../data/vehicles";
+import { vehicles } from "../data/vehicleList";
 import { extrasList } from "../data/extras";
 import AdresAutoComplete from "./AdresAutoComplete";
 import EkstralarAccordion from "../components/EkstralarAccordion";
