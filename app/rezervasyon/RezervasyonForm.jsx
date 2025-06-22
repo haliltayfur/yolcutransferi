@@ -1,10 +1,11 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { vehicles } from "../data/vehicleList";
-import { extrasList } from "../data/extras";
+import { vehicles } from "../../data/vehicleList";
+import { extrasList } from "../../data/extras";
+import EkstralarAccordion from "../../components/EkstralarAccordion";
 import AdresAutoComplete from "./AdresAutoComplete";
-import EkstralarAccordion from "../components/EkstralarAccordion";
+
 const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
