@@ -1,38 +1,35 @@
-// /components/EkstralarAccordion.js
-
+"use client";
 import { useState } from "react";
-// Kategorileri ve ekstraları buradan çek:
-const extrasByCategory = {
-  "Yiyecek": ["sandvic", "kuruyemis"],
-  "İçecek": ["su", "kola", "meyve_suyu"],
-  "Alkol": ["sampanya", "viski", "bira_3lu", "sarap"],
-  "Diğer": ["cocuk_koltugu", "wifi", "hostes", "mini_bar", "telefon_sarj_kiti", "ozel_karsilama"]
+import { extrasList } from "../../data/extras";
+
+// Kategorilere eşleştirme anahtarı
+const extraKategori = {
+  Yiyecek: ["sandvic", "kuruyemis", "cikolata", "kahvalti", "ogle_yemegi", "aksam_yemegi", "glutensiz_menü"],
+  İçecek: ["su", "kola", "kola_zero", "soda", "meyve_suyu", "cay_kahve"],
+  Alkol: ["bira_3lu", "sampanya", "sarap", "viski", "prosecco"],
+  Diğer: [
+    "cocuk_koltugu", "hayvan_kutusu", "evcil_hayvan", "hostes", "mini_bar", "wifi", "gazete", "airpods",
+    "powerbank", "welcoming", "cicek", "kisisel_asistan", "guvenlik", "hediye_paketi", "rehber"
+  ],
 };
 
-const extrasLabels = {
-  sandvic: "Sandviç",
-  kuruyemis: "Kuruyemiş",
-  su: "Su",
-  kola: "Kola",
-  meyve_suyu: "Meyve Suyu",
-  sampanya: "Şampanya",
-  viski: "Viski",
-  bira_3lu: "3'lü Bira",
-  sarap: "Şarap",
-  cocuk_koltugu: "Çocuk Koltuğu",
-  wifi: "Wi-Fi",
-  hostes: "Hostes",
-  mini_bar: "Mini Bar",
-  telefon_sarj_kiti: "Telefon Şarj Kiti",
-  ozel_karsilama: "Özel Karşılama",
-};
+// Otomatik kategori eşlemesi
+function getKategori(key) {
+  for (const [cat, list] of Object.entries(extraKategori)) {
+    if (list.includes(key)) return cat;
+  }
+  return "Diğer";
+}
 
 export default function EkstralarAccordion({ selectedExtras, setSelectedExtras }) {
-  const [openCat, setOpenCat] = useState(null);
-
-  function toggleCat(cat) {
-    setOpenCat(openCat === cat ? null : cat);
-  }
+  // Kategorilere göre grupla
+  const gruplu = extrasList.reduce((obj, extra) => {
+    const kategori = getKategori(extra.key);
+    if (!obj[kategori]) obj[kategori] = [];
+    obj[kategori].push(extra);
+    return obj;
+  }, {});
+  const [open, setOpen] = useState(""); // hangi kategori açık
 
   function handleCheck(e) {
     const { value, checked } = e.target;
@@ -41,28 +38,31 @@ export default function EkstralarAccordion({ selectedExtras, setSelectedExtras }
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      {Object.entries(extrasByCategory).map(([cat, items]) => (
-        <div key={cat} className="mb-2">
+    <div className="w-full">
+      {Object.keys(gruplu).map(kategori => (
+        <div key={kategori} className="mb-2">
           <button
             type="button"
-            onClick={() => toggleCat(cat)}
+            onClick={() => setOpen(open === kategori ? "" : kategori)}
             className="w-full text-left px-4 py-3 rounded-xl bg-[#23221a] text-[#bfa658] font-semibold shadow hover:bg-[#2c2a20] transition"
           >
-            {cat}
+            {kategori}
           </button>
-          {openCat === cat && (
-            <div className="pl-6 pr-2 py-2 flex flex-col gap-2 bg-black/70 rounded-b-xl border-l-4 border-[#bfa658] mt-1">
-              {items.map((item) => (
-                <label key={item} className="flex items-center gap-2 cursor-pointer text-[#ffeec2]">
+          {open === kategori && (
+            <div className="pl-4 pr-2 py-2 flex flex-col gap-1 bg-black/80 rounded-b-xl border-l-4 border-[#bfa658] mt-1">
+              {gruplu[kategori].map(extra => (
+                <label
+                  key={extra.key}
+                  className="flex items-center gap-2 cursor-pointer text-[#ffeec2] select-none"
+                >
                   <input
                     type="checkbox"
-                    value={item}
-                    checked={selectedExtras.includes(item)}
+                    value={extra.key}
+                    checked={selectedExtras.includes(extra.key)}
                     onChange={handleCheck}
                     className="accent-[#bfa658] scale-125"
                   />
-                  {extrasLabels[item] || item}
+                  <span>{extra.label}</span>
                 </label>
               ))}
             </div>
