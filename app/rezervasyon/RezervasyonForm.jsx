@@ -4,12 +4,13 @@ import { useSearchParams } from "next/navigation";
 import { vehicles } from "../../data/vehicles";
 import { extrasList } from "../../data/extras";
 import AdresAutoComplete from "./AdresAutoComplete";
+import EkstralarAccordion from "./EkstralarAccordion"; // <--- yeni
 
 const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
-export default function RezervasyonForm() {
+export default function VipTransferForm() {
   const params = useSearchParams();
   const paramFrom = params.get("from") || "";
   const paramTo = params.get("to") || "";
@@ -73,11 +74,6 @@ export default function RezervasyonForm() {
     (!people || (v.max || 1) >= people)
   );
   const maxPeople = Math.max(...availableVehicles.map(v => v.max || 1), 10);
-
-  const availableExtras = extrasList.map(e => ({
-    ...e,
-    disabled: vehicle && !vehicles.find(v => v.value === vehicle)?.extras?.includes(e.key)
-  }));
 
   const dateInputRef = useRef();
   const openDate = () => dateInputRef.current && dateInputRef.current.showPicker();
@@ -329,32 +325,7 @@ export default function RezervasyonForm() {
           {/* Ekstralar */}
           <div className="md:col-span-2">
             <label className="font-bold text-[#bfa658] mb-2 block text-lg">Ekstralar</label>
-            <div className="flex flex-wrap gap-4">
-              {availableExtras.map(extra =>
-                <label
-                  key={extra.key}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-xl shadow-md text-base font-semibold
-                    ${extra.disabled
-                    ? "bg-[#232117] border border-gray-500 text-gray-400 cursor-not-allowed"
-                    : "bg-[#1c1912] border border-[#bfa658] text-[#ffeec2] hover:scale-105 transition-transform duration-150 cursor-pointer"
-                  }`}
-                  style={{ minWidth: 180, justifyContent: "flex-start", letterSpacing: "0.02em" }}
-                >
-                  <input
-                    type="checkbox"
-                    disabled={extra.disabled}
-                    checked={extras.includes(extra.key)}
-                    onChange={e => {
-                      if (e.target.checked)
-                        setExtras([...extras, extra.key]);
-                      else
-                        setExtras(extras.filter(k => k !== extra.key));
-                    }}
-                  />
-                  {extra.label} {extra.price ? <span className="text-[#bfa658] font-bold ml-1">+{extra.price}₺</span> : ""}
-                </label>
-              )}
-            </div>
+            <EkstralarAccordion selectedExtras={extras} setSelectedExtras={setExtras} />
           </div>
           {/* Mesafeli Satış */}
           <div className="md:col-span-2 flex items-center mt-3">
@@ -408,52 +379,5 @@ export default function RezervasyonForm() {
   );
 }
 
-// Mesafeli popup
-function MesafeliPopup({ onClose }) {
-  const [content, setContent] = useState("Yükleniyor...");
-  useEffect(() => {
-    fetch("/mesafeli-satis")
-      .then(r => r.text())
-      .then(html => {
-        const main = html.match(/<main[^>]*>([\s\S]*?)<\/main>/);
-        setContent(main ? main[1] : html);
-      });
-  }, []);
-  return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
-      <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
-        <button onClick={onClose} className="absolute top-3 right-5 text-2xl font-bold text-red-500 hover:text-red-700">×</button>
-        <div className="text-gray-800 prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
-      </div>
-    </div>
-  );
-}
+// MesafeliPopup ve SummaryPopup aynı şekilde kullanılabilir.
 
-// Sipariş Özeti Pop-up
-function SummaryPopup({ from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, pnr, onClose }) {
-  return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
-      <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
-        <button onClick={onClose} className="absolute top-3 right-5 text-2xl font-bold text-red-500 hover:text-red-700">×</button>
-        <h2 className="text-2xl font-bold mb-5 text-[#bfa658] text-center">Rezervasyon Özeti</h2>
-        <div className="text-black space-y-2">
-          <div><b>Transfer:</b> {transfer || "-"}</div>
-          <div><b>Araç:</b> {vehicle || "-"}</div>
-          <div><b>Kişi:</b> {people}</div>
-          <div><b>Nereden:</b> {from}</div>
-          <div><b>Nereye:</b> {to}</div>
-          <div><b>Tarih:</b> {date} {time}</div>
-          <div><b>Ad Soyad:</b> {name} {surname} – T.C.: {tc}</div>
-          <div><b>Telefon:</b> {phone}</div>
-          {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
-          {note && <div><b>Ek Not:</b> {note}</div>}
-          <div><b>Ekstralar:</b> {extras.length > 0 ? extras.join(", ") : "Yok"}</div>
-        </div>
-        <button
-          onClick={() => { alert("Demo: Ödeme sayfasına yönlendirme yapılacak!"); onClose(); }}
-          className="w-full py-3 rounded-xl bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition mt-6"
-        >Onayla ve Öde</button>
-      </div>
-    </div>
-  );
-}
