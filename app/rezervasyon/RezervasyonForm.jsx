@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { vehicles } from "../../data/vehicleList";
 import { extrasList } from "../../data/extras";
 import EkstralarAccordion from "../../components/EkstralarAccordion";
@@ -20,12 +20,12 @@ const allTransfers = [
   "Toplu Transfer",
   "Düğün vb Organizasyonlar"
 ];
+const KDV_ORAN = 0.20;
 
 const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
-// String normalize fonksiyonu
 function normalize(str) {
   return (str || "")
     .toLocaleLowerCase("tr-TR")
@@ -41,7 +41,9 @@ function normalize(str) {
     .trim();
 }
 
+// EN BAŞ: Form bileşeni
 export default function VipTransferForm() {
+  const router = useRouter();
   const params = useSearchParams();
   const paramFrom = params.get("from") || "";
   const paramTo = params.get("to") || "";
@@ -50,6 +52,7 @@ export default function VipTransferForm() {
   const paramVehicle = params.get("vehicle") || "";
   const paramPeople = Number(params.get("people")) || 1;
 
+  // STATE
   const [from, setFrom] = useState(paramFrom);
   const [to, setTo] = useState(paramTo);
   const [people, setPeople] = useState(paramPeople);
@@ -65,18 +68,31 @@ export default function VipTransferForm() {
   const [pnr, setPnr] = useState("");
   const [note, setNote] = useState("");
   const [extras, setExtras] = useState([]);
+  const [extrasQty, setExtrasQty] = useState({});
   const [mesafeliOk, setMesafeliOk] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showContract, setShowContract] = useState(false);
 
-  const availableTransfers = allTransfers;
+  // HATA İLETİLERİ
+  const [fieldErrors, setFieldErrors] = useState({});
 
+  // FİLTRELER
+  const availableTransfers = allTransfers;
   const availableVehicles = vehicles.filter(v =>
     (!segment || normalize(v.segment) === normalize(segment)) &&
     (!transfer || (v.transferTypes || []).map(normalize).includes(normalize(transfer))) &&
     (!people || (v.max || 1) >= people)
   );
   const maxPeople = Math.max(...availableVehicles.map(v => v.max || 1), 10);
+
+  // EXTRAS: Default quantity = 1
+  useEffect(() => {
+    const next = {};
+    extras.forEach(key => {
+      next[key] = extrasQty[key] || 1;
+    });
+    setExtrasQty(next);
+  }, [extras]);
 
   const dateInputRef = useRef();
   const openDate = () => dateInputRef.current && dateInputRef.current.showPicker();
@@ -90,6 +106,7 @@ export default function VipTransferForm() {
     setPhone(num.slice(0, 11));
   }
 
+  // KİŞİ BİLGİLERİ LOCALSTORAGE
   useEffect(() => {
     try {
       if (!name) {
@@ -135,10 +152,31 @@ export default function VipTransferForm() {
   const showPnr =
     isAirport(from) || isAirport(to) || (transfer && transfer.toLowerCase().includes("hava"));
 
+  // FORM SUBMIT
   function handleSubmit(e) {
     e.preventDefault();
-    if (!from || !to || !date || !time || !vehicle || !name || !surname || tc.length !== 11 || phone.length !== 11 || !mesafeliOk || (showPnr && !pnr)) {
-      alert("Lütfen tüm alanları eksiksiz ve doğru doldurun!");
+    // Alanları tek tek kontrol et ve hata ver
+    const errors = {};
+    if (!from) errors.from = "Lütfen kalkış noktası girin!";
+    if (!to) errors.to = "Lütfen varış noktası girin!";
+    if (!people) errors.people = "Kişi sayısı seçin!";
+    if (!segment) errors.segment = "Segment seçin!";
+    if (!transfer) errors.transfer = "Transfer türü seçin!";
+    if (!vehicle) errors.vehicle = "Araç seçin!";
+    if (!date) errors.date = "Tarih seçin!";
+    if (!time) errors.time = "Saat seçin!";
+    if (!name) errors.name = "Adınızı girin!";
+    if (!surname) errors.surname = "Soyadınızı girin!";
+    if (tc.length !== 11) errors.tc = "TC Kimlik No 11 haneli olmalı!";
+    if (phone.length !== 11) errors.phone = "Telefon 11 haneli olmalı!";
+    if (!mesafeliOk) errors.mesafeliOk = "Mesafeli satış onayı zorunlu!";
+    if (showPnr && !pnr) errors.pnr = "PNR/Uçuş kodu zorunlu!";
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      // Sayfanın ilk hatalı alanına otomatik odaklan!
+      const first = Object.keys(errors)[0];
+      const el = document.querySelector(`[name='${first}']`);
+      if (el) el.focus();
       return;
     }
     setShowSummary(true);
@@ -151,7 +189,6 @@ export default function VipTransferForm() {
           VIP Rezervasyon Formu
         </h1>
         <form onSubmit={handleSubmit} autoComplete="on" className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Nereden */}
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
             <AdresAutoComplete
@@ -159,8 +196,8 @@ export default function VipTransferForm() {
               onChange={setFrom}
               placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
             />
+            {fieldErrors.from && <div className="text-red-400 text-xs mt-1">{fieldErrors.from}</div>}
           </div>
-          {/* Nereye */}
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
             <AdresAutoComplete
@@ -168,32 +205,33 @@ export default function VipTransferForm() {
               onChange={setTo}
               placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
             />
+            {fieldErrors.to && <div className="text-red-400 text-xs mt-1">{fieldErrors.to}</div>}
           </div>
-          {/* Kişi ve Segment */}
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
-            <select className="input w-full"
+            <select name="people" className="input w-full"
               value={people}
               onChange={e => setPeople(Number(e.target.value))}>
               {Array.from({ length: maxPeople }, (_, i) => i + 1).map(val =>
                 <option key={val} value={val}>{val}</option>
               )}
             </select>
+            {fieldErrors.people && <div className="text-red-400 text-xs mt-1">{fieldErrors.people}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
-            <select className="input w-full"
+            <select name="segment" className="input w-full"
               value={segment}
               onChange={e => setSegment(e.target.value)}>
               {segmentOptions.map(opt =>
                 <option key={opt.key} value={opt.label}>{opt.label}</option>
               )}
             </select>
+            {fieldErrors.segment && <div className="text-red-400 text-xs mt-1">{fieldErrors.segment}</div>}
           </div>
-          {/* Transfer ve Araç */}
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
-            <select className="input w-full"
+            <select name="transfer" className="input w-full"
               value={transfer}
               onChange={e => setTransfer(e.target.value)}>
               <option value="">Seçiniz</option>
@@ -201,10 +239,11 @@ export default function VipTransferForm() {
                 <option key={opt} value={opt}>{opt}</option>
               )}
             </select>
+            {fieldErrors.transfer && <div className="text-red-400 text-xs mt-1">{fieldErrors.transfer}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Araç</label>
-            <select className="input w-full"
+            <select name="vehicle" className="input w-full"
               value={vehicle}
               onChange={e => setVehicle(e.target.value)}>
               <option value="">Seçiniz</option>
@@ -212,12 +251,13 @@ export default function VipTransferForm() {
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               )}
             </select>
+            {fieldErrors.vehicle && <div className="text-red-400 text-xs mt-1">{fieldErrors.vehicle}</div>}
           </div>
-          {/* PNR (Havalimanı) */}
           {showPnr && (
             <div className="md:col-span-2">
               <label className="font-bold text-[#bfa658] mb-1 block">PNR / Uçuş Kodu</label>
               <input
+                name="pnr"
                 type="text"
                 className="input w-full"
                 value={pnr}
@@ -225,12 +265,13 @@ export default function VipTransferForm() {
                 placeholder="Uçuş Rezervasyon Kodu (PNR)"
                 style={{ fontFamily: "Quicksand,sans-serif" }}
               />
+              {fieldErrors.pnr && <div className="text-red-400 text-xs mt-1">{fieldErrors.pnr}</div>}
             </div>
           )}
-          {/* Tarih ve Saat */}
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
             <input
+              name="date"
               type="date"
               className="input w-full"
               value={typeof date === "string" ? date : ""}
@@ -242,20 +283,22 @@ export default function VipTransferForm() {
               autoComplete="on"
               style={{ fontFamily: "Quicksand,sans-serif" }}
             />
+            {fieldErrors.date && <div className="text-red-400 text-xs mt-1">{fieldErrors.date}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
-            <select className="input w-full"
+            <select name="time" className="input w-full"
               value={time}
               onChange={e => setTime(e.target.value)}>
               <option value="">Seçiniz</option>
               {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
             </select>
+            {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
           </div>
-          {/* Ad Soyad */}
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Ad</label>
             <input
+              name="name"
               type="text"
               className="input w-full"
               value={name}
@@ -263,10 +306,12 @@ export default function VipTransferForm() {
               autoComplete="given-name"
               style={{ fontFamily: "Quicksand,sans-serif" }}
             />
+            {fieldErrors.name && <div className="text-red-400 text-xs mt-1">{fieldErrors.name}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Soyad</label>
             <input
+              name="surname"
               type="text"
               className="input w-full"
               value={surname}
@@ -274,11 +319,12 @@ export default function VipTransferForm() {
               autoComplete="family-name"
               style={{ fontFamily: "Quicksand,sans-serif" }}
             />
+            {fieldErrors.surname && <div className="text-red-400 text-xs mt-1">{fieldErrors.surname}</div>}
           </div>
-          {/* TC ve Telefon */}
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">T.C. Kimlik No</label>
             <input
+              name="tc"
               type="text"
               className="input w-full"
               maxLength={11}
@@ -288,10 +334,12 @@ export default function VipTransferForm() {
               autoComplete="off"
               style={{ fontFamily: "Quicksand,sans-serif" }}
             />
+            {fieldErrors.tc && <div className="text-red-400 text-xs mt-1">{fieldErrors.tc}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Telefon</label>
             <input
+              name="phone"
               type="text"
               className="input w-full"
               maxLength={11}
@@ -301,8 +349,8 @@ export default function VipTransferForm() {
               autoComplete="tel"
               style={{ fontFamily: "Quicksand,sans-serif" }}
             />
+            {fieldErrors.phone && <div className="text-red-400 text-xs mt-1">{fieldErrors.phone}</div>}
           </div>
-          {/* Ek Not */}
           <div className="md:col-span-2">
             <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
             <textarea
@@ -314,14 +362,13 @@ export default function VipTransferForm() {
               style={{ fontFamily: "Quicksand,sans-serif" }}
             />
           </div>
-          {/* Ekstralar */}
           <div className="md:col-span-2">
             <label className="font-bold text-[#bfa658] mb-2 block text-lg">Ekstralar</label>
             <EkstralarAccordion selectedExtras={extras} setSelectedExtras={setExtras} />
           </div>
-          {/* Mesafeli Satış */}
           <div className="md:col-span-2 flex items-center mt-3">
             <input
+              name="mesafeliOk"
               type="checkbox"
               checked={mesafeliOk}
               onChange={e => setMesafeliOk(e.target.checked)}
@@ -333,8 +380,8 @@ export default function VipTransferForm() {
                 Mesafeli Satış Sözleşmesini
               </button> okudum ve onaylıyorum.
             </label>
+            {fieldErrors.mesafeliOk && <div className="text-red-400 text-xs ml-4">{fieldErrors.mesafeliOk}</div>}
           </div>
-          {/* Buton */}
           <div className="md:col-span-2 flex justify-end">
             <button type="submit"
               className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition">
@@ -342,7 +389,6 @@ export default function VipTransferForm() {
             </button>
           </div>
         </form>
-        {/* Pop-up'lar */}
         {showContract && (
           <MesafeliPopup onClose={() => setShowContract(false)} />
         )}
@@ -362,8 +408,12 @@ export default function VipTransferForm() {
             phone={phone}
             note={note}
             extras={extras}
+            extrasQty={extrasQty}
+            setExtrasQty={setExtrasQty}
+            setExtras={setExtras}
             pnr={pnr}
             onClose={() => setShowSummary(false)}
+            router={router}
           />
         )}
       </section>
@@ -371,7 +421,7 @@ export default function VipTransferForm() {
   );
 }
 
-// MESAFELİ SÖZLEŞME POPUP
+// -- POPUP: Mesafeli Sözleşme
 function MesafeliPopup({ onClose }) {
   const [content, setContent] = useState("Yükleniyor...");
   useEffect(() => {
@@ -392,14 +442,39 @@ function MesafeliPopup({ onClose }) {
   );
 }
 
-// SİPARİŞ ÖZETİ POPUP
-function SummaryPopup({ from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, pnr, onClose }) {
+// -- POPUP: Sipariş Özeti
+function SummaryPopup({
+  from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, extrasQty, setExtrasQty, setExtras, pnr, onClose, router
+}) {
+  // Fiyatlar
+  const basePrice = 4000; // ÖRNEK. Bunu aracın değerine göre vs dinamik yapabilirsin!
+  const selectedExtras = extrasList.filter(e => extras.includes(e.key));
+  const extrasTotal = selectedExtras.reduce((sum, e) => sum + (e.price * (extrasQty[e.key] || 1)), 0);
+  const araToplam = basePrice + extrasTotal;
+  const kdv = araToplam * KDV_ORAN;
+  const toplam = araToplam + kdv;
+
+  // Ekstra değiştir (adet artır/azalt)
+  function changeQty(key, dir) {
+    setExtrasQty(q => ({
+      ...q,
+      [key]: Math.max(1, (q[key] || 1) + dir)
+    }));
+  }
+  function removeExtra(key) {
+    setExtras(es => es.filter(k => k !== key));
+    setExtrasQty(q => {
+      const { [key]: _, ...rest } = q;
+      return rest;
+    });
+  }
+
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
       <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
         <button onClick={onClose} className="absolute top-3 right-5 text-2xl font-bold text-red-500 hover:text-red-700">×</button>
         <h2 className="text-2xl font-bold mb-5 text-[#bfa658] text-center">Rezervasyon Özeti</h2>
-        <div className="text-black space-y-2">
+        <div className="space-y-2 mb-5 text-black text-lg">
           <div><b>Transfer:</b> {transfer || "-"}</div>
           <div><b>Araç:</b> {vehicle || "-"}</div>
           <div><b>Kişi:</b> {people}</div>
@@ -410,11 +485,35 @@ function SummaryPopup({ from, to, people, segment, transfer, vehicle, date, time
           <div><b>Telefon:</b> {phone}</div>
           {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
           {note && <div><b>Ek Not:</b> {note}</div>}
-          <div><b>Ekstralar:</b> {extras.length > 0 ? extras.join(", ") : "Yok"}</div>
+        </div>
+        {/* Ekstralar + Adet/Çıkar */}
+        <div className="mb-5">
+          <b className="block mb-2 text-[#bfa658]">Ekstralar:</b>
+          {selectedExtras.length === 0 && <span className="text-gray-600">Ekstra yok</span>}
+          {selectedExtras.map(extra =>
+            <div key={extra.key} className="flex items-center gap-2 py-1">
+              <span className="font-semibold">{extra.label}</span>
+              <button type="button" className="px-2" onClick={() => changeQty(extra.key, -1)}>-</button>
+              <span className="w-8 text-center">{extrasQty[extra.key] || 1}</span>
+              <button type="button" className="px-2" onClick={() => changeQty(extra.key, +1)}>+</button>
+              <span className="ml-2">{extra.price}₺</span>
+              <button type="button" onClick={() => removeExtra(extra.key)} className="ml-2 text-red-500 font-bold hover:underline">Çıkar</button>
+            </div>
+          )}
+        </div>
+        {/* Tutarlar */}
+        <div className="mb-5 space-y-1 text-right text-lg">
+          <div><b>Transfer Bedeli:</b> {basePrice.toLocaleString()} ₺</div>
+          <div><b>Ekstralar:</b> {extrasTotal.toLocaleString()} ₺</div>
+          <div><b>KDV (%20):</b> {kdv.toLocaleString(undefined, { maximumFractionDigits: 2 })} ₺</div>
+          <div className="text-xl font-extrabold"><b>Toplam:</b> {toplam.toLocaleString()} ₺</div>
         </div>
         <button
-          onClick={() => { alert("Demo: Ödeme sayfasına yönlendirme yapılacak!"); onClose(); }}
-          className="w-full py-3 rounded-xl bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition mt-6"
+          onClick={() => {
+            // Demo'da gerçek yönlendirme! Canlıda ödeme sayfasına yönlendir
+            router.push("/odeme?success=1");
+          }}
+          className="w-full py-3 rounded-xl bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition text-xl"
         >Onayla ve Öde</button>
       </div>
     </div>
