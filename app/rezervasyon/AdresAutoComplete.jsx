@@ -1,10 +1,9 @@
-// /app/rezervasyon/AdresAutoComplete.jsx
 "use client";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
-// Tüm adresleri yükle
-const useAddressList = () => {
-  const [list, setList] = useState([]);
+// Ortak adres datasını oku
+export function useAddressData() {
+  const [addresses, setAddresses] = useState([]);
   useEffect(() => {
     Promise.all([
       fetch("/dumps/sehirler.json").then(r => r.json()),
@@ -12,68 +11,93 @@ const useAddressList = () => {
       fetch("/dumps/mahalleler.json").then(r => r.json()),
       fetch("/dumps/airports.json").then(r => r.json())
     ]).then(([sehirler, ilceler, mahalleler, airports]) => {
-      let adresler = [];
-      sehirler.forEach(s => {
-        adresler.push({ label: s.sehir_adi, tip: "il" });
-      });
-      ilceler.forEach(i => {
-        const sehir = sehirler.find(s => s.sehir_ID === i.sehir_ID)?.sehir_adi || "";
-        adresler.push({ label: `${sehir} / ${i.ilce_adi}`, tip: "ilce" });
-      });
-      mahalleler.forEach(m => {
-        const ilce = ilceler.find(i => i.ilce_ID === m.ilce_ID);
-        const sehir = sehirler.find(s => s.sehir_ID === ilce?.sehir_ID)?.sehir_adi || "";
-        adresler.push({ label: `${sehir} / ${ilce?.ilce_adi} / ${m.mahalle_adi}`, tip: "mahalle" });
-      });
-      airports.forEach(a => {
-        adresler.push({ label: a.name, tip: "havalimani" });
-      });
-      setList(adresler);
+      // Şehir
+      const sehirList = sehirler.map(s => ({
+        label: s.sehir_adi,
+        value: s.sehir_adi,
+        tip: "il"
+      }));
+      // İlçe
+      const ilceList = ilceler.map(i => ({
+        label: `${i.sehir_adi} / ${i.ilce_adi}`,
+        value: `${i.sehir_adi} / ${i.ilce_adi}`,
+        tip: "ilce"
+      }));
+      // Mahalle
+      const mahalleList = mahalleler.map(m => ({
+        label: `${m.sehir_adi} / ${m.ilce_adi} / ${m.mahalle_adi}`,
+        value: `${m.sehir_adi} / ${m.ilce_adi} / ${m.mahalle_adi}`,
+        tip: "mahalle"
+      }));
+      // Havalimanı
+      const havalimaniList = airports.map(a => ({
+        label: a.name,
+        value: a.name,
+        tip: "havalimani"
+      }));
+      setAddresses([...sehirList, ...ilceList, ...mahalleList, ...havalimaniList]);
     });
   }, []);
-  return list;
-};
-
-function normalize(s) {
-  return s?.toLocaleLowerCase("tr-TR")
-    .replace(/[çÇ]/g, "c").replace(/[ğĞ]/g, "g")
-    .replace(/[ıİ]/g, "i").replace(/[öÖ]/g, "o")
-    .replace(/[şŞ]/g, "s").replace(/[üÜ]/g, "u")
-    .replace(/[\s\-\.]/g, "");
+  return addresses;
 }
 
-export default function AdresAutoComplete({ value, onChange, placeholder }) {
-  const addressList = useAddressList();
-  const [input, setInput] = useState(value || "");
+// Normalleştirme fonksiyonu
+function normalize(s) {
+  return s
+    .toLocaleLowerCase("tr-TR")
+    .replace(/[çÇ]/g,"c").replace(/[ğĞ]/g,"g").replace(/[ıİ]/g,"i")
+    .replace(/[öÖ]/g,"o").replace(/[şŞ]/g,"s").replace(/[üÜ]/g,"u")
+    .replace(/[\s\-\.]/g,"");
+}
+
+// Otomatik tamamlama component'i
+export default function AdresAutoComplete({ label, value, onChange, placeholder = "İl / İlçe / Mahalle / Havalimanı" }) {
+  const addressList = useAddressData();
+  const [query, setQuery] = useState(value || "");
   const [suggestions, setSuggestions] = useState([]);
+  useEffect(() => { setQuery(value); }, [value]);
+
   useEffect(() => {
-    if (!input || input.length < 2) return setSuggestions([]);
+    if (!query || query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    const q = normalize(query);
     setSuggestions(
       addressList
-        .filter(a => normalize(a.label).includes(normalize(input)))
-        .map(a => a.label)
-        .slice(0, 15)
+        .filter(item => normalize(item.label).includes(q))
+        .slice(0, 10)
     );
-  }, [input, addressList]);
+  }, [query, addressList]);
+
   return (
-    <div className="relative">
+    <div className="relative w-full">
+      {label && <label className="font-bold text-[#bfa658] mb-1 block">{label}</label>}
       <input
         type="text"
         className="input w-full"
-        placeholder={placeholder || "Nereden?"}
-        value={input}
+        value={query}
+        placeholder={placeholder}
         onChange={e => {
-          setInput(e.target.value);
-          onChange && onChange(e.target.value);
+          setQuery(e.target.value);
+          onChange(e.target.value);
         }}
+        onFocus={() => setSuggestions(query.length >= 2 ? suggestions : [])}
         autoComplete="off"
       />
       {suggestions.length > 0 && (
-        <ul className="absolute bg-white border rounded shadow z-50 w-full max-h-56 overflow-auto text-black">
+        <ul className="absolute left-0 w-full bg-white text-black rounded shadow z-50 mt-1 max-h-60 overflow-auto">
           {suggestions.map((s, i) => (
-            <li key={i} className="px-3 py-2 hover:bg-yellow-50 cursor-pointer"
-                onClick={() => { setInput(s); onChange && onChange(s); setSuggestions([]); }}>
-              {s}
+            <li
+              key={i}
+              className="px-3 py-2 hover:bg-[#fffbec] cursor-pointer"
+              onClick={() => {
+                setQuery(s.label);
+                onChange(s.label);
+                setSuggestions([]);
+              }}
+            >
+              {s.label}
             </li>
           ))}
         </ul>
