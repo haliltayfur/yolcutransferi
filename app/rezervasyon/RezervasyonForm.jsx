@@ -1,13 +1,45 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { vehicles } from "../../data/vehicleList"; // YOLUN BUDUR!
+import { vehicles } from "../../data/vehicleList";
 import { extrasList } from "../../data/extras";
 import EkstralarAccordion from "../../components/EkstralarAccordion";
 import AdresAutoComplete from "./AdresAutoComplete";
+
+const segmentOptions = [
+  { key: "Ekonomik", label: "Ekonomik" },
+  { key: "Lüks", label: "Lüks" },
+  { key: "Prime+", label: "Prime+" }
+];
+const allTransfers = [
+  "VIP Havalimanı Transferi",
+  "Şehirler Arası Transfer",
+  "Kurumsal Etkinlik",
+  "Özel Etkinlik",
+  "Tur & Gezi",
+  "Toplu Transfer",
+  "Düğün vb Organizasyonlar"
+];
+
 const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
+
+// String normalize fonksiyonu
+function normalize(str) {
+  return (str || "")
+    .toLocaleLowerCase("tr-TR")
+    .replace(/&/g, "ve")
+    .replace(/[çÇ]/g, "c")
+    .replace(/[ğĞ]/g, "g")
+    .replace(/[ıİ]/g, "i")
+    .replace(/[öÖ]/g, "o")
+    .replace(/[şŞ]/g, "s")
+    .replace(/[üÜ]/g, "u")
+    .replace(/[,\.]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 export default function VipTransferForm() {
   const params = useSearchParams();
@@ -18,11 +50,10 @@ export default function VipTransferForm() {
   const paramVehicle = params.get("vehicle") || "";
   const paramPeople = Number(params.get("people")) || 1;
 
-  // State'ler
   const [from, setFrom] = useState(paramFrom);
   const [to, setTo] = useState(paramTo);
   const [people, setPeople] = useState(paramPeople);
-  const [segment, setSegment] = useState("ekonomik");
+  const [segment, setSegment] = useState("Ekonomik");
   const [transfer, setTransfer] = useState("");
   const [vehicle, setVehicle] = useState(paramVehicle);
   const [date, setDate] = useState(paramDate);
@@ -38,38 +69,11 @@ export default function VipTransferForm() {
   const [showSummary, setShowSummary] = useState(false);
   const [showContract, setShowContract] = useState(false);
 
-  // SEGMENTLER
-  const segmentOptions = [
-    { key: "ekonomik", label: "Ekonomik" },
-    { key: "lux", label: "Lüks" },
-    { key: "prime", label: "Prime+" }
-  ];
-  const transferTypes = {
-    ekonomik: [
-      "VIP Havalimanı Transferi",
-      "Şehirlerarası Transfer",
-      "Kurumsal & Toplu Transfer",
-      "Tur & Gezi Transferi"
-    ],
-    lux: [
-      "VIP Havalimanı Transferi",
-      "Şehirlerarası Transfer",
-      "Kurumsal & Toplu Transfer",
-      "Tur & Gezi Transferi"
-    ],
-    prime: [
-      "VIP Havalimanı Transferi",
-      "Şehirlerarası Transfer",
-      "Kurumsal & Toplu Transfer",
-      "Tur & Gezi Transferi",
-      "Düğün & Özel Etkinlik Transferi",
-      "Drone Yolcu Transferi"
-    ]
-  };
-  const availableTransfers = transferTypes[segment] || [];
+  const availableTransfers = allTransfers;
+
   const availableVehicles = vehicles.filter(v =>
-    (!transfer || v.transferTypes?.includes(transfer)) &&
-    (!segment || v.segment?.toLowerCase() === segment) &&
+    (!segment || normalize(v.segment) === normalize(segment)) &&
+    (!transfer || (v.transferTypes || []).map(normalize).includes(normalize(transfer))) &&
     (!people || (v.max || 1) >= people)
   );
   const maxPeople = Math.max(...availableVehicles.map(v => v.max || 1), 10);
@@ -86,7 +90,6 @@ export default function VipTransferForm() {
     setPhone(num.slice(0, 11));
   }
 
-  // AD / SOYAD / TEL CACHE (browser + localStorage)
   useEffect(() => {
     try {
       if (!name) {
@@ -123,7 +126,6 @@ export default function VipTransferForm() {
     }
   }, [showSummary, name, surname, phone]);
 
-  // HAVALİMANI ALGILAMA
   const isAirport = str =>
     str && typeof str === "string" && (
       str.toLowerCase().includes("havaalan") ||
@@ -142,15 +144,6 @@ export default function VipTransferForm() {
     setShowSummary(true);
   }
 
-  // Vercel debug bar gizle (prod için)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const el = document.querySelector('[class*="vercel-toolbar"]');
-      if (el && process.env.NODE_ENV === "production") el.style.display = "none";
-    }
-  }, []);
-
-  // -- RETURN HTML --
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-[#19160a] to-[#302811]">
       <section className="w-full max-w-2xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] my-16">
@@ -180,8 +173,8 @@ export default function VipTransferForm() {
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
             <select className="input w-full"
-                    value={people}
-                    onChange={e => setPeople(Number(e.target.value))}>
+              value={people}
+              onChange={e => setPeople(Number(e.target.value))}>
               {Array.from({ length: maxPeople }, (_, i) => i + 1).map(val =>
                 <option key={val} value={val}>{val}</option>
               )}
@@ -190,10 +183,10 @@ export default function VipTransferForm() {
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
             <select className="input w-full"
-                    value={segment}
-                    onChange={e => setSegment(e.target.value)}>
+              value={segment}
+              onChange={e => setSegment(e.target.value)}>
               {segmentOptions.map(opt =>
-                <option key={opt.key} value={opt.key}>{opt.label}</option>
+                <option key={opt.key} value={opt.label}>{opt.label}</option>
               )}
             </select>
           </div>
@@ -201,8 +194,8 @@ export default function VipTransferForm() {
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
             <select className="input w-full"
-                    value={transfer}
-                    onChange={e => setTransfer(e.target.value)}>
+              value={transfer}
+              onChange={e => setTransfer(e.target.value)}>
               <option value="">Seçiniz</option>
               {availableTransfers.map(opt =>
                 <option key={opt} value={opt}>{opt}</option>
@@ -212,8 +205,8 @@ export default function VipTransferForm() {
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Araç</label>
             <select className="input w-full"
-                    value={vehicle}
-                    onChange={e => setVehicle(e.target.value)}>
+              value={vehicle}
+              onChange={e => setVehicle(e.target.value)}>
               <option value="">Seçiniz</option>
               {availableVehicles.map(opt =>
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -240,7 +233,7 @@ export default function VipTransferForm() {
             <input
               type="date"
               className="input w-full"
-              value={date}
+              value={typeof date === "string" ? date : ""}
               ref={dateInputRef}
               onFocus={openDate}
               onClick={openDate}
@@ -253,8 +246,8 @@ export default function VipTransferForm() {
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
             <select className="input w-full"
-                    value={time}
-                    onChange={e => setTime(e.target.value)}>
+              value={time}
+              onChange={e => setTime(e.target.value)}>
               <option value="">Seçiniz</option>
               {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
             </select>
@@ -344,7 +337,7 @@ export default function VipTransferForm() {
           {/* Buton */}
           <div className="md:col-span-2 flex justify-end">
             <button type="submit"
-                    className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition">
+              className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition">
               Rezervasyonu Tamamla
             </button>
           </div>
@@ -378,5 +371,52 @@ export default function VipTransferForm() {
   );
 }
 
-// MesafeliPopup ve SummaryPopup aynı şekilde kullanılabilir.
+// MESAFELİ SÖZLEŞME POPUP
+function MesafeliPopup({ onClose }) {
+  const [content, setContent] = useState("Yükleniyor...");
+  useEffect(() => {
+    fetch("/mesafeli-satis")
+      .then(r => r.text())
+      .then(html => {
+        const main = html.match(/<main[^>]*>([\s\S]*?)<\/main>/);
+        setContent(main ? main[1] : html);
+      });
+  }, []);
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
+      <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
+        <button onClick={onClose} className="absolute top-3 right-5 text-2xl font-bold text-red-500 hover:text-red-700">×</button>
+        <div className="text-gray-800 prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
+      </div>
+    </div>
+  );
+}
 
+// SİPARİŞ ÖZETİ POPUP
+function SummaryPopup({ from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, pnr, onClose }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
+      <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
+        <button onClick={onClose} className="absolute top-3 right-5 text-2xl font-bold text-red-500 hover:text-red-700">×</button>
+        <h2 className="text-2xl font-bold mb-5 text-[#bfa658] text-center">Rezervasyon Özeti</h2>
+        <div className="text-black space-y-2">
+          <div><b>Transfer:</b> {transfer || "-"}</div>
+          <div><b>Araç:</b> {vehicle || "-"}</div>
+          <div><b>Kişi:</b> {people}</div>
+          <div><b>Nereden:</b> {from}</div>
+          <div><b>Nereye:</b> {to}</div>
+          <div><b>Tarih:</b> {date} {time}</div>
+          <div><b>Ad Soyad:</b> {name} {surname} – T.C.: {tc}</div>
+          <div><b>Telefon:</b> {phone}</div>
+          {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
+          {note && <div><b>Ek Not:</b> {note}</div>}
+          <div><b>Ekstralar:</b> {extras.length > 0 ? extras.join(", ") : "Yok"}</div>
+        </div>
+        <button
+          onClick={() => { alert("Demo: Ödeme sayfasına yönlendirme yapılacak!"); onClose(); }}
+          className="w-full py-3 rounded-xl bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition mt-6"
+        >Onayla ve Öde</button>
+      </div>
+    </div>
+  );
+}
