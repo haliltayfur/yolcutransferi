@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { extrasList } from "../../data/extras";
+
+import { extrasList } from "../data/extras";
 
 // Kategorilere eşleştirme anahtarı
 const extraKategori = {
