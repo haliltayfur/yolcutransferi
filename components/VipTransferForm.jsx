@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { vehicles } from "../data/vehicleList";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -25,26 +25,27 @@ function normalize(str) {
 
 export default function VipTransferForm() {
   const router = useRouter();
+  const params = useSearchParams();
 
-  const [segment, setSegment] = useState("");
-  const [transfer, setTransfer] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [date, setDate] = useState(null);
-  const [time, setTime] = useState("");
-  const [vehicle, setVehicle] = useState("");
-  const [people, setPeople] = useState(1);
+  const [segment, setSegment] = useState(params.get("segment") || "");
+  const [transfer, setTransfer] = useState(params.get("transfer") || "");
+  const [from, setFrom] = useState(params.get("from") || "");
+  const [to, setTo] = useState(params.get("to") || "");
+  const [date, setDate] = useState(params.get("date") ? new Date(params.get("date")) : null);
+  const [time, setTime] = useState(params.get("time") || "");
+  const [vehicle, setVehicle] = useState(params.get("vehicle") || "");
+  const [people, setPeople] = useState(Number(params.get("people")) || 1);
 
   useEffect(() => {
     const draft = JSON.parse(localStorage.getItem("reservationDraft") || "{}");
-    if (draft.from) setFrom(draft.from);
-    if (draft.to) setTo(draft.to);
-    if (draft.date) setDate(new Date(draft.date));
-    if (draft.time) setTime(draft.time);
-    if (draft.vehicle) setVehicle(draft.vehicle);
-    if (draft.people) setPeople(draft.people);
-    if (draft.segment) setSegment(draft.segment);
-    if (draft.transfer) setTransfer(draft.transfer);
+    if (!params.get("from") && draft.from) setFrom(draft.from);
+    if (!params.get("to") && draft.to) setTo(draft.to);
+    if (!params.get("date") && draft.date) setDate(new Date(draft.date));
+    if (!params.get("time") && draft.time) setTime(draft.time);
+    if (!params.get("vehicle") && draft.vehicle) setVehicle(draft.vehicle);
+    if (!params.get("people") && draft.people) setPeople(draft.people);
+    if (!params.get("segment") && draft.segment) setSegment(draft.segment);
+    if (!params.get("transfer") && draft.transfer) setTransfer(draft.transfer);
   }, []);
 
   useEffect(() => {
@@ -69,7 +70,7 @@ export default function VipTransferForm() {
     if (transfer) {
       const transferNorm = normalize(transfer);
       const arr = (v.transferTypes || []).map(normalize);
-      if (!arr.some(t => t === transferNorm)) return false;
+      if (!arr.includes(transferNorm)) return false;
     }
     return true;
   });
@@ -189,6 +190,7 @@ export default function VipTransferForm() {
           ))}
         </select>
       </div>
+
       <button
         type="submit"
         className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-8 rounded-xl w-full text-xl shadow hover:scale-105 transition"
