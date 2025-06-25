@@ -5,6 +5,7 @@ import { vehicles } from "../data/vehicleList";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
+// Saatler
 const saatler = [
   "00:00", "00:30", "01:00", "01:30", "02:00", "02:30", "03:00", "03:30",
   "04:00", "04:30", "05:00", "05:30", "06:00", "06:30", "07:00", "07:30",
@@ -27,6 +28,7 @@ export default function VipTransferForm() {
   const router = useRouter();
   const params = useSearchParams();
 
+  // State'ler (Aynen korunuyor)
   const [segment, setSegment] = useState(params.get("segment") || "");
   const [transfer, setTransfer] = useState(params.get("transfer") || "");
   const [from, setFrom] = useState(params.get("from") || "");
@@ -36,6 +38,7 @@ export default function VipTransferForm() {
   const [vehicle, setVehicle] = useState(params.get("vehicle") || "");
   const [people, setPeople] = useState(Number(params.get("people")) || 1);
 
+  // LocalStorage draft (Aynen korunuyor)
   useEffect(() => {
     const draft = JSON.parse(localStorage.getItem("reservationDraft") || "{}");
     if (!params.get("from") && draft.from) setFrom(draft.from);
@@ -64,6 +67,7 @@ export default function VipTransferForm() {
     );
   }, [from, to, date, time, vehicle, people, segment, transfer]);
 
+  // Araç filtresi
   const availableVehicles = vehicles.filter(v => {
     if (segment && normalize(v.segment) !== normalize(segment)) return false;
     if (people && v.max < people) return false;
@@ -75,6 +79,7 @@ export default function VipTransferForm() {
     return true;
   });
 
+  // Otomatik araç seçimi
   useEffect(() => {
     if (availableVehicles.length > 0) {
       if (!availableVehicles.find(v => v.value === vehicle)) {
@@ -97,13 +102,18 @@ export default function VipTransferForm() {
     router.push(`/rezervasyon?${params}`);
   }
 
+  // --- YENİ TASARIM BAŞLANGIÇ ---
   return (
     <form
-      className="w-full h-full flex flex-col justify-center px-8 py-6"
-      style={{ maxWidth: "900px", maxHeight: "700px" }}
+      className="w-full max-w-2xl mx-auto bg-black/90 border border-[#bfa658] rounded-3xl shadow-2xl px-8 py-10 mt-8 mb-12"
       onSubmit={handleSubmit}
+      style={{ fontFamily: "Quicksand, sans-serif" }}
     >
-      <div className="flex flex-col gap-4 w-full mb-4">
+      <h2 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-6 text-center">
+        VIP Rezervasyon Formu
+      </h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <input
           type="text"
           placeholder="Nereden? (il/ilçe/mahalle/sokak)"
@@ -122,9 +132,9 @@ export default function VipTransferForm() {
         />
       </div>
 
-      <div className="flex flex-row gap-4 w-full mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <select
-          className="w-1/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
           value={segment}
           onChange={e => setSegment(e.target.value)}
         >
@@ -134,7 +144,7 @@ export default function VipTransferForm() {
           <option value="Prime+">Prime+</option>
         </select>
         <select
-          className="w-2/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
           value={transfer}
           onChange={e => setTransfer(e.target.value)}
         >
@@ -149,9 +159,9 @@ export default function VipTransferForm() {
         </select>
       </div>
 
-      <div className="flex flex-row gap-4 w-full mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <select
-          className="w-1/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
           value={vehicle}
           onChange={e => setVehicle(e.target.value)}
         >
@@ -161,7 +171,7 @@ export default function VipTransferForm() {
           ))}
         </select>
         <select
-          className="w-1/6 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
           value={people}
           onChange={e => setPeople(Number(e.target.value))}
         >
@@ -175,12 +185,12 @@ export default function VipTransferForm() {
           dateFormat="dd.MM.yyyy"
           minDate={new Date()}
           placeholderText="Tarih Seç"
-          className="w-1/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
+          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
           popperPlacement="bottom"
           calendarClassName="bg-black text-white"
         />
         <select
-          className="w-1/4 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
           value={time}
           onChange={e => setTime(e.target.value)}
         >
