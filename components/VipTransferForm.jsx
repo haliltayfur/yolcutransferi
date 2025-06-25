@@ -5,7 +5,6 @@ import { vehicles } from "../data/vehicleList";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-// Saatler
 const saatler = [
   "00:00", "00:30", "01:00", "01:30", "02:00", "02:30", "03:00", "03:30",
   "04:00", "04:30", "05:00", "05:30", "06:00", "06:30", "07:00", "07:30",
@@ -28,7 +27,6 @@ export default function VipTransferForm() {
   const router = useRouter();
   const params = useSearchParams();
 
-  // State'ler (Aynen korunuyor)
   const [segment, setSegment] = useState(params.get("segment") || "");
   const [transfer, setTransfer] = useState(params.get("transfer") || "");
   const [from, setFrom] = useState(params.get("from") || "");
@@ -38,7 +36,7 @@ export default function VipTransferForm() {
   const [vehicle, setVehicle] = useState(params.get("vehicle") || "");
   const [people, setPeople] = useState(Number(params.get("people")) || 1);
 
-  // LocalStorage draft (Aynen korunuyor)
+  // Local storage ile draft bilgileri yönet
   useEffect(() => {
     const draft = JSON.parse(localStorage.getItem("reservationDraft") || "{}");
     if (!params.get("from") && draft.from) setFrom(draft.from);
@@ -79,7 +77,7 @@ export default function VipTransferForm() {
     return true;
   });
 
-  // Otomatik araç seçimi
+  // Seçili araç uygun değilse ilk uygun aracı seç
   useEffect(() => {
     if (availableVehicles.length > 0) {
       if (!availableVehicles.find(v => v.value === vehicle)) {
@@ -88,6 +86,7 @@ export default function VipTransferForm() {
     } else {
       setVehicle("");
     }
+    // eslint-disable-next-line
   }, [segment, transfer, people, vehicles]);
 
   function handleSubmit(e) {
@@ -102,14 +101,14 @@ export default function VipTransferForm() {
     router.push(`/rezervasyon?${params}`);
   }
 
-  // --- YENİ TASARIM BAŞLANGIÇ ---
+  // --- GÜNCEL VIP TASARIM ---
   return (
     <form
-      className="w-full max-w-2xl mx-auto bg-black/90 border border-[#bfa658] rounded-3xl shadow-2xl px-8 py-10 mt-8 mb-12"
+      className="w-full max-w-2xl mx-auto bg-black/90 border border-[#bfa658] rounded-3xl shadow-2xl px-8 py-10"
       onSubmit={handleSubmit}
       style={{ fontFamily: "Quicksand, sans-serif" }}
     >
-      <h2 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-6 text-center">
+      <h2 className="text-2xl md:text-3xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center">
         VIP Rezervasyon Formu
       </h2>
 
