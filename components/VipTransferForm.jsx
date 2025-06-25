@@ -27,16 +27,17 @@ export default function VipTransferForm() {
   const router = useRouter();
   const params = useSearchParams();
 
+  // Düzgün default başlangıç
   const [segment, setSegment] = useState(params.get("segment") || "");
   const [transfer, setTransfer] = useState(params.get("transfer") || "");
   const [from, setFrom] = useState(params.get("from") || "");
   const [to, setTo] = useState(params.get("to") || "");
   const [date, setDate] = useState(params.get("date") ? new Date(params.get("date")) : null);
   const [time, setTime] = useState(params.get("time") || "");
-  const [vehicle, setVehicle] = useState(params.get("vehicle") || "");
-  const [people, setPeople] = useState(Number(params.get("people")) || 1);
+  const [vehicle, setVehicle] = useState("");
+  const [people, setPeople] = useState(1);
 
-  // Local storage ile draft bilgileri yönet
+  // LocalStorage draft
   useEffect(() => {
     const draft = JSON.parse(localStorage.getItem("reservationDraft") || "{}");
     if (!params.get("from") && draft.from) setFrom(draft.from);
@@ -77,17 +78,11 @@ export default function VipTransferForm() {
     return true;
   });
 
-  // Seçili araç uygun değilse ilk uygun aracı seç
+  // Seçili aracı temizle, kişi sayısını sıfırla
   useEffect(() => {
-    if (availableVehicles.length > 0) {
-      if (!availableVehicles.find(v => v.value === vehicle)) {
-        setVehicle(availableVehicles[0].value);
-      }
-    } else {
-      setVehicle("");
-    }
-    // eslint-disable-next-line
-  }, [segment, transfer, people, vehicles]);
+    setVehicle(""); // Her segment ve transfer değişiminde araç seçimini sıfırla
+    setPeople(1);   // Kişi sayısı her zaman 1 ile başlasın
+  }, [segment, transfer]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -101,7 +96,6 @@ export default function VipTransferForm() {
     router.push(`/rezervasyon?${params}`);
   }
 
-  // --- GÜNCEL VIP TASARIM ---
   return (
     <form
       className="w-full max-w-2xl mx-auto bg-black/90 border border-[#bfa658] rounded-3xl shadow-2xl px-8 py-10"
@@ -112,97 +106,121 @@ export default function VipTransferForm() {
         VIP Rezervasyon Formu
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <input
-          type="text"
-          placeholder="Nereden? (il/ilçe/mahalle/sokak)"
-          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
-          value={from}
-          onChange={e => setFrom(e.target.value)}
-          autoComplete="off"
-        />
-        <input
-          type="text"
-          placeholder="Nereye? (il/ilçe/mahalle/sokak)"
-          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
-          value={to}
-          onChange={e => setTo(e.target.value)}
-          autoComplete="off"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+        <div>
+          <label className="text-[#bfa658] font-semibold mb-1 block">Nereden?</label>
+          <input
+            type="text"
+            placeholder="İl/ilçe/mahalle/sokak"
+            className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
+            value={from}
+            onChange={e => setFrom(e.target.value)}
+            autoComplete="off"
+          />
+        </div>
+        <div>
+          <label className="text-[#bfa658] font-semibold mb-1 block">Nereye?</label>
+          <input
+            type="text"
+            placeholder="İl/ilçe/mahalle/sokak"
+            className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
+            value={to}
+            onChange={e => setTo(e.target.value)}
+            autoComplete="off"
+          />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <select
-          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
-          value={segment}
-          onChange={e => setSegment(e.target.value)}
-        >
-          <option value="">Segment Seç</option>
-          <option value="Ekonomik">Ekonomik</option>
-          <option value="Lüks">Lüks</option>
-          <option value="Prime+">Prime+</option>
-        </select>
-        <select
-          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
-          value={transfer}
-          onChange={e => setTransfer(e.target.value)}
-        >
-          <option value="">Transfer Türü Seç</option>
-          <option value="VIP Havalimanı Transferi">VIP Havalimanı Transferi</option>
-          <option value="Şehirler Arası Transfer">Şehirler Arası Transfer</option>
-          <option value="Özel Etkinlik">Özel Etkinlik</option>
-          <option value="Kurumsal Etkinlik">Kurumsal Etkinlik</option>
-          <option value="Tur & Gezi">Tur & Gezi</option>
-          <option value="Toplu Transfer">Toplu Transfer</option>
-          <option value="Düğün vb Organizasyonlar">Düğün vb Organizasyonlar</option>
-        </select>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+        <div>
+          <label className="text-[#bfa658] font-semibold mb-1 block">Segment</label>
+          <select
+            className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+            value={segment}
+            onChange={e => setSegment(e.target.value)}
+          >
+            <option value="">Segment Seç</option>
+            <option value="Ekonomik">Ekonomik</option>
+            <option value="Lüks">Lüks</option>
+            <option value="Prime+">Prime+</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-[#bfa658] font-semibold mb-1 block">Transfer Türü</label>
+          <select
+            className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+            value={transfer}
+            onChange={e => setTransfer(e.target.value)}
+          >
+            <option value="">Transfer Türü Seç</option>
+            <option value="VIP Havalimanı Transferi">VIP Havalimanı Transferi</option>
+            <option value="Şehirler Arası Transfer">Şehirler Arası Transfer</option>
+            <option value="Özel Etkinlik">Özel Etkinlik</option>
+            <option value="Kurumsal Etkinlik">Kurumsal Etkinlik</option>
+            <option value="Tur & Gezi">Tur & Gezi</option>
+            <option value="Toplu Transfer">Toplu Transfer</option>
+            <option value="Düğün vb Organizasyonlar">Düğün vb Organizasyonlar</option>
+          </select>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <select
-          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
-          value={vehicle}
-          onChange={e => setVehicle(e.target.value)}
-        >
-          {availableVehicles.length === 0 && <option value="">Uygun araç yok</option>}
-          {availableVehicles.map((v, i) => (
-            <option key={i} value={v.value}>{v.label}</option>
-          ))}
-        </select>
-        <select
-          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
-          value={people}
-          onChange={e => setPeople(Number(e.target.value))}
-        >
-          {Array.from({ length: 24 }, (_, i) => i + 1).map(val =>
-            <option key={val} value={val}>{val}</option>
-          )}
-        </select>
-        <DatePicker
-          selected={date}
-          onChange={date => setDate(date)}
-          dateFormat="dd.MM.yyyy"
-          minDate={new Date()}
-          placeholderText="Tarih Seç"
-          className="w-full py-15 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
-          popperPlacement="bottom"
-          calendarClassName="bg-black text-white"
-        />
-        <select
-          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
-          value={time}
-          onChange={e => setTime(e.target.value)}
-        >
-          <option value="">Saat seç</option>
-          {saatler.map((saat, i) => (
-            <option key={i} value={saat}>{saat}</option>
-          ))}
-        </select>
+        <div>
+          <label className="text-[#bfa658] font-semibold mb-1 block">Araç</label>
+          <select
+            className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+            value={vehicle}
+            onChange={e => setVehicle(e.target.value)}
+          >
+            <option value="">Araç Seç</option>
+            {availableVehicles.map((v, i) => (
+              <option key={i} value={v.value}>{v.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="text-[#bfa658] font-semibold mb-1 block">Kişi Sayısı</label>
+          <select
+            className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+            value={people}
+            onChange={e => setPeople(Number(e.target.value))}
+          >
+            {Array.from({ length: 24 }, (_, i) => i + 1).map(val =>
+              <option key={val} value={val}>{val}</option>
+            )}
+          </select>
+        </div>
+        <div>
+          <label className="text-[#bfa658] font-semibold mb-1 block">Tarih</label>
+          <DatePicker
+            selected={date}
+            onChange={date => setDate(date)}
+            dateFormat="dd.MM.yyyy"
+            minDate={new Date()}
+            placeholderText="Tarih Seç"
+            className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
+            popperPlacement="bottom"
+            calendarClassName="bg-black text-white"
+          />
+        </div>
+        <div>
+          <label className="text-[#bfa658] font-semibold mb-1 block">Saat</label>
+          <select
+            className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
+            value={time}
+            onChange={e => setTime(e.target.value)}
+          >
+            <option value="">Saat seç</option>
+            {saatler.map((saat, i) => (
+              <option key={i} value={saat}>{saat}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <button
         type="submit"
-        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-8 rounded-xl w-full text-xl shadow hover:scale-105 transition"
+        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-8 rounded-xl w-full text-xl shadow hover:scale-105 transition mt-4"
       >
         Transfer Planla
       </button>
