@@ -184,7 +184,7 @@ export default function VipTransferForm() {
           dateFormat="dd.MM.yyyy"
           minDate={new Date()}
           placeholderText="Tarih Seç"
-          className="w-full py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
+          className="w-full py-15 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white focus:outline-none"
           popperPlacement="bottom"
           calendarClassName="bg-black text-white"
         />
