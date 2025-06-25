@@ -1,14 +1,16 @@
 import HeroSlider from "../components/HeroSlider";
-import VipTransferForm from "../components/VipTransferForm";
+import dynamic from "next/dynamic";
 import HeroVideo from "../components/HeroVideo";
 import AdvantagesBar from "../components/AdvantagesBar";
 import TestimonialsSlider from "../components/TestimonialsSlider";
+
+// ŞU SATIRDA dynamic import!
+const VipTransferForm = dynamic(() => import("../components/VipTransferForm"), { ssr: false });
 
 export default function Home() {
   return (
     <main>
       <HeroSlider />
-      {/* Desktop: form+video yan yana, mobile: sadece form */}
       <section
         className="
           flex flex-col items-center
