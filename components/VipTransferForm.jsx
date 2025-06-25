@@ -23,11 +23,10 @@ function normalize(str) {
     .trim();
 }
 
-export default function VipTransferForm() {
+export default function RezervasyonForm() {
   const router = useRouter();
   const params = useSearchParams();
 
-  // State’ler
   const [segment, setSegment] = useState(params.get("segment") || "");
   const [transfer, setTransfer] = useState(params.get("transfer") || "");
   const [from, setFrom] = useState(params.get("from") || "");
@@ -37,7 +36,6 @@ export default function VipTransferForm() {
   const [vehicle, setVehicle] = useState("");
   const [people, setPeople] = useState(1);
 
-  // LocalStorage draft
   useEffect(() => {
     const draft = JSON.parse(localStorage.getItem("reservationDraft") || "{}");
     if (!params.get("from") && draft.from) setFrom(draft.from);
@@ -66,7 +64,6 @@ export default function VipTransferForm() {
     );
   }, [from, to, date, time, vehicle, people, segment, transfer]);
 
-  // Araç filtresi
   const availableVehicles = vehicles.filter(v => {
     if (segment && normalize(v.segment) !== normalize(segment)) return false;
     if (people && v.max < people) return false;
@@ -78,10 +75,9 @@ export default function VipTransferForm() {
     return true;
   });
 
-  // Seçili aracı ve kişi sayısını sıfırla
   useEffect(() => {
-    setVehicle(""); // Her segment ve transfer değişiminde araç seçimini sıfırla
-    setPeople(1);   // Kişi sayısı her zaman 1 ile başlasın
+    setVehicle("");
+    setPeople(1);
   }, [segment, transfer]);
 
   function handleSubmit(e) {
@@ -106,6 +102,7 @@ export default function VipTransferForm() {
         VIP Rezervasyon Formu
       </h2>
 
+      {/* İki kolonlu, responsive, hizalı ve taşmayan grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Nereden?</label>
@@ -164,6 +161,7 @@ export default function VipTransferForm() {
         </div>
       </div>
 
+      {/* Araç + Kişi + Tarih + Saat aynı satırda grid, responsive */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Araç</label>
