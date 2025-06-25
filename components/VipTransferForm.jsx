@@ -5,8 +5,6 @@ import { vehicles } from "../data/vehicleList";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-// (Eğer segment ve transfer de eklenecekse bunları bir şekilde state olarak alırsın. Burada örnek olarak altta örnek select var.)
-
 const saatler = [
   "00:00", "00:30", "01:00", "01:30", "02:00", "02:30", "03:00", "03:30",
   "04:00", "04:30", "05:00", "05:30", "06:00", "06:30", "07:00", "07:30",
@@ -16,7 +14,6 @@ const saatler = [
   "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00", "23:30"
 ];
 
-// NORMALİZE fonksiyonu: Büyük/küçük harf, &/ve, fazladan boşlukları düzeltir
 function normalize(str) {
   return (str || "")
     .toLowerCase()
@@ -29,15 +26,13 @@ function normalize(str) {
 export default function VipTransferForm() {
   const router = useRouter();
 
-  // SEÇİMLER (Segment ve Transfer için örnek)
-  const [segment, setSegment] = useState(""); // "Ekonomik", "Lüks", "Prime+" vb.
-  const [transfer, setTransfer] = useState(""); // "VIP Havalimanı Transferi" vb.
-
+  const [segment, setSegment] = useState("");
+  const [transfer, setTransfer] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState(null);
   const [time, setTime] = useState("");
-  const [vehicle, setVehicle] = useState(""); // Seçili araç
+  const [vehicle, setVehicle] = useState("");
   const [people, setPeople] = useState(1);
 
   useEffect(() => {
@@ -68,13 +63,9 @@ export default function VipTransferForm() {
     );
   }, [from, to, date, time, vehicle, people, segment, transfer]);
 
-  // **FİLTRELEME - AKILLI**
   const availableVehicles = vehicles.filter(v => {
-    // Segment seçilmişse normalleştirerek eşleştir
     if (segment && normalize(v.segment) !== normalize(segment)) return false;
-    // Kişi kapasitesi
     if (people && v.max < people) return false;
-    // Transfer türü seçilmişse, normalize ederek array’de var mı bak
     if (transfer) {
       const transferNorm = normalize(transfer);
       const arr = (v.transferTypes || []).map(normalize);
@@ -83,7 +74,6 @@ export default function VipTransferForm() {
     return true;
   });
 
-  // Seçili araç, filtre dışına çıkarsa ilk uygun aracı seç
   useEffect(() => {
     if (availableVehicles.length > 0) {
       if (!availableVehicles.find(v => v.value === vehicle)) {
@@ -92,7 +82,6 @@ export default function VipTransferForm() {
     } else {
       setVehicle("");
     }
-    // eslint-disable-next-line
   }, [segment, transfer, people, vehicles]);
 
   function handleSubmit(e) {
@@ -132,9 +121,7 @@ export default function VipTransferForm() {
         />
       </div>
 
-      {/* Segment ve Transfer Seçimi */}
       <div className="flex flex-row gap-4 w-full mb-4">
-        {/* Segment */}
         <select
           className="w-1/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
           value={segment}
@@ -145,7 +132,6 @@ export default function VipTransferForm() {
           <option value="Lüks">Lüks</option>
           <option value="Prime+">Prime+</option>
         </select>
-        {/* Transfer Türü */}
         <select
           className="w-2/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
           value={transfer}
@@ -163,7 +149,6 @@ export default function VipTransferForm() {
       </div>
 
       <div className="flex flex-row gap-4 w-full mb-4">
-        {/* Araç Tipi */}
         <select
           className="w-1/3 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
           value={vehicle}
@@ -174,7 +159,6 @@ export default function VipTransferForm() {
             <option key={i} value={v.value}>{v.label}</option>
           ))}
         </select>
-        {/* Kişi */}
         <select
           className="w-1/6 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
           value={people}
@@ -184,7 +168,6 @@ export default function VipTransferForm() {
             <option key={val} value={val}>{val}</option>
           )}
         </select>
-        {/* Tarih (Modern Calendar) */}
         <DatePicker
           selected={date}
           onChange={date => setDate(date)}
@@ -195,7 +178,6 @@ export default function VipTransferForm() {
           popperPlacement="bottom"
           calendarClassName="bg-black text-white"
         />
-        {/* Saat */}
         <select
           className="w-1/4 py-4 px-4 rounded-xl border border-gold bg-black/80 text-lg text-white"
           value={time}
