@@ -102,7 +102,7 @@ export default function RezervasyonForm() {
         VIP Rezervasyon Formu
       </h2>
 
-      {/* İki kolonlu, responsive, hizalı ve taşmayan grid */}
+      {/* Responsive grid, grid-cols-2 ve grid-cols-4 AYNI SATIRDA OLMASIN */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Nereden?</label>
@@ -161,7 +161,7 @@ export default function RezervasyonForm() {
         </div>
       </div>
 
-      {/* Araç + Kişi + Tarih + Saat aynı satırda grid, responsive */}
+      {/* Araç, kişi, tarih, saat ayrı satırlarda mobilde, desktopta 4lü grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Araç</label>
