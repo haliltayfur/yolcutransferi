@@ -3,8 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { vehicles } from "../../data/vehicleList";
 import { extrasList } from "../../data/extras";
-import EkstralarAccordion from "../../components/EkstralarAccordion";
-import AdresAutoComplete from "./AdresAutoComplete";
 
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
@@ -41,11 +39,10 @@ function normalize(str) {
     .trim();
 }
 
-// EN BAŞ: Form bileşeni
 export default function VipTransferForm() {
   const router = useRouter();
   const params = useSearchParams();
-  // --- OTOMATİK PARAMETRE OKUMA VE STATE AYARLAMA ---
+
   const paramFrom = params.get("from") || "";
   const paramTo = params.get("to") || "";
   const paramDate = params.get("date") || "";
@@ -76,8 +73,6 @@ export default function VipTransferForm() {
   const [showContract, setShowContract] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
 
-  // FİLTRELER
-  const availableTransfers = allTransfers;
   const availableVehicles = vehicles.filter(v =>
     (!segment || normalize(v.segment) === normalize(segment)) &&
     (!transfer || (v.transferTypes || []).map(normalize).includes(normalize(transfer))) &&
@@ -94,7 +89,6 @@ export default function VipTransferForm() {
   }, [extras]);
 
   const dateInputRef = useRef();
-  const openDate = () => dateInputRef.current && dateInputRef.current.showPicker();
 
   function handleTcChange(val) {
     setTc(val.replace(/\D/g, "").slice(0, 11));
@@ -105,7 +99,6 @@ export default function VipTransferForm() {
     setPhone(num.slice(0, 11));
   }
 
-  // KİŞİ BİLGİLERİ LOCALSTORAGE
   useEffect(() => {
     try {
       if (!name) {
@@ -178,6 +171,140 @@ export default function VipTransferForm() {
     setShowSummary(true);
   }
 
+  // --- EKSTRALAR: (minimüm haliyle, checkbox'lı)
+  function EkstralarAccordion({ selectedExtras, setSelectedExtras }) {
+    return (
+      <div className="flex flex-wrap gap-3">
+        {extrasList.map(extra => (
+          <label key={extra.key} className="flex items-center gap-2 bg-[#19160a] border border-[#bfa658] rounded-xl px-4 py-2 cursor-pointer select-none text-[#ffeec2]">
+            <input
+              type="checkbox"
+              checked={selectedExtras.includes(extra.key)}
+              onChange={e => {
+                if (e.target.checked) setSelectedExtras([...selectedExtras, extra.key]);
+                else setSelectedExtras(selectedExtras.filter(k => k !== extra.key));
+              }}
+              className="accent-[#bfa658] w-4 h-4"
+            />
+            <span>{extra.label} ({extra.price}₺)</span>
+          </label>
+        ))}
+      </div>
+    );
+  }
+
+  // --- ADRES AUTOCOMPLETE: (sadece basic input, otomatik tamamlama yok)
+  function AdresAutoComplete({ value, onChange, placeholder }) {
+    return (
+      <input
+        className="input w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
+        type="text"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        autoComplete="off"
+      />
+    );
+  }
+
+  // --- MesafeliPopup
+  function MesafeliPopup({ onClose }) {
+    const [content, setContent] = useState("Yükleniyor...");
+    useEffect(() => {
+      fetch("/mesafeli-satis")
+        .then(r => r.text())
+        .then(html => {
+          const main = html.match(/<main[^>]*>([\s\S]*?)<\/main>/);
+          setContent(main ? main[1] : html);
+        });
+    }, []);
+    return (
+      <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
+        <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
+          <button onClick={onClose} className="absolute top-3 right-5 text-2xl font-bold text-red-500 hover:text-red-700">×</button>
+          <div className="text-gray-800 prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
+        </div>
+      </div>
+    );
+  }
+
+  // --- SummaryPopup
+  function SummaryPopup({
+    from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, extrasQty, setExtrasQty, setExtras, pnr, onClose, router
+  }) {
+    const basePrice = 4000; // ÖRNEK: dinamik yapmak için güncelle
+    const selectedExtras = extrasList.filter(e => extras.includes(e.key));
+    const extrasTotal = selectedExtras.reduce((sum, e) => sum + (e.price * (extrasQty[e.key] || 1)), 0);
+    const araToplam = basePrice + extrasTotal;
+    const kdv = araToplam * KDV_ORAN;
+    const toplam = araToplam + kdv;
+
+    function changeQty(key, dir) {
+      setExtrasQty(q => ({
+        ...q,
+        [key]: Math.max(1, (q[key] || 1) + dir)
+      }));
+    }
+    function removeExtra(key) {
+      setExtras(es => es.filter(k => k !== key));
+      setExtrasQty(q => {
+        const { [key]: _, ...rest } = q;
+        return rest;
+      });
+    }
+
+    return (
+      <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
+        <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
+          <button onClick={onClose} className="absolute top-3 right-5 text-2xl font-bold text-red-500 hover:text-red-700">×</button>
+          <h2 className="text-2xl font-bold mb-5 text-[#bfa658] text-center">Rezervasyon Özeti</h2>
+          <div className="space-y-2 mb-5 text-black text-lg">
+            <div><b>Transfer:</b> {transfer || "-"}</div>
+            <div><b>Araç:</b> {vehicle || "-"}</div>
+            <div><b>Kişi:</b> {people}</div>
+            <div><b>Nereden:</b> {from}</div>
+            <div><b>Nereye:</b> {to}</div>
+            <div><b>Tarih:</b> {date} {time}</div>
+            <div><b>Ad Soyad:</b> {name} {surname} – T.C.: {tc}</div>
+            <div><b>Telefon:</b> {phone}</div>
+            {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
+            {note && <div><b>Ek Not:</b> {note}</div>}
+          </div>
+          {/* Ekstralar + Adet/Çıkar */}
+          <div className="mb-5">
+            <b className="block mb-2 text-[#bfa658]">Ekstralar:</b>
+            {selectedExtras.length === 0 && <span className="text-gray-600">Ekstra yok</span>}
+            {selectedExtras.map(extra =>
+              <div key={extra.key} className="flex items-center gap-2 py-1">
+                <span className="font-semibold">{extra.label}</span>
+                <button type="button" className="px-2" onClick={() => changeQty(extra.key, -1)}>-</button>
+                <span className="w-8 text-center">{extrasQty[extra.key] || 1}</span>
+                <button type="button" className="px-2" onClick={() => changeQty(extra.key, +1)}>+</button>
+                <span className="ml-2">{extra.price}₺</span>
+                <button type="button" onClick={() => removeExtra(extra.key)} className="ml-2 text-red-500 font-bold hover:underline">Çıkar</button>
+              </div>
+            )}
+          </div>
+          {/* Tutarlar */}
+          <div className="mb-5 space-y-1 text-right text-lg">
+            <div><b>Transfer Bedeli:</b> {basePrice.toLocaleString()} ₺</div>
+            <div><b>Ekstralar:</b> {extrasTotal.toLocaleString()} ₺</div>
+            <div><b>KDV (%20):</b> {kdv.toLocaleString(undefined, { maximumFractionDigits: 2 })} ₺</div>
+            <div className="text-xl font-extrabold"><b>Toplam:</b> {toplam.toLocaleString()} ₺</div>
+          </div>
+          <button
+            onClick={() => {
+              // Demo'da gerçek yönlendirme! Canlıda ödeme sayfasına yönlendir
+              router.push("/odeme?success=1");
+            }}
+            className="w-full py-3 rounded-xl bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition text-xl"
+          >Onayla ve Öde</button>
+        </div>
+      </div>
+    );
+  }
+
+  // -- Ana formun return'u --
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-[#19160a] to-[#302811]">
       <section className="w-full max-w-2xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] my-16">
@@ -185,13 +312,205 @@ export default function VipTransferForm() {
           VIP Rezervasyon Formu
         </h1>
         <form onSubmit={handleSubmit} autoComplete="on" className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* ...Aşağıdaki kodun tamamı aynı... */}
-          {/* --- Formun tamamı burada değişmeden devam eder --- */}
-          {/* ... */}
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
+            <AdresAutoComplete
+              value={from}
+              onChange={setFrom}
+              placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
+            />
+            {fieldErrors.from && <div className="text-red-400 text-xs mt-1">{fieldErrors.from}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
+            <AdresAutoComplete
+              value={to}
+              onChange={setTo}
+              placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
+            />
+            {fieldErrors.to && <div className="text-red-400 text-xs mt-1">{fieldErrors.to}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
+            <select name="people" className="input w-full"
+              value={people}
+              onChange={e => setPeople(Number(e.target.value))}>
+              {Array.from({ length: maxPeople }, (_, i) => i + 1).map(val =>
+                <option key={val} value={val}>{val}</option>
+              )}
+            </select>
+            {fieldErrors.people && <div className="text-red-400 text-xs mt-1">{fieldErrors.people}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
+            <select name="segment" className="input w-full"
+              value={segment}
+              onChange={e => setSegment(e.target.value)}>
+              {segmentOptions.map(opt =>
+                <option key={opt.key} value={opt.label}>{opt.label}</option>
+              )}
+            </select>
+            {fieldErrors.segment && <div className="text-red-400 text-xs mt-1">{fieldErrors.segment}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
+            <select name="transfer" className="input w-full"
+              value={transfer}
+              onChange={e => setTransfer(e.target.value)}>
+              <option value="">Seçiniz</option>
+              {allTransfers.map(opt =>
+                <option key={opt} value={opt}>{opt}</option>
+              )}
+            </select>
+            {fieldErrors.transfer && <div className="text-red-400 text-xs mt-1">{fieldErrors.transfer}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Araç</label>
+            <select name="vehicle" className="input w-full"
+              value={vehicle}
+              onChange={e => setVehicle(e.target.value)}>
+              <option value="">Seçiniz</option>
+              {availableVehicles.map(opt =>
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              )}
+            </select>
+            {fieldErrors.vehicle && <div className="text-red-400 text-xs mt-1">{fieldErrors.vehicle}</div>}
+          </div>
+          {showPnr && (
+            <div className="md:col-span-2">
+              <label className="font-bold text-[#bfa658] mb-1 block">PNR / Uçuş Kodu</label>
+              <input
+                name="pnr"
+                type="text"
+                className="input w-full"
+                value={pnr}
+                onChange={e => setPnr(e.target.value)}
+                placeholder="Uçuş Rezervasyon Kodu (PNR)"
+                style={{ fontFamily: "Quicksand,sans-serif" }}
+              />
+              {fieldErrors.pnr && <div className="text-red-400 text-xs mt-1">{fieldErrors.pnr}</div>}
+            </div>
+          )}
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
+            <input
+              name="date"
+              type="date"
+              className="input w-full"
+              value={typeof date === "string" ? date : ""}
+              ref={dateInputRef}
+              onChange={e => setDate(e.target.value)}
+              min={new Date().toISOString().split("T")[0]}
+              autoComplete="on"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
+            />
+            {fieldErrors.date && <div className="text-red-400 text-xs mt-1">{fieldErrors.date}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
+            <select name="time" className="input w-full"
+              value={time}
+              onChange={e => setTime(e.target.value)}>
+              <option value="">Seçiniz</option>
+              {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
+            </select>
+            {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Ad</label>
+            <input
+              name="name"
+              type="text"
+              className="input w-full"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              autoComplete="given-name"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
+            />
+            {fieldErrors.name && <div className="text-red-400 text-xs mt-1">{fieldErrors.name}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Soyad</label>
+            <input
+              name="surname"
+              type="text"
+              className="input w-full"
+              value={surname}
+              onChange={e => setSurname(e.target.value)}
+              autoComplete="family-name"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
+            />
+            {fieldErrors.surname && <div className="text-red-400 text-xs mt-1">{fieldErrors.surname}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">T.C. Kimlik No</label>
+            <input
+              name="tc"
+              type="text"
+              className="input w-full"
+              maxLength={11}
+              pattern="[0-9]*"
+              value={tc}
+              onChange={e => handleTcChange(e.target.value)}
+              autoComplete="off"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
+            />
+            {fieldErrors.tc && <div className="text-red-400 text-xs mt-1">{fieldErrors.tc}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Telefon</label>
+            <input
+              name="phone"
+              type="text"
+              className="input w-full"
+              maxLength={11}
+              pattern="[0-9]*"
+              value={phone}
+              onChange={e => handlePhoneChange(e.target.value)}
+              autoComplete="tel"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
+            />
+            {fieldErrors.phone && <div className="text-red-400 text-xs mt-1">{fieldErrors.phone}</div>}
+          </div>
+          <div className="md:col-span-2">
+            <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
+            <textarea
+              className="input w-full"
+              rows={2}
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="Eklemek istediğiniz bir not var mı?"
+              style={{ fontFamily: "Quicksand,sans-serif" }}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="font-bold text-[#bfa658] mb-2 block text-lg">Ekstralar</label>
+            <EkstralarAccordion selectedExtras={extras} setSelectedExtras={setExtras} />
+          </div>
+          <div className="md:col-span-2 flex items-center mt-3">
+            <input
+              name="mesafeliOk"
+              type="checkbox"
+              checked={mesafeliOk}
+              onChange={e => setMesafeliOk(e.target.checked)}
+              className="mr-2"
+              id="mesafeliBox"
+            />
+            <label htmlFor="mesafeliBox" className="text-sm text-gray-200">
+              <button type="button" className="underline text-[#bfa658]" onClick={e => { e.preventDefault(); setShowContract(true); }}>
+                Mesafeli Satış Sözleşmesini
+              </button> okudum ve onaylıyorum.
+            </label>
+            {fieldErrors.mesafeliOk && <div className="text-red-400 text-xs ml-4">{fieldErrors.mesafeliOk}</div>}
+          </div>
+          <div className="md:col-span-2 flex justify-end">
+            <button type="submit"
+              className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition">
+              Rezervasyonu Tamamla
+            </button>
+          </div>
         </form>
-        {showContract && (
-          <MesafeliPopup onClose={() => setShowContract(false)} />
-        )}
+        {showContract && <MesafeliPopup onClose={() => setShowContract(false)} />}
         {showSummary && (
           <SummaryPopup
             from={from}
@@ -220,5 +539,3 @@ export default function VipTransferForm() {
     </div>
   );
 }
-
-// MesafeliPopup ve SummaryPopup fonksiyonları kodunda değişmeden kalabilir.
