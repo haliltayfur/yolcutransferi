@@ -92,6 +92,10 @@ export default function VipTransferForm() {
     router.push(`/rezervasyon?${params}`);
   }
 
+  // Common gold border Tailwind for all inputs/selects
+  const inputClass =
+    "w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black/80 text-lg text-white focus:outline-none focus:border-yellow-400 transition";
+
   return (
     <form
       className="w-full max-w-[340px] md:max-w-[810px] border border-[#bfa658] rounded-2xl bg-black/80 shadow-xl p-6 md:p-10"
@@ -107,7 +111,7 @@ export default function VipTransferForm() {
           <input
             type="text"
             placeholder="İl/ilçe/mahalle/sokak"
-            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
+            className={inputClass}
             value={from}
             onChange={e => setFrom(e.target.value)}
             autoComplete="off"
@@ -118,7 +122,7 @@ export default function VipTransferForm() {
           <input
             type="text"
             placeholder="İl/ilçe/mahalle/sokak"
-            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
+            className={inputClass}
             value={to}
             onChange={e => setTo(e.target.value)}
             autoComplete="off"
@@ -127,7 +131,7 @@ export default function VipTransferForm() {
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Segment</label>
           <select
-            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
+            className={inputClass}
             value={segment}
             onChange={e => setSegment(e.target.value)}
           >
@@ -140,7 +144,7 @@ export default function VipTransferForm() {
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Transfer Türü</label>
           <select
-            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
+            className={inputClass}
             value={transfer}
             onChange={e => setTransfer(e.target.value)}
           >
@@ -158,7 +162,7 @@ export default function VipTransferForm() {
           <div>
             <label className="text-[#bfa658] font-semibold mb-1 block">Araç</label>
             <select
-              className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
+              className={inputClass}
               value={vehicle}
               onChange={e => setVehicle(e.target.value)}
             >
@@ -171,7 +175,7 @@ export default function VipTransferForm() {
           <div>
             <label className="text-[#bfa658] font-semibold mb-1 block">Kişi Sayısı</label>
             <select
-              className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
+              className={inputClass}
               value={people}
               onChange={e => setPeople(Number(e.target.value))}
             >
@@ -188,7 +192,7 @@ export default function VipTransferForm() {
               dateFormat="dd.MM.yyyy"
               minDate={new Date()}
               placeholderText="Tarih Seç"
-              className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
+              className={inputClass}
               popperPlacement="bottom"
               calendarClassName="bg-black text-white"
             />
@@ -196,7 +200,7 @@ export default function VipTransferForm() {
           <div>
             <label className="text-[#bfa658] font-semibold mb-1 block">Saat</label>
             <select
-              className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
+              className={inputClass}
               value={time}
               onChange={e => setTime(e.target.value)}
             >
