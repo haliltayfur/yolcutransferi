@@ -1,3 +1,4 @@
+// app/rezervasyon/page.js
 import { Suspense } from "react";
 import RezervasyonForm from "./RezervasyonForm";
 
