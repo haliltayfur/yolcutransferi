@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { vehicles } from "../../data/vehicleList";
-import { extrasList } from "../../data/extras"; // Sadece bu import değişti
+import { extrasListByCategory } from "../../data/extrasByCategory";
 
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
@@ -39,7 +39,7 @@ function normalize(str) {
     .trim();
 }
 
-export default function VipTransferForm() {
+export default function RezervasyonForm() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -171,23 +171,45 @@ export default function VipTransferForm() {
     setShowSummary(true);
   }
 
-  // EKSTRALAR (tek blok, kategorisiz)
-  function EkstralarAccordion({ selectedExtras, setSelectedExtras }) {
+  // -------- EKSTRALAR (Kategorili, açılır menülü, fiyat yok) --------
+  function EkstralarAccordion({ selectedExtras, setSelectedExtras, extrasQty, setExtrasQty }) {
     return (
-      <div className="flex flex-wrap gap-3">
-        {extrasList.map(extra => (
-          <label key={extra.key} className="flex items-center gap-2 bg-[#19160a] border border-[#bfa658] rounded-xl px-4 py-2 cursor-pointer select-none text-[#ffeec2]">
-            <input
-              type="checkbox"
-              checked={selectedExtras.includes(extra.key)}
-              onChange={e => {
-                if (e.target.checked) setSelectedExtras([...selectedExtras, extra.key]);
-                else setSelectedExtras(selectedExtras.filter(k => k !== extra.key));
-              }}
-              className="accent-[#bfa658] w-4 h-4"
-            />
-            <span>{extra.label}</span>
-          </label>
+      <div className="space-y-6">
+        {extrasListByCategory.map(cat => (
+          <div key={cat.category}>
+            <div className="font-bold text-base text-[#bfa658] mb-1">{cat.category}</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {cat.items.map(extra => (
+                <div key={extra.key} className="flex items-center gap-3 bg-[#19160a] border border-[#bfa658] rounded-xl px-4 py-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedExtras.includes(extra.key)}
+                    onChange={e => {
+                      if (e.target.checked) setSelectedExtras([...selectedExtras, extra.key]);
+                      else setSelectedExtras(selectedExtras.filter(k => k !== extra.key));
+                    }}
+                    className="accent-[#bfa658] w-4 h-4"
+                    id={extra.key}
+                  />
+                  <label htmlFor={extra.key} className="flex-1 text-[#ffeec2]">{extra.label}</label>
+                  {selectedExtras.includes(extra.key) && (
+                    <select
+                      className="ml-2 rounded bg-black/70 text-[#ffeec2] border border-[#bfa658] px-2 py-1"
+                      value={extrasQty[extra.key] || 1}
+                      onChange={e => setExtrasQty(q => ({
+                        ...q,
+                        [extra.key]: Number(e.target.value)
+                      }))}
+                    >
+                      {[...Array(10)].map((_, i) => (
+                        <option key={i + 1} value={i + 1}>{i + 1} adet</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     );
@@ -229,7 +251,9 @@ export default function VipTransferForm() {
   function SummaryPopup({
     from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, extrasQty, setExtrasQty, setExtras, pnr, onClose, router
   }) {
-    const selectedExtras = extrasList.filter(e => extras.includes(e.key));
+    // Tüm ekstraları düzleştir
+    const allExtras = extrasListByCategory.flatMap(cat => cat.items);
+    const selectedExtras = allExtras.filter(e => extras.includes(e.key));
     const basePrice = 4000; // DİNAMİK yapacaksan burada değiştir
     const extrasTotal = selectedExtras.reduce((sum, e) => sum + (e.price * (extrasQty[e.key] || 1)), 0);
     const araToplam = basePrice + extrasTotal;
@@ -301,7 +325,7 @@ export default function VipTransferForm() {
   // ---- ANA FORM ----
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-[#19160a] to-[#302811]">
-      <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-2 sm:px-6 md:px-12 py-20 bg-gradient-to-br from-black via-[#19160a] to-[#302811] my-16">
+      <section className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl bg-black/90 p-6 sm:p-10 my-16">
         <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand">
           VIP Rezervasyon Formu
         </h1>
@@ -479,7 +503,12 @@ export default function VipTransferForm() {
           </div>
           <div className="md:col-span-2">
             <label className="font-bold text-[#bfa658] mb-2 block text-lg">Ekstralar</label>
-            <EkstralarAccordion selectedExtras={extras} setSelectedExtras={setExtras} />
+            <EkstralarAccordion
+              selectedExtras={extras}
+              setSelectedExtras={setExtras}
+              extrasQty={extrasQty}
+              setExtrasQty={setExtrasQty}
+            />
           </div>
           <div className="md:col-span-2 flex items-center mt-3">
             <input
