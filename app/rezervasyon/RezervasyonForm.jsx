@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { vehicles } from "../../data/vehicleList";
 import EkstralarAccordion from "./EkstralarAccordion";
 
+
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
   { key: "Lüks", label: "Lüks" },
