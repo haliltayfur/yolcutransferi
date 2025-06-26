@@ -1,5 +1,5 @@
 import HeroSlider from "../components/HeroSlider";
-import dynamic from "next/dynamic";
+import VipTransferForm from "../components/VipTransferForm";
 import HeroVideo from "../components/HeroVideo";
 import AdvantagesBar from "../components/AdvantagesBar";
 import TestimonialsSlider from "../components/TestimonialsSlider";
