@@ -125,7 +125,7 @@ export default function RezervasyonForm() {
     function handlePayment() {
       const params = new URLSearchParams({
         from, to, people, segment, transfer, date, time, name, surname, tc, phone, email, pnr, note,
-        extras: extras.join(","), // string
+        extras: extras.join(","),
         extrasQty: JSON.stringify(extrasQty),
       }).toString();
       router.push(`/odeme?${params}`);
