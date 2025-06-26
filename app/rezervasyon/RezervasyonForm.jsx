@@ -1,9 +1,8 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { vehicles } from "../../data/vehicleList";
+import { useState } from "react";
 import EkstralarAccordion from "./EkstralarAccordion";
 import AdresAutoComplete from "./AdresAutoComplete";
+import { vehicles } from "../../data/vehicleList";
 
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
@@ -19,7 +18,6 @@ const allTransfers = [
   "Toplu Transfer",
   "Düğün vb Organizasyonlar"
 ];
-
 const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
@@ -40,26 +38,15 @@ function normalize(str) {
 }
 
 export default function RezervasyonForm() {
-  const router = useRouter();
-  const params = useSearchParams();
-
-  const paramFrom = params.get("from") || "";
-  const paramTo = params.get("to") || "";
-  const paramDate = params.get("date") || "";
-  const paramTime = params.get("time") || "";
-  const paramVehicle = params.get("vehicle") || "";
-  const paramPeople = Number(params.get("people")) || 1;
-  const paramSegment = params.get("segment") || "Ekonomik";
-  const paramTransfer = params.get("transfer") || "";
-
-  const [from, setFrom] = useState(paramFrom);
-  const [to, setTo] = useState(paramTo);
-  const [people, setPeople] = useState(paramPeople);
-  const [segment, setSegment] = useState(paramSegment);
-  const [transfer, setTransfer] = useState(paramTransfer);
-  const [vehicle, setVehicle] = useState(paramVehicle);
-  const [date, setDate] = useState(paramDate);
-  const [time, setTime] = useState(paramTime);
+  // STATE
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [people, setPeople] = useState(1);
+  const [segment, setSegment] = useState("");
+  const [transfer, setTransfer] = useState("");
+  const [vehicle, setVehicle] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [tc, setTc] = useState("");
@@ -68,6 +55,7 @@ export default function RezervasyonForm() {
   const [note, setNote] = useState("");
   const [extras, setExtras] = useState([]);
   const [extrasQty, setExtrasQty] = useState({});
+  const [showSummary, setShowSummary] = useState(false);
 
   function handleTcChange(val) {
     setTc(val.replace(/\D/g, "").slice(0, 11));
@@ -78,13 +66,78 @@ export default function RezervasyonForm() {
     setPhone(num.slice(0, 11));
   }
 
+  // FORM SUBMITTE POPUP AÇ
+  function handleSubmit(e) {
+    e.preventDefault();
+    setShowSummary(true);
+  }
+
+  // KVKK tarzı popup
+  function SummaryPopup({ onClose }) {
+    // Basit fiyat örneği
+    const basePrice = 4000;
+    // NOT: extras arrayini backend logic ile doldurabilirsin
+    const allExtras = require("../../data/extrasByCategory").extrasListByCategory.flatMap(cat => cat.items);
+    const selectedExtras = allExtras.filter(e => extras.includes(e.key));
+    const extrasTotal = selectedExtras.reduce((sum, e) => sum + (e.price * (extrasQty[e.key] || 1)), 0);
+    const KDV_ORAN = 0.20;
+    const araToplam = basePrice + extrasTotal;
+    const kdv = araToplam * KDV_ORAN;
+    const toplam = araToplam + kdv;
+
+    return (
+      <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
+        <div className="bg-[#19160a] rounded-3xl border border-[#bfa658] max-w-xl w-full shadow-2xl p-8 md:p-10 overflow-y-auto max-h-[90vh] relative">
+          <button onClick={onClose} className="absolute top-3 right-5 text-3xl font-bold text-[#ffeec2] hover:text-yellow-400">×</button>
+          <h2 className="text-2xl md:text-3xl font-extrabold mb-4 text-[#bfa658] text-center font-quicksand">
+            Rezervasyon Özeti
+          </h2>
+          <div className="mb-5 space-y-2 text-[#ffeec2] text-base">
+            <div><b>Transfer:</b> {transfer || "-"}</div>
+            <div><b>Araç:</b> {vehicle || "-"}</div>
+            <div><b>Kişi:</b> {people}</div>
+            <div><b>Nereden:</b> {from}</div>
+            <div><b>Nereye:</b> {to}</div>
+            <div><b>Tarih/Saat:</b> {date} {time}</div>
+            <div><b>Ad Soyad:</b> {name} {surname} – T.C.: {tc}</div>
+            <div><b>Telefon:</b> {phone}</div>
+            {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
+            {note && <div><b>Ek Not:</b> {note}</div>}
+            <div className="pt-2"><b>Ekstralar:</b>
+              {selectedExtras.length === 0 && <span className="text-gray-400 ml-2">Ekstra yok</span>}
+              {selectedExtras.map(extra => (
+                <div key={extra.key} className="flex items-center gap-2 text-sm mt-1">
+                  <span>{extra.label}</span>
+                  <span className="bg-[#bfa658]/20 px-2 rounded">{extrasQty[extra.key] || 1} adet</span>
+                  <span>{extra.price}₺</span>
+                </div>
+              ))}
+            </div>
+            <div className="pt-2 text-right text-base">
+              <div><b>Transfer Bedeli:</b> {basePrice.toLocaleString()} ₺</div>
+              <div><b>Ekstralar:</b> {extrasTotal.toLocaleString()} ₺</div>
+              <div><b>KDV (%20):</b> {kdv.toLocaleString(undefined, { maximumFractionDigits: 2 })} ₺</div>
+              <div className="text-lg font-extrabold"><b>Toplam:</b> {toplam.toLocaleString()} ₺</div>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-full py-3 mt-4 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-lg hover:scale-105 transition"
+          >
+            Onayla ve Kapat
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <section className="w-full max-w-4xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] px-6 md:px-12 py-14 my-8">
       <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand">
         VIP Rezervasyon Formu
       </h1>
       <form
-        onSubmit={e => { e.preventDefault(); alert("Test: Form çalışıyor!"); }}
+        onSubmit={handleSubmit}
         autoComplete="on"
         className="grid grid-cols-1 md:grid-cols-2 gap-5"
       >
@@ -244,6 +297,7 @@ export default function RezervasyonForm() {
           </button>
         </div>
       </form>
+      {showSummary && <SummaryPopup onClose={() => setShowSummary(false)} />}
     </section>
   );
 }
