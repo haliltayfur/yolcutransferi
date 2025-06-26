@@ -1,261 +1,249 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { vehicles } from "../../data/vehicleList";
+import EkstralarAccordion from "./EkstralarAccordion";
+import AdresAutoComplete from "./AdresAutoComplete";
 
-// Demo ekstralar
-const extralar = [
-  { key: "bebek_koltugu", label: "Bebek Koltuğu" },
-  { key: "wi-fi", label: "Wi-Fi" },
-  { key: "ikram", label: "İkram" }
+const segmentOptions = [
+  { key: "Ekonomik", label: "Ekonomik" },
+  { key: "Lüks", label: "Lüks" },
+  { key: "Prime+", label: "Prime+" }
+];
+const allTransfers = [
+  "VIP Havalimanı Transferi",
+  "Şehirler Arası Transfer",
+  "Kurumsal Etkinlik",
+  "Özel Etkinlik",
+  "Tur & Gezi",
+  "Toplu Transfer",
+  "Düğün vb Organizasyonlar"
 ];
 
+const saatler = [];
+for (let h = 0; h < 24; ++h)
+  for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
+
+function normalize(str) {
+  return (str || "")
+    .toLocaleLowerCase("tr-TR")
+    .replace(/&/g, "ve")
+    .replace(/[çÇ]/g, "c")
+    .replace(/[ğĞ]/g, "g")
+    .replace(/[ıİ]/g, "i")
+    .replace(/[öÖ]/g, "o")
+    .replace(/[şŞ]/g, "s")
+    .replace(/[üÜ]/g, "u")
+    .replace(/[,\.]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export default function RezervasyonForm() {
-  const [form, setForm] = useState({
-    from: "",
-    to: "",
-    people: 1,
-    segment: "",
-    transfer: "",
-    vehicle: "",
-    date: "",
-    time: "",
-    name: "",
-    surname: "",
-    tc: "",
-    phone: "",
-    note: "",
-    pnr: "",
-    ekstralar: []
-  });
+  const router = useRouter();
+  const params = useSearchParams();
 
-  function handleChange(e) {
-    const { name, value, type, checked } = e.target;
-    if (type === "checkbox" && name === "ekstralar") {
-      setForm((f) => ({
-        ...f,
-        ekstralar: checked
-          ? [...f.ekstralar, value]
-          : f.ekstralar.filter((k) => k !== value)
-      }));
-    } else {
-      setForm((f) => ({ ...f, [name]: value }));
-    }
+  const paramFrom = params.get("from") || "";
+  const paramTo = params.get("to") || "";
+  const paramDate = params.get("date") || "";
+  const paramTime = params.get("time") || "";
+  const paramVehicle = params.get("vehicle") || "";
+  const paramPeople = Number(params.get("people")) || 1;
+  const paramSegment = params.get("segment") || "Ekonomik";
+  const paramTransfer = params.get("transfer") || "";
+
+  const [from, setFrom] = useState(paramFrom);
+  const [to, setTo] = useState(paramTo);
+  const [people, setPeople] = useState(paramPeople);
+  const [segment, setSegment] = useState(paramSegment);
+  const [transfer, setTransfer] = useState(paramTransfer);
+  const [vehicle, setVehicle] = useState(paramVehicle);
+  const [date, setDate] = useState(paramDate);
+  const [time, setTime] = useState(paramTime);
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [tc, setTc] = useState("");
+  const [phone, setPhone] = useState("");
+  const [pnr, setPnr] = useState("");
+  const [note, setNote] = useState("");
+  const [extras, setExtras] = useState([]);
+  const [extrasQty, setExtrasQty] = useState({});
+
+  function handleTcChange(val) {
+    setTc(val.replace(/\D/g, "").slice(0, 11));
   }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    alert("Form başarıyla çalışıyor!");
+  function handlePhoneChange(val) {
+    let num = val.replace(/\D/g, "");
+    if (num.length > 0 && num[0] !== "0") num = "0" + num;
+    setPhone(num.slice(0, 11));
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-[#19160a] to-[#302811] pt-10 pb-4">
-      <section className="w-full max-w-4xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] px-6 md:px-12 py-14 mt-8 mb-8">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand shadow-none">
-          VIP Rezervasyon Formu
-        </h1>
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-5"
-          autoComplete="off"
-        >
-          {/* FORM ALANLARI */}
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
-            <input
-              name="from"
-              value={form.from}
-              onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
-              placeholder="Nereden? (İl/İlçe/Mahalle/Havalimanı)"
-              required
-            />
-          </div>
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
-            <input
-              name="to"
-              value={form.to}
-              onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
-              placeholder="Nereye? (İl/İlçe/Mahalle/Havalimanı)"
-              required
-            />
-          </div>
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
-            <select
-              name="people"
-              value={form.people}
-              onChange={handleChange}
-              className="input w-full py-3 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658]"
-            >
-              {[...Array(8)].map((_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  {i + 1}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
-            <select
-              name="segment"
-              value={form.segment}
-              onChange={handleChange}
-              className="input w-full py-3 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658]"
-            >
-              <option value="">Seçiniz</option>
-              <option value="Ekonomik">Ekonomik</option>
-              <option value="Lüks">Lüks</option>
-              <option value="Prime+">Prime+</option>
-            </select>
-          </div>
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
-            <select
-              name="transfer"
-              value={form.transfer}
-              onChange={handleChange}
-              className="input w-full py-3 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658]"
-            >
-              <option value="">Seçiniz</option>
-              <option value="VIP Havalimanı Transferi">VIP Havalimanı Transferi</option>
-              <option value="Şehirler Arası Transfer">Şehirler Arası Transfer</option>
-              <option value="Kurumsal Etkinlik">Kurumsal Etkinlik</option>
-              <option value="Özel Etkinlik">Özel Etkinlik</option>
-              <option value="Tur & Gezi">Tur & Gezi</option>
-              <option value="Toplu Transfer">Toplu Transfer</option>
-              <option value="Düğün vb Organizasyonlar">Düğün vb Organizasyonlar</option>
-            </select>
-          </div>
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Araç</label>
-            <input
-              name="vehicle"
-              value={form.vehicle}
-              onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
-              placeholder="Araç"
-            />
-          </div>
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
-            <input
-              name="date"
-              type="date"
-              value={form.date}
-              onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658]"
-              required
-            />
-          </div>
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
-            <input
-              name="time"
-              type="time"
-              value={form.time}
-              onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658]"
-              required
-            />
-          </div>
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Ad</label>
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
-              placeholder="Ad"
-              required
-            />
-          </div>
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Soyad</label>
-            <input
-              name="surname"
-              value={form.surname}
-              onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
-              placeholder="Soyad"
-              required
-            />
-          </div>
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">T.C. Kimlik No</label>
-            <input
-              name="tc"
-              value={form.tc}
-              onChange={handleChange}
-              maxLength={11}
-              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
-              placeholder="T.C. Kimlik No"
-              required
-            />
-          </div>
-          <div>
-            <label className="font-bold text-[#bfa658] mb-1 block">Telefon</label>
-            <input
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              maxLength={11}
-              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
-              placeholder="Telefon"
-              required
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
-            <textarea
-              name="note"
-              value={form.note}
-              onChange={handleChange}
-              className="input w-full bg-black/50 text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              rows={2}
-              placeholder="Eklemek istediğiniz bir not var mı?"
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="font-bold text-[#bfa658] mb-1 block">PNR / Uçuş Kodu</label>
-            <input
-              name="pnr"
-              value={form.pnr}
-              onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658]"
-              placeholder="Uçuş Rezervasyon Kodu (PNR)"
-            />
-          </div>
-          {/* Ekstralar Alanı */}
-          <div className="md:col-span-2">
-            <label className="font-bold text-[#bfa658] mb-1 block">Ekstralar</label>
-            <div className="flex flex-wrap gap-4">
-              {extralar.map((extra) => (
-                <label key={extra.key} className="flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-[#bfa658]">
-                  <input
-                    type="checkbox"
-                    name="ekstralar"
-                    value={extra.key}
-                    checked={form.ekstralar.includes(extra.key)}
-                    onChange={handleChange}
-                    className="accent-[#bfa658] w-5 h-5"
-                  />
-                  <span className="text-[#ffeec2] text-base">{extra.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-          {/* --- BUTONU KOLONDA YAP VE TAŞMAZ! --- */}
-          <div className="md:col-span-2 flex justify-end mt-6">
-            <button
-              type="submit"
-              className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition"
-            >
-              Rezervasyonu Tamamla
-            </button>
-          </div>
-        </form>
-      </section>
-    </div>
+    <section className="w-full max-w-4xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] px-6 md:px-12 py-14 my-8">
+      <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand">
+        VIP Rezervasyon Formu
+      </h1>
+      <form
+        onSubmit={e => { e.preventDefault(); alert("Test: Form çalışıyor!"); }}
+        autoComplete="on"
+        className="grid grid-cols-1 md:grid-cols-2 gap-5"
+      >
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
+          <AdresAutoComplete
+            value={from}
+            onChange={setFrom}
+            placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
+          />
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
+          <AdresAutoComplete
+            value={to}
+            onChange={setTo}
+            placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
+          />
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
+          <select name="people" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={people}
+            onChange={e => setPeople(Number(e.target.value))}>
+            {Array.from({ length: 8 }, (_, i) => i + 1).map(val =>
+              <option key={val} value={val}>{val}</option>
+            )}
+          </select>
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
+          <select name="segment" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={segment}
+            onChange={e => setSegment(e.target.value)}>
+            <option value="">Seçiniz</option>
+            {segmentOptions.map(opt =>
+              <option key={opt.key} value={opt.label}>{opt.label}</option>
+            )}
+          </select>
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
+          <select name="transfer" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={transfer}
+            onChange={e => setTransfer(e.target.value)}>
+            <option value="">Seçiniz</option>
+            {allTransfers.map(opt =>
+              <option key={opt} value={opt}>{opt}</option>
+            )}
+          </select>
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Araç</label>
+          <select name="vehicle" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={vehicle}
+            onChange={e => setVehicle(e.target.value)}>
+            <option value="">Seçiniz</option>
+            {vehicles.map(opt =>
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            )}
+          </select>
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
+          <input
+            name="date"
+            type="date"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={date}
+            onChange={e => setDate(e.target.value)}
+            min={new Date().toISOString().split("T")[0]}
+            autoComplete="on"
+          />
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
+          <select name="time" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={time}
+            onChange={e => setTime(e.target.value)}>
+            <option value="">Seçiniz</option>
+            {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Ad</label>
+          <input
+            name="name"
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            autoComplete="given-name"
+          />
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Soyad</label>
+          <input
+            name="surname"
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={surname}
+            onChange={e => setSurname(e.target.value)}
+            autoComplete="family-name"
+          />
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">T.C. Kimlik No</label>
+          <input
+            name="tc"
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            maxLength={11}
+            pattern="[0-9]*"
+            value={tc}
+            onChange={e => handleTcChange(e.target.value)}
+            autoComplete="off"
+          />
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Telefon</label>
+          <input
+            name="phone"
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            maxLength={11}
+            pattern="[0-9]*"
+            value={phone}
+            onChange={e => handlePhoneChange(e.target.value)}
+            autoComplete="tel"
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
+          <textarea
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            rows={2}
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Eklemek istediğiniz bir not var mı?"
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="font-bold text-[#bfa658] mb-2 block text-lg">Ekstralar</label>
+          <EkstralarAccordion
+            selectedExtras={extras}
+            setSelectedExtras={setExtras}
+            extrasQty={extrasQty}
+            setExtrasQty={setExtrasQty}
+          />
+        </div>
+        <div className="md:col-span-2 flex justify-end mt-6">
+          <button
+            type="submit"
+            className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition"
+          >
+            Rezervasyonu Tamamla
+          </button>
+        </div>
+      </form>
+    </section>
   );
 }
