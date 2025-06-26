@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { vehicles } from "../../data/vehicleList";
-import { extrasListByCategory } from "../../data/extrasByCategory";
+import EkstralarAccordion from "./EkstralarAccordion";
 
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
@@ -171,54 +171,11 @@ export default function RezervasyonForm() {
     setShowSummary(true);
   }
 
-  // -------- EKSTRALAR (Kategorili, açılır menülü, fiyat yok) --------
-  function EkstralarAccordion({ selectedExtras, setSelectedExtras, extrasQty, setExtrasQty }) {
-    return (
-      <div className="space-y-6">
-        {extrasListByCategory.map(cat => (
-          <div key={cat.category}>
-            <div className="font-bold text-base text-[#bfa658] mb-1">{cat.category}</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {cat.items.map(extra => (
-                <div key={extra.key} className="flex items-center gap-3 bg-[#19160a] border border-[#bfa658] rounded-xl px-4 py-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedExtras.includes(extra.key)}
-                    onChange={e => {
-                      if (e.target.checked) setSelectedExtras([...selectedExtras, extra.key]);
-                      else setSelectedExtras(selectedExtras.filter(k => k !== extra.key));
-                    }}
-                    className="accent-[#bfa658] w-4 h-4"
-                    id={extra.key}
-                  />
-                  <label htmlFor={extra.key} className="flex-1 text-[#ffeec2]">{extra.label}</label>
-                  {selectedExtras.includes(extra.key) && (
-                    <select
-                      className="ml-2 rounded bg-black/70 text-[#ffeec2] border border-[#bfa658] px-2 py-1"
-                      value={extrasQty[extra.key] || 1}
-                      onChange={e => setExtrasQty(q => ({
-                        ...q,
-                        [extra.key]: Number(e.target.value)
-                      }))}
-                    >
-                      {[...Array(10)].map((_, i) => (
-                        <option key={i + 1} value={i + 1}>{i + 1} adet</option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
+  // ---- Standart inputlar (KVKK ile aynı) ----
   function AdresAutoComplete({ value, onChange, placeholder }) {
     return (
       <input
-        className="input w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
+        className="input w-full py-3 px-4 rounded-xl bg-[#19160a] text-lg text-[#ffeec2] border border-[#bfa658] focus:outline-none focus:border-[#ffeec2] transition"
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -240,9 +197,9 @@ export default function RezervasyonForm() {
     }, []);
     return (
       <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
-        <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
+        <div className="bg-[#19160a] rounded-2xl max-w-2xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-[#bfa658]">
           <button onClick={onClose} className="absolute top-3 right-5 text-2xl font-bold text-red-500 hover:text-red-700">×</button>
-          <div className="text-gray-800 prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
+          <div className="text-[#ffeec2] prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
         </div>
       </div>
     );
@@ -252,9 +209,9 @@ export default function RezervasyonForm() {
     from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, extrasQty, setExtrasQty, setExtras, pnr, onClose, router
   }) {
     // Tüm ekstraları düzleştir
-    const allExtras = extrasListByCategory.flatMap(cat => cat.items);
+    const allExtras = require("../../data/extrasByCategory").extrasListByCategory.flatMap(cat => cat.items);
     const selectedExtras = allExtras.filter(e => extras.includes(e.key));
-    const basePrice = 4000; // DİNAMİK yapacaksan burada değiştir
+    const basePrice = 4000;
     const extrasTotal = selectedExtras.reduce((sum, e) => sum + (e.price * (extrasQty[e.key] || 1)), 0);
     const araToplam = basePrice + extrasTotal;
     const kdv = araToplam * KDV_ORAN;
@@ -276,10 +233,10 @@ export default function RezervasyonForm() {
 
     return (
       <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
-        <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative">
+        <div className="bg-[#19160a] rounded-2xl max-w-xl w-full shadow-2xl p-8 overflow-y-auto max-h-[90vh] relative border border-[#bfa658]">
           <button onClick={onClose} className="absolute top-3 right-5 text-2xl font-bold text-red-500 hover:text-red-700">×</button>
           <h2 className="text-2xl font-bold mb-5 text-[#bfa658] text-center">Rezervasyon Özeti</h2>
-          <div className="space-y-2 mb-5 text-black text-lg">
+          <div className="space-y-2 mb-5 text-[#ffeec2] text-lg">
             <div><b>Transfer:</b> {transfer || "-"}</div>
             <div><b>Araç:</b> {vehicle || "-"}</div>
             <div><b>Kişi:</b> {people}</div>
@@ -293,7 +250,7 @@ export default function RezervasyonForm() {
           </div>
           <div className="mb-5">
             <b className="block mb-2 text-[#bfa658]">Ekstralar:</b>
-            {selectedExtras.length === 0 && <span className="text-gray-600">Ekstra yok</span>}
+            {selectedExtras.length === 0 && <span className="text-gray-400">Ekstra yok</span>}
             {selectedExtras.map(extra =>
               <div key={extra.key} className="flex items-center gap-2 py-1">
                 <span className="font-semibold">{extra.label}</span>
@@ -325,8 +282,8 @@ export default function RezervasyonForm() {
   // ---- ANA FORM ----
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-[#19160a] to-[#302811]">
-      <section className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl bg-black/90 p-6 sm:p-10 my-16">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand">
+      <section className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] p-6 sm:p-10 my-16">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand shadow-none">
           VIP Rezervasyon Formu
         </h1>
         <form onSubmit={handleSubmit} autoComplete="on" className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -350,7 +307,7 @@ export default function RezervasyonForm() {
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
-            <select name="people" className="input w-full"
+            <select name="people" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               value={people}
               onChange={e => setPeople(Number(e.target.value))}>
               {Array.from({ length: maxPeople }, (_, i) => i + 1).map(val =>
@@ -361,7 +318,7 @@ export default function RezervasyonForm() {
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
-            <select name="segment" className="input w-full"
+            <select name="segment" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               value={segment}
               onChange={e => setSegment(e.target.value)}>
               {segmentOptions.map(opt =>
@@ -372,7 +329,7 @@ export default function RezervasyonForm() {
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
-            <select name="transfer" className="input w-full"
+            <select name="transfer" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               value={transfer}
               onChange={e => setTransfer(e.target.value)}>
               <option value="">Seçiniz</option>
@@ -384,7 +341,7 @@ export default function RezervasyonForm() {
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Araç</label>
-            <select name="vehicle" className="input w-full"
+            <select name="vehicle" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               value={vehicle}
               onChange={e => setVehicle(e.target.value)}>
               <option value="">Seçiniz</option>
@@ -400,7 +357,7 @@ export default function RezervasyonForm() {
               <input
                 name="pnr"
                 type="text"
-                className="input w-full"
+                className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
                 value={pnr}
                 onChange={e => setPnr(e.target.value)}
                 placeholder="Uçuş Rezervasyon Kodu (PNR)"
@@ -414,7 +371,7 @@ export default function RezervasyonForm() {
             <input
               name="date"
               type="date"
-              className="input w-full"
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               value={typeof date === "string" ? date : ""}
               ref={dateInputRef}
               onChange={e => setDate(e.target.value)}
@@ -426,7 +383,7 @@ export default function RezervasyonForm() {
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
-            <select name="time" className="input w-full"
+            <select name="time" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               value={time}
               onChange={e => setTime(e.target.value)}>
               <option value="">Seçiniz</option>
@@ -439,7 +396,7 @@ export default function RezervasyonForm() {
             <input
               name="name"
               type="text"
-              className="input w-full"
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               value={name}
               onChange={e => setName(e.target.value)}
               autoComplete="given-name"
@@ -452,7 +409,7 @@ export default function RezervasyonForm() {
             <input
               name="surname"
               type="text"
-              className="input w-full"
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               value={surname}
               onChange={e => setSurname(e.target.value)}
               autoComplete="family-name"
@@ -465,7 +422,7 @@ export default function RezervasyonForm() {
             <input
               name="tc"
               type="text"
-              className="input w-full"
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               maxLength={11}
               pattern="[0-9]*"
               value={tc}
@@ -480,7 +437,7 @@ export default function RezervasyonForm() {
             <input
               name="phone"
               type="text"
-              className="input w-full"
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               maxLength={11}
               pattern="[0-9]*"
               value={phone}
@@ -493,7 +450,7 @@ export default function RezervasyonForm() {
           <div className="md:col-span-2">
             <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
             <textarea
-              className="input w-full"
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               rows={2}
               value={note}
               onChange={e => setNote(e.target.value)}
@@ -519,7 +476,7 @@ export default function RezervasyonForm() {
               className="mr-2"
               id="mesafeliBox"
             />
-            <label htmlFor="mesafeliBox" className="text-sm text-gray-200">
+            <label htmlFor="mesafeliBox" className="text-sm text-[#ffeec2]">
               <button type="button" className="underline text-[#bfa658]" onClick={e => { e.preventDefault(); setShowContract(true); }}>
                 Mesafeli Satış Sözleşmesini
               </button> okudum ve onaylıyorum.
