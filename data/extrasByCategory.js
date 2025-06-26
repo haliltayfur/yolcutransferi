@@ -1,3 +1,4 @@
+// data/extrasByCategory.js
 export const extrasListByCategory = [
   {
     category: "İçecekler",
