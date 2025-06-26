@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { vehicles } from "../../data/vehicleList";
-import { extrasList } from "../../data/extras";
+import { extrasListByCategory } from "../../data/extrasByCategory";
 
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
@@ -43,6 +43,7 @@ export default function VipTransferForm() {
   const router = useRouter();
   const params = useSearchParams();
 
+  // Varsayılan parametreler
   const paramFrom = params.get("from") || "";
   const paramTo = params.get("to") || "";
   const paramDate = params.get("date") || "";
@@ -52,6 +53,7 @@ export default function VipTransferForm() {
   const paramSegment = params.get("segment") || "Ekonomik";
   const paramTransfer = params.get("transfer") || "";
 
+  // Form state
   const [from, setFrom] = useState(paramFrom);
   const [to, setTo] = useState(paramTo);
   const [people, setPeople] = useState(paramPeople);
@@ -73,6 +75,7 @@ export default function VipTransferForm() {
   const [showContract, setShowContract] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
 
+  // Segment ve transfer uyumlu araçlar
   const availableVehicles = vehicles.filter(v =>
     (!segment || normalize(v.segment) === normalize(segment)) &&
     (!transfer || (v.transferTypes || []).map(normalize).includes(normalize(transfer))) &&
@@ -171,29 +174,35 @@ export default function VipTransferForm() {
     setShowSummary(true);
   }
 
-  // --- EKSTRALAR: (minimüm haliyle, checkbox'lı)
+  // EKSTRALAR - kategoriye göre gruplanmış, fiyat yok!
   function EkstralarAccordion({ selectedExtras, setSelectedExtras }) {
     return (
-      <div className="flex flex-wrap gap-3">
-        {extrasList.map(extra => (
-          <label key={extra.key} className="flex items-center gap-2 bg-[#19160a] border border-[#bfa658] rounded-xl px-4 py-2 cursor-pointer select-none text-[#ffeec2]">
-            <input
-              type="checkbox"
-              checked={selectedExtras.includes(extra.key)}
-              onChange={e => {
-                if (e.target.checked) setSelectedExtras([...selectedExtras, extra.key]);
-                else setSelectedExtras(selectedExtras.filter(k => k !== extra.key));
-              }}
-              className="accent-[#bfa658] w-4 h-4"
-            />
-            <span>{extra.label} ({extra.price}₺)</span>
-          </label>
+      <div className="space-y-4">
+        {extrasListByCategory.map(cat => (
+          <div key={cat.category}>
+            <div className="font-bold text-base text-[#bfa658] mb-1">{cat.category}</div>
+            <div className="flex flex-wrap gap-3">
+              {cat.items.map(extra => (
+                <label key={extra.key} className="flex items-center gap-2 bg-[#19160a] border border-[#bfa658] rounded-xl px-4 py-2 cursor-pointer select-none text-[#ffeec2]">
+                  <input
+                    type="checkbox"
+                    checked={selectedExtras.includes(extra.key)}
+                    onChange={e => {
+                      if (e.target.checked) setSelectedExtras([...selectedExtras, extra.key]);
+                      else setSelectedExtras(selectedExtras.filter(k => k !== extra.key));
+                    }}
+                    className="accent-[#bfa658] w-4 h-4"
+                  />
+                  <span>{extra.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     );
   }
 
-  // --- ADRES AUTOCOMPLETE: (sadece basic input, otomatik tamamlama yok)
   function AdresAutoComplete({ value, onChange, placeholder }) {
     return (
       <input
@@ -207,7 +216,7 @@ export default function VipTransferForm() {
     );
   }
 
-  // --- MesafeliPopup
+  // Mesafeli Satış Popup
   function MesafeliPopup({ onClose }) {
     const [content, setContent] = useState("Yükleniyor...");
     useEffect(() => {
@@ -228,12 +237,14 @@ export default function VipTransferForm() {
     );
   }
 
-  // --- SummaryPopup
+  // Rezervasyon Özeti Popup
   function SummaryPopup({
     from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, extrasQty, setExtrasQty, setExtras, pnr, onClose, router
   }) {
-    const basePrice = 4000; // ÖRNEK: dinamik yapmak için güncelle
-    const selectedExtras = extrasList.filter(e => extras.includes(e.key));
+    // Tüm ekstraları düzleştir
+    const allExtras = extrasListByCategory.flatMap(cat => cat.items);
+    const selectedExtras = allExtras.filter(e => extras.includes(e.key));
+    const basePrice = 4000; // DİNAMİK yapacaksan burada değiştir
     const extrasTotal = selectedExtras.reduce((sum, e) => sum + (e.price * (extrasQty[e.key] || 1)), 0);
     const araToplam = basePrice + extrasTotal;
     const kdv = araToplam * KDV_ORAN;
@@ -270,7 +281,6 @@ export default function VipTransferForm() {
             {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
             {note && <div><b>Ek Not:</b> {note}</div>}
           </div>
-          {/* Ekstralar + Adet/Çıkar */}
           <div className="mb-5">
             <b className="block mb-2 text-[#bfa658]">Ekstralar:</b>
             {selectedExtras.length === 0 && <span className="text-gray-600">Ekstra yok</span>}
@@ -285,7 +295,6 @@ export default function VipTransferForm() {
               </div>
             )}
           </div>
-          {/* Tutarlar */}
           <div className="mb-5 space-y-1 text-right text-lg">
             <div><b>Transfer Bedeli:</b> {basePrice.toLocaleString()} ₺</div>
             <div><b>Ekstralar:</b> {extrasTotal.toLocaleString()} ₺</div>
@@ -294,7 +303,6 @@ export default function VipTransferForm() {
           </div>
           <button
             onClick={() => {
-              // Demo'da gerçek yönlendirme! Canlıda ödeme sayfasına yönlendir
               router.push("/odeme?success=1");
             }}
             className="w-full py-3 rounded-xl bg-yellow-400 text-black font-bold hover:bg-yellow-500 transition text-xl"
@@ -304,10 +312,10 @@ export default function VipTransferForm() {
     );
   }
 
-  // -- Ana formun return'u --
+  // ---- ANA FORM ----
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-[#19160a] to-[#302811]">
-      <section className="w-full max-w-2xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] my-16">
+      <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-2 sm:px-6 md:px-12 py-20 bg-gradient-to-br from-black via-[#19160a] to-[#302811] my-16">
         <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand">
           VIP Rezervasyon Formu
         </h1>
