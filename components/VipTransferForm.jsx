@@ -23,7 +23,7 @@ function normalize(str) {
     .trim();
 }
 
-export default function RezervasyonForm() {
+export default function VipTransferForm() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -94,47 +94,40 @@ export default function RezervasyonForm() {
 
   return (
     <form
-      className="w-full max-w-xl mx-auto rounded-2xl border border-[#bfa658] shadow-2xl bg-black/90 px-8 py-10
-      flex flex-col gap-4"
-      style={{
-        fontFamily: "Quicksand, sans-serif",
-        minWidth: "300px",
-        background: "linear-gradient(135deg, #1a1813 80%, #302811 100%)"
-      }}
+      className="w-full max-w-[340px] md:max-w-[810px] border border-[#bfa658] rounded-2xl bg-black/80 shadow-xl p-6 md:p-10"
       onSubmit={handleSubmit}
+      style={{ fontFamily: "Quicksand, sans-serif" }}
     >
-      <h2 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-6 text-center"
-        style={{ letterSpacing: ".02em" }}>
+      <h2 className="text-2xl md:text-3xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center">
         VIP Rezervasyon Formu
       </h2>
-
-      <div className="flex flex-col gap-3">
-        <label className="text-[#bfa658] font-semibold">Nereden?</label>
-        <input
-          type="text"
-          placeholder="İl / İlçe / Mahalle / Sokak"
-          className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white border border-[#bfa658] focus:outline-none focus:ring-2 focus:ring-[#bfa658]"
-          value={from}
-          onChange={e => setFrom(e.target.value)}
-        />
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <label className="text-[#bfa658] font-semibold">Nereye?</label>
-        <input
-          type="text"
-          placeholder="İl / İlçe / Mahalle / Sokak"
-          className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white border border-[#bfa658] focus:outline-none focus:ring-2 focus:ring-[#bfa658]"
-          value={to}
-          onChange={e => setTo(e.target.value)}
-        />
-      </div>
-
-      <div className="flex flex-row gap-4">
-        <div className="flex-1 flex flex-col">
-          <label className="text-[#bfa658] font-semibold">Segment</label>
+      <div className="flex flex-col gap-4 mb-2">
+        <div>
+          <label className="text-[#bfa658] font-semibold mb-1 block">Nereden?</label>
+          <input
+            type="text"
+            placeholder="İl/ilçe/mahalle/sokak"
+            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
+            value={from}
+            onChange={e => setFrom(e.target.value)}
+            autoComplete="off"
+          />
+        </div>
+        <div>
+          <label className="text-[#bfa658] font-semibold mb-1 block">Nereye?</label>
+          <input
+            type="text"
+            placeholder="İl/ilçe/mahalle/sokak"
+            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
+            value={to}
+            onChange={e => setTo(e.target.value)}
+            autoComplete="off"
+          />
+        </div>
+        <div>
+          <label className="text-[#bfa658] font-semibold mb-1 block">Segment</label>
           <select
-            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white border border-[#bfa658]"
+            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
             value={segment}
             onChange={e => setSegment(e.target.value)}
           >
@@ -144,10 +137,10 @@ export default function RezervasyonForm() {
             <option value="Prime+">Prime+</option>
           </select>
         </div>
-        <div className="flex-1 flex flex-col">
-          <label className="text-[#bfa658] font-semibold">Transfer Türü</label>
+        <div>
+          <label className="text-[#bfa658] font-semibold mb-1 block">Transfer Türü</label>
           <select
-            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white border border-[#bfa658]"
+            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
             value={transfer}
             onChange={e => setTransfer(e.target.value)}
           >
@@ -161,70 +154,63 @@ export default function RezervasyonForm() {
             <option value="Düğün vb Organizasyonlar">Düğün vb Organizasyonlar</option>
           </select>
         </div>
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div>
+            <label className="text-[#bfa658] font-semibold mb-1 block">Araç</label>
+            <select
+              className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
+              value={vehicle}
+              onChange={e => setVehicle(e.target.value)}
+            >
+              <option value="">Araç Seç</option>
+              {availableVehicles.map((v, i) => (
+                <option key={i} value={v.value}>{v.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-[#bfa658] font-semibold mb-1 block">Kişi Sayısı</label>
+            <select
+              className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
+              value={people}
+              onChange={e => setPeople(Number(e.target.value))}
+            >
+              {Array.from({ length: 24 }, (_, i) => i + 1).map(val =>
+                <option key={val} value={val}>{val}</option>
+              )}
+            </select>
+          </div>
+          <div>
+            <label className="text-[#bfa658] font-semibold mb-1 block">Tarih</label>
+            <DatePicker
+              selected={date}
+              onChange={date => setDate(date)}
+              dateFormat="dd.MM.yyyy"
+              minDate={new Date()}
+              placeholderText="Tarih Seç"
+              className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
+              popperPlacement="bottom"
+              calendarClassName="bg-black text-white"
+            />
+          </div>
+          <div>
+            <label className="text-[#bfa658] font-semibold mb-1 block">Saat</label>
+            <select
+              className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
+              value={time}
+              onChange={e => setTime(e.target.value)}
+            >
+              <option value="">Saat seç</option>
+              {saatler.map((saat, i) => (
+                <option key={i} value={saat}>{saat}</option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div>
-          <label className="text-[#bfa658] font-semibold">Araç</label>
-          <select
-            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white border border-[#bfa658]"
-            value={vehicle}
-            onChange={e => setVehicle(e.target.value)}
-          >
-            <option value="">Araç Seç</option>
-            {availableVehicles.map((v, i) => (
-              <option key={i} value={v.value}>{v.label}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="text-[#bfa658] font-semibold">Kişi</label>
-          <select
-            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white border border-[#bfa658]"
-            value={people}
-            onChange={e => setPeople(Number(e.target.value))}
-          >
-            {Array.from({ length: 24 }, (_, i) => i + 1).map(val =>
-              <option key={val} value={val}>{val}</option>
-            )}
-          </select>
-        </div>
-        <div>
-          <label className="text-[#bfa658] font-semibold">Tarih</label>
-          <DatePicker
-            selected={date}
-            onChange={date => setDate(date)}
-            dateFormat="dd.MM.yyyy"
-            minDate={new Date()}
-            placeholderText="Tarih Seç"
-            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white border border-[#bfa658] focus:outline-none"
-            popperPlacement="bottom"
-            calendarClassName="bg-black text-white"
-          />
-        </div>
-        <div>
-          <label className="text-[#bfa658] font-semibold">Saat</label>
-          <select
-            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white border border-[#bfa658]"
-            value={time}
-            onChange={e => setTime(e.target.value)}
-          >
-            <option value="">Saat seç</option>
-            {saatler.map((saat, i) => (
-              <option key={i} value={saat}>{saat}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
       <button
         type="submit"
         className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-8 rounded-xl w-full text-xl shadow hover:scale-105 transition mt-6"
-        style={{
-          marginTop: 32,
-          letterSpacing: "0.02em",
-          boxShadow: "0 4px 24px 0 rgba(191, 166, 88, 0.13)"
-        }}
       >
         Transfer Planla
       </button>
