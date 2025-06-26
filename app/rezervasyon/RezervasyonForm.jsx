@@ -1,4 +1,5 @@
 // app/rezervasyon/RezervasyonForm.jsx
+
 "use client";
 import { useState } from "react";
 import EkstralarAccordion from "./EkstralarAccordion";
@@ -48,18 +49,24 @@ export default function RezervasyonForm() {
   const [people, setPeople] = useState(1);
   const [segment, setSegment] = useState("");
   const [transfer, setTransfer] = useState("");
-  const [vehicle, setVehicle] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [tc, setTc] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [pnr, setPnr] = useState("");
   const [note, setNote] = useState("");
   const [extras, setExtras] = useState([]);
   const [extrasQty, setExtrasQty] = useState({});
   const [showSummary, setShowSummary] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  // Validasyon fonksiyonları
+  const isValidTC = t => /^[1-9]\d{9}[02468]$/.test(t) && t.length === 11;
+  const isValidPhone = t => /^05\d{9}$/.test(t) && t.length === 11;
+  const isValidEmail = t => /^\S+@\S+\.\S+$/.test(t);
 
   function handleTcChange(val) {
     setTc(val.replace(/\D/g, "").slice(0, 11));
@@ -70,9 +77,23 @@ export default function RezervasyonForm() {
     setPhone(num.slice(0, 11));
   }
 
-  // FORM SUBMITTE POPUP AÇ
   function handleSubmit(e) {
     e.preventDefault();
+    // Hata kontrol
+    const err = {};
+    if (!from) err.from = "Lütfen kalkış noktası giriniz.";
+    if (!to) err.to = "Lütfen varış noktası giriniz.";
+    if (!segment) err.segment = "Lütfen segment seçiniz.";
+    if (!transfer) err.transfer = "Lütfen transfer tipi seçiniz.";
+    if (!date) err.date = "Tarih zorunlu.";
+    if (!time) err.time = "Saat zorunlu.";
+    if (!name) err.name = "Ad zorunlu.";
+    if (!surname) err.surname = "Soyad zorunlu.";
+    if (!isValidTC(tc)) err.tc = "Geçerli bir TC Kimlik No giriniz.";
+    if (!isValidPhone(phone)) err.phone = "Geçerli bir 05xx ile başlayan telefon giriniz.";
+    if (!isValidEmail(email)) err.email = "Geçerli e-posta adresi giriniz.";
+    setFieldErrors(err);
+    if (Object.keys(err).length > 0) return;
     setShowSummary(true);
   }
 
@@ -86,7 +107,7 @@ export default function RezervasyonForm() {
     const kdv = araToplam * KDV_ORAN;
     const toplam = araToplam + kdv;
 
-    // Adet arttır/azalt & sil
+    // Artır/azalt/sil
     function changeQty(key, dir) {
       setExtrasQty(q => ({
         ...q,
@@ -101,58 +122,100 @@ export default function RezervasyonForm() {
       });
     }
 
-    // Onayla ve Ödemeye Geç
     function handlePayment() {
-      // Tüm bilgileri query string olarak gönder
       const params = new URLSearchParams({
-        from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, pnr, note,
-        extras: extras.join(","), // dizi olarak string gönder
-        extrasQty: JSON.stringify(extrasQty), // obje olarak string
+        from, to, people, segment, transfer, date, time, name, surname, tc, phone, email, pnr, note,
+        extras: extras.join(","), // string
+        extrasQty: JSON.stringify(extrasQty),
       }).toString();
       router.push(`/odeme?${params}`);
     }
 
     return (
       <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
-        <div className="bg-[#19160a] rounded-3xl border border-[#bfa658] max-w-2xl w-full shadow-2xl p-8 md:p-12 overflow-y-auto max-h-[92vh] relative">
+        <div className="bg-[#19160a] rounded-3xl border border-[#bfa658] max-w-3xl w-full shadow-2xl p-8 md:p-12 overflow-y-auto max-h-[92vh] relative">
           <button onClick={onClose} className="absolute top-3 right-5 text-3xl font-bold text-[#ffeec2] hover:text-yellow-400">×</button>
-          <h2 className="text-2xl md:text-3xl font-extrabold mb-4 text-[#bfa658] text-center font-quicksand">
+          <h2 className="text-2xl md:text-3xl font-extrabold mb-6 text-[#bfa658] text-center font-quicksand">
             Rezervasyon Özeti
           </h2>
-          <div className="mb-5 space-y-2 text-[#ffeec2] text-base">
-            <div><b>Transfer:</b> {transfer || "-"}</div>
-            <div><b>Araç:</b> {vehicle || "-"}</div>
-            <div><b>Kişi:</b> {people}</div>
-            <div><b>Nereden:</b> {from}</div>
-            <div><b>Nereye:</b> {to}</div>
-            <div><b>Tarih/Saat:</b> {date} {time}</div>
-            <div><b>Ad Soyad:</b> {name} {surname} – T.C.: {tc}</div>
-            <div><b>Telefon:</b> {phone}</div>
-            {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
-            {note && <div><b>Ek Not:</b> {note}</div>}
-            <div className="pt-2"><b>Ekstralar:</b>
-              {selectedExtras.length === 0 && <span className="text-gray-400 ml-2">Ekstra yok</span>}
-              {selectedExtras.map(extra => (
-                <div key={extra.key} className="flex items-center gap-2 text-sm mt-1">
-                  <span>{extra.label}</span>
-                  <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, -1)}>-</button>
-                  <span className="w-8 text-center">{extrasQty[extra.key] || 1}</span>
-                  <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, +1)}>+</button>
-                  <span className="ml-2">{extra.price}₺</span>
-                  <button type="button" onClick={() => removeExtra(extra.key)} className="ml-2 text-red-400 font-bold hover:underline">Sil</button>
-                </div>
-              ))}
+          {/* 2 sütunlu detay */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-[#ffeec2] text-base">
+            <div>
+              <div><b>Ad Soyad:</b> {name} {surname} <span className="block">T.C.: {tc}</span></div>
+              <div><b>Telefon:</b> {phone}</div>
+              <div><b>E-posta:</b> {email}</div>
+              <div><b>Tarih/Saat:</b> {date} {time}</div>
+              <div><b>Kişi:</b> {people}</div>
             </div>
-            <div className="pt-2 text-right text-base">
-              <div><b>Transfer Bedeli:</b> {basePrice.toLocaleString()} ₺</div>
-              <div><b>Ekstralar:</b> {extrasTotal.toLocaleString()} ₺</div>
-              <div><b>KDV (%20):</b> {kdv.toLocaleString(undefined, { maximumFractionDigits: 2 })} ₺</div>
-              <div className="text-lg font-extrabold"><b>Toplam:</b> {toplam.toLocaleString()} ₺</div>
+            <div>
+              <div><b>Transfer:</b> {transfer || "-"}</div>
+              <div><b>Segment:</b> {segment}</div>
+              <div>
+                <b>Araç:</b>
+                <span className="ml-1 text-yellow-400">Seçilen segmentteki uygun araçlardan biri atanacaktır.</span>
+              </div>
+              <div><b>Nereden:</b> {from}</div>
+              <div><b>Nereye:</b> {to}</div>
+              {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
             </div>
+          </div>
+          {/* Ekstralar Tablosu */}
+          <div className="mb-5">
+            <b className="block mb-2 text-[#bfa658] text-lg">Ekstralar:</b>
+            {selectedExtras.length === 0 && <span className="text-gray-400">Ekstra yok</span>}
+            {selectedExtras.length > 0 &&
+              <table className="w-full text-base mb-3">
+                <thead>
+                  <tr className="text-[#ffeec2] border-b border-[#bfa658]/40">
+                    <th className="text-left py-1 pl-1">Ürün</th>
+                    <th className="w-28">Adet</th>
+                    <th className="w-24">Birim Fiyat</th>
+                    <th className="w-24">Toplam</th>
+                    <th className="w-16"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedExtras.map(extra => (
+                    <tr key={extra.key} className="border-b border-[#bfa658]/10">
+                      <td className="py-1 pl-1">{extra.label}</td>
+                      <td>
+                        <div className="flex items-center gap-1">
+                          <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, -1)}>-</button>
+                          <span className="w-7 text-center">{extrasQty[extra.key] || 1}</span>
+                          <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, +1)}>+</button>
+                        </div>
+                      </td>
+                      <td>{extra.price}₺</td>
+                      <td>{((extrasQty[extra.key] || 1) * extra.price).toLocaleString()}₺</td>
+                      <td>
+                        <button type="button" onClick={() => removeExtra(extra.key)} className="ml-1 text-red-400 font-bold hover:underline">🗑️</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            }
+          </div>
+          {/* Not ve fiyatlar */}
+          <div className="mb-3 text-[#ffeec2] text-base">
+            {note && <div className="mb-2"><b>Ek Not:</b> {note}</div>}
+            <div className="grid grid-cols-2 gap-2 mt-3">
+              <div className="text-right"><b>Transfer Bedeli:</b></div>
+              <div>{basePrice.toLocaleString()} ₺</div>
+              <div className="text-right"><b>Ekstralar:</b></div>
+              <div>{extrasTotal.toLocaleString()} ₺</div>
+              <div className="text-right"><b>KDV (%20):</b></div>
+              <div>{kdv.toLocaleString(undefined, { maximumFractionDigits: 2 })} ₺</div>
+              <div className="text-right text-xl font-bold"><b>Toplam:</b></div>
+              <div className="text-xl font-bold">{toplam.toLocaleString()} ₺</div>
+            </div>
+          </div>
+          <div className="bg-[#302811]/60 rounded-xl px-4 py-3 my-4 text-sm text-[#ffeec2]">
+            <b>Not:</b> Transfer rezervasyonunuz alınmıştır. Seçtiğiniz segmentteki uygun araç(lar) ve şoförünüz en kısa sürede sizinle paylaşılacaktır.
           </div>
           <button
             onClick={handlePayment}
-            className="w-full py-3 mt-4 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-lg hover:scale-105 transition"
+            className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-lg hover:scale-105 transition"
           >
             Onayla ve Ödemeye Geç
           </button>
@@ -178,6 +241,7 @@ export default function RezervasyonForm() {
             onChange={setFrom}
             placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
           />
+          {fieldErrors.from && <div className="text-red-400 text-xs mt-1">{fieldErrors.from}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
@@ -186,6 +250,7 @@ export default function RezervasyonForm() {
             onChange={setTo}
             placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
           />
+          {fieldErrors.to && <div className="text-red-400 text-xs mt-1">{fieldErrors.to}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
@@ -207,6 +272,7 @@ export default function RezervasyonForm() {
               <option key={opt.key} value={opt.label}>{opt.label}</option>
             )}
           </select>
+          {fieldErrors.segment && <div className="text-red-400 text-xs mt-1">{fieldErrors.segment}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
@@ -218,17 +284,7 @@ export default function RezervasyonForm() {
               <option key={opt} value={opt}>{opt}</option>
             )}
           </select>
-        </div>
-        <div>
-          <label className="font-bold text-[#bfa658] mb-1 block">Araç</label>
-          <select name="vehicle" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            value={vehicle}
-            onChange={e => setVehicle(e.target.value)}>
-            <option value="">Seçiniz</option>
-            {vehicles.map(opt =>
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            )}
-          </select>
+          {fieldErrors.transfer && <div className="text-red-400 text-xs mt-1">{fieldErrors.transfer}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
@@ -241,6 +297,7 @@ export default function RezervasyonForm() {
             min={new Date().toISOString().split("T")[0]}
             autoComplete="on"
           />
+          {fieldErrors.date && <div className="text-red-400 text-xs mt-1">{fieldErrors.date}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
@@ -250,6 +307,7 @@ export default function RezervasyonForm() {
             <option value="">Seçiniz</option>
             {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
           </select>
+          {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Ad</label>
@@ -261,6 +319,7 @@ export default function RezervasyonForm() {
             onChange={e => setName(e.target.value)}
             autoComplete="given-name"
           />
+          {fieldErrors.name && <div className="text-red-400 text-xs mt-1">{fieldErrors.name}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Soyad</label>
@@ -272,6 +331,7 @@ export default function RezervasyonForm() {
             onChange={e => setSurname(e.target.value)}
             autoComplete="family-name"
           />
+          {fieldErrors.surname && <div className="text-red-400 text-xs mt-1">{fieldErrors.surname}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">T.C. Kimlik No</label>
@@ -285,6 +345,7 @@ export default function RezervasyonForm() {
             onChange={e => handleTcChange(e.target.value)}
             autoComplete="off"
           />
+          {fieldErrors.tc && <div className="text-red-400 text-xs mt-1">{fieldErrors.tc}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Telefon</label>
@@ -297,6 +358,31 @@ export default function RezervasyonForm() {
             value={phone}
             onChange={e => handlePhoneChange(e.target.value)}
             autoComplete="tel"
+          />
+          {fieldErrors.phone && <div className="text-red-400 text-xs mt-1">{fieldErrors.phone}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">E-posta</label>
+          <input
+            name="email"
+            type="email"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            autoComplete="email"
+            placeholder="ornek@email.com"
+          />
+          {fieldErrors.email && <div className="text-red-400 text-xs mt-1">{fieldErrors.email}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
+          <input
+            name="pnr"
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={pnr}
+            onChange={e => setPnr(e.target.value)}
+            placeholder="Uçuş rezervasyon kodu (varsa)"
           />
         </div>
         <div className="md:col-span-2">
@@ -331,3 +417,5 @@ export default function RezervasyonForm() {
     </section>
   );
 }
+
+// app/rezervasyon/RezervasyonForm.jsx
