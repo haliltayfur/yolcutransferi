@@ -1,6 +1,13 @@
 "use client";
 import { useState } from "react";
 
+// Demo ekstralar
+const extralar = [
+  { key: "bebek_koltugu", label: "Bebek Koltuğu" },
+  { key: "wi-fi", label: "Wi-Fi" },
+  { key: "ikram", label: "İkram" }
+];
+
 export default function RezervasyonForm() {
   const [form, setForm] = useState({
     from: "",
@@ -17,11 +24,21 @@ export default function RezervasyonForm() {
     phone: "",
     note: "",
     pnr: "",
+    ekstralar: []
   });
 
   function handleChange(e) {
-    const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    if (type === "checkbox" && name === "ekstralar") {
+      setForm((f) => ({
+        ...f,
+        ekstralar: checked
+          ? [...f.ekstralar, value]
+          : f.ekstralar.filter((k) => k !== value)
+      }));
+    } else {
+      setForm((f) => ({ ...f, [name]: value }));
+    }
   }
 
   function handleSubmit(e) {
@@ -35,15 +52,21 @@ export default function RezervasyonForm() {
         <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand shadow-none">
           VIP Rezervasyon Formu
         </h1>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-5"
+          autoComplete="off"
+        >
+          {/* FORM ALANLARI */}
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
             <input
               name="from"
               value={form.from}
               onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-[#19160a] text-lg text-[#ffeec2] border border-[#bfa658]"
-              placeholder="Nereden?"
+              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
+              placeholder="Nereden? (İl/İlçe/Mahalle/Havalimanı)"
+              required
             />
           </div>
           <div>
@@ -52,8 +75,9 @@ export default function RezervasyonForm() {
               name="to"
               value={form.to}
               onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-[#19160a] text-lg text-[#ffeec2] border border-[#bfa658]"
-              placeholder="Nereye?"
+              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
+              placeholder="Nereye? (İl/İlçe/Mahalle/Havalimanı)"
+              required
             />
           </div>
           <div>
@@ -62,11 +86,11 @@ export default function RezervasyonForm() {
               name="people"
               value={form.people}
               onChange={handleChange}
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              className="input w-full py-3 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658]"
             >
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <option key={i} value={i}>
-                  {i}
+              {[...Array(8)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}
                 </option>
               ))}
             </select>
@@ -77,7 +101,7 @@ export default function RezervasyonForm() {
               name="segment"
               value={form.segment}
               onChange={handleChange}
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              className="input w-full py-3 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658]"
             >
               <option value="">Seçiniz</option>
               <option value="Ekonomik">Ekonomik</option>
@@ -91,7 +115,7 @@ export default function RezervasyonForm() {
               name="transfer"
               value={form.transfer}
               onChange={handleChange}
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              className="input w-full py-3 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658]"
             >
               <option value="">Seçiniz</option>
               <option value="VIP Havalimanı Transferi">VIP Havalimanı Transferi</option>
@@ -109,7 +133,7 @@ export default function RezervasyonForm() {
               name="vehicle"
               value={form.vehicle}
               onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-[#19160a] text-lg text-[#ffeec2] border border-[#bfa658]"
+              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
               placeholder="Araç"
             />
           </div>
@@ -120,7 +144,8 @@ export default function RezervasyonForm() {
               type="date"
               value={form.date}
               onChange={handleChange}
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658]"
+              required
             />
           </div>
           <div>
@@ -130,7 +155,8 @@ export default function RezervasyonForm() {
               type="time"
               value={form.time}
               onChange={handleChange}
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658]"
+              required
             />
           </div>
           <div>
@@ -139,8 +165,9 @@ export default function RezervasyonForm() {
               name="name"
               value={form.name}
               onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-[#19160a] text-lg text-[#ffeec2] border border-[#bfa658]"
+              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
               placeholder="Ad"
+              required
             />
           </div>
           <div>
@@ -149,8 +176,9 @@ export default function RezervasyonForm() {
               name="surname"
               value={form.surname}
               onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-[#19160a] text-lg text-[#ffeec2] border border-[#bfa658]"
+              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
               placeholder="Soyad"
+              required
             />
           </div>
           <div>
@@ -159,9 +187,10 @@ export default function RezervasyonForm() {
               name="tc"
               value={form.tc}
               onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-[#19160a] text-lg text-[#ffeec2] border border-[#bfa658]"
               maxLength={11}
+              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
               placeholder="T.C. Kimlik No"
+              required
             />
           </div>
           <div>
@@ -170,9 +199,10 @@ export default function RezervasyonForm() {
               name="phone"
               value={form.phone}
               onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-[#19160a] text-lg text-[#ffeec2] border border-[#bfa658]"
               maxLength={11}
+              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658] text-base"
               placeholder="Telefon"
+              required
             />
           </div>
           <div className="md:col-span-2">
@@ -181,7 +211,7 @@ export default function RezervasyonForm() {
               name="note"
               value={form.note}
               onChange={handleChange}
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              className="input w-full bg-black/50 text-[#ffeec2] border border-[#bfa658] rounded-xl"
               rows={2}
               placeholder="Eklemek istediğiniz bir not var mı?"
             />
@@ -192,10 +222,30 @@ export default function RezervasyonForm() {
               name="pnr"
               value={form.pnr}
               onChange={handleChange}
-              className="input w-full py-3 px-4 rounded-xl bg-[#19160a] text-lg text-[#ffeec2] border border-[#bfa658]"
+              className="input w-full py-3 px-4 rounded-xl bg-black/50 text-[#ffeec2] border border-[#bfa658]"
               placeholder="Uçuş Rezervasyon Kodu (PNR)"
             />
           </div>
+          {/* Ekstralar Alanı */}
+          <div className="md:col-span-2">
+            <label className="font-bold text-[#bfa658] mb-1 block">Ekstralar</label>
+            <div className="flex flex-wrap gap-4">
+              {extralar.map((extra) => (
+                <label key={extra.key} className="flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-[#bfa658]">
+                  <input
+                    type="checkbox"
+                    name="ekstralar"
+                    value={extra.key}
+                    checked={form.ekstralar.includes(extra.key)}
+                    onChange={handleChange}
+                    className="accent-[#bfa658] w-5 h-5"
+                  />
+                  <span className="text-[#ffeec2] text-base">{extra.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          {/* --- BUTONU KOLONDA YAP VE TAŞMAZ! --- */}
           <div className="md:col-span-2 flex justify-end mt-6">
             <button
               type="submit"
