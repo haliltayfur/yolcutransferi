@@ -93,23 +93,18 @@ export default function RezervasyonForm() {
   }
 
   return (
-    <form
-      className="w-full"
-      onSubmit={handleSubmit}
-      style={{ fontFamily: "Quicksand, sans-serif" }}
-    >
+    <form className="w-full" onSubmit={handleSubmit} style={{ fontFamily: "Quicksand, sans-serif" }}>
       <h2 className="text-2xl md:text-3xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center">
         VIP Rezervasyon Formu
       </h2>
-
-      {/* Responsive grid, grid-cols-2 ve grid-cols-4 AYNI SATIRDA OLMASIN */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+      {/* HER ALAN KENDİ SATIRINDA! */}
+      <div className="flex flex-col gap-4 mb-2">
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Nereden?</label>
           <input
             type="text"
             placeholder="İl/ilçe/mahalle/sokak"
-            className="w-full py-4 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
+            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
             value={from}
             onChange={e => setFrom(e.target.value)}
             autoComplete="off"
@@ -120,19 +115,16 @@ export default function RezervasyonForm() {
           <input
             type="text"
             placeholder="İl/ilçe/mahalle/sokak"
-            className="w-full py-4 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
+            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
             value={to}
             onChange={e => setTo(e.target.value)}
             autoComplete="off"
           />
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Segment</label>
           <select
-            className="w-full py-4 px-4 rounded-xl bg-black/80 text-lg text-white"
+            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
             value={segment}
             onChange={e => setSegment(e.target.value)}
           >
@@ -145,7 +137,7 @@ export default function RezervasyonForm() {
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Transfer Türü</label>
           <select
-            className="w-full py-4 px-4 rounded-xl bg-black/80 text-lg text-white"
+            className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
             value={transfer}
             onChange={e => setTransfer(e.target.value)}
           >
@@ -159,66 +151,64 @@ export default function RezervasyonForm() {
             <option value="Düğün vb Organizasyonlar">Düğün vb Organizasyonlar</option>
           </select>
         </div>
+        {/* 4'lü grid tek satırda, ama küçük ekranlarda alt alta */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div>
+            <label className="text-[#bfa658] font-semibold mb-1 block">Araç</label>
+            <select
+              className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
+              value={vehicle}
+              onChange={e => setVehicle(e.target.value)}
+            >
+              <option value="">Araç Seç</option>
+              {availableVehicles.map((v, i) => (
+                <option key={i} value={v.value}>{v.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-[#bfa658] font-semibold mb-1 block">Kişi Sayısı</label>
+            <select
+              className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
+              value={people}
+              onChange={e => setPeople(Number(e.target.value))}
+            >
+              {Array.from({ length: 24 }, (_, i) => i + 1).map(val =>
+                <option key={val} value={val}>{val}</option>
+              )}
+            </select>
+          </div>
+          <div>
+            <label className="text-[#bfa658] font-semibold mb-1 block">Tarih</label>
+            <DatePicker
+              selected={date}
+              onChange={date => setDate(date)}
+              dateFormat="dd.MM.yyyy"
+              minDate={new Date()}
+              placeholderText="Tarih Seç"
+              className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
+              popperPlacement="bottom"
+              calendarClassName="bg-black text-white"
+            />
+          </div>
+          <div>
+            <label className="text-[#bfa658] font-semibold mb-1 block">Saat</label>
+            <select
+              className="w-full py-3 px-4 rounded-xl bg-black/80 text-lg text-white"
+              value={time}
+              onChange={e => setTime(e.target.value)}
+            >
+              <option value="">Saat seç</option>
+              {saatler.map((saat, i) => (
+                <option key={i} value={saat}>{saat}</option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
-
-      {/* Araç, kişi, tarih, saat ayrı satırlarda mobilde, desktopta 4lü grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div>
-          <label className="text-[#bfa658] font-semibold mb-1 block">Araç</label>
-          <select
-            className="w-full py-4 px-4 rounded-xl bg-black/80 text-lg text-white"
-            value={vehicle}
-            onChange={e => setVehicle(e.target.value)}
-          >
-            <option value="">Araç Seç</option>
-            {availableVehicles.map((v, i) => (
-              <option key={i} value={v.value}>{v.label}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="text-[#bfa658] font-semibold mb-1 block">Kişi Sayısı</label>
-          <select
-            className="w-full py-4 px-4 rounded-xl bg-black/80 text-lg text-white"
-            value={people}
-            onChange={e => setPeople(Number(e.target.value))}
-          >
-            {Array.from({ length: 24 }, (_, i) => i + 1).map(val =>
-              <option key={val} value={val}>{val}</option>
-            )}
-          </select>
-        </div>
-        <div>
-          <label className="text-[#bfa658] font-semibold mb-1 block">Tarih</label>
-          <DatePicker
-            selected={date}
-            onChange={date => setDate(date)}
-            dateFormat="dd.MM.yyyy"
-            minDate={new Date()}
-            placeholderText="Tarih Seç"
-            className="w-full py-4 px-4 rounded-xl bg-black/80 text-lg text-white focus:outline-none"
-            popperPlacement="bottom"
-            calendarClassName="bg-black text-white"
-          />
-        </div>
-        <div>
-          <label className="text-[#bfa658] font-semibold mb-1 block">Saat</label>
-          <select
-            className="w-full py-4 px-4 rounded-xl bg-black/80 text-lg text-white"
-            value={time}
-            onChange={e => setTime(e.target.value)}
-          >
-            <option value="">Saat seç</option>
-            {saatler.map((saat, i) => (
-              <option key={i} value={saat}>{saat}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
       <button
         type="submit"
-        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-8 rounded-xl w-full text-xl shadow hover:scale-105 transition mt-4"
+        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-8 rounded-xl w-full text-xl shadow hover:scale-105 transition mt-6"
       >
         Transfer Planla
       </button>
