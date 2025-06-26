@@ -1,3 +1,4 @@
+// app/page.js
 import HeroSlider from "../components/HeroSlider";
 import dynamic from "next/dynamic";
 import HeroVideo from "../components/HeroVideo";
@@ -23,25 +24,11 @@ export default function Home() {
         "
       >
         {/* FORM */}
-        <div
-          className="
-            w-full max-w-[340px] md:max-w-[810px] 
-            md:h-[600px]
-            flex items-center justify-center
-            rounded-2xl
-            border border-[#bfa658]
-            bg-black/80
-            shadow-xl
-            py-8 md:py-0 px-2 md:px-0
-            transition-all
-          "
-        >
+        <div className="w-full max-w-[340px] md:max-w-[810px] flex items-center justify-center transition-all">
           <VipTransferForm />
         </div>
         {/* VIDEO sadece desktop */}
-        <div
-          className="hidden md:block w-[380px] h-[600px] flex-shrink-0 overflow-hidden"
-        >
+        <div className="hidden md:block w-[380px] h-[600px] flex-shrink-0 overflow-hidden">
           <HeroVideo />
         </div>
       </section>
