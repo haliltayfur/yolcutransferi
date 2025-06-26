@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { vehicles } from "../../data/vehicleList";
-import { extrasListByCategory } from "../../data/extrasByCategory";
+import { extrasList } from "../../data/extras"; // Sadece bu import değişti
 
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
@@ -43,7 +43,6 @@ export default function VipTransferForm() {
   const router = useRouter();
   const params = useSearchParams();
 
-  // Varsayılan parametreler
   const paramFrom = params.get("from") || "";
   const paramTo = params.get("to") || "";
   const paramDate = params.get("date") || "";
@@ -53,7 +52,6 @@ export default function VipTransferForm() {
   const paramSegment = params.get("segment") || "Ekonomik";
   const paramTransfer = params.get("transfer") || "";
 
-  // Form state
   const [from, setFrom] = useState(paramFrom);
   const [to, setTo] = useState(paramTo);
   const [people, setPeople] = useState(paramPeople);
@@ -75,7 +73,6 @@ export default function VipTransferForm() {
   const [showContract, setShowContract] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
 
-  // Segment ve transfer uyumlu araçlar
   const availableVehicles = vehicles.filter(v =>
     (!segment || normalize(v.segment) === normalize(segment)) &&
     (!transfer || (v.transferTypes || []).map(normalize).includes(normalize(transfer))) &&
@@ -174,30 +171,23 @@ export default function VipTransferForm() {
     setShowSummary(true);
   }
 
-  // EKSTRALAR - kategoriye göre gruplanmış, fiyat yok!
+  // EKSTRALAR (tek blok, kategorisiz)
   function EkstralarAccordion({ selectedExtras, setSelectedExtras }) {
     return (
-      <div className="space-y-4">
-        {extrasListByCategory.map(cat => (
-          <div key={cat.category}>
-            <div className="font-bold text-base text-[#bfa658] mb-1">{cat.category}</div>
-            <div className="flex flex-wrap gap-3">
-              {cat.items.map(extra => (
-                <label key={extra.key} className="flex items-center gap-2 bg-[#19160a] border border-[#bfa658] rounded-xl px-4 py-2 cursor-pointer select-none text-[#ffeec2]">
-                  <input
-                    type="checkbox"
-                    checked={selectedExtras.includes(extra.key)}
-                    onChange={e => {
-                      if (e.target.checked) setSelectedExtras([...selectedExtras, extra.key]);
-                      else setSelectedExtras(selectedExtras.filter(k => k !== extra.key));
-                    }}
-                    className="accent-[#bfa658] w-4 h-4"
-                  />
-                  <span>{extra.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+      <div className="flex flex-wrap gap-3">
+        {extrasList.map(extra => (
+          <label key={extra.key} className="flex items-center gap-2 bg-[#19160a] border border-[#bfa658] rounded-xl px-4 py-2 cursor-pointer select-none text-[#ffeec2]">
+            <input
+              type="checkbox"
+              checked={selectedExtras.includes(extra.key)}
+              onChange={e => {
+                if (e.target.checked) setSelectedExtras([...selectedExtras, extra.key]);
+                else setSelectedExtras(selectedExtras.filter(k => k !== extra.key));
+              }}
+              className="accent-[#bfa658] w-4 h-4"
+            />
+            <span>{extra.label}</span>
+          </label>
         ))}
       </div>
     );
@@ -216,7 +206,6 @@ export default function VipTransferForm() {
     );
   }
 
-  // Mesafeli Satış Popup
   function MesafeliPopup({ onClose }) {
     const [content, setContent] = useState("Yükleniyor...");
     useEffect(() => {
@@ -237,13 +226,10 @@ export default function VipTransferForm() {
     );
   }
 
-  // Rezervasyon Özeti Popup
   function SummaryPopup({
     from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, extrasQty, setExtrasQty, setExtras, pnr, onClose, router
   }) {
-    // Tüm ekstraları düzleştir
-    const allExtras = extrasListByCategory.flatMap(cat => cat.items);
-    const selectedExtras = allExtras.filter(e => extras.includes(e.key));
+    const selectedExtras = extrasList.filter(e => extras.includes(e.key));
     const basePrice = 4000; // DİNAMİK yapacaksan burada değiştir
     const extrasTotal = selectedExtras.reduce((sum, e) => sum + (e.price * (extrasQty[e.key] || 1)), 0);
     const araToplam = basePrice + extrasTotal;
