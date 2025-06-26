@@ -1,4 +1,3 @@
-// app/page.js
 import HeroSlider from "../components/HeroSlider";
 import dynamic from "next/dynamic";
 import HeroVideo from "../components/HeroVideo";
