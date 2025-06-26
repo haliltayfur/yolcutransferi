@@ -1,8 +1,10 @@
+// app/rezervasyon/RezervasyonForm.jsx
 "use client";
 import { useState } from "react";
 import EkstralarAccordion from "./EkstralarAccordion";
 import AdresAutoComplete from "./AdresAutoComplete";
 import { vehicles } from "../../data/vehicleList";
+import { useRouter } from "next/navigation";
 
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
@@ -18,6 +20,7 @@ const allTransfers = [
   "Toplu Transfer",
   "Düğün vb Organizasyonlar"
 ];
+const KDV_ORAN = 0.20;
 const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
@@ -38,6 +41,7 @@ function normalize(str) {
 }
 
 export default function RezervasyonForm() {
+  const router = useRouter();
   // STATE
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -72,22 +76,45 @@ export default function RezervasyonForm() {
     setShowSummary(true);
   }
 
-  // KVKK tarzı popup
+  // --- REZERVASYON ÖZETİ POPUP ---
   function SummaryPopup({ onClose }) {
-    // Basit fiyat örneği
     const basePrice = 4000;
-    // NOT: extras arrayini backend logic ile doldurabilirsin
     const allExtras = require("../../data/extrasByCategory").extrasListByCategory.flatMap(cat => cat.items);
     const selectedExtras = allExtras.filter(e => extras.includes(e.key));
     const extrasTotal = selectedExtras.reduce((sum, e) => sum + (e.price * (extrasQty[e.key] || 1)), 0);
-    const KDV_ORAN = 0.20;
     const araToplam = basePrice + extrasTotal;
     const kdv = araToplam * KDV_ORAN;
     const toplam = araToplam + kdv;
 
+    // Adet arttır/azalt & sil
+    function changeQty(key, dir) {
+      setExtrasQty(q => ({
+        ...q,
+        [key]: Math.max(1, (q[key] || 1) + dir)
+      }));
+    }
+    function removeExtra(key) {
+      setExtras(es => es.filter(k => k !== key));
+      setExtrasQty(q => {
+        const { [key]: _, ...rest } = q;
+        return rest;
+      });
+    }
+
+    // Onayla ve Ödemeye Geç
+    function handlePayment() {
+      // Tüm bilgileri query string olarak gönder
+      const params = new URLSearchParams({
+        from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, pnr, note,
+        extras: extras.join(","), // dizi olarak string gönder
+        extrasQty: JSON.stringify(extrasQty), // obje olarak string
+      }).toString();
+      router.push(`/odeme?${params}`);
+    }
+
     return (
       <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
-        <div className="bg-[#19160a] rounded-3xl border border-[#bfa658] max-w-xl w-full shadow-2xl p-8 md:p-10 overflow-y-auto max-h-[90vh] relative">
+        <div className="bg-[#19160a] rounded-3xl border border-[#bfa658] max-w-2xl w-full shadow-2xl p-8 md:p-12 overflow-y-auto max-h-[92vh] relative">
           <button onClick={onClose} className="absolute top-3 right-5 text-3xl font-bold text-[#ffeec2] hover:text-yellow-400">×</button>
           <h2 className="text-2xl md:text-3xl font-extrabold mb-4 text-[#bfa658] text-center font-quicksand">
             Rezervasyon Özeti
@@ -108,8 +135,11 @@ export default function RezervasyonForm() {
               {selectedExtras.map(extra => (
                 <div key={extra.key} className="flex items-center gap-2 text-sm mt-1">
                   <span>{extra.label}</span>
-                  <span className="bg-[#bfa658]/20 px-2 rounded">{extrasQty[extra.key] || 1} adet</span>
-                  <span>{extra.price}₺</span>
+                  <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, -1)}>-</button>
+                  <span className="w-8 text-center">{extrasQty[extra.key] || 1}</span>
+                  <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, +1)}>+</button>
+                  <span className="ml-2">{extra.price}₺</span>
+                  <button type="button" onClick={() => removeExtra(extra.key)} className="ml-2 text-red-400 font-bold hover:underline">Sil</button>
                 </div>
               ))}
             </div>
@@ -121,10 +151,10 @@ export default function RezervasyonForm() {
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={handlePayment}
             className="w-full py-3 mt-4 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-lg hover:scale-105 transition"
           >
-            Onayla ve Kapat
+            Onayla ve Ödemeye Geç
           </button>
         </div>
       </div>
