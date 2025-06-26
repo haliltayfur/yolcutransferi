@@ -1,6 +1,6 @@
 // app/admin/rezervasyonlar/page.js
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 // Detaylı popup
 function RezervasyonDetayPopup({ item, onClose }) {
@@ -94,19 +94,53 @@ export default function AdminRezervasyonlarPage() {
   const [filter, setFilter] = useState("all");
   const [showPopup, setShowPopup] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [showRemoved, setShowRemoved] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/admin/rezervasyonlar")
+  const intervalRef = useRef(null);
+
+  // Listeyi güncelle
+  function refreshList() {
+    setLoading(true);
+    fetch("/api/admin/rezervasyonlar" + (showRemoved ? "?removed=1" : ""))
       .then(r => r.json())
       .then(d => { setList(d.items || []); setLoading(false); });
-  }, []);
+  }
+
+  useEffect(() => {
+    refreshList();
+    // Her 5 saniyede bir güncelle
+    intervalRef.current = setInterval(refreshList, 5000);
+    return () => clearInterval(intervalRef.current);
+    // eslint-disable-next-line
+  }, [showRemoved]);
 
   const filtered = list.filter(item => {
-    if (filter === "all") return true;
-    if (filter === "paid") return item.status === "Ödeme Yapıldı";
-    if (filter === "cancelled") return item.status === "İptal";
-    return true;
+    if (filter === "all") return !item.removed;
+    if (filter === "paid") return item.status === "Ödeme Yapıldı" && !item.removed;
+    if (filter === "cancelled") return item.status === "İptal" && !item.removed;
+    return !item.removed;
   });
+
+  // Rezervasyonu kaldır (admin panelde gösterme ama silme)
+  async function handleRemove(id) {
+    await fetch("/api/admin/rezervasyonlar/remove", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    refreshList();
+  }
+
+  // Rezervasyonu db'den tamamen sil (çok riskli, geri dönüşsüz!)
+  async function handleDelete(id) {
+    if (!window.confirm("Bu rezervasyonu kalıcı olarak silmek istediğinize emin misiniz?")) return;
+    await fetch("/api/admin/rezervasyonlar/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    refreshList();
+  }
 
   return (
     <main className="min-h-[80vh] flex flex-col items-center justify-center bg-black/30 py-8">
@@ -116,6 +150,9 @@ export default function AdminRezervasyonlarPage() {
           <button onClick={() => setFilter("all")} className={`px-4 py-2 rounded font-bold ${filter === "all" ? "bg-gold text-black" : "bg-gray-700 text-white"}`}>Tümü</button>
           <button onClick={() => setFilter("paid")} className={`px-4 py-2 rounded font-bold ${filter === "paid" ? "bg-gold text-black" : "bg-gray-700 text-white"}`}>Ödeme Yapmış</button>
           <button onClick={() => setFilter("cancelled")} className={`px-4 py-2 rounded font-bold ${filter === "cancelled" ? "bg-gold text-black" : "bg-gray-700 text-white"}`}>Vazgeçilen</button>
+          <button onClick={() => setShowRemoved(v => !v)} className={`ml-5 px-4 py-2 rounded font-bold border ${showRemoved ? "bg-gold text-black" : "bg-black text-gold border-gold"}`}>
+            {showRemoved ? "Aktifleri Göster" : "Kaldırılanları Göster"}
+          </button>
         </div>
         {loading ? (
           <div className="text-center text-gold">Yükleniyor...</div>
@@ -152,11 +189,23 @@ export default function AdminRezervasyonlarPage() {
                     <td className="py-2 px-2">{r.to}</td>
                     <td className="py-2 px-2 font-semibold">{r.summary?.toplam?.toLocaleString()} ₺</td>
                     <td className="py-2 px-2">{r.status || "-"}</td>
-                    <td className="py-2 px-2">
+                    <td className="py-2 px-2 flex flex-col gap-1">
                       <button
-                        className="bg-[#bfa658] text-black rounded px-3 py-1 font-bold hover:bg-[#ffeec2]"
+                        className="bg-[#bfa658] text-black rounded px-3 py-1 font-bold hover:bg-[#ffeec2] mb-1"
                         onClick={() => { setSelected(r); setShowPopup(true); }}>
                         Oku
+                      </button>
+                      {!r.removed && (
+                        <button
+                          className="bg-yellow-900 text-white rounded px-3 py-1 font-bold hover:bg-yellow-800 mb-1"
+                          onClick={() => handleRemove(r._id)}>
+                          Kaldır
+                        </button>
+                      )}
+                      <button
+                        className="bg-red-700 text-white rounded px-3 py-1 font-bold hover:bg-red-500"
+                        onClick={() => handleDelete(r._id)}>
+                        Sil
                       </button>
                     </td>
                   </tr>
@@ -172,4 +221,5 @@ export default function AdminRezervasyonlarPage() {
     </main>
   );
 }
+
 // app/admin/rezervasyonlar/page.js
