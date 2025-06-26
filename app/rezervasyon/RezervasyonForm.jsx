@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { vehicles } from "../../data/vehicleList";
 import EkstralarAccordion from "./EkstralarAccordion";
-
+import AdresAutoComplete from "./AdresAutoComplete";
 
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
@@ -172,20 +172,6 @@ export default function RezervasyonForm() {
     setShowSummary(true);
   }
 
-  // ---- Standart inputlar (KVKK ile aynı) ----
-  function AdresAutoComplete({ value, onChange, placeholder }) {
-    return (
-      <input
-        className="input w-full py-3 px-4 rounded-xl bg-[#19160a] text-lg text-[#ffeec2] border border-[#bfa658] focus:outline-none focus:border-[#ffeec2] transition"
-        type="text"
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        autoComplete="off"
-      />
-    );
-  }
-
   function MesafeliPopup({ onClose }) {
     const [content, setContent] = useState("Yükleniyor...");
     useEffect(() => {
@@ -209,7 +195,6 @@ export default function RezervasyonForm() {
   function SummaryPopup({
     from, to, people, segment, transfer, vehicle, date, time, name, surname, tc, phone, note, extras, extrasQty, setExtrasQty, setExtras, pnr, onClose, router
   }) {
-    // Tüm ekstraları düzleştir
     const allExtras = require("../../data/extrasByCategory").extrasListByCategory.flatMap(cat => cat.items);
     const selectedExtras = allExtras.filter(e => extras.includes(e.key));
     const basePrice = 4000;
@@ -282,8 +267,8 @@ export default function RezervasyonForm() {
 
   // ---- ANA FORM ----
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-[#19160a] to-[#302811]">
-      <section className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] p-6 sm:p-10 my-16">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-[#19160a] to-[#302811] pt-10 pb-4">
+      <section className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] p-6 sm:p-10 mt-8 mb-8">
         <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand shadow-none">
           VIP Rezervasyon Formu
         </h1>
