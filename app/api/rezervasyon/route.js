@@ -1,77 +1,56 @@
 // app/api/rezervasyon/route.js
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "../../../lib/mongodb";
-import nodemailer from "nodemailer";
+import { connectToDatabase } from "@/lib/mongodb";
+import { Resend } from "resend";
 
-// SMTP bilgilerini .env dosyasından al
-const SMTP_USER = process.env.SMTP_USER;
-const SMTP_PASS = process.env.SMTP_PASS;
-const SMTP_HOST = process.env.SMTP_HOST;
-const SMTP_PORT = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465;
-const MAILS = ["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"];
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const data = await req.json();
-
-    // DB bağlantısı
+    const data = await request.json();
     const db = await connectToDatabase();
-    const collection = db.collection("rezervasyonlar");
+
+    // Sipariş kodu/numarası oluştur
+    const now = new Date();
+    const dateStr = `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth()+1).padStart(2,"0")}${now.getFullYear()}`;
+    const countToday = await db.collection("rezervasyonlar").countDocuments({
+      createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) }
+    });
+    const orderId = data.orderId ||
+      `siparis${dateStr}_${String(countToday+1001)}`;
 
     // Varsayılan durum
     let status = data.status;
     if (!status) status = "Ödeme Yapıldı";
 
-    // Sipariş kodu oluştur (geldiyse kullan)
-    let orderId = data.orderId;
-    if (!orderId) {
-      const today = new Date();
-      orderId = `siparis${today.getDate()}${today.getMonth() + 1}${today.getFullYear()}_${1000 + Math.floor(Math.random() * 300)}`;
-    }
-
     // DB'ye yaz
-    const dbObj = {
-      createdAt: new Date(),
-      status,
+    const yeniKayit = {
+      ...data,
       orderId,
-      ad: data.name,
-      soyad: data.surname,
-      tc: data.tc,
-      telefon: data.phone,
-      email: data.email || "",
-      from: data.from,
-      to: data.to,
-      people: data.people,
-      segment: data.segment,
-      transfer: data.transfer,
-      vehicle: data.vehicle,
-      date: data.date,
-      time: data.time,
-      pnr: data.pnr,
-      note: data.note,
-      extras: data.extras,
-      extrasQty: data.extrasQty,
-      card: data.card ? {
-        name: data.card.name,
-        number: "**** **** **** " + (data.card.number || "").slice(-4), // son 4 rakamı göster
-      } : undefined,
+      createdAt: new Date(),
+      status
     };
-    await collection.insertOne(dbObj);
+    await db.collection("rezervasyonlar").insertOne(yeniKayit);
 
-    // Mail içeriği oluştur
+    // Ekstralar metni
     let extrasTxt = "";
     if (data.extras && data.extras.length > 0) {
-      extrasTxt =
-        data.extras
-          .map(
-            (k) =>
-              `- ${k} (${(data.extrasQty && data.extrasQty[k]) || 1} adet)`
-          )
-          .join("<br>");
+      extrasTxt = data.extras
+        .map(
+          (k) => `- ${k} (${(data.extrasQty && data.extrasQty[k]) || 1} adet)`
+        )
+        .join("<br>");
     } else {
       extrasTxt = "Yok";
     }
 
+    // Kart bilgisi sadece son 4 hane (gizli)
+    let kartTxt = "-";
+    if (data.card && data.card.number) {
+      kartTxt = `**** **** **** ${(data.card.number || "").slice(-4)} (${data.card.name || ""})`;
+    }
+
+    // Mail içeriği
     const html = `
       <div style="font-family:Arial,sans-serif;font-size:15px;">
         <h2 style="color:#bfa658;">YolcuTransferi.com Yeni Rezervasyon</h2>
@@ -90,29 +69,20 @@ export async function POST(req) {
         <b>PNR:</b> ${data.pnr || "-"}<br>
         <b>Not:</b> ${data.note || "-"}<br>
         <b>Ekstralar:</b><br>${extrasTxt}<br>
-        <b>Kart Bilgisi:</b> ${(data.card && data.card.name) ? data.card.name + " (**** " + (data.card.number || "").slice(-4) + ")" : "-"}<br>
+        <b>Kart Bilgisi:</b> ${kartTxt}<br>
         <b>Durum:</b> <span style="color:${status === "Ödeme Yapıldı" ? "green" : "red"}">${status}</span>
         <hr>
         <i>Bu mesaj sistem tarafından otomatik gönderilmiştir.</i>
       </div>
     `;
 
-    // Mail gönder
-    if (SMTP_USER && SMTP_PASS && SMTP_HOST) {
-      let transporter = nodemailer.createTransport({
-        host: SMTP_HOST,
-        port: SMTP_PORT,
-        secure: SMTP_PORT === 465,
-        auth: { user: SMTP_USER, pass: SMTP_PASS },
-      });
-
-      await transporter.sendMail({
-        from: `"YolcuTransferi.com" <${SMTP_USER}>`,
-        to: MAILS.join(","),
-        subject: `Yeni Rezervasyon - ${orderId}`,
-        html,
-      });
-    }
+    // E-posta gönder
+    await resend.emails.send({
+      from: "YolcuTransferi <info@yolcutransferi.com>",
+      to: ["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"],
+      subject: `Yeni Rezervasyon - ${orderId}`,
+      html
+    });
 
     return NextResponse.json({ ok: true, orderId }, { status: 200 });
   } catch (err) {
