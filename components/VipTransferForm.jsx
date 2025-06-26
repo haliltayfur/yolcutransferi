@@ -1,16 +1,18 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { vehicles } from "../data/vehicleList";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-// Saatler
-const saatler = Array.from({ length: 24 * 2 }, (_, i) => {
-  const h = Math.floor(i / 2).toString().padStart(2, "0");
-  const m = i % 2 === 0 ? "00" : "30";
-  return `${h}:${m}`;
-});
+const saatler = [
+  "00:00", "00:30", "01:00", "01:30", "02:00", "02:30", "03:00", "03:30",
+  "04:00", "04:30", "05:00", "05:30", "06:00", "06:30", "07:00", "07:30",
+  "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+  "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30",
+  "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00", "23:30"
+];
 
 function normalize(str) {
   return (str || "")
@@ -21,122 +23,162 @@ function normalize(str) {
     .trim();
 }
 
-const segmentLabels = {
-  "Ekonomik": "Ekonomik (Standart Konfor)",
-  "Lüks": "Lüks (Yüksek Konfor)",
-  "Prime+": "Prime+ (Ultra Lüks)"
-};
+function isAirport(str) {
+  if (!str) return false;
+  str = str.toLowerCase();
+  return (
+    str.includes("havaalan") ||
+    str.includes("havaliman") ||
+    str.includes("airport")
+  );
+}
 
 export default function VipTransferForm() {
   const router = useRouter();
   const params = useSearchParams();
 
-  // Tüm inputlar, localStorage varsayılanları
+  // ---- INITIAL STATE ----
   const [from, setFrom] = useState(params.get("from") || "");
   const [to, setTo] = useState(params.get("to") || "");
   const [segment, setSegment] = useState(params.get("segment") || "");
   const [people, setPeople] = useState(Number(params.get("people")) || 1);
   const [transfer, setTransfer] = useState(params.get("transfer") || "");
-  const [vehicle, setVehicle] = useState(params.get("vehicle") || "");
+  const [vehicle, setVehicle] = useState(""); // Kullanıcı seçemiyor.
   const [date, setDate] = useState(params.get("date") ? new Date(params.get("date")) : null);
   const [time, setTime] = useState(params.get("time") || "");
   const [pnr, setPnr] = useState(params.get("pnr") || "");
+  const [forceUpdate, setForceUpdate] = useState(false);
 
-  // Formu her cihazda/sekmede boş açmak için storage effect:
+  // ---- LOCAL STORAGE (tarayıcıya özel) ----
+  // Her kullanıcıya özel, sadece browser'da
   useEffect(() => {
-    // Eğer sayfa yenilenirse veya farklı cihazsa: varsayılanları çek
-    setFrom(params.get("from") || "");
-    setTo(params.get("to") || "");
-    setSegment(params.get("segment") || "");
-    setPeople(Number(params.get("people")) || 1);
-    setTransfer(params.get("transfer") || "");
-    setVehicle(params.get("vehicle") || "");
-    setDate(params.get("date") ? new Date(params.get("date")) : null);
-    setTime(params.get("time") || "");
-    setPnr(params.get("pnr") || "");
-  }, [params]);
+    // Sadece aynı browserda doldurulanlar gelir
+    const draft = JSON.parse(localStorage.getItem("reservationDraft") || "{}");
+    if (!params.get("from") && draft.from) setFrom(draft.from);
+    if (!params.get("to") && draft.to) setTo(draft.to);
+    if (!params.get("segment") && draft.segment) setSegment(draft.segment);
+    if (!params.get("people") && draft.people) setPeople(draft.people);
+    if (!params.get("transfer") && draft.transfer) setTransfer(draft.transfer);
+    if (!params.get("date") && draft.date) setDate(new Date(draft.date));
+    if (!params.get("time") && draft.time) setTime(draft.time);
+    if (!params.get("pnr") && draft.pnr) setPnr(draft.pnr);
+  }, []);
 
-  // Segment değişince araçları sıfırla
   useEffect(() => {
-    setVehicle("");
-  }, [segment, people, transfer]);
+    // Her değişiklikte güncelle
+    localStorage.setItem(
+      "reservationDraft",
+      JSON.stringify({
+        from, to, segment, people, transfer, date: date ? date.toISOString() : "", time, pnr
+      })
+    );
+  }, [from, to, segment, people, transfer, date, time, pnr]);
 
-  // Araç segmentine uygunları getir (seçim olarak göster ama seçilmeden geçilemesin)
-  const availableVehicles = vehicles.filter(v => {
-    if (segment && normalize(v.segment) !== normalize(segment)) return false;
-    if (people && v.max < people) return false;
-    if (transfer) {
-      const transferNorm = normalize(transfer);
-      const arr = (v.transferTypes || []).map(normalize);
-      if (!arr.includes(transferNorm)) return false;
-    }
-    return true;
-  });
+  // Sayfa yenilemede temizle
+  useEffect(() => {
+    const onReload = (e) => {
+      if (performance.getEntriesByType("navigation")[0].type === "reload") {
+        localStorage.removeItem("reservationDraft");
+      }
+    };
+    window.addEventListener("beforeunload", onReload);
+    return () => window.removeEventListener("beforeunload", onReload);
+  }, []);
 
-  // Havalimanı/PNR kontrolü
-  const isAirport = str =>
-    str && typeof str === "string" &&
-    (str.toLowerCase().includes("havaalan") ||
-      str.toLowerCase().includes("havaliman") ||
-      str.toLowerCase().includes("airport"));
-  const showPnr =
-    isAirport(from) || isAirport(to) || (transfer && transfer.toLowerCase().includes("hava"));
+  // ---- ARAÇLAR FİLTRE ----
+  const availableVehicles = vehicles.filter(
+    v =>
+      (!segment || normalize(v.segment) === normalize(segment)) &&
+      (!transfer || (v.transferTypes || []).map(normalize).includes(normalize(transfer))) &&
+      (!people || (v.max || 1) >= people)
+  );
 
-  // Tarih düzeltme: timezone sorunu varsa (UTC/Türkiye) burada handle edilir.
-  function toDateString(dt) {
-    if (!dt) return "";
-    // Localde gün sapmasını engelle
-    const userTimezoneOffset = dt.getTimezoneOffset() * 60000;
-    const localDate = new Date(dt.getTime() - userTimezoneOffset);
-    return localDate.toISOString().split("T")[0];
-  }
-
+  // ---- FORM SUBMIT ----
   function handleSubmit(e) {
     e.preventDefault();
-    if (!from || !to || !segment || !people || !transfer || !vehicle || !date || !time) {
-      alert("Lütfen tüm alanları eksiksiz doldurun.");
-      return;
-    }
-    // Formda ne girildiyse rezervasyon sayfasına gönder
-    const params = new URLSearchParams({
-      from,
-      to,
+    // Tarihi ISO format yerine yyyy-mm-dd gönder
+    const paramsObj = {
+      from, to,
       segment,
       people,
       transfer,
-      vehicle,
-      date: toDateString(date),
+      date: date ? date.toISOString().split("T")[0] : "",
       time,
-      ...(showPnr && { pnr })
-    }).toString();
-    router.push(`/rezervasyon?${params}`);
+      pnr
+    };
+    // Model seçtirmiyorsun, segmentteki araçlardan biri atanacak!
+    // Kullanıcıya gösteriyoruz ama parametre göndermiyoruz
+    router.push(`/rezervasyon?${Object.entries(paramsObj).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&")}`);
   }
+
+  // ---- STYLE OVERRIDES FOR DATEPICKER ----
+  // Takvimde arka plan, yazı rengi ve seçili gün gold, diğerleri #111
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      .react-datepicker,
+      .react-datepicker__month-container {
+        background: #111 !important;
+        color: #ffeec2 !important;
+        border-radius: 20px !important;
+      }
+      .react-datepicker__header {
+        background: #19160a !important;
+        border-bottom: 1px solid #bfa658 !important;
+      }
+      .react-datepicker__day--selected,
+      .react-datepicker__day--keyboard-selected {
+        background: #bfa658 !important;
+        color: #111 !important;
+      }
+      .react-datepicker__day {
+        border-radius: 6px !important;
+      }
+      .react-datepicker__day:hover {
+        background: #ffeec2 !important;
+        color: #111 !important;
+      }
+      .react-datepicker__current-month,
+      .react-datepicker__day-name {
+        color: #ffeec2 !important;
+      }
+      .react-datepicker__day--disabled {
+        color: #555 !important;
+        background: #222 !important;
+      }
+      .react-datepicker__triangle { display: none; }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
+
+  // ---- SEGMENT ADI GÜNCELLEME ----
+  const segmentOptions = [
+    { key: "Ekonomik", label: "Ekonomik (Standart Konfor)" },
+    { key: "Lüks", label: "Lüks (Premium Sınıf)" },
+    { key: "Prime+", label: "Prime+ (Ultra Lüks)" }
+  ];
 
   return (
     <form
-      className="w-full max-w-[340px] md:max-w-[810px] p-6 md:p-10 rounded-2xl border border-[#bfa658] bg-black/90 shadow-2xl"
+      className="w-full max-w-[340px] md:max-w-[810px] flex flex-col gap-4 px-2"
       style={{
-        fontFamily: "Quicksand, sans-serif",
-        minHeight: "600px",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center"
+        fontFamily: "Quicksand, sans-serif"
       }}
       onSubmit={handleSubmit}
       autoComplete="off"
     >
-      <h2 className="text-2xl md:text-3xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center">
+      <h2 className="text-2xl md:text-3xl font-extrabold text-[#bfa658] tracking-tight mb-2 text-center">
         VIP Rezervasyon Formu
       </h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-        {/* Nereden/Nereye yan yana */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Nereden-Nereye */}
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Nereden?</label>
           <input
             type="text"
-            placeholder="ilçe/Mahalle"
-            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black text-white focus:outline-none"
+            placeholder="İlçe/Mahalle"
+            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black/80 text-lg text-white focus:outline-none focus:border-[#ffeec2] transition"
             value={from}
             onChange={e => setFrom(e.target.value)}
           />
@@ -145,79 +187,71 @@ export default function VipTransferForm() {
           <label className="text-[#bfa658] font-semibold mb-1 block">Nereye?</label>
           <input
             type="text"
-            placeholder="ilçe/Mahalle"
-            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black text-white focus:outline-none"
+            placeholder="İlçe/Mahalle"
+            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black/80 text-lg text-white focus:outline-none focus:border-[#ffeec2] transition"
             value={to}
             onChange={e => setTo(e.target.value)}
           />
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-        {/* Araç Sınıfı ve Kişi Sayısı yan yana */}
+        {/* Araç Sınıfı / Kişi Sayısı */}
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Araç Sınıfı</label>
           <select
-            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black text-white"
+            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black/80 text-lg text-white"
             value={segment}
-            onChange={e => setSegment(e.target.value)}
+            onChange={e => { setSegment(e.target.value); setVehicle(""); setForceUpdate(f => !f); }}
           >
             <option value="">Araç Sınıfı Seçin</option>
-            <option value="Ekonomik">{segmentLabels["Ekonomik"]}</option>
-            <option value="Lüks">{segmentLabels["Lüks"]}</option>
-            <option value="Prime+">{segmentLabels["Prime+"]}</option>
+            {segmentOptions.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
           </select>
+          <div className="text-xs text-[#ffeec2] mt-1">Sınıf seçiminize uygun araçlardan biri atanacaktır.</div>
         </div>
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Kişi Sayısı</label>
           <select
-            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black text-white"
+            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black/80 text-lg text-white"
             value={people}
             onChange={e => setPeople(Number(e.target.value))}
           >
-            {Array.from({ length: 24 }, (_, i) => i + 1).map(val => (
+            {Array.from({ length: 24 }, (_, i) => i + 1).map(val =>
               <option key={val} value={val}>{val}</option>
-            ))}
+            )}
           </select>
         </div>
-      </div>
-
-      {/* Transfer Türü */}
-      <div className="mb-2">
-        <label className="text-[#bfa658] font-semibold mb-1 block">Transfer Türü</label>
-        <select
-          className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black text-white"
-          value={transfer}
-          onChange={e => setTransfer(e.target.value)}
-        >
-          <option value="">Transfer Türü Seç</option>
-          <option value="VIP Havalimanı Transferi">VIP Havalimanı Transferi</option>
-          <option value="Şehirler Arası Transfer">Şehirler Arası Transfer</option>
-          <option value="Özel Etkinlik">Özel Etkinlik</option>
-          <option value="Kurumsal Etkinlik">Kurumsal Etkinlik</option>
-          <option value="Tur & Gezi">Tur & Gezi</option>
-          <option value="Toplu Transfer">Toplu Transfer</option>
-          <option value="Düğün vb Organizasyonlar">Düğün vb Organizasyonlar</option>
-        </select>
-      </div>
-
-      {/* Araç ve Tarih/Saat yan yana */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* Transfer Türü */}
+        <div className="md:col-span-2">
+          <label className="text-[#bfa658] font-semibold mb-1 block">Transfer Türü</label>
+          <select
+            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black/80 text-lg text-white"
+            value={transfer}
+            onChange={e => setTransfer(e.target.value)}
+          >
+            <option value="">Transfer Türü Seç</option>
+            <option value="VIP Havalimanı Transferi">VIP Havalimanı Transferi</option>
+            <option value="Şehirler Arası Transfer">Şehirler Arası Transfer</option>
+            <option value="Özel Etkinlik">Özel Etkinlik</option>
+            <option value="Kurumsal Etkinlik">Kurumsal Etkinlik</option>
+            <option value="Tur & Gezi">Tur & Gezi</option>
+            <option value="Toplu Transfer">Toplu Transfer</option>
+            <option value="Düğün vb Organizasyonlar">Düğün vb Organizasyonlar</option>
+          </select>
+        </div>
+        {/* Araç / Tarih / Saat */}
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Araç</label>
           <select
-            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black text-white"
-            value={vehicle}
-            onChange={e => setVehicle(e.target.value)}
+            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black/80 text-lg text-white"
+            value=""
+            disabled
           >
-            <option value="">Araç Seç</option>
-            {availableVehicles.map((v, i) => (
-              <option key={i} value={v.value}>{v.label}</option>
-            ))}
+            <option>
+              {segment ? (
+                availableVehicles.length > 0
+                  ? availableVehicles.map(v => v.label).join(" / ")
+                  : "Seçtiğiniz sınıfa uygun araç yok"
+              ) : "Araç Seç"}
+            </option>
           </select>
-          {segment && (
-            <span className="text-xs text-[#bfa658] block mt-1">Seçtiğiniz sınıfa uygun bir araç atanacaktır.</span>
-          )}
         </div>
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Tarih</label>
@@ -227,16 +261,15 @@ export default function VipTransferForm() {
             dateFormat="dd.MM.yyyy"
             minDate={new Date()}
             placeholderText="Tarih Seç"
-            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black text-white focus:outline-none"
+            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black/80 text-lg text-white focus:outline-none focus:border-[#ffeec2]"
             calendarClassName="bg-black text-white"
             popperPlacement="bottom"
-            style={{ width: "100%" }}
           />
         </div>
         <div>
           <label className="text-[#bfa658] font-semibold mb-1 block">Saat</label>
           <select
-            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black text-white"
+            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black/80 text-lg text-white"
             value={time}
             onChange={e => setTime(e.target.value)}
           >
@@ -246,25 +279,23 @@ export default function VipTransferForm() {
             ))}
           </select>
         </div>
+        {/* PNR alanı havalimanı transferi veya nerede/nereye havalimanı varsa */}
+        {(transfer.includes("Havalimanı") || isAirport(from) || isAirport(to)) && (
+          <div className="md:col-span-2">
+            <label className="text-[#bfa658] font-semibold mb-1 block">PNR / Uçuş Kodu</label>
+            <input
+              type="text"
+              placeholder="Uçuş Rezervasyon Kodu (PNR)"
+              className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black/80 text-lg text-white focus:outline-none"
+              value={pnr}
+              onChange={e => setPnr(e.target.value)}
+            />
+          </div>
+        )}
       </div>
-
-      {/* PNR alanı sadece havalimanı ise */}
-      {showPnr && (
-        <div className="mb-2">
-          <label className="text-[#bfa658] font-semibold mb-1 block">PNR / Uçuş Kodu</label>
-          <input
-            type="text"
-            placeholder="Uçuş Rezervasyon Kodu (PNR)"
-            className="w-full py-3 px-4 rounded-xl border border-[#bfa658] bg-black text-white focus:outline-none"
-            value={pnr}
-            onChange={e => setPnr(e.target.value)}
-          />
-        </div>
-      )}
-
       <button
         type="submit"
-        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-8 rounded-xl w-full text-xl shadow hover:scale-105 transition mt-4"
+        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-8 rounded-xl w-full text-xl shadow hover:scale-105 transition mt-3"
       >
         Transfer Planla
       </button>
