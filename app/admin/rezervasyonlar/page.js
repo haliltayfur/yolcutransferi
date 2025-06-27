@@ -1,132 +1,47 @@
 // app/admin/rezervasyonlar/page.js
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
-// ---- DETAYLI POPUP ----
 function RezervasyonDetayPopup({ item, onClose, onSoftDelete, onHardDelete }) {
-  if (!item) return null;
-
-  // Ekstralar tablosu
-  let extrasTable = null;
-  if (Array.isArray(item.selectedExtras) && item.selectedExtras.length > 0) {
-    extrasTable = (
-      <table className="w-full mb-2 text-xs border border-[#bfa658] rounded">
-        <thead>
-          <tr className="bg-[#bfa658] text-black">
-            <th className="p-1">Ekstra</th>
-            <th className="p-1">Adet</th>
-            <th className="p-1">Birim Fiyat</th>
-            <th className="p-1">Toplam</th>
-          </tr>
-        </thead>
-        <tbody>
-          {item.selectedExtras.map(e => (
-            <tr key={e.key} className="text-[#19160a]">
-              <td className="p-1">{e.label || e.key}</td>
-              <td className="p-1">{item.extrasQty?.[e.key] || 1}</td>
-              <td className="p-1">{e.price?.toLocaleString?.() || "-"}</td>
-              <td className="p-1">{((e.price || 0) * (item.extrasQty?.[e.key] || 1)).toLocaleString()} ₺</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-  } else if (item.extras && Array.isArray(item.extras) && item.extras.length > 0) {
-    extrasTable = (
-      <ul className="ml-2 list-disc">
-        {item.extras.map(k => (
-          <li key={k} className="text-[#19160a]">{k} ({item.extrasQty?.[k] || 1} adet)</li>
-        ))}
-      </ul>
-    );
-  } else {
-    extrasTable = <span className="text-gray-500 ml-2">Ekstra yok</span>;
-  }
-
-  // Tutar özeti
-  let tutarDetay = null;
-  if (item.summary) {
-    tutarDetay = (
-      <div className="my-3 text-sm text-right">
-        <div><b>Transfer Bedeli:</b> {item.summary.basePrice?.toLocaleString()} ₺</div>
-        <div><b>Ekstralar:</b> {item.summary.extrasTotal?.toLocaleString()} ₺</div>
-        <div><b>KDV (%20):</b> {item.summary.kdv?.toLocaleString(undefined, { maximumFractionDigits: 2 })} ₺</div>
-        <div className="font-bold text-lg"><b>Toplam:</b> {item.summary.toplam?.toLocaleString()} ₺</div>
-      </div>
-    );
-  }
-
-  // Tüm form alanları eksiksiz!
-  return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
-      <div className="bg-[#fffbef] max-w-2xl w-full rounded-2xl p-8 relative border-2 border-[#bfa658] overflow-y-auto max-h-[98vh]">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-5 text-3xl font-bold text-[#bfa658] hover:text-red-400"
-        >×</button>
-        <h2 className="text-2xl font-bold mb-5 text-[#bfa658] text-center">Rezervasyon Detayı</h2>
-        <div className="grid grid-cols-2 gap-4 text-sm text-[#19160a]">
-          <div><b>Sipariş No:</b> {item.orderId}</div>
-          <div><b>Durum:</b> {item.status}</div>
-          <div><b>Oluşturma Tarihi:</b> {item.createdAt ? new Date(item.createdAt).toLocaleString("tr-TR") : "-"}</div>
-          <div><b>Kişi Sayısı:</b> {item.people}</div>
-          <div><b>Ad Soyad:</b> {item.name} {item.surname}</div>
-          <div><b>T.C.:</b> {item.tc}</div>
-          <div><b>Telefon:</b> {item.phone}</div>
-          <div><b>E-posta:</b> {item.email || "-"}</div>
-          <div><b>Segment:</b> {item.segment}</div>
-          <div><b>Transfer Türü:</b> {item.transfer}</div>
-          <div><b>Araç:</b> {item.vehicle} <span className="text-[11px] text-gray-500 block">{item.segment ? "(Segment seçildi, araç atanacak)" : ""}</span></div>
-          <div><b>Nereden:</b> {item.from}</div>
-          <div><b>Nereye:</b> {item.to}</div>
-          <div><b>Tarih/Saat:</b> {item.date} {item.time}</div>
-          {item.pnr && <div className="col-span-2"><b>PNR/Uçuş Kodu:</b> {item.pnr}</div>}
-          {item.note && <div className="col-span-2"><b>Ek Not:</b> {item.note}</div>}
-          <div className="col-span-2">
-            <b>Ekstralar:</b>
-            {extrasTable}
-          </div>
-        </div>
-        {tutarDetay}
-        <div className="flex gap-4 mt-8 justify-end">
-          <button
-            className="bg-[#c24c4c] hover:bg-[#a33030] text-white px-4 py-2 rounded-xl font-bold"
-            onClick={() => onHardDelete(item)}
-          >Sil (Kalıcı)</button>
-          <button
-            className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-xl font-bold"
-            onClick={() => onSoftDelete(item)}
-          >Kaldır (Listeden)</button>
-          <button
-            className="bg-[#bfa658] hover:bg-[#9f7c2b] text-black px-6 py-2 rounded-xl font-bold"
-            onClick={onClose}
-          >Kapat</button>
-        </div>
-      </div>
-    </div>
-  );
+  // ... aynı popup kodun kalıyor ...
+  // (Bir önceki mesajdaki gibi)
 }
 
-// ---- ANA SAYFA ----
 export default function AdminRezervasyonlarPage() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [showPopup, setShowPopup] = useState(false);
   const [selected, setSelected] = useState(null);
+  const selectedRef = useRef(null);
 
-  // Verileri çek ve otomatik güncelle
+  // Listeyi getir
   function fetchData() {
-    setLoading(true);
     fetch("/api/admin/rezervasyonlar")
       .then(r => r.json())
-      .then(d => { setList(d.items || []); setLoading(false); });
+      .then(d => {
+        setList(d.items || []);
+        setLoading(false);
+
+        // Eğer popup açık ve seçili bir kayıt varsa, bu kaydın en güncel halini tekrar bul.
+        if (showPopup && selectedRef.current) {
+          const updated = (d.items || []).find(x => x._id === selectedRef.current._id);
+          if (updated) setSelected(updated);
+        }
+      });
   }
+
   useEffect(() => {
     fetchData();
-    const intv = setInterval(fetchData, 7000); // Her 7 sn'de bir otomatik güncelle
+    const intv = setInterval(fetchData, 7000); // 7 sn'de bir fetch
     return () => clearInterval(intv);
   }, []);
+
+  // Popup açıldığında, referansa seçili kaydı yaz
+  useEffect(() => {
+    if (showPopup && selected) selectedRef.current = selected;
+    if (!showPopup) selectedRef.current = null;
+  }, [showPopup, selected]);
 
   // Kaldır (soft delete)
   async function handleSoftDelete(item) {
