@@ -6,21 +6,20 @@ import { useRouter } from "next/navigation";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-// Demo araç verisi (gerçek sistemde dışarıdan import edilecek)
+// Demo araç verisi
 const vehicles = [
   { id: 1, label: "Mercedes Vito", segment: "Lüks", max: 5, transferTypes: ["VIP Havalimanı Transferi", "Şehirler Arası Transfer"] },
   { id: 2, label: "Sprinter", segment: "Prime+", max: 10, transferTypes: ["VIP Havalimanı Transferi", "Kurumsal Etkinlik"] },
   { id: 3, label: "Passat", segment: "Ekonomik", max: 4, transferTypes: ["Şehirler Arası Transfer"] },
+  { id: 4, label: "BMW 7", segment: "Lüks", max: 3, transferTypes: ["VIP Havalimanı Transferi"] },
+  { id: 5, label: "Ford Tourneo", segment: "Ekonomik", max: 5, transferTypes: ["VIP Havalimanı Transferi", "Şehirler Arası Transfer"] }
 ];
 
-const saatler = [
-  "00:00", "00:30", "01:00", "01:30", "02:00", "02:30", "03:00", "03:30",
-  "04:00", "04:30", "05:00", "05:30", "06:00", "06:30", "07:00", "07:30",
-  "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
-  "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30",
-  "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00", "23:30"
-];
+const saatler = Array.from({ length: 24 * 2 }, (_, i) => {
+  const h = String(Math.floor(i / 2)).padStart(2, "0");
+  const m = i % 2 === 0 ? "00" : "30";
+  return `${h}:${m}`;
+});
 
 const segmentOptions = [
   { value: "", label: "Araç Sınıfı Seçin" },
@@ -40,13 +39,8 @@ const transferOptions = [
   { value: "Düğün vb Organizasyonlar", label: "Düğün vb Organizasyonlar" },
 ];
 
-function getAvailableVehicles(segment, transfer, people) {
-  return vehicles.filter(
-    v =>
-      (!segment || v.segment === segment) &&
-      (!transfer || (v.transferTypes || []).includes(transfer)) &&
-      (!people || (v.max || 1) >= people)
-  );
+function getAvailableVehicles(segment) {
+  return vehicles.filter(v => !segment || v.segment === segment);
 }
 
 export default function VipTransferForm() {
@@ -62,29 +56,30 @@ export default function VipTransferForm() {
     vehicleId: null,
   });
 
-  const availableVehicles = getAvailableVehicles(form.segment, form.transfer, form.people);
+  const [showPnr, setShowPnr] = useState(false);
+
   const router = useRouter();
 
   useEffect(() => {
+    // Takvim için tema düzeltme
     const style = document.createElement("style");
     style.innerHTML = `
-      .react-datepicker,
-      .react-datepicker__month-container {
-        background: #19160a !important;
-        color: #ffeec2 !important;
-        border-radius: 20px !important;
+      .react-datepicker, .react-datepicker__month-container {
+        background: #fff !important;
+        color: #222 !important;
+        border-radius: 16px !important;
       }
       .react-datepicker__header {
-        background: #19160a !important;
+        background: #fff !important;
         border-bottom: 1px solid #bfa658 !important;
+        color: #111 !important;
       }
+      .react-datepicker__day,
       .react-datepicker__day--selected,
       .react-datepicker__day--keyboard-selected {
-        background: #bfa658 !important;
+        background: #fff !important;
         color: #19160a !important;
-      }
-      .react-datepicker__day {
-        border-radius: 8px !important;
+        border-radius: 7px !important;
       }
       .react-datepicker__day:hover {
         background: #ffeec2 !important;
@@ -92,20 +87,23 @@ export default function VipTransferForm() {
       }
       .react-datepicker__current-month,
       .react-datepicker__day-name {
-        color: #ffeec2 !important;
-      }
-      .react-datepicker__day--disabled {
-        color: #444 !important;
-        background: #222 !important;
+        color: #19160a !important;
       }
       .react-datepicker__triangle { display: none; }
     `;
     document.head.appendChild(style);
-    return () => { document.head.removeChild(style); };
+    return () => document.head.removeChild(style);
   }, []);
 
-  const inputClass = "w-full py-2 px-3 rounded-xl border border-[#bfa658] bg-black/60 text-[#ffeec2] text-base focus:outline-none focus:border-[#ffeec2] font-quicksand shadow-none";
-  const labelClass = "font-bold text-[#bfa658] mb-1 block font-quicksand text-[16px]";
+  useEffect(() => {
+    setShowPnr(form.transfer === "VIP Havalimanı Transferi");
+    if (form.transfer !== "VIP Havalimanı Transferi") {
+      setForm(f => ({ ...f, pnr: "" }));
+    }
+  }, [form.transfer]);
+
+  const inputClass = "w-full py-2 px-3 rounded-lg border border-[#bfa658] bg-black/65 text-[#ffeec2] text-base focus:outline-none focus:border-[#ffeec2] font-quicksand shadow-none";
+  const labelClass = "font-bold text-[#bfa658] mb-1 block font-quicksand text-[15px]";
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -123,6 +121,8 @@ export default function VipTransferForm() {
     router.push(`/rezervasyon?${params.toString()}`);
   }
 
+  const vehiclesInSegment = getAvailableVehicles(form.segment);
+
   return (
     <form
       className="w-full h-full flex flex-col gap-2 justify-between"
@@ -132,12 +132,12 @@ export default function VipTransferForm() {
         height: 600,
         minHeight: 600,
         boxSizing: "border-box",
-        padding: "36px 32px 22px 32px",
+        padding: "28px 24px 20px 24px",
       }}
       autoComplete="off"
       onSubmit={handleSubmit}
     >
-      <h2 className="text-3xl font-extrabold text-[#bfa658] tracking-tight mb-5 text-center font-quicksand">
+      <h2 className="text-3xl font-extrabold text-[#bfa658] tracking-tight mb-4 text-center font-quicksand">
         VIP Rezervasyon Formu
       </h2>
       <div className="flex-1 flex flex-col gap-3 justify-start">
@@ -211,29 +211,35 @@ export default function VipTransferForm() {
             ))}
           </select>
         </div>
+        {/* Araçlar */}
         <div>
           <label className={labelClass}>Araçlar</label>
-          {form.segment && availableVehicles.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2">
-              {availableVehicles.map((v) => (
-                <button
-                  type="button"
-                  key={v.id}
-                  onClick={() => setForm(f => ({ ...f, vehicleId: v.id }))}
-                  className={`flex flex-col items-center justify-center border rounded-xl p-2 bg-black/60 transition-all
-                    ${form.vehicleId === v.id
-                      ? "border-[#ffeec2] bg-[#bfa658]/30 scale-105 shadow"
-                      : "border-[#bfa658] hover:border-[#ffeec2] hover:bg-[#bfa658]/20"}
-                  `}
-                  style={{
-                    minHeight: 62,
-                  }}
-                >
-                  <span className="font-semibold text-[#ffeec2] text-[15px]">{v.label}</span>
-                  <span className="text-xs text-[#bfa658] mt-1">{v.segment}</span>
-                  <span className="text-xs text-[#ffeec2] mt-1">{v.max} Kişi</span>
-                </button>
-              ))}
+          {form.segment && vehiclesInSegment.length > 0 ? (
+            <div>
+              <div className="grid grid-cols-2 gap-2">
+                {vehiclesInSegment.map((v) => (
+                  <button
+                    type="button"
+                    key={v.id}
+                    onClick={() => setForm(f => ({ ...f, vehicleId: v.id }))}
+                    className={`flex flex-col items-center justify-center border rounded-lg p-2 bg-black/70 transition-all
+                      ${form.vehicleId === v.id
+                        ? "border-[#ffeec2] bg-[#bfa658]/40 scale-105 shadow"
+                        : "border-[#bfa658] hover:border-[#ffeec2] hover:bg-[#bfa658]/20"}
+                    `}
+                    style={{
+                      minHeight: 56,
+                    }}
+                  >
+                    <span className="font-semibold text-[#ffeec2] text-[15px]">{v.label}</span>
+                    <span className="text-xs text-[#bfa658] mt-1">{v.segment}</span>
+                    <span className="text-xs text-[#ffeec2] mt-1">{v.max} Kişi</span>
+                  </button>
+                ))}
+              </div>
+              <div className="text-xs text-[#ffeec2] mt-2 ml-1 opacity-90">
+                Seçtiğiniz segmentteki araçlardan biri size rezerve edilecektir.
+              </div>
             </div>
           ) : (
             <div className="w-full text-[#ffeec2] text-sm py-1">
@@ -256,7 +262,7 @@ export default function VipTransferForm() {
               minDate={new Date()}
               placeholderText="Tarih Seç"
               className={inputClass}
-              calendarClassName="bg-black text-[#ffeec2]"
+              calendarClassName="bg-white text-black"
               popperPlacement="bottom"
               required
             />
@@ -277,17 +283,20 @@ export default function VipTransferForm() {
             </select>
           </div>
         </div>
-        <div style={{ maxWidth: 330 }}>
-          <label className={labelClass}>PNR / Uçuş Kodu</label>
-          <input
-            name="pnr"
-            value={form.pnr}
-            onChange={e => setForm(f => ({ ...f, pnr: e.target.value }))}
-            className={inputClass}
-            placeholder="Uçuş Rezervasyon Kodu (PNR)"
-            maxLength={20}
-          />
-        </div>
+        {/* PNR sadece havalimanı transferinde gösterilir */}
+        {showPnr && (
+          <div style={{ maxWidth: 330 }}>
+            <label className={labelClass}>PNR / Uçuş Kodu</label>
+            <input
+              name="pnr"
+              value={form.pnr}
+              onChange={e => setForm(f => ({ ...f, pnr: e.target.value }))}
+              className={inputClass}
+              placeholder="Uçuş Rezervasyon Kodu (PNR)"
+              maxLength={20}
+            />
+          </div>
+        )}
       </div>
       <div className="flex justify-end mt-3">
         <button
