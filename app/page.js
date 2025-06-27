@@ -1,3 +1,5 @@
+// PATH: /app/page.js
+
 import HeroSlider from "../components/HeroSlider";
 import dynamic from "next/dynamic";
 import HeroVideo from "../components/HeroVideo";
@@ -14,21 +16,44 @@ export default function Home() {
       <section
         className="
           flex flex-col md:flex-row
-          justify-center items-center
+          justify-center items-start
           gap-8 md:gap-16
           w-full max-w-[1200px] mx-auto
           px-2 md:px-0
-          mt-8 md:mt-12
-          mb-8 md:mb-14
+          mt-8 md:mt-14
+          mb-10 md:mb-20
           transition-all
         "
       >
         {/* FORM */}
-        <div className="w-full w-[710px] h-[600px] flex items-center justify-center">
+        <div
+          className="
+            w-full max-w-[480px]
+            min-h-[530px]
+            flex flex-col justify-center
+            bg-black/80 border border-[#bfa658]
+            rounded-2xl shadow-2xl
+            p-7 md:p-8
+            mx-auto
+            "
+          style={{
+            boxShadow: "0 12px 40px 0 #0008",
+            minHeight: 530,
+          }}
+        >
           <VipTransferForm />
         </div>
         {/* VIDEO sadece desktop */}
-        <div className="hidden md:flex w-[370px] h-[600px] items-center justify-center rounded-2xl overflow-hidden shadow-xl border border-[#bfa658] bg-black/90">
+        <div
+          className="
+            hidden md:flex
+            items-center justify-center
+            rounded-2xl overflow-hidden shadow-2xl border border-[#bfa658]
+            bg-black/90
+            ml-2
+            w-[340px] h-[530px] min-w-[270px]
+          "
+        >
           <HeroVideo />
         </div>
       </section>
@@ -37,3 +62,5 @@ export default function Home() {
     </main>
   );
 }
+
+// PATH: /app/page.js
