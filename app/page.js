@@ -24,7 +24,7 @@ export default function Home() {
         "
       >
         {/* FORM */}
-        <div className="w-full max-w-[810px] flex items-center justify-center">
+        <div className="w-full w-[710px] h-[600px] flex items-center justify-center">
           <VipTransferForm />
         </div>
         {/* VIDEO sadece desktop */}
