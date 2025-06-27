@@ -1,4 +1,4 @@
-// app/rezervasyon/RezervasyonForm.jsx
+// PATH: /app/rezervasyon/RezervasyonForm.jsx
 
 "use client";
 import { useState } from "react";
@@ -62,6 +62,7 @@ export default function RezervasyonForm() {
   const [extrasQty, setExtrasQty] = useState({});
   const [showSummary, setShowSummary] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [kvkkChecked, setKvkkChecked] = useState(false);
 
   // Validasyon fonksiyonları
   const isValidTC = t => /^[1-9]\d{9}[02468]$/.test(t) && t.length === 11;
@@ -92,6 +93,7 @@ export default function RezervasyonForm() {
     if (!isValidTC(tc)) err.tc = "Geçerli bir TC Kimlik No giriniz.";
     if (!isValidPhone(phone)) err.phone = "Geçerli bir 05xx ile başlayan telefon giriniz.";
     if (!isValidEmail(email)) err.email = "Geçerli e-posta adresi giriniz.";
+    if (!kvkkChecked) err.kvkk = "KVKK onayı zorunludur.";
     setFieldErrors(err);
     if (Object.keys(err).length > 0) return;
     setShowSummary(true);
@@ -127,9 +129,13 @@ export default function RezervasyonForm() {
         from, to, people, segment, transfer, date, time, name, surname, tc, phone, email, pnr, note,
         extras: extras.join(","),
         extrasQty: JSON.stringify(extrasQty),
+        kvkk: "true",
       }).toString();
       router.push(`/odeme?${params}`);
     }
+
+    // SEÇİLEN SEGMENTTEKİ TÜM ARAÇLAR
+    const segmentVehicles = vehicles.filter(v => v.segment === segment);
 
     return (
       <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
@@ -141,24 +147,36 @@ export default function RezervasyonForm() {
           {/* 2 sütunlu detay */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-[#ffeec2] text-base">
             <div>
-              <div><b>Ad Soyad:</b> {name} {surname} <span className="block">T.C.: {tc}</span></div>
+              <div><b>Ad Soyad:</b> {name} {surname}</div>
+              <div><b>T.C.:</b> {tc}</div>
               <div><b>Telefon:</b> {phone}</div>
               <div><b>E-posta:</b> {email}</div>
-              <div><b>Tarih/Saat:</b> {date} {time}</div>
               <div><b>Kişi:</b> {people}</div>
+              <div><b>Tarih:</b> {date}</div>
+              <div><b>Saat:</b> {time}</div>
             </div>
             <div>
               <div><b>Transfer:</b> {transfer || "-"}</div>
               <div><b>Segment:</b> {segment}</div>
-              <div>
-                <b>Araç:</b>
-                <span className="ml-1 text-yellow-400">Seçilen segmentteki uygun araçlardan biri atanacaktır.</span>
-              </div>
               <div><b>Nereden:</b> {from}</div>
               <div><b>Nereye:</b> {to}</div>
               {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
             </div>
           </div>
+
+          {/* SEGMENTTEKİ ARAÇLAR */}
+          <div className="my-4 p-3 rounded-xl border-2 border-[#bfa658] bg-[#19160a]">
+            <div className="mb-2 font-semibold text-[#bfa658]">Bu segmentteki araçlar:</div>
+            <ul className="space-y-1 text-base">
+              {segmentVehicles.map((v) => (
+                <li key={v.id} className="text-[#ffeec2]">{v.label} <span className="text-xs text-[#bfa658]">({v.max} kişi)</span></li>
+              ))}
+            </ul>
+            <div className="mt-2 text-sm text-[#ffeec2] opacity-90">
+              Seçtiğiniz segmentteki araçlardan birini hazırlıyoruz.
+            </div>
+          </div>
+
           {/* Ekstralar Tablosu */}
           <div className="mb-5">
             <b className="block mb-2 text-[#bfa658] text-lg">Ekstralar:</b>
@@ -168,27 +186,27 @@ export default function RezervasyonForm() {
                 <thead>
                   <tr className="text-[#ffeec2] border-b border-[#bfa658]/40">
                     <th className="text-left py-1 pl-1">Ürün</th>
-                    <th className="w-28">Adet</th>
-                    <th className="w-24">Birim Fiyat</th>
-                    <th className="w-24">Toplam</th>
-                    <th className="w-16"></th>
+                    <th className="text-center w-20">Adet</th>
+                    <th className="text-right w-28">Birim</th>
+                    <th className="text-right w-28">Toplam</th>
+                    <th className="text-center w-12"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {selectedExtras.map(extra => (
                     <tr key={extra.key} className="border-b border-[#bfa658]/10">
                       <td className="py-1 pl-1">{extra.label}</td>
-                      <td>
-                        <div className="flex items-center gap-1">
+                      <td className="text-center">
+                        <div className="flex items-center gap-1 justify-center">
                           <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, -1)}>-</button>
                           <span className="w-7 text-center">{extrasQty[extra.key] || 1}</span>
                           <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, +1)}>+</button>
                         </div>
                       </td>
-                      <td>{extra.price}₺</td>
-                      <td>{((extrasQty[extra.key] || 1) * extra.price).toLocaleString()}₺</td>
-                      <td>
-                        <button type="button" onClick={() => removeExtra(extra.key)} className="ml-1 text-red-400 font-bold hover:underline">🗑️</button>
+                      <td className="text-right">{extra.price.toLocaleString()}₺</td>
+                      <td className="text-right">{((extrasQty[extra.key] || 1) * extra.price).toLocaleString()}₺</td>
+                      <td className="text-center">
+                        <button type="button" onClick={() => removeExtra(extra.key)} className="text-red-400 font-bold hover:scale-125 transition-transform">🗑️</button>
                       </td>
                     </tr>
                   ))}
@@ -196,33 +214,37 @@ export default function RezervasyonForm() {
               </table>
             }
           </div>
-          {/* Not ve fiyatlar */}
-          <div className="mb-3 text-[#ffeec2] text-base">
-            {note && <div className="mb-2"><b>Ek Not:</b> {note}</div>}
-            <div className="grid grid-cols-2 gap-2 mt-3">
-              <div className="text-right"><b>Transfer Bedeli:</b></div>
-              <div>{basePrice.toLocaleString()} ₺</div>
-              <div className="text-right"><b>Ekstralar:</b></div>
-              <div>{extrasTotal.toLocaleString()} ₺</div>
-              <div className="text-right"><b>KDV (%20):</b></div>
-              <div>{kdv.toLocaleString(undefined, { maximumFractionDigits: 2 })} ₺</div>
-              <div className="text-right text-xl font-bold"><b>Toplam:</b></div>
-              <div className="text-xl font-bold">{toplam.toLocaleString()} ₺</div>
-            </div>
+
+          {/* Fiyatlar */}
+          <div className="w-full flex flex-col items-end gap-1 mt-2 text-base">
+            <div>Transfer Bedeli: <b>{basePrice.toLocaleString()} ₺</b></div>
+            <div>Ekstralar: <b>{extrasTotal.toLocaleString()} ₺</b></div>
+            <div>KDV: <b>{kdv.toLocaleString(undefined, { maximumFractionDigits: 2 })} ₺</b></div>
+            <div className="text-xl text-[#bfa658] font-bold">Toplam: {toplam.toLocaleString()} ₺</div>
           </div>
-          <div className="bg-[#302811]/60 rounded-xl px-4 py-3 my-4 text-sm text-[#ffeec2]">
-            <b>Not:</b> Transfer rezervasyonunuz alınmıştır. Seçtiğiniz segmentteki uygun araç(lar) ve şoförünüz en kısa sürede sizinle paylaşılacaktır.
+
+          {/* Butonlar */}
+          <div className="flex flex-col md:flex-row justify-between gap-4 mt-9">
+            <button
+              className="w-full md:w-auto bg-[#bfa658] hover:bg-[#ffeec2] text-black font-bold py-3 px-8 rounded-xl shadow-lg transition-colors"
+              onClick={handlePayment}
+            >
+              Onayla ve Ödemeye Geç
+            </button>
+            <button
+              className="w-full md:w-auto border border-[#bfa658] hover:bg-[#3b2c10] text-[#bfa658] font-semibold py-3 px-8 rounded-xl shadow-lg transition-colors"
+              onClick={onClose}
+              type="button"
+            >
+              Vazgeç
+            </button>
           </div>
-          <button
-            onClick={handlePayment}
-            className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-lg hover:scale-105 transition"
-          >
-            Onayla ve Ödemeye Geç
-          </button>
         </div>
       </div>
     );
   }
+
+  // --- ANA FORM ---
 
   return (
     <section className="w-full max-w-4xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] px-6 md:px-12 py-14 my-8">
@@ -404,6 +426,23 @@ export default function RezervasyonForm() {
             setExtrasQty={setExtrasQty}
           />
         </div>
+        {/* KVKK Onay Kutusu */}
+        <div className="md:col-span-2 flex items-center mt-6">
+          <input
+            type="checkbox"
+            id="kvkk"
+            required
+            checked={kvkkChecked}
+            onChange={e => setKvkkChecked(e.target.checked)}
+            className="accent-[#bfa658] w-5 h-5"
+          />
+          <label htmlFor="kvkk" className="ml-2 text-[#ffeec2] text-sm">
+            <span className="underline cursor-pointer">
+              KVKK Aydınlatma Metni ve Politikası
+            </span>'nı okudum, onaylıyorum.
+          </label>
+        </div>
+        {fieldErrors.kvkk && <div className="text-red-400 text-xs mt-1 md:col-span-2">{fieldErrors.kvkk}</div>}
         <div className="md:col-span-2 flex justify-end mt-6">
           <button
             type="submit"
@@ -418,4 +457,4 @@ export default function RezervasyonForm() {
   );
 }
 
-// app/rezervasyon/RezervasyonForm.jsx
+// PATH: /app/rezervasyon/RezervasyonForm.jsx
