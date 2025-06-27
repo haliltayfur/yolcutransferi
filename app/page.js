@@ -17,29 +17,23 @@ export default function Home() {
         className="
           flex flex-col md:flex-row
           justify-center items-start
-          gap-8 md:gap-16
+          gap-10 md:gap-16
           w-full max-w-[1200px] mx-auto
           px-2 md:px-0
-          mt-8 md:mt-14
-          mb-10 md:mb-20
-          transition-all
+          mt-12 md:mt-16
+          mb-10 md:mb-16
         "
       >
         {/* FORM */}
         <div
           className="
-            w-full max-w-[480px]
-            min-h-[530px]
+            w-full max-w-[440px] min-h-[570px]
             flex flex-col justify-center
-            bg-black/80 border border-[#bfa658]
+            bg-black/85 border border-[#bfa658]
             rounded-2xl shadow-2xl
             p-7 md:p-8
             mx-auto
-            "
-          style={{
-            boxShadow: "0 12px 40px 0 #0008",
-            minHeight: 530,
-          }}
+          "
         >
           <VipTransferForm />
         </div>
@@ -51,7 +45,7 @@ export default function Home() {
             rounded-2xl overflow-hidden shadow-2xl border border-[#bfa658]
             bg-black/90
             ml-2
-            w-[340px] h-[530px] min-w-[270px]
+            w-[340px] h-[570px] min-w-[260px]
           "
         >
           <HeroVideo />
