@@ -3,13 +3,12 @@
 "use client";
 import Image from "next/image";
 import { vehicles } from "../../data/vehicleList";
-import { User2, Briefcase, Wifi, GlassWater, Sparkle, Baby, Car, ShieldCheck, BadgeCheck, PlusCircle, CheckCircle, Wine, Sparkles } from "lucide-react";
+import { User2, Briefcase, Wifi, GlassWater, BadgeCheck, Sparkle, Baby, Car, ShieldCheck, CheckCircle, PlusCircle, Wine, Sparkles } from "lucide-react";
 
-// Özellik ikonu eşleşmeleri
+// Özellik ikon eşleştirmeleri
 const BADGE_ICONS = {
   "Wi-Fi": <Wifi size={15} />,
   "Minibar": <GlassWater size={15} />,
-  "Elektrikli Kapı": <Sparkle size={15} />,
   "Deri Koltuk": <BadgeCheck size={15} />,
   "Çocuk Koltuğu": <Baby size={15} />,
   "Güvenlik": <ShieldCheck size={15} />,
@@ -27,9 +26,9 @@ const SEGMENT_TITLES = {
   "Ekonomik": "EKONOMİK & KONFORLU"
 };
 const SEGMENT_DESC = {
-  "Lüks": "En prestijli araçlarla, maksimum konfor ve mahremiyet.",
-  "Prime+": "Ultra lüks, yeni nesil ve yüksek segment transfer çözümleri.",
-  "Ekonomik": "Bütçe dostu, konforlu ve güvenli transfer seçenekleri."
+  "Lüks": "En prestijli ve donanımlı araçlarla maksimum konfor, mahremiyet ve şıklık.",
+  "Prime+": "Ultra lüks yeni nesil ve yüksek segmentli transfer çözümleri.",
+  "Ekonomik": "Bütçe dostu, modern, bakımlı ve güvenli VIP transfer seçenekleri."
 };
 
 function getFirstFeatures(vehicle, max = 4) {
@@ -37,7 +36,7 @@ function getFirstFeatures(vehicle, max = 4) {
 }
 
 export default function Araclar() {
-  // Dron taksi kartı için çek
+  // Dron taksi kartı için
   const dronTaksi = vehicles.find(v => v.key === "dron_taksi");
   const segmentGroups = SEGMENT_ORDER.map(segment => ({
     segment,
@@ -45,48 +44,48 @@ export default function Araclar() {
   }));
 
   return (
-    <main className="max-w-5xl mx-auto px-2 sm:px-4 py-10 md:py-16">
-      <div className="bg-gradient-to-br from-black via-[#19160a] to-[#302811] border border-[#bfa658] rounded-3xl shadow-2xl px-2 sm:px-7 md:px-12 py-10 md:py-14">
+    <main className="max-w-6xl mx-auto px-2 sm:px-6 py-10 md:py-16">
+      <div className="bg-gradient-to-br from-black via-[#19160a] to-[#302811] border border-[#bfa658] rounded-3xl shadow-2xl px-2 sm:px-8 md:px-14 py-10 md:py-16">
         {/* Başlık ve tanım */}
-        <h1 className="text-4xl md:text-5xl font-extrabold text-[#bfa658] mb-4 md:mb-7 text-center drop-shadow-lg font-quicksand tracking-tight">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-[#bfa658] mb-5 md:mb-9 text-center drop-shadow-lg font-quicksand tracking-tight">
           VIP Transfer Araçları
         </h1>
-        <div className="text-[#ffeec2] text-center text-[18px] md:text-lg mb-8 max-w-2xl mx-auto">
-          Türkiye’nin önde gelen partnerlerinden, her segmentte güncel, bakımlı ve lüks araçlar. <br />
-          <span className="text-gold font-bold">Kusursuz ve keyifli yolculuk için tüm ekstralar seçilebilir.</span>
+        <div className="text-[#ffeec2] text-center text-[18px] md:text-lg mb-10 max-w-2xl mx-auto">
+          <span className="font-semibold text-gold">Türkiye’nin seçkin partnerlerinden,</span> her segmentte güncel, bakımlı ve tam donanımlı VIP araçlar.<br />
+          <span className="text-gold font-bold">Tüm ekstralar isteğe göre eklenebilir. Ultra konfor ve prestij YolcuTransferi’nde!</span>
         </div>
-        {/* Araçlar: segment bazlı */}
-        <div className="flex flex-col gap-12 md:gap-16">
-          {segmentGroups.map(({ segment, vehicles }) =>
+        <div className="flex flex-col gap-14 md:gap-20">
+          {/* Segment bazlı araç grupları */}
+          {segmentGroups.map(({ segment, vehicles }, idx) =>
             vehicles.length > 0 && (
               <section key={segment} className="mb-3">
                 <div className="flex items-center gap-3 mb-3">
-                  <h2 className="text-xl md:text-2xl font-bold text-gold tracking-wide">{SEGMENT_TITLES[segment] || segment}</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gold tracking-wide">{SEGMENT_TITLES[segment] || segment}</h2>
                   <div className="flex-1 h-px bg-gradient-to-r from-[#bfa658]/60 to-transparent" />
                 </div>
-                <div className="text-[#ffeec2] mb-5 text-sm">{SEGMENT_DESC[segment]}</div>
+                <div className="text-[#ffeec2] mb-6 text-base">{SEGMENT_DESC[segment]}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {vehicles.map(arac => (
                     <div
                       key={arac.key}
-                      className="flex bg-black/75 rounded-2xl shadow-lg p-6 border border-gold/30 items-center group hover:scale-[1.02] transition-all min-h-[152px] relative"
+                      className="flex bg-black/80 rounded-2xl shadow-lg p-6 border border-gold/30 items-center group hover:scale-[1.025] transition-all min-h-[170px] relative"
                     >
                       {/* Araç görseli */}
                       <div className="relative">
                         <Image
                           src={arac.image}
                           alt={arac.label}
-                          width={110}
-                          height={80}
-                          className="rounded-xl shadow border border-[#bfa658]/50 bg-[#221f15] mr-4"
+                          width={120}
+                          height={88}
+                          className="rounded-xl shadow border border-[#bfa658]/60 bg-[#221f15] mr-4"
                           style={{ objectFit: "cover" }}
                         />
-                        {/* Prime+/Lüks Rozeti */}
-                        {arac.segment === "Prime+" && (
+                        {/* Rozet */}
+                        {arac.segment === "Prime+" &&
                           <span className="absolute top-2 left-2 bg-gold text-black text-xs font-bold rounded-full px-2 py-0.5 flex items-center gap-1 shadow-sm">
                             <Sparkles size={15} /> Ultra VIP
                           </span>
-                        )}
+                        }
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-1 mb-1">
@@ -116,29 +115,33 @@ export default function Araclar() {
                     </div>
                   ))}
                 </div>
+                {/* Segmentler arası ayırıcı */}
+                {idx !== segmentGroups.length - 1 && (
+                  <div className="my-8 border-t border-[#bfa658]/30" />
+                )}
               </section>
             )
           )}
-          {/* Dron taksi */}
+
+          {/* DRON TAKSİ */}
           {dronTaksi &&
             <section>
-              <div className="flex items-center gap-3 mt-10 mb-3">
-                <h2 className="text-xl md:text-2xl font-bold text-gold tracking-wide">YAKINDA: DRON TAKSİ</h2>
+              <div className="flex items-center gap-3 mt-12 mb-3">
+                <h2 className="text-2xl md:text-3xl font-bold text-gold tracking-wide">YAKINDA: DRON TAKSİ</h2>
                 <span className="px-3 py-1 bg-gradient-to-br from-[#ffeec2] to-[#bfa658] text-black rounded-full font-bold text-xs animate-pulse shadow-lg border border-[#bfa658] scale-110">PEK YAKINDA</span>
                 <div className="flex-1 h-px bg-gradient-to-r from-[#bfa658]/60 to-transparent" />
               </div>
-              {/* Dron taksi kartı çok farklı */}
-              <div className="flex flex-col md:flex-row items-center bg-gradient-to-br from-[#232118] via-[#221f15] to-[#302811] border-2 border-[#bfa658] rounded-3xl shadow-2xl p-7 md:p-10 mt-3 relative">
+              <div className="flex flex-col md:flex-row items-center bg-gradient-to-br from-[#232118] via-[#221f15] to-[#302811] border-2 border-[#bfa658] rounded-3xl shadow-2xl p-8 md:p-12 mt-3 relative">
                 <Image
                   src={dronTaksi.image}
                   alt={dronTaksi.label}
-                  width={210}
-                  height={160}
-                  className="rounded-2xl shadow-xl border border-[#bfa658]/70 bg-[#221f15] mr-0 md:mr-8 mb-5 md:mb-0"
-                  style={{ objectFit: "cover", boxShadow: "0 2px 22px 3px #bfa65844" }}
+                  width={240}
+                  height={170}
+                  className="rounded-2xl shadow-xl border border-[#bfa658]/70 bg-[#221f15] mr-0 md:mr-10 mb-5 md:mb-0"
+                  style={{ objectFit: "cover", boxShadow: "0 2px 28px 4px #bfa65844" }}
                 />
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="font-bold text-2xl text-gold mb-2 tracking-wide">{dronTaksi.label}</h3>
+                  <h3 className="font-bold text-2xl md:text-3xl text-gold mb-2 tracking-wide">{dronTaksi.label}</h3>
                   <div className="flex gap-2 mb-3 flex-wrap justify-center md:justify-start">
                     <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/40 rounded-lg px-3 py-1 text-sm font-semibold text-gold">
                       <User2 size={18} /> {dronTaksi.capacity} yolcu
@@ -147,21 +150,21 @@ export default function Araclar() {
                       <Wifi size={16} /> Wi-Fi
                     </span>
                   </div>
-                  <div className="text-[#ffeec2] text-[17px]">{dronTaksi.description}</div>
+                  <div className="text-[#ffeec2] text-[17px] mb-2">{dronTaksi.description}</div>
                   <div className="mt-4 text-gold text-base font-semibold">
                     <Sparkles className="inline mr-2" /> Türkiye'nin ilk şehir içi havadan VIP transferi için <b>rezervasyon beklemede!</b>
                   </div>
                 </div>
                 {/* Fütüristik animasyon */}
-                <div className="absolute -top-6 right-6 animate-pulse z-10 hidden md:block">
-                  <Sparkle size={40} color="#ffeec2" />
+                <div className="absolute -top-7 right-7 animate-pulse z-10 hidden md:block">
+                  <Sparkle size={46} color="#ffeec2" />
                 </div>
               </div>
             </section>
           }
         </div>
-        <div className="mt-12 text-center text-gray-400 text-sm">
-          <span className="text-gold">Tüm araçlar partner firmaların kontrolünde, yolcu güvenliği ve üst düzey hijyen standartlarına uygun şekilde sunulur.</span>
+        <div className="mt-14 text-center text-gray-400 text-[15px]">
+          <span className="text-gold">Tüm araçlar YolcuTransferi partner ağındandır; bakımlı, güvenli ve üst düzey hijyen standartlarında sunulur.</span>
         </div>
       </div>
     </main>
