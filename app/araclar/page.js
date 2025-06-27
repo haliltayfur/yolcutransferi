@@ -2,112 +2,91 @@
 
 "use client";
 import Image from "next/image";
-import { CarFront, Wifi, GlassWater, User2, Briefcase } from "lucide-react";
+import { User2, Briefcase } from "lucide-react";
+import { vehicles } from "../../data/vehicleList";
 
-const ARACLAR = [
-  {
-    title: "Mercedes Maybach Sedan",
-    desc: "En üst düzey lüks, prestij ve mahremiyet. Deri koltuklar, Wi-Fi, minibar, arka masaj, sessiz sürüş.",
-    image: "/arac-maybach.png",
-    features: [
-      { icon: <User2 size={18} />, text: "3 yolcu" },
-      { icon: <Briefcase size={18} />, text: "3 valiz" },
-      { icon: <Wifi size={18} />, text: "Wi-Fi" },
-      { icon: <GlassWater size={18} />, text: "Minibar" }
-    ]
-  },
-  {
-    title: "Mercedes Vito VIP",
-    desc: "Aileler, gruplar ve iş dünyası için ultra konfor. Lüks koltuklar, multimedia, ferah iç hacim.",
-    image: "/arac-vito.png",
-    features: [
-      { icon: <User2 size={18} />, text: "6 yolcu" },
-      { icon: <Briefcase size={18} />, text: "8 valiz" },
-      { icon: <Wifi size={18} />, text: "Wi-Fi" }
-    ]
-  },
-  {
-    title: "Premium Minivan",
-    desc: "Kalabalık gruplar ve uzun mesafeler için geniş ve konforlu transfer deneyimi.",
-    image: "/arac-minivan.png",
-    features: [
-      { icon: <User2 size={18} />, text: "8 yolcu" },
-      { icon: <Briefcase size={18} />, text: "10 valiz" }
-    ]
-  },
-  {
-    title: "Dron Transferi",
-    desc: "İleri teknolojiyle, şehir içi kısa mesafelerde havadan ultra hızlı ulaşım.",
-    image: "/arac-dron.png",
-    features: [
-      { icon: <User2 size={18} />, text: "1 yolcu" },
-      { icon: <Wifi size={18} />, text: "Wi-Fi" }
-    ]
-  },
-  {
-    title: "Standart Sedan",
-    desc: "Ekonomik ve konforlu transferler için ideal çözüm. Havalimanı ve şehir içi transferlerde hızlı seçim.",
-    image: "/arac-standart.png",
-    features: [
-      { icon: <User2 size={18} />, text: "3 yolcu" },
-      { icon: <Briefcase size={18} />, text: "2 valiz" }
-    ]
-  }
-];
+// Segment sıralama ve başlıklar
+const SEGMENT_ORDER = ["Ekonomik", "Lüks", "Prime+"];
+const SEGMENT_TITLES = {
+  "Ekonomik": "Ekonomik VIP Araçlar",
+  "Lüks": "Lüks VIP Araçlar",
+  "Prime+": "Prime+ ve Ultra Lüks"
+};
 
 export default function Araclar() {
+  // Araçları segmentlere grupla, sıralı olsun
+  const segmentGroups = SEGMENT_ORDER.map(segment => ({
+    segment,
+    vehicles: vehicles.filter(v => v.segment === segment)
+  }));
+
   return (
-    <main className="max-w-5xl mx-auto px-4 py-16">
-      <h1 className="text-4xl md:text-5xl font-extrabold text-gold mb-5 text-center tracking-tight drop-shadow-xl">
-        VIP Araç Filomuz
-      </h1>
-      <div className="text-[#ffeec2] text-center text-lg mb-10">
-        Türkiye'nin en seçkin araçları, üst düzey sürücülerle, <b>her transferiniz VIP ayrıcalıkta</b>.
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {ARACLAR.map((arac, i) => (
-          <div
-            key={arac.title}
-            className="group flex flex-col md:flex-row items-center bg-gradient-to-br from-[#221f15] via-[#19160a] to-[#302811] rounded-2xl shadow-lg border border-gold/30 overflow-hidden hover:scale-[1.025] transition-all hover:shadow-2xl"
+    <main className="max-w-5xl mx-auto px-2 sm:px-4 py-8 md:py-14">
+      <div className="bg-gradient-to-br from-black via-[#19160a] to-[#302811] border border-[#bfa658] rounded-3xl shadow-2xl px-2 sm:px-6 md:px-10 py-8 md:py-14">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-[#bfa658] mb-5 md:mb-10 text-center drop-shadow-lg font-quicksand tracking-tight">
+          VIP Araç Filomuz
+        </h1>
+        <div className="text-[#ffeec2] text-center text-lg mb-7 md:mb-12">
+          <span className="text-gold font-bold">Her segmentte konfor ve prestij!</span><br />
+          Yolculuğunuz için en uygun aracı seçin.
+        </div>
+        
+        {/* Segmentlere göre bölümlü araç listesi */}
+        <div className="flex flex-col gap-14">
+          {segmentGroups.map(({ segment, vehicles }) =>
+            vehicles.length > 0 && (
+              <section key={segment}>
+                <h2 className="text-2xl md:text-3xl font-bold text-gold mb-7 pl-2 border-l-4 border-gold">
+                  {SEGMENT_TITLES[segment] || segment}
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {vehicles.map(arac => (
+                    <div
+                      key={arac.key}
+                      className="flex bg-black/70 rounded-2xl shadow-lg p-6 border border-gold/30 items-center hover:scale-[1.02] transition-all"
+                    >
+                      <Image
+                        src={arac.image}
+                        alt={arac.label}
+                        width={110}
+                        height={78}
+                        className="mr-6 rounded-xl shadow border border-[#bfa658]/50 bg-[#221f15]"
+                        style={{ objectFit: "cover" }}
+                      />
+                      <div className="flex-1">
+                        <h3 className="font-bold text-xl text-gold mb-1">{arac.label}</h3>
+                        <div className="flex gap-2 mb-2 flex-wrap">
+                          <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/40 rounded-lg px-3 py-1 text-xs font-semibold text-gold">
+                            <User2 size={16} /> {arac.capacity} yolcu
+                          </span>
+                          <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/40 rounded-lg px-3 py-1 text-xs font-semibold text-gold">
+                            <Briefcase size={16} /> {arac.luggage} valiz
+                          </span>
+                          <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/40 rounded-lg px-3 py-1 text-xs font-semibold text-gold">
+                            {arac.segment}
+                          </span>
+                        </div>
+                        <p className="text-[#ffeec2] text-[15px]">{arac.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )
+          )}
+        </div>
+
+        <div className="mt-14 text-center">
+          <a
+            href="/rezervasyon"
+            className="inline-block bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-10 rounded-2xl text-xl shadow hover:scale-105 transition mt-5"
           >
-            <div className="md:w-44 w-full flex-shrink-0 flex items-center justify-center bg-[#19160a] p-6">
-              <Image
-                src={arac.image}
-                alt={arac.title}
-                width={170}
-                height={110}
-                className="rounded-xl shadow-lg border border-gold/20"
-                style={{ objectFit: "cover" }}
-              />
-            </div>
-            <div className="flex-1 px-6 py-6 md:py-5">
-              <h2 className="text-2xl font-bold text-gold mb-2 font-quicksand">{arac.title}</h2>
-              <div className="flex gap-3 mb-3 flex-wrap">
-                {arac.features.map((f, i) => (
-                  <span
-                    key={i}
-                    className="inline-flex items-center gap-1 bg-gold/10 border border-gold/50 rounded-lg px-3 py-1 text-xs font-semibold text-gold shadow-sm"
-                  >
-                    {f.icon}
-                    {f.text}
-                  </span>
-                ))}
-              </div>
-              <p className="text-[#ffeec2] mb-2">{arac.desc}</p>
-            </div>
+            Hemen VIP Transfer Teklifi Al
+          </a>
+          <div className="mt-6 text-gray-400 text-sm">
+            Tüm araçlarımız periyodik bakımlı, yeni ve profesyonel şoförlüdür.<br />
+            <b>YolcuTransferi.com</b> ile ayrıcalığı yaşayın.
           </div>
-        ))}
-      </div>
-      <div className="mt-12 text-center">
-        <a
-          href="/rezervasyon"
-          className="inline-block bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-10 rounded-2xl text-xl shadow hover:scale-105 transition mt-5"
-        >
-          Hemen VIP Transfer Teklifi Al
-        </a>
-        <div className="mt-6 text-gray-400 text-sm">
-          Tüm araçlarımız full bakımlı ve yolculuk öncesi dezenfekte edilmektedir.<br />
-          <b>YolcuTransferi.com</b> ile %100 güvenli, konforlu, kurumsal transfer.
         </div>
       </div>
     </main>
