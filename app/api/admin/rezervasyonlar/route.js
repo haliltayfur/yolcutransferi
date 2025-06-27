@@ -1,16 +1,27 @@
 // app/api/admin/rezervasyonlar/route.js
+
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 
-export async function GET() {
+// ... (Eğer başka GET/POST methodların varsa yukarıya ekle, bu sadece PATCH içindir.)
+
+export async function PATCH(req) {
   try {
+    const body = await req.json();
+    const { id, hide } = body;
+    if (!id) return NextResponse.json({ error: "ID zorunlu" }, { status: 400 });
+
     const db = await connectToDatabase();
-    const items = await db.collection("rezervasyonlar")
-      .find({})
-      .sort({ createdAt: -1 })
-      .toArray();
-    return NextResponse.json({ items });
+    await db.collection("rezervasyonlar").updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { hide: !!hide } }
+    );
+
+    return NextResponse.json({ ok: true });
   } catch (err) {
-    return NextResponse.json({ error: err.toString() }, { status: 500 });
+    return NextResponse.json({ error: err?.toString() || "Hata" }, { status: 500 });
   }
 }
+
+// app/api/admin/rezervasyonlar/route.js
