@@ -24,11 +24,11 @@ export default function Home() {
         "
       >
         {/* FORM */}
-        <div className="w-full max-w-[410px] flex items-center justify-center">
+        <div className="w-full max-w-[810px] flex items-center justify-center">
           <VipTransferForm />
         </div>
         {/* VIDEO sadece desktop */}
-        <div className="hidden md:flex w-[370px] h-[480px] items-center justify-center rounded-2xl overflow-hidden shadow-xl border border-[#bfa658] bg-black/90">
+        <div className="hidden md:flex w-[370px] h-[600px] items-center justify-center rounded-2xl overflow-hidden shadow-xl border border-[#bfa658] bg-black/90">
           <HeroVideo />
         </div>
       </section>
