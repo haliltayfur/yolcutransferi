@@ -3,20 +3,24 @@
 "use client";
 import Image from "next/image";
 import { vehicles } from "../../data/vehicleList";
-import { User2, Briefcase, Wifi, GlassWater, BadgeCheck, Sparkle, Baby, Car, ShieldCheck, CheckCircle, PlusCircle, Wine, Sparkles } from "lucide-react";
+import { User2, Briefcase, Wifi, GlassWater, BadgeCheck, Sparkle, Baby, Car, ShieldCheck, CheckCircle, PlusCircle, Wine, Sparkles, MonitorCheck, Crown, Volume2, PartyPopper, ThermometerSnowflake } from "lucide-react";
 
-// Sadelestirilmis ve dikkatlice secilmis ikonlar:
-const BADGE_ICONS = {
+const FEATURE_ICONS = {
   "Wi-Fi": <Wifi size={15} />,
   "Minibar": <GlassWater size={15} />,
   "Deri Koltuk": <BadgeCheck size={15} />,
+  "360° Kamera": <MonitorCheck size={15} />,
+  "Isıtmalı Koltuk": <ThermometerSnowflake size={15} />,
   "Çocuk Koltuğu": <Baby size={15} />,
-  "Güvenlik": <ShieldCheck size={15} />,
-  "Elektrikli": <Sparkle size={15} />,
+  "Özel Güvenlik": <ShieldCheck size={15} />,
   "4x4": <Car size={15} />,
   "Özel Şoför": <CheckCircle size={15} />,
   "Alkollü İçecek": <Wine size={15} />,
   "Ekstralar": <PlusCircle size={15} />,
+  "VIP Aydınlatma": <Sparkle size={15} />,
+  "Parti Paketi": <PartyPopper size={15} />,
+  "Ses Sistemi": <Volume2 size={15} />,
+  "Ultra Lüks": <Crown size={15} />,
 };
 
 const SEGMENT_ORDER = ["Prime+", "Lüks", "Ekonomik"];
@@ -26,33 +30,20 @@ const SEGMENT_TITLES = {
   "Ekonomik": "EKONOMİK & KONFORLU"
 };
 const SEGMENT_DESC = {
-  "Prime+": "En yeni nesil, ultra lüks ve özel donanımlı araçlar. Sektörün zirvesi.",
-  "Lüks": "Maksimum konfor ve kusursuz sürüş deneyimi için üst segment VIP seçenekler.",
-  "Ekonomik": "Modern, bakımlı ve bütçe dostu araçlar; güvenli ve pratik transferler."
+  "Prime+": "Yeni nesil ultra lüks, benzersiz konfor, üst düzey VIP donanım.",
+  "Lüks": "En çok tercih edilen VIP araçlar, her detayıyla konforlu ve prestijli.",
+  "Ekonomik": "Bütçe dostu, modern ve güvenli transfer için ideal seçenekler."
 };
 
-function getFirstFeatures(vehicle, max = 4) {
-  return (vehicle.features || []).slice(0, max);
-}
-
-// Wi-Fi kontrolü (standart veya ekstra)
-function wifiBadge(arac) {
-  if (!arac.features) return null;
-  if (arac.features.includes("Wi-Fi")) {
-    return (
-      <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/40 rounded-lg px-2 py-1 text-xs font-semibold text-gold">
-        <Wifi size={15} /> Wi-Fi
-      </span>
-    );
-  }
-  if (arac.extras && arac.extras.includes("Wi-Fi")) {
-    return (
-      <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/30 rounded-lg px-2 py-1 text-xs font-semibold text-gold">
-        <Wifi size={15} /> Wi-Fi <span className="text-xs text-gray-400">(Ekstra)</span>
-      </span>
-    );
-  }
-  return null;
+function getFeatureBadges(features = [], extras = []) {
+  // Standart donanım ve ekstra hizmet ayrımı
+  const allFeatures = features.concat((extras || []).map(e => e + " (Ekstra)"));
+  return allFeatures.map((feat, i) => (
+    <span key={i} className="inline-flex items-center gap-1 bg-gold/10 border border-gold/30 rounded-lg px-2 py-1 text-xs font-semibold text-gold mr-1 mb-1">
+      {FEATURE_ICONS[feat.replace(" (Ekstra)", "")] || <BadgeCheck size={15} />}
+      {feat}
+    </span>
+  ));
 }
 
 export default function Araclar() {
@@ -67,10 +58,12 @@ export default function Araclar() {
       <div className="bg-gradient-to-br from-black via-[#19160a] to-[#232118] border border-[#bfa658] rounded-3xl shadow-2xl px-2 sm:px-8 md:px-14 py-10 md:py-16">
         {/* Başlık ve açıklama */}
         <h1 className="text-4xl md:text-5xl font-extrabold text-[#bfa658] mb-4 md:mb-9 text-center font-quicksand tracking-tight">
-          VIP Araç Seçeneklerimiz
+          VIP Araç Seçenekleri
         </h1>
         <div className="text-[#ffeec2] text-center text-[18px] md:text-lg mb-10 max-w-2xl mx-auto">
-          <span className="font-semibold text-gold">Türkiye'nin önde gelen partnerlerinden,</span> her ihtiyaca uygun güncel ve bakımlı VIP araçlar. Tüm ekstralar rezervasyonda seçilebilir.  
+          <span className="font-semibold text-gold">Tüm segmentlerde, güncel ve bakımlı VIP araçlar.</span> 
+          <br />
+          Donanım ve ekstra hizmetlerle kişiselleştirilmiş yolculuk.
         </div>
         <div className="flex flex-col gap-14 md:gap-20">
           {/* Segment grupları */}
@@ -86,10 +79,10 @@ export default function Araclar() {
                   {vehicles.map(arac => (
                     <div
                       key={arac.key}
-                      className="flex bg-gradient-to-br from-[#181612] via-[#232118] to-[#1c1a13] rounded-2xl shadow-lg p-6 border border-gold/20 items-center group hover:scale-[1.025] transition-all min-h-[168px] relative"
+                      className="flex bg-gradient-to-br from-[#181612] via-[#232118] to-[#1c1a13] rounded-2xl shadow-lg p-6 border border-gold/20 items-center group hover:scale-[1.025] transition-all min-h-[172px] relative"
                     >
                       {/* Araç görseli */}
-                      <div className="relative">
+                      <div className="relative flex-shrink-0">
                         <Image
                           src={arac.image}
                           alt={arac.label}
@@ -98,7 +91,6 @@ export default function Araclar() {
                           className="rounded-xl shadow border border-[#bfa658]/40 bg-[#221f15] mr-4"
                           style={{ objectFit: "cover" }}
                         />
-                        {/* Ultra lüks rozeti */}
                         {arac.segment === "Prime+" && (
                           <span className="absolute top-2 left-2 bg-gold text-black text-xs font-bold rounded-full px-2 py-0.5 flex items-center gap-1 shadow-sm">
                             <Sparkles size={15} /> Ultra VIP
@@ -106,30 +98,22 @@ export default function Araclar() {
                         )}
                       </div>
                       <div className="flex-1">
+                        {/* Araç adı */}
                         <div className="flex items-center gap-1 mb-1">
                           <h3 className="font-bold text-lg md:text-xl text-gold">{arac.label}</h3>
                         </div>
                         {/* Kapasite ve valiz */}
-                        <div className="flex gap-2 mb-2 flex-wrap">
-                          <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/40 rounded-lg px-3 py-1 text-xs font-semibold text-gold">
-                            <User2 size={16} /> {arac.capacity} yolcu
+                        <div className="flex gap-2 mb-2 flex-wrap text-[#ffeec2] font-semibold text-sm">
+                          <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/40 rounded-lg px-3 py-1">
+                            <User2 size={16} /> <span>{arac.capacity} kişi</span>
                           </span>
-                          <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/40 rounded-lg px-3 py-1 text-xs font-semibold text-gold">
-                            <Briefcase size={16} /> {arac.luggage} valiz
+                          <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/40 rounded-lg px-3 py-1">
+                            <Briefcase size={16} /> <span>{arac.luggage} valiz</span>
                           </span>
-                          {/* En fazla 3 özellik (Wi-Fi ayrı) */}
-                          {getFirstFeatures(arac, 3).map((f, i) =>
-                            f !== "Wi-Fi" && (
-                              <span key={i} className="inline-flex items-center gap-1 bg-gold/10 border border-gold/30 rounded-lg px-2 py-1 text-xs font-semibold text-gold">
-                                {BADGE_ICONS[f] || <BadgeCheck size={15} />} {f}
-                              </span>
-                            )
-                          )}
-                          {wifiBadge(arac)}
-                          {/* Ekstralar */}
-                          <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/30 rounded-lg px-2 py-1 text-xs font-semibold text-gold">
-                            <PlusCircle size={15} /> Ekstralar
-                          </span>
+                        </div>
+                        {/* VIP donanım ve ekstralar */}
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {getFeatureBadges(arac.features, arac.extras)}
                         </div>
                         <div className="text-[#ffeec2] text-[15px]">{arac.description}</div>
                       </div>
@@ -164,7 +148,7 @@ export default function Araclar() {
                   <h3 className="font-bold text-2xl md:text-3xl text-gold mb-2 tracking-wide">{dronTaksi.label}</h3>
                   <div className="flex gap-2 mb-3 flex-wrap justify-center md:justify-start">
                     <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/40 rounded-lg px-3 py-1 text-sm font-semibold text-gold">
-                      <User2 size={18} /> {dronTaksi.capacity} yolcu
+                      <User2 size={18} /> {dronTaksi.capacity} kişi
                     </span>
                     <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/40 rounded-lg px-3 py-1 text-sm font-semibold text-gold">
                       <Wifi size={16} /> Wi-Fi
