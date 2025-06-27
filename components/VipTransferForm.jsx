@@ -1,3 +1,5 @@
+// PATH: /components/VipTransferForm.jsx
+
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -126,7 +128,7 @@ export default function VipTransferForm() {
 
   return (
     <form
-      className="w-full max-w-[410px] bg-[#19160a]/95 border border-[#bfa658] rounded-3xl shadow-2xl px-6 py-8 flex flex-col gap-2"
+      className="w-full flex flex-col gap-2"
       style={{ fontFamily: "Quicksand, sans-serif" }}
       autoComplete="off"
       onSubmit={handleSubmit}
@@ -300,3 +302,5 @@ export default function VipTransferForm() {
     </form>
   );
 }
+
+// PATH: /components/VipTransferForm.jsx
