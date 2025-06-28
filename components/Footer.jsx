@@ -8,7 +8,13 @@ export default function Footer() {
     <footer className="bg-[#151310] pt-12 pb-3 px-3 border-t border-[#FFD70022] text-gray-200 font-sans">
       {/* Ana GRID */}
       <div className="w-full flex justify-center">
-        <div className="max-w-6xl w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-14 gap-y-10 pb-6">
+        <div className="
+          max-w-6xl w-full
+          grid grid-cols-1 
+          xs:grid-cols-2
+          md:grid-cols-3
+          gap-x-10 gap-y-8 pb-6
+          ">
           {/* 1. VIP Hizmetler */}
           <div>
             <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">VIP Hizmetler</h3>
@@ -35,9 +41,9 @@ export default function Footer() {
             </ul>
           </div>
           {/* 3. İletişim + Sosyal */}
-          <div>
+          <div className="xs:col-span-2 md:col-span-1 flex flex-col items-center md:items-start">
             <h3 className="text-gold text-lg font-bold mb-4 tracking-wide">İletişim</h3>
-            <div className="flex flex-col gap-3 text-[1rem]">
+            <div className="flex flex-col gap-2 text-[1rem]">
               <div className="flex items-center gap-2">
                 <FaPhoneAlt className="text-gold" />
                 <a href="tel:+905395267569" className="footer-link">+90 539 526 75 69</a>
@@ -65,10 +71,10 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      {/* ALT BAND: Sol (telif) - Orta (logolar) - Sağ (menü) */}
+      {/* ALT BAND: Mobilde blok blok, masaüstünde yatayda üçe bölünür */}
       <div className="w-full flex flex-col md:flex-row md:items-center justify-between max-w-6xl mx-auto pt-6 pb-2 gap-2">
         {/* Telif */}
-        <div className="text-[15px] text-gray-400 flex-1 flex justify-start items-center">
+        <div className="text-[15px] text-gray-400 flex-1 flex justify-center md:justify-start items-center">
           © {new Date().getFullYear()} <span className="text-gold font-semibold ml-1">YolcuTransferi.com</span> • Tüm hakları saklıdır.
         </div>
         {/* Orta logolar */}
@@ -80,11 +86,11 @@ export default function Footer() {
           <Image src="/iyzico.png" alt="iyzico" width={54} height={30} className="footer-card-img" style={{objectFit:"contain"}} />
         </div>
         {/* Sağ Menü */}
-        <div className="flex gap-3 flex-1 justify-end items-center text-base">
+        <div className="flex gap-3 flex-1 justify-center md:justify-end items-center text-base">
           <a href="/kvkk" className="footer-link">KVKK</a>
-          <span>|</span>
+          <span className="hidden xs:inline">|</span>
           <a href="/gizlilik-politikasi" className="footer-link">Gizlilik</a>
-          <span>|</span>
+          <span className="hidden xs:inline">|</span>
           <a href="/kullanim-sartlari" className="footer-link">Kullanım Şartları</a>
         </div>
       </div>
@@ -122,6 +128,9 @@ export default function Footer() {
           object-fit: contain;
           box-shadow: 0 1px 7px 0 #3332;
           display: inline-block;
+        }
+        @media (max-width: 700px) {
+          .footer-card-img { height: 25px !important; padding: 2px 5px; }
         }
       `}</style>
     </footer>
