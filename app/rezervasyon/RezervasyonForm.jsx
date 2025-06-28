@@ -1,54 +1,110 @@
 // PATH: /app/rezervasyon/RezervasyonForm.jsx
+
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import EkstralarAccordion from "./EkstralarAccordion";
 import { vehicles } from "../../data/vehicleList";
+import { addressList } from "../../data/addressList";
 import { useRouter } from "next/navigation";
 
-// Autocomplete listesi (örnek)
-const addressSuggestions = [
-  "Ümraniye", "Bağcılar", "Kadıköy", "Maltepe", "Bakırköy",
-  "Atatürk Havalimanı", "Sabiha Gökçen Havalimanı", "Esenler",
-  "Ankara Esenboğa Havalimanı", "Antalya Havalimanı"
-];
-// Basit autocomplete componenti
-function AdresAutoComplete({ value, onChange, placeholder }) {
-  const [list, setList] = useState([]);
-  function handleInput(e) {
-    const val = e.target.value;
-    onChange(val);
-    if (!val) setList([]);
-    else setList(addressSuggestions.filter(addr =>
-      addr.toLocaleLowerCase("tr-TR").includes(val.toLocaleLowerCase("tr-TR"))
-    ));
-  }
+// Otomatik tamamlamalı input için basit komponent
+function AutoCompleteInput({ value, onChange, placeholder }) {
+  const [suggestions, setSuggestions] = useState([]);
+  const [showList, setShowList] = useState(false);
+
+  useEffect(() => {
+    if (!value) setSuggestions([]);
+    else {
+      const val = value.toLocaleLowerCase("tr-TR");
+      setSuggestions(
+        addressList.filter(a => a.toLocaleLowerCase("tr-TR").includes(val)).slice(0, 5)
+      );
+    }
+  }, [value]);
+
   return (
-    <div className="relative w-full">
+    <div className="relative">
       <input
-        type="text"
         className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
         value={value}
-        onChange={handleInput}
+        onChange={e => { onChange(e.target.value); setShowList(true); }}
         placeholder={placeholder}
+        onFocus={() => setShowList(true)}
+        onBlur={() => setTimeout(() => setShowList(false), 150)}
         autoComplete="off"
       />
-      {list.length > 0 &&
-        <ul className="absolute left-0 right-0 z-20 bg-[#19160a] border border-[#bfa658] rounded-xl mt-1 max-h-40 overflow-auto">
-          {list.map(addr => (
-            <li key={addr}
-              className="px-3 py-1 cursor-pointer hover:bg-[#bfa658] hover:text-black"
-              onClick={() => { onChange(addr); setList([]); }}>
-              {addr}
-            </li>
+      {showList && suggestions.length > 0 &&
+        <ul className="absolute z-20 bg-[#19160a] border border-[#bfa658] rounded-lg w-full mt-1 text-[#ffeec2] max-h-40 overflow-y-auto">
+          {suggestions.map(s => (
+            <li key={s}
+              className="px-3 py-1 hover:bg-[#bfa658] hover:text-black cursor-pointer"
+              onClick={() => { onChange(s); setShowList(false); }}
+            >{s}</li>
           ))}
-        </ul>}
+        </ul>
+      }
     </div>
   );
 }
-const KDV_ORAN = 0.20;
-const saatler = [];
-for (let h = 0; h < 24; ++h)
-  for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
+
+// KVKK Popup Mantığı
+function KvkkPopup({ open, onClose }) {
+  const [html, setHtml] = useState("");
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (!open) return;
+    setLoading(true);
+    fetch("https://yolcutransferi.com/mesafeli-satis")
+      .then(r => r.text())
+      .then(txt => {
+        // <main> içeriğini çek
+        const match = txt.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+        setHtml(match ? match[1] : "İçerik yüklenemedi.");
+      })
+      .catch(() => setHtml("İçerik alınamadı."))
+      .finally(() => setLoading(false));
+  }, [open]);
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+      <div className="relative bg-[#19160a] border-2 border-[#bfa658] rounded-2xl shadow-2xl w-[90vw] max-w-2xl max-h-[85vh] overflow-y-auto px-7 py-8">
+        {/* Kapat */}
+        <button
+          className="absolute top-3 right-5 text-[#bfa658] text-2xl font-bold hover:text-yellow-400"
+          onClick={onClose}
+        >×</button>
+        <div className="text-[#ffeec2] space-y-2" dangerouslySetInnerHTML={{ __html: loading ? "Yükleniyor..." : html }} />
+      </div>
+    </div>
+  );
+}
+
+// Araç filtreleme mantığı
+function filterVehicles(segment, people) {
+  if (!segment || !people) return [];
+  let maxKisi = 0;
+  if (people <= 4) maxKisi = 6;
+  else if (people <= 7) maxKisi = 10;
+  else if (people <= 12) maxKisi = 12;
+  else if (people <= 24) maxKisi = 24;
+  else maxKisi = 99;
+
+  return vehicles.filter(v =>
+    v.segment === segment && v.max >= people && v.max <= maxKisi
+  );
+}
+
+// PNR mantığı
+const airportKeywords = [
+  "havalimanı", "istanbul havalimanı", "iga", "ist", "sabiha gökçen", "saw", "eskişehir havalimanı",
+  "antalya havalimanı", "ankara esenboğa", "esenboğa", "milas bodrum", "izmir adnan", "trabzon havalimanı"
+];
+function isAirportRelated(val) {
+  if (!val) return false;
+  const t = val.toLocaleLowerCase("tr-TR");
+  return airportKeywords.some(k => t.includes(k));
+}
+
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
   { key: "Lüks", label: "Lüks" },
@@ -63,50 +119,12 @@ const allTransfers = [
   "Toplu Transfer",
   "Düğün vb Organizasyonlar"
 ];
-// Havalimanı anahtar kelime kontrolü
-const airportKeywords = [
-  "havalimanı", "istanbul havalimanı", "iga", "ist", "sabiha gökçen", "saw", "eskişehir havalimanı",
-  "antalya havalimanı", "ankara esenboğa", "esenboğa", "milas bodrum", "izmir adnan", "trabzon havalimanı"
-];
-function isAirportRelated(text) {
-  if (!text) return false;
-  const t = text.toLocaleLowerCase("tr-TR");
-  return airportKeywords.some(keyword => t.includes(keyword));
-}
-// KVKK Popup
-function KvkkPopup({ open, onClose }) {
-  const [mainHtml, setMainHtml] = useState("");
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    if (!open) return;
-    setLoading(true);
-    fetch("/kvkk")
-      .then(r => r.text())
-      .then(html => {
-        const match = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
-        setMainHtml(match ? match[1] : "İçerik yüklenemedi.");
-      })
-      .catch(() => setMainHtml("KVKK içeriği alınamadı."))
-      .finally(() => setLoading(false));
-  }, [open]);
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-      <div className="absolute top-0 right-0 m-5">
-        <button onClick={onClose}
-          className="bg-[#19160a] border border-[#bfa658] text-[#ffeec2] font-bold rounded-full text-lg px-5 py-2 shadow-xl hover:bg-[#bfa658] hover:text-black transition">
-          Kapat
-        </button>
-      </div>
-      <div className="bg-[#1b1b1b] border-2 border-[#bfa658] rounded-3xl p-8 max-w-3xl w-full shadow-2xl overflow-y-auto max-h-[92vh]">
-        {loading
-          ? <div className="text-center text-[#ffeec2] py-8">Yükleniyor...</div>
-          : <div dangerouslySetInnerHTML={{ __html: mainHtml }} />}
-      </div>
-    </div>
-  );
-}
-export default function RezervasyonForm() {
+const KDV_ORAN = 0.20;
+const saatler = [];
+for (let h = 0; h < 24; ++h)
+  for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
+
+function RezervasyonForm() {
   const router = useRouter();
   // STATE
   const [from, setFrom] = useState("");
@@ -126,48 +144,32 @@ export default function RezervasyonForm() {
   const [extras, setExtras] = useState([]);
   const [extrasQty, setExtrasQty] = useState({});
   const [showSummary, setShowSummary] = useState(false);
+  const [showKvkkPopup, setShowKvkkPopup] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [kvkkChecked, setKvkkChecked] = useState(false);
-  const [showKvkkPopup, setShowKvkkPopup] = useState(false);
 
-  // Validasyon
+  // Validasyon fonksiyonları
   const isValidTC = t => /^[1-9]\d{9}[02468]$/.test(t) && t.length === 11;
   const isValidPhone = t => /^05\d{9}$/.test(t) && t.length === 11;
   const isValidEmail = t => /^\S+@\S+\.\S+$/.test(t);
-  function handleTcChange(val) { setTc(val.replace(/\D/g, "").slice(0, 11)); }
+
+  function handleTcChange(val) {
+    setTc(val.replace(/\D/g, "").slice(0, 11));
+  }
   function handlePhoneChange(val) {
     let num = val.replace(/\D/g, "");
     if (num.length > 0 && num[0] !== "0") num = "0" + num;
     setPhone(num.slice(0, 11));
   }
 
-  // Araç filtre mantığı
-  function filterVehicles(segment, people, transfer) {
-    if (!segment || !people) return [];
-    const p = parseInt(people, 10);
-    let maxKisi = 0;
-    if (p <= 4) maxKisi = 6;
-    else if (p <= 7) maxKisi = 10;
-    else if (p <= 9) maxKisi = 12;
-    else if (p <= 12) maxKisi = 15;
-    else maxKisi = 24; // En üst
-    return vehicles.filter(
-      v =>
-        v.segment === segment &&
-        v.max >= p &&
-        v.max <= maxKisi &&
-        (!transfer || v.transferTypes.includes(transfer))
-    );
-  }
-  const filteredVehicles = filterVehicles(segment, people, transfer);
-
   function handleSubmit(e) {
     e.preventDefault();
     const err = {};
-    if (!from) err.from = "Lütfen kalkış noktası giriniz.";
-    if (!to) err.to = "Lütfen varış noktası giriniz.";
+    if (!people) err.people = "Kişi sayısı zorunlu.";
     if (!segment) err.segment = "Lütfen segment seçiniz.";
     if (!transfer) err.transfer = "Lütfen transfer tipi seçiniz.";
+    if (!from) err.from = "Lütfen kalkış noktası giriniz.";
+    if (!to) err.to = "Lütfen varış noktası giriniz.";
     if (!date) err.date = "Tarih zorunlu.";
     if (!time) err.time = "Saat zorunlu.";
     if (!name) err.name = "Ad zorunlu.";
@@ -180,24 +182,25 @@ export default function RezervasyonForm() {
     if (Object.keys(err).length > 0) return;
     setShowSummary(true);
   }
-  const showPNR =
-    transfer === "VIP Havalimanı Transferi" ||
-    isAirportRelated(from) ||
-    isAirportRelated(to);
 
+  // Araç filtre
+  const filteredVehicles = filterVehicles(segment, Number(people));
+  // PNR gösterim
+  const showPNR = transfer === "VIP Havalimanı Transferi" || isAirportRelated(from) || isAirportRelated(to);
+
+  // --- ANA FORM ---
   return (
-    <section className="w-full max-w-4xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] px-6 md:px-12 py-14 my-8">
+    <section className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] px-6 md:px-10 py-14 my-10">
       <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand">
         VIP Rezervasyon Formu
       </h1>
-      <form onSubmit={handleSubmit} autoComplete="on">
-        {/* Kişi/segment/transfer türü yan yana */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+      <form onSubmit={handleSubmit} autoComplete="on" className="flex flex-col gap-2">
+        {/* Kişi/segment/transfer yan yana */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
-            <select name="people" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={people}
-              onChange={e => setPeople(e.target.value)}>
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={people} onChange={e => setPeople(e.target.value)}>
               <option value="">Seçiniz</option>
               {Array.from({ length: 24 }, (_, i) => i + 1).map(val =>
                 <option key={val} value={val}>{val}</option>
@@ -207,9 +210,8 @@ export default function RezervasyonForm() {
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
-            <select name="segment" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={segment}
-              onChange={e => setSegment(e.target.value)}>
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={segment} onChange={e => setSegment(e.target.value)}>
               <option value="">Seçiniz</option>
               {segmentOptions.map(opt =>
                 <option key={opt.key} value={opt.label}>{opt.label}</option>
@@ -219,9 +221,8 @@ export default function RezervasyonForm() {
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
-            <select name="transfer" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={transfer}
-              onChange={e => setTransfer(e.target.value)}>
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={transfer} onChange={e => setTransfer(e.target.value)}>
               <option value="">Seçiniz</option>
               {allTransfers.map(opt =>
                 <option key={opt} value={opt}>{opt}</option>
@@ -230,44 +231,47 @@ export default function RezervasyonForm() {
             {fieldErrors.transfer && <div className="text-red-400 text-xs mt-1">{fieldErrors.transfer}</div>}
           </div>
         </div>
-        {/* Araçlar kutusu */}
-        <div className="mb-6">
+
+        {/* Araçlar */}
+        <div className="mb-3">
           <label className="font-bold text-[#bfa658] mb-2 block text-lg">Araçlar</label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {segment && people && filteredVehicles.length > 0 ? filteredVehicles.map((v) => (
-              <div key={v.value} className="border-2 border-[#bfa658] rounded-xl p-3 bg-black/70 flex flex-col items-center text-[#ffeec2]">
-                <div className="font-bold text-base">{v.label}</div>
-                <div className="text-xs text-[#bfa658] mb-1">{v.segment}</div>
-                <div className="text-xs">{v.max} Kişi</div>
-              </div>
-            )) : (
-              <div className="text-gray-400 col-span-3">Lütfen segment ve kişi sayısını seçiniz. Uygun araçlar burada listelenecektir.</div>
-            )}
-          </div>
+          {!segment || !people ? (
+            <div className="text-[#ffeec2] text-base">Lütfen segment ve kişi sayısını seçiniz. Uygun araçlar burada listelenecektir.</div>
+          ) : filteredVehicles.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {filteredVehicles.map(v => (
+                <div key={v.value}
+                  className="border-2 border-[#bfa658] rounded-xl p-3 bg-black/70 flex flex-col items-center text-[#ffeec2] text-base">
+                  <div className="font-bold">{v.label}</div>
+                  <div className="text-xs text-[#bfa658] mb-1">{v.segment}</div>
+                  <div className="text-xs">{v.max} Kişi</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-red-400">Uygun araç bulunamadı.</div>
+          )}
           <div className="mt-2 text-sm text-[#ffeec2] opacity-90">
             Seçtiğiniz segment ve kişi sayısına uygun araçlardan biri, size en uygun ve kurumsal şekilde rezerve edilecektir.
           </div>
         </div>
-        {/* Diğer alanlar */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        {/* Nereden/Nereye */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
-            <AdresAutoComplete
-              value={from}
-              onChange={setFrom}
-              placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
-            />
+            <AutoCompleteInput value={from} onChange={setFrom} placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı" />
             {fieldErrors.from && <div className="text-red-400 text-xs mt-1">{fieldErrors.from}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
-            <AdresAutoComplete
-              value={to}
-              onChange={setTo}
-              placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
-            />
+            <AutoCompleteInput value={to} onChange={setTo} placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı" />
             {fieldErrors.to && <div className="text-red-400 text-xs mt-1">{fieldErrors.to}</div>}
           </div>
+        </div>
+
+        {/* Tarih ve Saat */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
             <input
@@ -278,13 +282,13 @@ export default function RezervasyonForm() {
               onChange={e => setDate(e.target.value)}
               min={new Date().toISOString().split("T")[0]}
               autoComplete="on"
-              onFocus={e => e.target.showPicker && e.target.showPicker()}
+              onClick={e => e.target.showPicker && e.target.showPicker()}
             />
             {fieldErrors.date && <div className="text-red-400 text-xs mt-1">{fieldErrors.date}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
-            <select name="time" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               value={time}
               onChange={e => setTime(e.target.value)}>
               <option value="">Seçiniz</option>
@@ -292,6 +296,10 @@ export default function RezervasyonForm() {
             </select>
             {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
           </div>
+        </div>
+
+        {/* Ad/Soyad */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Ad</label>
             <input
@@ -316,6 +324,10 @@ export default function RezervasyonForm() {
             />
             {fieldErrors.surname && <div className="text-red-400 text-xs mt-1">{fieldErrors.surname}</div>}
           </div>
+        </div>
+
+        {/* T.C./Telefon/E-mail */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">T.C. Kimlik No</label>
             <input
@@ -357,22 +369,25 @@ export default function RezervasyonForm() {
             />
             {fieldErrors.email && <div className="text-red-400 text-xs mt-1">{fieldErrors.email}</div>}
           </div>
-          {showPNR && (
-            <div>
-              <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
-              <input
-                name="pnr"
-                type="text"
-                className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-                value={pnr}
-                onChange={e => setPnr(e.target.value)}
-                placeholder="Uçuş rezervasyon kodu (varsa)"
-              />
-            </div>
-          )}
         </div>
+
+        {/* PNR */}
+        {showPNR && (
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
+            <input
+              name="pnr"
+              type="text"
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={pnr}
+              onChange={e => setPnr(e.target.value)}
+              placeholder="Uçuş rezervasyon kodu (varsa)"
+            />
+          </div>
+        )}
+
         {/* Ek Not */}
-        <div className="mt-5">
+        <div className="mb-3">
           <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
           <textarea
             className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
@@ -382,8 +397,9 @@ export default function RezervasyonForm() {
             placeholder="Eklemek istediğiniz bir not var mı?"
           />
         </div>
+
         {/* Ekstralar */}
-        <div className="mt-5">
+        <div className="mb-2">
           <label className="font-bold text-[#bfa658] mb-2 block text-lg">Ekstralar</label>
           <EkstralarAccordion
             selectedExtras={extras}
@@ -392,8 +408,9 @@ export default function RezervasyonForm() {
             setExtrasQty={setExtrasQty}
           />
         </div>
-        {/* KVKK Onay */}
-        <div className="flex items-center mt-7">
+
+        {/* KVKK Onay Kutusu */}
+        <div className="flex items-center mt-6 mb-3">
           <input
             type="checkbox"
             id="kvkk"
@@ -404,17 +421,18 @@ export default function RezervasyonForm() {
           />
           <label htmlFor="kvkk" className="ml-2 text-[#ffeec2] text-sm">
             <button type="button"
-              className="underline text-[#FFD700] hover:text-[#bfa658] cursor-pointer outline-none"
-              style={{ padding: 0, border: "none", background: "transparent" }}
-              onClick={() => setShowKvkkPopup(true)}>
+              className="underline text-[#FFD700] hover:text-[#bfa658] cursor-pointer px-1"
+              style={{ border: "none", background: "transparent" }}
+              onClick={() => setShowKvkkPopup(true)}
+            >
               KVKK Aydınlatma Metni ve Politikası
-            </button>{" "}
+            </button>
             'nı okudum, onaylıyorum.
           </label>
         </div>
         {fieldErrors.kvkk && <div className="text-red-400 text-xs mt-1">{fieldErrors.kvkk}</div>}
-        {/* Buton */}
-        <div className="flex justify-end mt-7">
+
+        <div className="flex justify-end mt-2">
           <button
             type="submit"
             className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition"
@@ -425,9 +443,9 @@ export default function RezervasyonForm() {
       </form>
       {/* KVKK POPUP */}
       <KvkkPopup open={showKvkkPopup} onClose={() => setShowKvkkPopup(false)} />
-      {/* REZERVASYON ÖZETİ (yeni eklenmeli!) */}
-      {/* {showSummary && <SummaryPopup onClose={() => setShowSummary(false)} />} */}
     </section>
   );
 }
-// PATH SONU
+
+export default RezervasyonForm;
+// PATH: /app/rezervasyon/RezervasyonForm.jsx
