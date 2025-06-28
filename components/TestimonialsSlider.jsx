@@ -16,11 +16,19 @@ function useIsMobile() {
   return isMobile;
 }
 
-// En uzun yorumu bul (güvenli)
+// En uzun yorumu bul, fazladan boşluk ekle
 const maxLen =
   Array.isArray(testimonials) && testimonials.length > 0
     ? testimonials.reduce((max, t) => (t.comment.length > max ? t.comment.length : max), 0)
     : 0;
+
+const getPaddedComment = (comment) => {
+  // Kısa yorumlara fazladan satır ekle, her kutunun metin yüksekliği aynı olsun
+  const maxLines = Math.ceil(maxLen / 32) + 1;
+  const currentLines = Math.ceil(comment.length / 32);
+  const lineDiff = maxLines - currentLines;
+  return comment + "\n".repeat(lineDiff > 0 ? lineDiff : 0);
+};
 
 export default function TestimonialsSlider() {
   const [testimonialIndex, setTestimonialIndex] = useState(0);
@@ -50,11 +58,11 @@ export default function TestimonialsSlider() {
     ];
   };
 
-  // Kutu yüksekliğini en uzun yoruma göre sabitle, fazladan boşluk bırak
+  // Kutunun yüksekliği tam sabit!
   const charPerLine = 32;
   const lineCount = Math.ceil(maxLen / charPerLine) + 1;
   const pxPerLine = 23;
-  const minHeight = 55 + lineCount * pxPerLine;
+  const minHeight = 60 + lineCount * pxPerLine;
 
   return (
     <section className="w-full max-w-6xl mx-auto py-7 mb-3 px-2 flex flex-col items-center">
@@ -68,29 +76,32 @@ export default function TestimonialsSlider() {
             className="bg-[#181818] border border-gold/20 rounded-2xl px-6 py-4 shadow flex flex-col justify-between max-w-sm w-full transition-all"
             style={{
               minHeight,
+              maxHeight: minHeight,
               boxShadow: "0 3px 18px #bfa65820",
-              display: "flex"
+              display: "flex",
+              whiteSpace: "pre-line" // Satır sonu karakterini uygula!
             }}
           >
-            {/* YILDIZLAR */}
-            <div className="flex items-center mb-1">
-              {[...Array(Number.isFinite(item.stars) && item.stars > 0 ? Math.floor(item.stars) : 0)].map((_, i) => (
-                <FaStar key={i} className="text-gold" size={16} />
-              ))}
-              {item.stars % 1 !== 0 && <FaStarHalfAlt className="text-gold" size={15} />}
-            </div>
             {/* YORUM */}
             <p
-              className="text-[0.98rem] font-medium mb-3 flex-1"
+              className="text-[0.98rem] font-medium mb-2 flex-1"
               style={{
                 lineHeight: "1.45em",
-                textAlign: "left"
+                textAlign: "left",
+                whiteSpace: "pre-line",
               }}
             >
-              {item.comment}
+              {getPaddedComment(item.comment)}
             </p>
+            {/* YILDIZLAR */}
+            <div className="flex items-center mb-2">
+              {[...Array(Number.isFinite(item.stars) && item.stars > 0 ? Math.floor(item.stars) : 0)].map((_, i) => (
+                <FaStar key={i} className="text-gold" size={18} />
+              ))}
+              {item.stars % 1 !== 0 && <FaStarHalfAlt className="text-gold" size={16} />}
+            </div>
             {/* AVATAR ve İSİM */}
-            <div className="flex items-center gap-3 mt-2">
+            <div className="flex items-center gap-3 mt-1">
               <div className="w-9 h-9 rounded-full bg-gold text-black flex items-center justify-center text-lg font-bold shadow">
                 {item.avatar}
               </div>
