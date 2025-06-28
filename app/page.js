@@ -2,7 +2,6 @@
 
 import HeroSlider from "../components/HeroSlider";
 import dynamic from "next/dynamic";
-import HeroVideo from "../components/HeroVideo";
 import AdvantagesBar from "../components/AdvantagesBar";
 import TestimonialsSlider from "../components/TestimonialsSlider";
 
@@ -14,7 +13,7 @@ export default function Home() {
       <HeroSlider />
       <section
         className="
-          flex flex-col lg:flex-row justify-center items-start
+          flex flex-col md:flex-row justify-center items-start
           gap-[10px]
           w-full max-w-[1260px] mx-auto
           px-2 md:px-0
@@ -22,9 +21,6 @@ export default function Home() {
           mb-10 md:mb-16
           min-h-[600px]
         "
-        style={{
-          minHeight: 600,
-        }}
       >
         {/* FORM */}
         <div
@@ -32,34 +28,28 @@ export default function Home() {
             flex flex-col justify-center
             bg-black/85 border border-[#bfa658]
             rounded-2xl shadow-2xl
-            w-full lg:w-[800px]
-            min-h-[600px]
             p-0
+            w-full md:w-[800px] min-w-0
           "
           style={{
-            minWidth: 0,
-            height: "auto",
+            maxWidth: 800,
+            minHeight: 600,
             boxSizing: "border-box",
           }}
         >
           <VipTransferForm />
         </div>
-        {/* VIDEO - SADECE LG VE ÜZERİ */}
+        {/* VIDEO: SADECE DESKTOPTA */}
         <div
-          className="
-            hidden lg:flex items-center justify-center
+          className="hidden md:flex items-center justify-center
             rounded-2xl overflow-hidden shadow-2xl border border-[#bfa658]
             bg-black/90
-          "
-          style={{
-            width: 400,
-            height: 600,
-            minWidth: 400,
-            minHeight: 600,
-            boxSizing: "border-box",
-          }}
+            w-[400px] min-w-[400px] h-[600px] min-h-[600px] box-border"
         >
-          <HeroVideo />
+          {/* Mobilde video asla gösterilmeyecek! */}
+          {typeof window !== "undefined" && window.innerWidth >= 768 && (
+            require("../components/HeroVideo").default()
+          )}
         </div>
       </section>
       <AdvantagesBar />
