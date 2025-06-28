@@ -40,25 +40,25 @@ export default function AdvantagesBar() {
         max-w-6xl w-full
         px-1
         ">
-        {advantages.map((adv, i) => (
-          <div
-            key={i}
-            className="flex flex-col items-center justify-center 
-              bg-gradient-to-br from-[#191919e8] to-[#232323ef] 
-              border-2 border-gold rounded-2xl py-7 px-4
-              shadow-gold-lg text-center
-              transition-all duration-300 
-              hover:scale-105 hover:shadow-gold-xl
-              backdrop-blur-sm
-              min-h-[168px]
-            "
-            style={{minHeight:"168px"}}
-          >
-            {adv.icon}
-            <div className="font-semibold text-[1.13rem] mb-1 text-white drop-shadow">{adv.title}</div>
-            <div className="text-gray-300 text-sm">{adv.desc}</div>
-          </div>
-        ))}
+        {Array.isArray(advantages) && advantages.length > 0 &&
+          advantages.map((adv, i) => (
+            <div
+              key={i}
+              className="flex flex-col items-center justify-center 
+                bg-gradient-to-br from-[#191919e8] to-[#232323ef] 
+                border-2 border-gold rounded-2xl py-7 px-4
+                shadow-gold-lg text-center
+                transition-all duration-300 
+                hover:scale-105 hover:shadow-gold-xl
+                backdrop-blur-sm
+                min-h-[168px]"
+              style={{ minHeight: "168px" }}
+            >
+              {adv.icon}
+              <div className="font-semibold text-[1.13rem] mb-1 text-white drop-shadow">{adv.title}</div>
+              <div className="text-gray-300 text-sm">{adv.desc}</div>
+            </div>
+          ))}
       </div>
       <style jsx>{`
         @media (max-width: 800px) {
