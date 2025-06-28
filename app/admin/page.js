@@ -1,8 +1,18 @@
+// app/admin/page.js
 "use client";
-import { useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { FaUser, FaMoneyBillWave, FaUserCheck, FaUsers, FaMapMarkerAlt } from "react-icons/fa";
+import { 
+  FaUser, 
+  FaMoneyBillWave, 
+  FaUserCheck, 
+  FaUsers, 
+  FaMapMarkerAlt, 
+  FaListAlt, 
+  FaEnvelope, 
+  FaUserShield 
+} from "react-icons/fa";
 import Link from "next/link";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import React from "react";
 
 // Demo KPI verileri
 const kpis = [
@@ -56,7 +66,6 @@ const COLORS = ["#bfa658", "#ffeec2", "#f5ca74", "#e5dbb8", "#d8ae5e"];
 
 export default function AdminPanel() {
   // Giriş kontrolü ve demo dummy veri ile başlatıyoruz
-  // Sonraki fazda auth ile entegre edilir
 
   return (
     <main className="flex flex-col gap-8">
@@ -152,7 +161,4 @@ export default function AdminPanel() {
   );
 }
 
-// NOT: 
-// Eğer "tailwind" kullanılmıyorsa klasik className'leri "bg-[#bfa658]" gibi kullandığım satırları 
-// kendi tema koduna göre değiştir. Responsive ve mobile uyumu garantilidir.
-// Üyelik modülü geldikçe ekstra grafik/KPI ekleyebilirsin.
+// app/admin/page.js
