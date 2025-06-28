@@ -36,9 +36,12 @@ const getStars = (stars) => {
   const fullStars = Math.floor(stars);
   const hasHalf = stars % 1 !== 0;
   for (let i = 0; i < 5; i++) {
-    if (i < fullStars) output.push(<FaStar key={i} color="#bfa658" size={18} />);
-    else if (i === fullStars && hasHalf) output.push(<FaStarHalfAlt key={i} color="#bfa658" size={18} />);
-    else output.push(<FaStar key={i} color="#444" size={18} />);
+    if (i < fullStars)
+      output.push(<FaStar key={i} style={{ color: "#bfa658", fill: "#bfa658" }} size={18} />);
+    else if (i === fullStars && hasHalf)
+      output.push(<FaStarHalfAlt key={i} style={{ color: "#bfa658", fill: "#bfa658" }} size={18} />);
+    else
+      output.push(<FaStar key={i} style={{ color: "#444", fill: "#444" }} size={18} />);
   }
   return output;
 };
