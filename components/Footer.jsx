@@ -2,7 +2,7 @@
 
 "use client";
 import Image from "next/image";
-import { FaWhatsapp, FaInstagram, FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaLinkedin } from "react-icons/fa";
+import { FaWhatsapp, FaInstagram, FaPhoneAlt, FaEnvelope, FaLinkedin } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
 export default function Footer() {
@@ -27,7 +27,8 @@ export default function Footer() {
           <h3 className="text-gold text-[1.08rem] font-bold mb-2 tracking-wide">Kurumsal & Yasal</h3>
           <ul className="flex flex-col gap-1 text-[0.97rem]">
             <li><a href="/hakkimizda" className="footer-link">Hakkımızda</a></li>
-            <li><a href="/kvkk" className="footer-link">KVKK</a></li>
+            {/* <li><a href="/kvkk" className="footer-link md:inline hidden">KVKK</a></li>  Mobilde gizli! */}
+            <li className="md:block hidden"><a href="/kvkk" className="footer-link">KVKK</a></li>
             <li><a href="/gizlilik-politikasi" className="footer-link">Gizlilik</a></li>
             <li><a href="/kullanim-sartlari" className="footer-link">Kullanım Şartları</a></li>
             <li><a href="/mesafeli-satis" className="footer-link">Mesafeli Satış</a></li>
@@ -49,39 +50,31 @@ export default function Footer() {
             </div>
             <div className="flex gap-2 mt-2">
               <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="WhatsApp">
-                <FaWhatsapp size={19} />
+                <FaWhatsapp size={21} />
               </a>
               <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="Instagram">
-                <FaInstagram size={18} />
+                <FaInstagram size={20} />
               </a>
               <a href="https://www.linkedin.com/company/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="LinkedIn">
-                <FaLinkedin size={18} />
+                <FaLinkedin size={20} />
               </a>
               <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="X">
-                <SiX size={18} />
+                <SiX size={20} />
               </a>
-            </div>
-            <div className="flex items-center gap-2 mt-2">
-              <FaMapMarkerAlt className="text-gold" />
-              <span className="text-gray-300">Türkiye Geneli 7/24 Hizmet</span>
             </div>
           </div>
         </div>
       </div>
-      {/* Mobilde iletişim sola yaslı, ikonlar yan yana */}
-      <div className="md:hidden flex flex-col items-start mt-4 mb-1 w-full max-w-6xl mx-auto pl-2">
+      {/* Mobilde iletişim sola yaslı, ikonlar yan yana, yukarıda */}
+      <div className="md:hidden flex flex-col items-start mt-2 mb-2 w-full max-w-6xl mx-auto pl-2">
         <h3 className="text-gold text-[1.08rem] font-bold mb-2 tracking-wide">İletişim</h3>
-        <div className="flex items-center gap-3 text-[0.99rem] mb-1">
-          <a href="tel:+905395267569" className="footer-social" aria-label="Telefon"><FaPhoneAlt size={19} /></a>
-          <a href="mailto:info@yolcutransferi.com" className="footer-social" aria-label="Mail"><FaEnvelope size={18} /></a>
-          <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="WhatsApp"><FaWhatsapp size={18} /></a>
-          <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="Instagram"><FaInstagram size={17} /></a>
-          <a href="https://www.linkedin.com/company/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="LinkedIn"><FaLinkedin size={17} /></a>
-          <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="X"><SiX size={17} /></a>
-        </div>
-        <div className="flex items-center gap-2 text-[0.96rem] mt-0 mb-1">
-          <FaMapMarkerAlt className="text-gold" />
-          <span className="text-gray-300">Türkiye Geneli 7/24 Hizmet</span>
+        <div className="flex items-center gap-3 text-[1.11rem] mb-2">
+          <a href="tel:+905395267569" className="footer-social" aria-label="Telefon"><FaPhoneAlt size={22} /></a>
+          <a href="mailto:info@yolcutransferi.com" className="footer-social" aria-label="Mail"><FaEnvelope size={20} /></a>
+          <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="WhatsApp"><FaWhatsapp size={20} /></a>
+          <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="Instagram"><FaInstagram size={19} /></a>
+          <a href="https://www.linkedin.com/company/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="LinkedIn"><FaLinkedin size={19} /></a>
+          <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="X"><SiX size={19} /></a>
         </div>
       </div>
       {/* Alt BAND */}
@@ -93,23 +86,23 @@ export default function Footer() {
             justify-between
             gap-5
             w-full
-            bg-[#181818]
             px-3
             py-2
             rounded-2xl
             mb-1
+            logo-band
           "
           style={{
-            borderLeft: "1px solid #bfa65866",
-            borderRight: "1px solid #bfa65866",
-            minHeight: "47px",
+            border: "1.8px solid #bfa658",
+            background: "#23201a",
+            minHeight: "49px",
           }}
         >
-          <Image src="/tursab.png" alt="TÜRSAB" width={70} height={32} className="footer-card-img" />
-          <Image src="/mastercard.png" alt="MasterCard" width={52} height={32} className="footer-card-img" />
-          <Image src="/visa.png" alt="Visa" width={52} height={32} className="footer-card-img" />
-          <Image src="/Troy.png" alt="TROY" width={52} height={32} className="footer-card-img" />
-          <Image src="/iyzico.png" alt="iyzico" width={61} height={32} className="footer-card-img" />
+          <Image src="/tursab.png" alt="TÜRSAB" width={75} height={34} className="footer-card-img" />
+          <Image src="/mastercard.png" alt="MasterCard" width={56} height={34} className="footer-card-img" />
+          <Image src="/visa.png" alt="Visa" width={56} height={34} className="footer-card-img" />
+          <Image src="/Troy.png" alt="TROY" width={56} height={34} className="footer-card-img" />
+          <Image src="/iyzico.png" alt="iyzico" width={65} height={34} className="footer-card-img" />
         </div>
         <div className="text-[15px] text-gray-400 font-light text-center mb-0">
           © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
@@ -128,8 +121,8 @@ export default function Footer() {
           color: #FFD700;
           background: #181818;
           border-radius: 50%;
-          padding: 7px;
-          font-size: 1.03rem;
+          padding: 8px;
+          font-size: 1.11rem;
           box-shadow: 0 0 8px 1px #FFD70019;
           transition: all 0.17s;
           display: flex; align-items: center; justify-content: center;
@@ -143,8 +136,8 @@ export default function Footer() {
         .footer-card-img {
           background: #fff;
           border-radius: 8px;
-          padding: 3px 13px;
-          height: 32px !important;
+          padding: 3px 14px;
+          height: 34px !important;
           width: auto !important;
           object-fit: contain;
           box-shadow: 0 1px 8px 0 #3332;
@@ -158,13 +151,14 @@ export default function Footer() {
           .footer-link, h3 { font-size: 0.95rem !important; }
         }
         @media (max-width: 600px) {
-          .footer-card-img { height: 25px !important; padding: 3px 7px; }
+          .footer-card-img { height: 27px !important; padding: 2.5px 8px; }
+          .logo-band { padding-left: 5px !important; padding-right: 5px !important; }
         }
         @media (max-width: 480px) {
-          .footer-card-img { height: 18px !important; padding: 2px 5px; }
+          .footer-card-img { height: 18px !important; padding: 2px 4px; }
           .footer-link, h3 { font-size: 0.85rem !important; }
           .text-[15px] { font-size: 0.74rem !important; }
-          .px-3 { padding-left: 6px !important; padding-right: 6px !important; }
+          .logo-band { padding-left: 3px !important; padding-right: 3px !important; }
         }
       `}</style>
     </footer>
