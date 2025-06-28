@@ -16,18 +16,18 @@ function useIsMobile() {
   return isMobile;
 }
 
-// En uzun yorumu bul
-const maxLen = testimonials.reduce(
-  (max, t) => (t.comment.length > max ? t.comment.length : max),
-  0
-);
-const maxCharYorum = testimonials.find(t => t.comment.length === maxLen)?.comment || "";
+// En uzun yorumu bul (güvenli)
+const maxLen =
+  Array.isArray(testimonials) && testimonials.length > 0
+    ? testimonials.reduce((max, t) => (t.comment.length > max ? t.comment.length : max), 0)
+    : 0;
 
 export default function TestimonialsSlider() {
   const [testimonialIndex, setTestimonialIndex] = useState(0);
   const isMobile = useIsMobile();
 
   useEffect(() => {
+    if (!Array.isArray(testimonials) || testimonials.length === 0) return;
     const interval = setInterval(() => {
       setTestimonialIndex(idx =>
         (idx + (isMobile ? 2 : 3)) % testimonials.length
@@ -37,6 +37,7 @@ export default function TestimonialsSlider() {
   }, [isMobile, testimonialIndex]);
 
   const getVisibleTestimonials = () => {
+    if (!Array.isArray(testimonials) || testimonials.length === 0) return [];
     if (isMobile)
       return [
         testimonials[testimonialIndex % testimonials.length],
@@ -50,10 +51,10 @@ export default function TestimonialsSlider() {
   };
 
   // Kutu yüksekliğini en uzun yoruma göre sabitle, fazladan boşluk bırak
-  const charPerLine = 32; // yaklaşık her satır karakteri
+  const charPerLine = 32;
   const lineCount = Math.ceil(maxLen / charPerLine) + 1;
-  const pxPerLine = 23; // satır başına yükseklik px
-  const minHeight = 55 + lineCount * pxPerLine; // yıldız+isim+padding + satırlar
+  const pxPerLine = 23;
+  const minHeight = 55 + lineCount * pxPerLine;
 
   return (
     <section className="w-full max-w-6xl mx-auto py-7 mb-3 px-2 flex flex-col items-center">
@@ -73,7 +74,7 @@ export default function TestimonialsSlider() {
           >
             {/* YILDIZLAR */}
             <div className="flex items-center mb-1">
-              {[...Array(Math.floor(item.stars))].map((_, i) => (
+              {[...Array(Number.isFinite(item.stars) && item.stars > 0 ? Math.floor(item.stars) : 0)].map((_, i) => (
                 <FaStar key={i} className="text-gold" size={16} />
               ))}
               {item.stars % 1 !== 0 && <FaStarHalfAlt className="text-gold" size={15} />}
@@ -101,7 +102,6 @@ export default function TestimonialsSlider() {
           </div>
         ))}
       </div>
-      {/* En uzun satırdan sonra sabitlemek için görünmez alan */}
       <div style={{ height: "1.2em" }} />
       <style jsx>{`
         @media (max-width: 700px) {
