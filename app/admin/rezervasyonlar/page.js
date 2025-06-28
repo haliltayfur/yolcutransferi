@@ -12,16 +12,16 @@ function kisaMetin(str, len = 18) {
 
 // Sütunlar
 const columns = [
-  { name: "Sipariş No", className: "min-w-[150px]" },
-  { name: "Tarih", className: "min-w-[140px]" },
-  { name: "Ad Soyad", className: "min-w-[150px]" },
+  { name: "Sipariş No", className: "min-w-[120px]" },
+  { name: "Tarih", className: "min-w-[130px]" },
+  { name: "Ad Soyad", className: "min-w-[120px]" },
   { name: "Telefon", className: "min-w-[120px]" },
-  { name: "E-posta", className: "min-w-[160px]" },
+  { name: "E-posta", className: "min-w-[150px]" },
   { name: "Transfer Türü", className: "min-w-[120px]" },
   { name: "Kalkış / Varış", className: "min-w-[140px]" },
   { name: "Tutar", className: "min-w-[90px] text-right" },
   { name: "Durum", className: "min-w-[100px]" },
-  { name: "İşlem", className: "min-w-[180px]" }
+  { name: "İşlem", className: "min-w-[160px]" }
 ];
 
 export default function AdminRezervasyonlar() {
