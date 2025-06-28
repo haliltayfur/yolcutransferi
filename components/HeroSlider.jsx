@@ -1,7 +1,7 @@
 // === Dosya: components/HeroSlider.jsx ===
 
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 const heroImages = [
@@ -9,43 +9,62 @@ const heroImages = [
   "/Hero6.png", "/Hero7.png", "/Hero8.png", "/Hero9.png"
 ];
 
-// * Sağ-sol efektli ve kaydırmalı slider için*
+// **SVG Fish Scale MASK**
+const FishMask = ({ side }) => (
+  <svg width="100%" height="100%" style={{position:"absolute",top:0,left:0,pointerEvents:"none",zIndex:9}} viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id={`fade${side}`} x1={side==="left"?1:0} y1="0" x2={side==="left"?0:1} y2="0">
+        <stop offset="0%" stopColor="#fff" stopOpacity="0.04"/>
+        <stop offset="60%" stopColor="#fff" stopOpacity="0.35"/>
+        <stop offset="85%" stopColor="#fff" stopOpacity="0.86"/>
+        <stop offset="100%" stopColor="#fff" stopOpacity="1"/>
+      </linearGradient>
+      <pattern id={`fish${side}`} patternUnits="userSpaceOnUse" width="16" height="14">
+        <ellipse cx="8" cy="7" rx="8" ry="7" fill={`url(#fade${side})`} />
+      </pattern>
+      <mask id={`fishMask${side}`}>
+        <rect width="100" height="100" fill={`url(#fish${side})`} />
+      </mask>
+    </defs>
+    <rect width="100" height="100" fill="#fff" mask={`url(#fishMask${side})`} />
+  </svg>
+);
+
 export default function HeroSlider() {
   const [current, setCurrent] = useState(0);
-  const [dir, setDir] = useState("right"); // transition yönü
-  const [animating, setAnimating] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Oto-ileri
   useEffect(() => {
-    const timer = setTimeout(() => handleNav("right"), 8000);
-    return () => clearTimeout(timer);
-  }, [current]);
+    if (typeof window === "undefined") return;
+    const check = () => setIsMobile(window.innerWidth < 700);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
-  // Kaydırma fonksiyonu
+  // Otomatik geçiş
+  useEffect(() => {
+    if (isMobile) return;
+    const timer = setTimeout(() => handleNav("right"), 9000);
+    return () => clearTimeout(timer);
+  }, [current, isMobile]);
+
   function handleNav(direction) {
-    if (animating) return;
-    setDir(direction);
-    setAnimating(true);
-    setTimeout(() => {
-      setCurrent((old) => {
-        if (direction === "right") return (old + 1) % heroImages.length;
-        else return (old - 1 + heroImages.length) % heroImages.length;
-      });
-      setAnimating(false);
-    }, 500); // animasyon süresi ile eşit
+    setCurrent((old) => {
+      if (direction === "right") return (old + 1) % heroImages.length;
+      else return (old - 1 + heroImages.length) % heroImages.length;
+    });
   }
 
-  // Önceki ve sonraki indexler
   const prevIdx = (current - 1 + heroImages.length) % heroImages.length;
   const nextIdx = (current + 1) % heroImages.length;
 
-  // Mobilde önceki gibi tam ekran kalsın (senin istediğin buydu)
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 700;
+  // MOBILDE - ELLEME!
   if (isMobile) {
     return (
       <section className="relative w-full flex flex-col items-center overflow-x-hidden select-none hero-cinema">
         <div className="w-full h-3 block"></div>
-        <div className="relative w-full mx-auto mob-slider-box">
+        <div className="relative w-full mob-slider-box aspect-[1.78]">
           <Image
             src={heroImages[current]}
             alt=""
@@ -86,45 +105,37 @@ export default function HeroSlider() {
     );
   }
 
-  // DESKTOP: büyük, “sinema” gibi ve sağ/sol blur/uzatma + animasyon
+  // DESKTOP: BALIK DERİSİ EFFECT & MODERN!
   return (
     <section className="relative w-full flex flex-col items-center select-none">
       <div className="w-full h-8 block"></div>
-      <div className="cinema-slider-container">
-        {/* Önceki resim uzatma/fade */}
-        <div className="side-img side-left" onClick={() => handleNav("left")}>
+      <div className="fish-cinema-slider">
+        {/* Balık derisi parçalı efekti: Sol */}
+        <div className="fish-side fish-left" onClick={() => handleNav("left")}>
           <Image
             src={heroImages[prevIdx]}
-            alt=""
+            alt="Önceki"
             fill
-            className="object-cover blur-[3px]"
-            style={{
-              opacity: 0.23,
-              filter: "brightness(.75) blur(3.5px) grayscale(.18)"
-            }}
+            className="object-cover fish-img"
             draggable={false}
+            style={{ filter: "blur(2px) grayscale(20%) brightness(0.75)", opacity: .38 }}
           />
+          <FishMask side="left"/>
         </div>
-        {/* Sonraki resim uzatma/fade */}
-        <div className="side-img side-right" onClick={() => handleNav("right")}>
+        {/* Balık derisi parçalı efekti: Sağ */}
+        <div className="fish-side fish-right" onClick={() => handleNav("right")}>
           <Image
             src={heroImages[nextIdx]}
-            alt=""
+            alt="Sonraki"
             fill
-            className="object-cover blur-[3px]"
-            style={{
-              opacity: 0.23,
-              filter: "brightness(.75) blur(3.5px) grayscale(.18)"
-            }}
+            className="object-cover fish-img"
             draggable={false}
+            style={{ filter: "blur(2px) grayscale(20%) brightness(0.75)", opacity: .38 }}
           />
+          <FishMask side="right"/>
         </div>
         {/* Asıl ana slider görseli */}
-        <div
-          className={
-            `main-img-zone ${animating ? (dir === "right" ? "anim-right" : "anim-left") : ""}`
-          }
-        >
+        <div className="fish-main">
           <Image
             src={heroImages[current]}
             alt=""
@@ -135,58 +146,41 @@ export default function HeroSlider() {
           />
         </div>
         {/* Dotlar */}
-        <div className="absolute bottom-7 left-0 w-full flex justify-center z-30 gap-2 select-none">
+        <div className="absolute bottom-8 left-0 w-full flex justify-center z-30 gap-2 select-none">
           {heroImages.map((_, i) => (
             <div
               key={i}
               className={`slider-dot ${i === current ? "active" : ""}`}
-              style={{
-                transition: "all 0.23s cubic-bezier(.68,-0.55,.27,1.55)",
-                transform: i === current ? "scale(1.25) translateY(-2px)" : "scale(1) translateY(0)",
-                background: i === current
-                  ? "linear-gradient(135deg, #FFD700 60%, #fff60099 100%)"
-                  : "rgba(60,60,60,0.16)",
-                boxShadow: i === current ? "0 2px 10px #FFD70066" : "none",
-                border: i === current ? "2px solid #FFD700" : "1.1px solid #555",
-                width: i === current ? "16px" : "10px",
-                height: i === current ? "16px" : "10px",
-                borderRadius: "7px",
-                margin: "0 3px"
-              }}
               onClick={() => setCurrent(i)}
-            ></div>
+            />
           ))}
         </div>
       </div>
       <style jsx>{`
-        .cinema-slider-container {
-          width: 98vw; max-width: 1900px; aspect-ratio: 2.45;
-          min-height: 430px; max-height: 72vh;
-          position: relative;
-          display: flex; align-items: center; justify-content: center;
-          background: #131212;
-          border-radius: 29px;
+        .fish-cinema-slider {
+          width: 99vw; max-width: 1850px; aspect-ratio: 2.38;
+          min-height: 450px; max-height: 76vh;
+          position: relative; display: flex; align-items: center; justify-content: center;
+          background: #131212; border-radius: 28px;
           overflow: visible;
-          box-shadow: 0 6px 36px #000a, 0 2.5px 16px #FFD70024;
+          box-shadow: 0 6px 32px #000b, 0 2.5px 15px #FFD70028;
         }
-        .side-img {
+        .fish-side {
           position: absolute;
-          top: 0; width: 17vw; min-width: 90px; max-width: 220px;
-          height: 100%; z-index: 2;
-          cursor: pointer; border-radius: 26px;
-          transition: opacity .28s;
+          top: 0; width: 15vw; min-width: 110px; max-width: 200px;
+          height: 100%; z-index: 2; cursor: pointer; border-radius: 26px;
           overflow: hidden;
+          transition: box-shadow .23s, filter .21s;
         }
-        .side-left { left: -6px; box-shadow: -4px 0 18px #0005; }
-        .side-right { right: -6px; box-shadow: 4px 0 18px #0005; }
-        .main-img-zone {
-          position: relative;
-          width: 74vw; max-width: 1440px; height: 100%; aspect-ratio: 2.45;
-          z-index: 4; border-radius: 28px;
-          overflow: hidden;
+        .fish-left { left: -6px; box-shadow: -4px 0 14px #0004; }
+        .fish-right { right: -6px; box-shadow: 4px 0 14px #0004; }
+        .fish-side:hover { box-shadow: 0 0 24px #FFD70066, 0 0 32px #FFD70022;}
+        .fish-img { width:100%;height:100%;object-fit:cover;}
+        .fish-main {
+          position: relative; z-index: 5;
+          width: 78vw; max-width: 1500px; height: 100%; aspect-ratio: 2.38;
+          border-radius: 27px; overflow: hidden;
           background: #181817;
-          box-shadow: 0 3px 24px #FFD70014;
-          transition: box-shadow .22s;
         }
         .main-img {
           object-fit: contain !important;
@@ -194,33 +188,26 @@ export default function HeroSlider() {
           border-radius: 28px;
           box-shadow: 0 2.5px 15px #FFD70012;
         }
-        /* Animasyonlar */
-        .anim-right { animation: slideRight .5s; }
-        .anim-left { animation: slideLeft .5s; }
-        @keyframes slideRight {
-          from { transform: translateX(54%); opacity: 0.3;}
-          to   { transform: translateX(0); opacity: 1;}
+        .slider-dot {
+          background: #FFD70090;
+          border-radius: 50%; width: 12px; height: 12px;
+          margin: 0 4px; cursor: pointer;
+          border: 2.5px solid #FFD70033;
+          transition: all 0.21s;
+          box-shadow: 0 1.5px 5px #FFD70020;
         }
-        @keyframes slideLeft {
-          from { transform: translateX(-54%); opacity: 0.3;}
-          to   { transform: translateX(0); opacity: 1;}
+        .slider-dot.active {
+          background: #FFD700;
+          box-shadow: 0 3px 15px #FFD70044, 0 1px 7px #FFD70038;
+          border: 2.5px solid #fff800;
         }
-        .slider-dot { display: inline-block; cursor: pointer;}
-        .slider-dot.active { animation: bounceDot 0.45s; }
-        @keyframes bounceDot {
-          0% { transform: scale(1) translateY(0);}
-          40% { transform: scale(1.4) translateY(-8px);}
-          80% { transform: scale(1.2) translateY(-2px);}
-          100% { transform: scale(1.25) translateY(-2px);}
+        @media (max-width: 1200px) {
+          .fish-cinema-slider { min-height: 350px; }
+          .fish-main { width: 82vw; }
         }
         @media (max-width: 900px) {
-          .cinema-slider-container { width: 99vw; aspect-ratio: 2; }
-          .main-img-zone { width: 85vw; max-width: 98vw; }
-          .side-img { min-width: 50px; }
-        }
-        @media (max-width: 600px) {
-          .main-img-zone { border-radius: 14px; }
-          .side-img { border-radius: 12px; }
+          .fish-cinema-slider { aspect-ratio: 2; min-height: 220px; }
+          .fish-main { width: 96vw; }
         }
       `}</style>
     </section>
