@@ -4,6 +4,7 @@ import HeroSlider from "../components/HeroSlider";
 import dynamic from "next/dynamic";
 import AdvantagesBar from "../components/AdvantagesBar";
 import TestimonialsSlider from "../components/TestimonialsSlider";
+import AdresAutoComplete from "@/components/AdresAutoComplete";
 
 const VipTransferForm = dynamic(() => import("../components/VipTransferForm"), { ssr: false });
 
