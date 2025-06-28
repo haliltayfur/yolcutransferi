@@ -1,7 +1,7 @@
 // === Dosya: components/HeroSlider.jsx ===
 
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 const heroImages = [
@@ -12,7 +12,6 @@ const heroImages = [
 export default function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const sliderRef = useRef();
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 900);
@@ -23,19 +22,11 @@ export default function HeroSlider() {
 
   useEffect(() => {
     if (isMobile) return;
-    const timer = setTimeout(() => handleNav("right"), 9000);
+    const timer = setTimeout(() => setCurrent((prev) => (prev + 1) % heroImages.length), 9000);
     return () => clearTimeout(timer);
   }, [current, isMobile]);
 
-  function handleNav(dir) {
-    setCurrent(prev =>
-      dir === "right"
-        ? (prev + 1) % heroImages.length
-        : (prev - 1 + heroImages.length) % heroImages.length
-    );
-  }
-
-  // === MOBILDE FULL-WIDTH, YÜKSEKLİK OTOMATİK, YANA OKLAR BUTONLAR ===
+  // Mobilde eski kod (değişmiyor!)
   if (isMobile) {
     return (
       <section className="relative w-full select-none">
@@ -50,18 +41,6 @@ export default function HeroSlider() {
             draggable={false}
             style={{ borderRadius: "11px" }}
           />
-          <button
-            aria-label="Önceki"
-            className="slider-arrow left-2"
-            style={{ left: 2 }}
-            onClick={() => handleNav("left")}
-          >&#8592;</button>
-          <button
-            aria-label="Sonraki"
-            className="slider-arrow right-2"
-            style={{ right: 2 }}
-            onClick={() => handleNav("right")}
-          >&#8594;</button>
         </div>
         <div className="flex justify-center gap-1 mt-3">
           {heroImages.map((_, i) => (
@@ -73,18 +52,6 @@ export default function HeroSlider() {
           ))}
         </div>
         <style jsx>{`
-          .slider-arrow {
-            position: absolute; top: 50%; z-index: 5;
-            transform: translateY(-50%);
-            background: #FFD700;
-            border: none; border-radius: 50%;
-            color: #19160a;
-            font-size: 1.45rem;
-            padding: 7px 12px;
-            box-shadow: 0 1px 8px #FFD70035;
-            opacity: 0.86;
-            cursor: pointer;
-          }
           .dot-mob {
             width: 10px; height: 10px;
             border-radius: 50%;
@@ -101,19 +68,19 @@ export default function HeroSlider() {
     );
   }
 
-  // === DESKTOP: FULL-WIDTH SİNEMA SLIDER ===
+  // Desktopta: Sadece resim, %10 daha büyük ve dotlar
   return (
     <section className="relative w-full select-none flex flex-col items-center">
       <div className="w-full h-8 block" /> {/* Header'dan boşluk */}
       <div
-        ref={sliderRef}
         className="cinema-slider-desktop relative flex items-center justify-center overflow-hidden rounded-3xl"
         style={{
-          width: "min(94vw, 1850px)",
-          height: "min(70vw, 610px)",
-          minHeight: "360px",
-          maxHeight: "610px",
-          boxShadow: "0 10px 34px #000b, 0 4px 24px #FFD70018"
+          width: "min(100vw, 2000px)",    // %10 daha geniş!
+          height: "min(78vw, 670px)",     // %10 daha yüksek!
+          minHeight: "380px",
+          maxHeight: "670px",
+          boxShadow: "0 10px 34px #000b, 0 4px 24px #FFD70018",
+          background: "#181818",
         }}
       >
         <Image
@@ -130,18 +97,6 @@ export default function HeroSlider() {
             borderRadius: "22px"
           }}
         />
-        <button
-          aria-label="Önceki"
-          className="slider-arrow left-4"
-          style={{ left: 14 }}
-          onClick={() => handleNav("left")}
-        >&#8592;</button>
-        <button
-          aria-label="Sonraki"
-          className="slider-arrow right-4"
-          style={{ right: 14 }}
-          onClick={() => handleNav("right")}
-        >&#8594;</button>
         {/* Dotlar */}
         <div className="absolute bottom-5 left-0 w-full flex justify-center z-30 gap-2 select-none">
           {heroImages.map((_, i) => (
@@ -157,20 +112,6 @@ export default function HeroSlider() {
         .cinema-slider-desktop {
           background: #191919;
         }
-        .slider-arrow {
-          position: absolute; top: 50%; z-index: 6;
-          transform: translateY(-50%);
-          background: #FFD700;
-          border: none; border-radius: 50%;
-          color: #19160a;
-          font-size: 2.15rem;
-          padding: 11px 17px;
-          box-shadow: 0 1px 14px #FFD70045;
-          opacity: 0.79;
-          cursor: pointer;
-          transition: opacity .18s;
-        }
-        .slider-arrow:hover { opacity: 1; box-shadow: 0 1px 20px #FFD70080; }
         .slider-dot {
           background: #FFD70090;
           border-radius: 50%; width: 14px; height: 14px;
@@ -185,10 +126,10 @@ export default function HeroSlider() {
           border: 2.5px solid #fff800;
         }
         @media (max-width: 1200px) {
-          .cinema-slider-desktop { height: min(67vw, 420px) !important; }
+          .cinema-slider-desktop { height: min(75vw, 480px) !important; }
         }
         @media (max-width: 900px) {
-          .cinema-slider-desktop { height: min(80vw, 270px) !important; }
+          .cinema-slider-desktop { height: min(90vw, 270px) !important; }
         }
       `}</style>
     </section>
