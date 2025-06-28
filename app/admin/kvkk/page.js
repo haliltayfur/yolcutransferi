@@ -1,3 +1,4 @@
+// app/admin/kvkk/page.js
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
@@ -35,6 +36,13 @@ export default function AdminKvkk() {
   const [removedForms, setRemovedForms] = useState([]);
   const [refreshFlag, setRefreshFlag] = useState(false);
   const pollingRef = useRef();
+
+  // Modal açıkken body scroll'unu engelle
+  useEffect(() => {
+    if (modalForm) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [modalForm]);
 
   // Backend verisini çek
   async function fetchForms() {
@@ -192,11 +200,11 @@ export default function AdminKvkk() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={columns.length} className="text-center p-4 text-gray-400">Yükleniyor...</td>
+                <td colSpan={columns.length} className="text-center py-6 text-gray-400 text-lg">Yükleniyor...</td>
               </tr>
             ) : pagedForms.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="text-center p-4 text-gray-400">Hiç başvuru bulunamadı.</td>
+                <td colSpan={columns.length} className="text-center py-10 text-gray-400 text-xl font-semibold">Hiç başvuru bulunamadı.</td>
               </tr>
             ) : (
               pagedForms.map((form, i) => (
@@ -314,3 +322,4 @@ export default function AdminKvkk() {
     </main>
   );
 }
+// app/admin/kvkk/page.js
