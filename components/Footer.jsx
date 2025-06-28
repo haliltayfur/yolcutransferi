@@ -76,34 +76,33 @@ export default function Footer() {
           <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="X"><SiX size={19} /></a>
         </div>
       </div>
-      {/* Alt BAND */}
+      {/* Alt BAND: LOGO BANDI KOYU - GOLD ÇERÇEVE */}
       <div className="w-full flex flex-col items-center justify-center max-w-6xl mx-auto pt-2 pb-1">
-        {/* LOGO BANT (ARKA BEYAZ, ÇERÇEVE GOLD, YUVARLAK) */}
         <div
           className="
             flex flex-row items-center
             justify-between
-            gap-5
+            gap-6
             w-full
-            px-3
-            py-2
+            px-5
+            py-3
             rounded-2xl
             mb-1
             logo-band
-            logo-band-white
+            logo-band-dark
           "
           style={{
-            border: "2px solid #bfa658",
-            background: "#fff",
-            minHeight: "51px",
-            boxShadow: "0 2px 12px #bfa65825"
+            border: "2.5px solid #bfa658",
+            background: "#23201a",
+            minHeight: "58px",
+            boxShadow: "0 2px 20px #bfa65820"
           }}
         >
-          <Image src="/tursab.png" alt="TÜRSAB" width={75} height={34} className="footer-card-img" />
-          <Image src="/mastercard.png" alt="MasterCard" width={56} height={34} className="footer-card-img" />
-          <Image src="/visa.png" alt="Visa" width={56} height={34} className="footer-card-img" />
-          <Image src="/Troy.png" alt="TROY" width={56} height={34} className="footer-card-img" />
-          <Image src="/iyzico.png" alt="iyzico" width={65} height={34} className="footer-card-img" />
+          <Image src="/tursab.png" alt="TÜRSAB" width={90} height={40} className="footer-card-img desktop-logo" />
+          <Image src="/mastercard.png" alt="MasterCard" width={90} height={40} className="footer-card-img desktop-logo" />
+          <Image src="/visa.png" alt="Visa" width={90} height={40} className="footer-card-img desktop-logo" />
+          <Image src="/Troy.png" alt="TROY" width={90} height={40} className="footer-card-img desktop-logo" />
+          <Image src="/iyzico.png" alt="iyzico" width={100} height={40} className="footer-card-img desktop-logo" />
         </div>
         <div className="text-[15px] text-gray-400 font-light text-center mb-0">
           © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
@@ -137,33 +136,26 @@ export default function Footer() {
         .footer-card-img {
           background: transparent;
           border-radius: 8px;
-          padding: 3px 14px;
-          height: 34px !important;
+          padding: 3px 18px;
+          height: 40px !important;
           width: auto !important;
           object-fit: contain;
           display: inline-block;
-        }
-        .logo-band-white {
-          background: #fff !important;
-          border: 2px solid #bfa658 !important;
-          border-radius: 20px !important;
+          transition: all .2s;
         }
         @media (max-width: 900px) {
-          .max-w-6xl { max-width: 98vw !important; }
-        }
-        @media (max-width: 650px) {
-          .grid-cols-2 { grid-template-columns: 1fr 1fr !important; }
-          .footer-link, h3 { font-size: 0.95rem !important; }
+          .desktop-logo { height: 34px !important; padding: 3px 10px; width: auto !important; }
+          .logo-band-dark { min-height: 36px !important; }
         }
         @media (max-width: 600px) {
-          .footer-card-img { height: 27px !important; padding: 2.5px 8px; }
+          .footer-card-img { height: 24px !important; padding: 2px 7px; }
           .logo-band { padding-left: 5px !important; padding-right: 5px !important; }
+          .logo-band-dark { min-height: 26px !important; }
         }
         @media (max-width: 480px) {
           .footer-card-img { height: 18px !important; padding: 2px 4px; }
-          .footer-link, h3 { font-size: 0.85rem !important; }
-          .text-[15px] { font-size: 0.74rem !important; }
           .logo-band { padding-left: 3px !important; padding-right: 3px !important; }
+          .logo-band-dark { min-height: 20px !important; }
         }
       `}</style>
     </footer>
