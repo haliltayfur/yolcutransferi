@@ -1,7 +1,5 @@
-// PATH: /app/rezervasyon/RezervasyonForm.jsx
-
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import EkstralarAccordion from "./EkstralarAccordion";
 import AdresAutoComplete from "./AdresAutoComplete";
 import { vehicles } from "../../data/vehicleList";
@@ -21,11 +19,11 @@ const allTransfers = [
   "Toplu Transfer",
   "Düğün vb Organizasyonlar"
 ];
-const KDV_ORAN = 0.20;
 const saatler = [];
-for (let h = 0; h < 24; ++h)
-  for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
-
+for (let h = 0; h < 24; ++h) for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
+const havalimanlari = [
+  "istanbul havalimanı", "sabiha gökçen", "antalya havalimanı", "esenboğa", "adnan menderes", "milas bodrum", "dalaman", "trabzon havalimanı", "erzurum havalimanı", "gaziantep havalimanı", "nevşehir kapadokya", "gazipaşa", "çorlu", "balıkesir", "teknofest", "tekirdağ", "diğer havalimanı"
+];
 function normalize(str) {
   return (str || "")
     .toLocaleLowerCase("tr-TR")
@@ -39,6 +37,10 @@ function normalize(str) {
     .replace(/[,\.]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+function containsAirport(val) {
+  const nval = normalize(val);
+  return havalimanlari.some(h => nval.includes(normalize(h)));
 }
 
 export default function RezervasyonForm() {
@@ -78,9 +80,40 @@ export default function RezervasyonForm() {
     setPhone(num.slice(0, 11));
   }
 
+  // PNR GÖSTERME LOGİĞİ
+  const isAirport = useMemo(() => {
+    return (
+      containsAirport(from) ||
+      containsAirport(to) ||
+      (transfer && transfer.toLocaleLowerCase("tr-TR").includes("havalimanı"))
+    );
+  }, [from, to, transfer]);
+
+  // Araç filtreleme - segment & kişi sayısı & transfer türü
+  const filteredVehicles = useMemo(() => {
+    if (!segment) return [];
+    // Segment filtre
+    let arr = vehicles.filter(v => v.segment === segment);
+    // Kişi sayısı üstünde olanları getir (ve minimum mantıklı farkı uygula)
+    if (people > 0) {
+      // Otobüs ve çok büyük araçlar yalnızca 8+ kişi için gelsin
+      if (people === 1) arr = arr.filter(v => v.max <= 6);
+      else if (people <= 4) arr = arr.filter(v => v.max >= people && v.max <= 8);
+      else if (people <= 8) arr = arr.filter(v => v.max >= people && v.max <= 16);
+      else arr = arr.filter(v => v.max >= people); // 10+ ise 10 ve üzeri göster
+    }
+    // Transfer türü uygun olmayan araçları çıkar
+    if (transfer) {
+      arr = arr.filter(v =>
+        !v.transferTypes || v.transferTypes.includes(transfer)
+      );
+    }
+    return arr;
+  }, [segment, people, transfer]);
+
+  // HATA ve SUBMIT
   function handleSubmit(e) {
     e.preventDefault();
-    // Hata kontrol
     const err = {};
     if (!from) err.from = "Lütfen kalkış noktası giriniz.";
     if (!to) err.to = "Lütfen varış noktası giriniz.";
@@ -94,36 +127,21 @@ export default function RezervasyonForm() {
     if (!isValidPhone(phone)) err.phone = "Geçerli bir 05xx ile başlayan telefon giriniz.";
     if (!isValidEmail(email)) err.email = "Geçerli e-posta adresi giriniz.";
     if (!kvkkChecked) err.kvkk = "KVKK onayı zorunludur.";
+    if (isAirport && !pnr) err.pnr = "Havalimanı transferi için PNR/Uçuş Kodu zorunludur.";
     setFieldErrors(err);
     if (Object.keys(err).length > 0) return;
     setShowSummary(true);
   }
 
-  // --- REZERVASYON ÖZETİ POPUP ---
+  // --- ÖZET POPUP ---
   function SummaryPopup({ onClose }) {
     const basePrice = 4000;
     const allExtras = require("../../data/extrasByCategory").extrasListByCategory.flatMap(cat => cat.items);
     const selectedExtras = allExtras.filter(e => extras.includes(e.key));
     const extrasTotal = selectedExtras.reduce((sum, e) => sum + (e.price * (extrasQty[e.key] || 1)), 0);
     const araToplam = basePrice + extrasTotal;
-    const kdv = araToplam * KDV_ORAN;
+    const kdv = araToplam * 0.20;
     const toplam = araToplam + kdv;
-
-    // Artır/azalt/sil
-    function changeQty(key, dir) {
-      setExtrasQty(q => ({
-        ...q,
-        [key]: Math.max(1, (q[key] || 1) + dir)
-      }));
-    }
-    function removeExtra(key) {
-      setExtras(es => es.filter(k => k !== key));
-      setExtrasQty(q => {
-        const { [key]: _, ...rest } = q;
-        return rest;
-      });
-    }
-
     function handlePayment() {
       const params = new URLSearchParams({
         from, to, people, segment, transfer, date, time, name, surname, tc, phone, email, pnr, note,
@@ -133,18 +151,12 @@ export default function RezervasyonForm() {
       }).toString();
       router.push(`/odeme?${params}`);
     }
-
-    // SEÇİLEN SEGMENTTEKİ TÜM ARAÇLAR
     const segmentVehicles = vehicles.filter(v => v.segment === segment);
-
     return (
       <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
         <div className="bg-[#19160a] rounded-3xl border border-[#bfa658] max-w-3xl w-full shadow-2xl p-8 md:p-12 overflow-y-auto max-h-[92vh] relative">
           <button onClick={onClose} className="absolute top-3 right-5 text-3xl font-bold text-[#ffeec2] hover:text-yellow-400">×</button>
-          <h2 className="text-2xl md:text-3xl font-extrabold mb-6 text-[#bfa658] text-center font-quicksand">
-            Rezervasyon Özeti
-          </h2>
-          {/* 2 sütunlu detay */}
+          <h2 className="text-2xl md:text-3xl font-extrabold mb-6 text-[#bfa658] text-center font-quicksand">Rezervasyon Özeti</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-[#ffeec2] text-base">
             <div>
               <div><b>Ad Soyad:</b> {name} {surname}</div>
@@ -163,21 +175,17 @@ export default function RezervasyonForm() {
               {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
             </div>
           </div>
-
-          {/* SEGMENTTEKİ ARAÇLAR */}
           <div className="my-4 p-3 rounded-xl border-2 border-[#bfa658] bg-[#19160a]">
             <div className="mb-2 font-semibold text-[#bfa658]">Bu segmentteki araçlar:</div>
             <ul className="space-y-1 text-base">
               {segmentVehicles.map((v) => (
-                <li key={v.id} className="text-[#ffeec2]">{v.label} <span className="text-xs text-[#bfa658]">({v.max} kişi)</span></li>
+                <li key={v.value} className="text-[#ffeec2]">{v.label} <span className="text-xs text-[#bfa658]">({v.max} kişi)</span></li>
               ))}
             </ul>
             <div className="mt-2 text-sm text-[#ffeec2] opacity-90">
-              Seçtiğiniz segmentteki araçlardan birini hazırlıyoruz.
+              Seçtiğiniz segmentteki araçlardan biri size rezerve edilecektir.
             </div>
           </div>
-
-          {/* Ekstralar Tablosu */}
           <div className="mb-5">
             <b className="block mb-2 text-[#bfa658] text-lg">Ekstralar:</b>
             {selectedExtras.length === 0 && <span className="text-gray-400">Ekstra yok</span>}
@@ -198,15 +206,18 @@ export default function RezervasyonForm() {
                       <td className="py-1 pl-1">{extra.label}</td>
                       <td className="text-center">
                         <div className="flex items-center gap-1 justify-center">
-                          <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, -1)}>-</button>
+                          <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => setExtrasQty(q => ({ ...q, [extra.key]: Math.max(1, (q[extra.key] || 1) - 1) }))}>-</button>
                           <span className="w-7 text-center">{extrasQty[extra.key] || 1}</span>
-                          <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, +1)}>+</button>
+                          <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => setExtrasQty(q => ({ ...q, [extra.key]: (q[extra.key] || 1) + 1 }))}>+</button>
                         </div>
                       </td>
                       <td className="text-right">{extra.price.toLocaleString()}₺</td>
                       <td className="text-right">{((extrasQty[extra.key] || 1) * extra.price).toLocaleString()}₺</td>
                       <td className="text-center">
-                        <button type="button" onClick={() => removeExtra(extra.key)} className="text-red-400 font-bold hover:scale-125 transition-transform">🗑️</button>
+                        <button type="button" onClick={() => {
+                          setExtras(extras.filter(k => k !== extra.key));
+                          setExtrasQty(q => { const { [extra.key]: _, ...rest } = q; return rest; });
+                        }} className="text-red-400 font-bold hover:scale-125 transition-transform">🗑️</button>
                       </td>
                     </tr>
                   ))}
@@ -214,16 +225,12 @@ export default function RezervasyonForm() {
               </table>
             }
           </div>
-
-          {/* Fiyatlar */}
           <div className="w-full flex flex-col items-end gap-1 mt-2 text-base">
             <div>Transfer Bedeli: <b>{basePrice.toLocaleString()} ₺</b></div>
             <div>Ekstralar: <b>{extrasTotal.toLocaleString()} ₺</b></div>
             <div>KDV: <b>{kdv.toLocaleString(undefined, { maximumFractionDigits: 2 })} ₺</b></div>
             <div className="text-xl text-[#bfa658] font-bold">Toplam: {toplam.toLocaleString()} ₺</div>
           </div>
-
-          {/* Butonlar */}
           <div className="flex flex-col md:flex-row justify-between gap-4 mt-9">
             <button
               className="w-full md:w-auto bg-[#bfa658] hover:bg-[#ffeec2] text-black font-bold py-3 px-8 rounded-xl shadow-lg transition-colors"
@@ -244,42 +251,31 @@ export default function RezervasyonForm() {
     );
   }
 
-  // --- ANA FORM ---
-
   return (
-    <section className="w-full max-w-4xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] px-6 md:px-12 py-14 my-8">
-      <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand">
+    <section className="w-full max-w-4xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] px-3 md:px-12 py-8 md:py-14 my-6 md:my-8">
+      <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-7 md:mb-8 text-center font-quicksand">
         VIP Rezervasyon Formu
       </h1>
       <form
         onSubmit={handleSubmit}
         autoComplete="on"
-        className="grid grid-cols-1 md:grid-cols-2 gap-5"
+        className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3 md:gap-y-5"
       >
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
-          <AdresAutoComplete
-            value={from}
-            onChange={setFrom}
-            placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
-          />
+          <AdresAutoComplete value={from} onChange={setFrom} placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı" />
           {fieldErrors.from && <div className="text-red-400 text-xs mt-1">{fieldErrors.from}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
-          <AdresAutoComplete
-            value={to}
-            onChange={setTo}
-            placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
-          />
+          <AdresAutoComplete value={to} onChange={setTo} placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı" />
           {fieldErrors.to && <div className="text-red-400 text-xs mt-1">{fieldErrors.to}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
           <select name="people" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            value={people}
-            onChange={e => setPeople(Number(e.target.value))}>
-            {Array.from({ length: 8 }, (_, i) => i + 1).map(val =>
+            value={people} onChange={e => setPeople(Number(e.target.value))}>
+            {Array.from({ length: 20 }, (_, i) => i + 1).map(val =>
               <option key={val} value={val}>{val}</option>
             )}
           </select>
@@ -287,8 +283,7 @@ export default function RezervasyonForm() {
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
           <select name="segment" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            value={segment}
-            onChange={e => setSegment(e.target.value)}>
+            value={segment} onChange={e => setSegment(e.target.value)}>
             <option value="">Seçiniz</option>
             {segmentOptions.map(opt =>
               <option key={opt.key} value={opt.label}>{opt.label}</option>
@@ -299,8 +294,7 @@ export default function RezervasyonForm() {
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
           <select name="transfer" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            value={transfer}
-            onChange={e => setTransfer(e.target.value)}>
+            value={transfer} onChange={e => setTransfer(e.target.value)}>
             <option value="">Seçiniz</option>
             {allTransfers.map(opt =>
               <option key={opt} value={opt}>{opt}</option>
@@ -310,113 +304,70 @@ export default function RezervasyonForm() {
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
-          <input
-            name="date"
-            type="date"
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            value={date}
-            onChange={e => setDate(e.target.value)}
-            min={new Date().toISOString().split("T")[0]}
-            autoComplete="on"
+          <input name="date" type="date" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={date} onChange={e => setDate(e.target.value)}
+            min={new Date().toISOString().split("T")[0]} autoComplete="on"
           />
           {fieldErrors.date && <div className="text-red-400 text-xs mt-1">{fieldErrors.date}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
           <select name="time" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            value={time}
-            onChange={e => setTime(e.target.value)}>
+            value={time} onChange={e => setTime(e.target.value)}>
             <option value="">Seçiniz</option>
             {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
           </select>
           {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
         </div>
-        <div>
-          <label className="font-bold text-[#bfa658] mb-1 block">Ad</label>
-          <input
-            name="name"
-            type="text"
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            autoComplete="given-name"
-          />
-          {fieldErrors.name && <div className="text-red-400 text-xs mt-1">{fieldErrors.name}</div>}
-        </div>
-        <div>
-          <label className="font-bold text-[#bfa658] mb-1 block">Soyad</label>
-          <input
-            name="surname"
-            type="text"
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            value={surname}
-            onChange={e => setSurname(e.target.value)}
-            autoComplete="family-name"
-          />
-          {fieldErrors.surname && <div className="text-red-400 text-xs mt-1">{fieldErrors.surname}</div>}
-        </div>
-        <div>
-          <label className="font-bold text-[#bfa658] mb-1 block">T.C. Kimlik No</label>
-          <input
-            name="tc"
-            type="text"
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            maxLength={11}
-            pattern="[0-9]*"
-            value={tc}
-            onChange={e => handleTcChange(e.target.value)}
-            autoComplete="off"
-          />
-          {fieldErrors.tc && <div className="text-red-400 text-xs mt-1">{fieldErrors.tc}</div>}
-        </div>
-        <div>
-          <label className="font-bold text-[#bfa658] mb-1 block">Telefon</label>
-          <input
-            name="phone"
-            type="text"
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            maxLength={11}
-            pattern="[0-9]*"
-            value={phone}
-            onChange={e => handlePhoneChange(e.target.value)}
-            autoComplete="tel"
-          />
-          {fieldErrors.phone && <div className="text-red-400 text-xs mt-1">{fieldErrors.phone}</div>}
-        </div>
-        <div>
-          <label className="font-bold text-[#bfa658] mb-1 block">E-posta</label>
-          <input
-            name="email"
-            type="email"
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            autoComplete="email"
-            placeholder="ornek@email.com"
-          />
-          {fieldErrors.email && <div className="text-red-400 text-xs mt-1">{fieldErrors.email}</div>}
-        </div>
-        <div>
-          <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
-          <input
-            name="pnr"
-            type="text"
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            value={pnr}
-            onChange={e => setPnr(e.target.value)}
-            placeholder="Uçuş rezervasyon kodu (varsa)"
-          />
-        </div>
+
+        {/* ARAÇLAR ALANI */}
+        {segment && (
+          <div className="md:col-span-2">
+            <label className="font-bold text-[#bfa658] mb-1 block">Araçlar</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {filteredVehicles.length === 0 && (
+                <div className="text-sm text-[#ffeec2]/80 p-3 bg-black/20 rounded-lg col-span-3">
+                  Seçime uygun araç bulunamadı.
+                </div>
+              )}
+              {filteredVehicles.map((v) => (
+                <div key={v.value}
+                  className="border border-[#bfa658] rounded-xl p-2 flex flex-col items-center justify-center text-center min-h-[74px] bg-black/50"
+                  style={{ minWidth: 0 }}>
+                  <span className="font-bold text-[#ffeec2] text-base">{v.label}</span>
+                  <span className="text-xs text-[#bfa658]">{v.segment} • {v.max} Kişi</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 text-sm text-[#ffeec2] opacity-90">
+              Seçtiğiniz segment ve kişi sayısına uygun araçlardan biri size rezerve edilecektir.
+            </div>
+          </div>
+        )}
+
+        {/* PNR (HAVALİMANI İÇİN) */}
+        {isAirport && (
+          <div className="md:col-span-2">
+            <label className="font-bold text-[#bfa658] mb-1 block">PNR / Uçuş Kodu <span className="text-[#ffeec2] text-xs">(Havalimanı transferleri için zorunlu)</span></label>
+            <input
+              name="pnr"
+              type="text"
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={pnr}
+              onChange={e => setPnr(e.target.value)}
+              placeholder="Uçuş rezervasyon kodu"
+            />
+            {fieldErrors.pnr && <div className="text-red-400 text-xs mt-1">{fieldErrors.pnr}</div>}
+          </div>
+        )}
+
+        {/* EK NOT */}
         <div className="md:col-span-2">
           <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
-          <textarea
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            rows={2}
-            value={note}
-            onChange={e => setNote(e.target.value)}
-            placeholder="Eklemek istediğiniz bir not var mı?"
-          />
+          <textarea className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            rows={2} value={note} onChange={e => setNote(e.target.value)} placeholder="Eklemek istediğiniz bir not var mı?" />
         </div>
+        {/* EKSTRALAR */}
         <div className="md:col-span-2">
           <label className="font-bold text-[#bfa658] mb-2 block text-lg">Ekstralar</label>
           <EkstralarAccordion
@@ -426,7 +377,7 @@ export default function RezervasyonForm() {
             setExtrasQty={setExtrasQty}
           />
         </div>
-        {/* KVKK Onay Kutusu */}
+        {/* KVKK */}
         <div className="md:col-span-2 flex items-center mt-6">
           <input
             type="checkbox"
@@ -437,13 +388,12 @@ export default function RezervasyonForm() {
             className="accent-[#bfa658] w-5 h-5"
           />
           <label htmlFor="kvkk" className="ml-2 text-[#ffeec2] text-sm">
-            <span className="underline cursor-pointer">
-              KVKK Aydınlatma Metni ve Politikası
-            </span>'nı okudum, onaylıyorum.
+            <span className="underline cursor-pointer">KVKK Aydınlatma Metni ve Politikası</span>'nı okudum, onaylıyorum.
           </label>
         </div>
         {fieldErrors.kvkk && <div className="text-red-400 text-xs mt-1 md:col-span-2">{fieldErrors.kvkk}</div>}
-        <div className="md:col-span-2 flex justify-end mt-6">
+
+        <div className="md:col-span-2 flex justify-center md:justify-end mt-6">
           <button
             type="submit"
             className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition"
@@ -456,5 +406,3 @@ export default function RezervasyonForm() {
     </section>
   );
 }
-
-// PATH: /app/rezervasyon/RezervasyonForm.jsx
