@@ -8,267 +8,219 @@ const heroImages = [
   "/Hero1.png", "/Hero2.png", "/Hero3.png", "/Hero4.png", "/Hero5.png",
   "/Hero6.png", "/Hero7.png", "/Hero8.png", "/Hero9.png"
 ];
-const ASPECT_RATIO = 16 / 7; // Geniş sinema hissi için
 
-function isMobileScreen() {
-  if (typeof window === "undefined") return false;
-  return window.innerWidth < 700;
-}
-
+// * Sağ-sol efektli ve kaydırmalı slider için*
 export default function HeroSlider() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [manualPause, setManualPause] = useState(false);
-  const pauseTimeoutRef = useRef();
-  const [isMobile, setIsMobile] = useState(isMobileScreen());
+  const [current, setCurrent] = useState(0);
+  const [dir, setDir] = useState("right"); // transition yönü
+  const [animating, setAnimating] = useState(false);
 
-  // Ekran boyutunu dinle
+  // Oto-ileri
   useEffect(() => {
-    const onResize = () => setIsMobile(isMobileScreen());
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
+    const timer = setTimeout(() => handleNav("right"), 8000);
+    return () => clearTimeout(timer);
+  }, [current]);
 
-  useEffect(() => {
-    if (manualPause) return;
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % heroImages.length);
-    }, 9000);
-    return () => clearInterval(interval);
-  }, [manualPause, currentSlide]);
+  // Kaydırma fonksiyonu
+  function handleNav(direction) {
+    if (animating) return;
+    setDir(direction);
+    setAnimating(true);
+    setTimeout(() => {
+      setCurrent((old) => {
+        if (direction === "right") return (old + 1) % heroImages.length;
+        else return (old - 1 + heroImages.length) % heroImages.length;
+      });
+      setAnimating(false);
+    }, 500); // animasyon süresi ile eşit
+  }
 
-  const handleNav = (dir) => {
-    setCurrentSlide(dir === "right"
-      ? (currentSlide + 1) % heroImages.length
-      : (currentSlide - 1 + heroImages.length) % heroImages.length
-    );
-    setManualPause(true);
-    if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current);
-    pauseTimeoutRef.current = setTimeout(() => setManualPause(false), 12000);
-  };
+  // Önceki ve sonraki indexler
+  const prevIdx = (current - 1 + heroImages.length) % heroImages.length;
+  const nextIdx = (current + 1) % heroImages.length;
 
-  // Touch için mobil swipe
-  const sliderRef = useRef(null);
-  let startX = null;
-  const handleTouchStart = (e) => { startX = e.touches[0].clientX; };
-  const handleTouchEnd = (e) => {
-    if (!startX) return;
-    let endX = e.changedTouches[0].clientX;
-    let diff = startX - endX;
-    if (Math.abs(diff) > 42) {
-      if (diff > 0) handleNav("right");
-      else handleNav("left");
-    }
-    startX = null;
-  };
-
-  // Slide index wrap-around
-  const prevIndex = (currentSlide - 1 + heroImages.length) % heroImages.length;
-  const nextIndex = (currentSlide + 1) % heroImages.length;
-
-  // === DESKTOP SLIDER ===
-  if (!isMobile) {
+  // Mobilde önceki gibi tam ekran kalsın (senin istediğin buydu)
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 700;
+  if (isMobile) {
     return (
       <section className="relative w-full flex flex-col items-center overflow-x-hidden select-none hero-cinema">
-        <div className="w-full h-6 block"></div>
-        <div
-          className="relative desktop-hero-img-box group"
-          style={{ margin: "0 auto" }}
-        >
-          {/* Önceki resmin fade-gölge gösterimi */}
-          <div
-            className="abs-img fade-left"
-            onClick={() => handleNav("left")}
-            title="Önceki"
-          >
-            <Image
-              src={heroImages[prevIndex]}
-              alt="Önceki"
-              fill
-              draggable={false}
-              className="img-fade"
-              style={{
-                objectFit: "cover",
-                objectPosition: "right center",
-                filter: "blur(4px) brightness(.6)",
-                opacity: 0.28
-              }}
-            />
+        <div className="w-full h-3 block"></div>
+        <div className="relative w-full mx-auto mob-slider-box">
+          <Image
+            src={heroImages[current]}
+            alt=""
+            fill
+            className="object-cover rounded-xl shadow-lg transition-all"
+            priority
+            draggable={false}
+            style={{ borderRadius: "10px" }}
+          />
+          <div className="absolute left-2 top-1/2 -translate-y-1/2 z-30">
+            <button
+              aria-label="Sol"
+              className="mob-arrow"
+              onClick={() => handleNav("left")}
+            >&#8592;</button>
           </div>
-          {/* Sonraki resmin fade-gölge gösterimi */}
-          <div
-            className="abs-img fade-right"
-            onClick={() => handleNav("right")}
-            title="Sonraki"
-          >
-            <Image
-              src={heroImages[nextIndex]}
-              alt="Sonraki"
-              fill
-              draggable={false}
-              className="img-fade"
-              style={{
-                objectFit: "cover",
-                objectPosition: "left center",
-                filter: "blur(4px) brightness(.6)",
-                opacity: 0.28
-              }}
-            />
-          </div>
-          {/* Asıl ana görsel */}
-          <div className="active-img-container">
-            <Image
-              src={heroImages[currentSlide]}
-              alt={`VIP Transfer ${currentSlide + 1}`}
-              fill
-              draggable={false}
-              priority
-              sizes="90vw"
-              className="img-main"
-              style={{
-                objectFit: "contain"
-              }}
-            />
-          </div>
-          {/* Dotlar */}
-          <div className="absolute bottom-5 left-0 w-full flex justify-center z-30 gap-2 select-none">
-            {heroImages.map((_, i) => (
-              <div
-                key={i}
-                className={`slider-dot ${i === currentSlide ? "active" : ""}`}
-                style={{
-                  transition: "all 0.33s cubic-bezier(.68,-0.55,.27,1.55)",
-                  transform: i === currentSlide ? "scale(1.35) translateY(-3px)" : "scale(1) translateY(0)",
-                  background: i === currentSlide
-                    ? "linear-gradient(135deg, #FFD700 60%, #fff60088 100%)"
-                    : "rgba(60,60,60,0.18)",
-                  boxShadow: i === currentSlide ? "0 2px 10px #FFD70088" : "none",
-                  border: i === currentSlide ? "2px solid #FFD700" : "1.2px solid #555",
-                  width: i === currentSlide ? "18px" : "12px",
-                  height: i === currentSlide ? "18px" : "12px",
-                  borderRadius: "6px",
-                  margin: "0 3px"
-                }}
-                onClick={() => setCurrentSlide(i)}
-              ></div>
-            ))}
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 z-30">
+            <button
+              aria-label="Sağ"
+              className="mob-arrow"
+              onClick={() => handleNav("right")}
+            >&#8594;</button>
           </div>
         </div>
         <style jsx>{`
-          .desktop-hero-img-box {
-            width: 86vw;
-            max-width: 1680px;
-            aspect-ratio: ${ASPECT_RATIO};
-            min-height: 350px;
-            max-height: 66vh;
-            border-radius: 24px;
-            box-shadow: 0 6px 28px #000c, 0 2.5px 12px #FFD70022;
-            position: relative;
-            overflow: visible;
-            display: flex;
-            align-items: center;
-            background: #000;
-          }
-          .active-img-container {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
-            border-radius: 24px;
-            overflow: hidden;
-          }
-          .img-main {
-            object-fit: contain !important;
-            width: 100%; height: 100%;
-            border-radius: 24px;
-            box-shadow: 0 1.5px 15px #FFD70018;
-            transition: opacity .7s;
-          }
-          .abs-img {
-            position: absolute;
-            top: 0; width: 11%; height: 100%;
-            min-width: 64px;
-            max-width: 120px;
-            z-index: 8;
-            cursor: pointer;
-            transition: opacity .23s;
-            overflow: hidden;
-            pointer-events: auto;
-          }
-          .fade-left { left: 0; border-top-left-radius: 24px; border-bottom-left-radius: 24px; }
-          .fade-right { right: 0; border-top-right-radius: 24px; border-bottom-right-radius: 24px; }
-          .img-fade {
-            object-fit: cover !important;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            user-select: none;
-          }
-          .slider-dot { display: inline-block; cursor: pointer;}
-          .slider-dot.active { animation: bounceDot 0.75s; }
-          @keyframes bounceDot {
-            0% { transform: scale(1) translateY(0);}
-            40% { transform: scale(1.5) translateY(-8px);}
-            80% { transform: scale(1.2) translateY(-3px);}
-            100% { transform: scale(1.35) translateY(-3px);}
+          .mob-slider-box { aspect-ratio: 1.78; min-height: 120px; }
+          .mob-arrow {
+            background: #FFD700;
+            border-radius: 100%;
+            border: none;
+            font-size: 1.5rem;
+            padding: 7px 13px;
+            color: #111;
+            box-shadow: 0 1px 8px #FFD70033;
           }
         `}</style>
       </section>
     );
   }
 
-  // === MOBILE SLIDER ===
+  // DESKTOP: büyük, “sinema” gibi ve sağ/sol blur/uzatma + animasyon
   return (
-    <section className="relative w-full flex flex-col items-center overflow-x-hidden select-none hero-cinema">
-      <div className="w-full h-4 block"></div>
-      <div
-        className="relative w-full mx-auto hero-img-box-mob"
-        ref={sliderRef}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {heroImages.map((src, idx) => (
+    <section className="relative w-full flex flex-col items-center select-none">
+      <div className="w-full h-8 block"></div>
+      <div className="cinema-slider-container">
+        {/* Önceki resim uzatma/fade */}
+        <div className="side-img side-left" onClick={() => handleNav("left")}>
           <Image
-            key={src}
-            src={src}
-            alt={`VIP Transfer ${idx + 1}`}
+            src={heroImages[prevIdx]}
+            alt=""
             fill
-            className={`object-cover transition-opacity duration-1000 ${currentSlide === idx ? "opacity-100 z-10" : "opacity-0 z-0"}`}
-            priority={idx === 0}
-            sizes="100vw"
+            className="object-cover blur-[3px]"
+            style={{
+              opacity: 0.23,
+              filter: "brightness(.75) blur(3.5px) grayscale(.18)"
+            }}
             draggable={false}
-            style={{ borderRadius: "11px", objectFit: "cover" }}
           />
-        ))}
-        <div className="absolute bottom-3 left-0 w-full flex justify-center z-30 gap-2 select-none">
+        </div>
+        {/* Sonraki resim uzatma/fade */}
+        <div className="side-img side-right" onClick={() => handleNav("right")}>
+          <Image
+            src={heroImages[nextIdx]}
+            alt=""
+            fill
+            className="object-cover blur-[3px]"
+            style={{
+              opacity: 0.23,
+              filter: "brightness(.75) blur(3.5px) grayscale(.18)"
+            }}
+            draggable={false}
+          />
+        </div>
+        {/* Asıl ana slider görseli */}
+        <div
+          className={
+            `main-img-zone ${animating ? (dir === "right" ? "anim-right" : "anim-left") : ""}`
+          }
+        >
+          <Image
+            src={heroImages[current]}
+            alt=""
+            fill
+            className="object-contain main-img"
+            priority
+            draggable={false}
+          />
+        </div>
+        {/* Dotlar */}
+        <div className="absolute bottom-7 left-0 w-full flex justify-center z-30 gap-2 select-none">
           {heroImages.map((_, i) => (
             <div
               key={i}
-              className={`slider-dot ${i === currentSlide ? "active" : ""}`}
+              className={`slider-dot ${i === current ? "active" : ""}`}
               style={{
-                transition: "all 0.33s cubic-bezier(.68,-0.55,.27,1.55)",
-                transform: i === currentSlide ? "scale(1.25) translateY(-2px)" : "scale(1) translateY(0)",
-                background: i === currentSlide
-                  ? "linear-gradient(135deg, #FFD700 60%, #fff60088 100%)"
-                  : "rgba(60,60,60,0.19)",
-                boxShadow: i === currentSlide ? "0 2px 10px #FFD70066" : "none",
-                border: i === currentSlide ? "2px solid #FFD700" : "1.1px solid #555",
-                width: i === currentSlide ? "14px" : "8px",
-                height: i === currentSlide ? "14px" : "8px",
-                borderRadius: "5px",
-                margin: "0 2px"
+                transition: "all 0.23s cubic-bezier(.68,-0.55,.27,1.55)",
+                transform: i === current ? "scale(1.25) translateY(-2px)" : "scale(1) translateY(0)",
+                background: i === current
+                  ? "linear-gradient(135deg, #FFD700 60%, #fff60099 100%)"
+                  : "rgba(60,60,60,0.16)",
+                boxShadow: i === current ? "0 2px 10px #FFD70066" : "none",
+                border: i === current ? "2px solid #FFD700" : "1.1px solid #555",
+                width: i === current ? "16px" : "10px",
+                height: i === current ? "16px" : "10px",
+                borderRadius: "7px",
+                margin: "0 3px"
               }}
-              onClick={() => setCurrentSlide(i)}
+              onClick={() => setCurrent(i)}
             ></div>
           ))}
         </div>
       </div>
       <style jsx>{`
-        .hero-img-box-mob {
-          width: 100vw;
-          aspect-ratio: 1.78;
-          min-height: 100px;
-          border-radius: 11px;
-          box-shadow: 0 3px 12px #0007, 0 1px 7px #FFD70022;
+        .cinema-slider-container {
+          width: 98vw; max-width: 1900px; aspect-ratio: 2.45;
+          min-height: 430px; max-height: 72vh;
+          position: relative;
+          display: flex; align-items: center; justify-content: center;
+          background: #131212;
+          border-radius: 29px;
+          overflow: visible;
+          box-shadow: 0 6px 36px #000a, 0 2.5px 16px #FFD70024;
         }
-        @media (max-width: 480px) {
-          .hero-img-box-mob { aspect-ratio: 1.72; min-height: 80px; border-radius: 7px; }
+        .side-img {
+          position: absolute;
+          top: 0; width: 17vw; min-width: 90px; max-width: 220px;
+          height: 100%; z-index: 2;
+          cursor: pointer; border-radius: 26px;
+          transition: opacity .28s;
+          overflow: hidden;
+        }
+        .side-left { left: -6px; box-shadow: -4px 0 18px #0005; }
+        .side-right { right: -6px; box-shadow: 4px 0 18px #0005; }
+        .main-img-zone {
+          position: relative;
+          width: 74vw; max-width: 1440px; height: 100%; aspect-ratio: 2.45;
+          z-index: 4; border-radius: 28px;
+          overflow: hidden;
+          background: #181817;
+          box-shadow: 0 3px 24px #FFD70014;
+          transition: box-shadow .22s;
+        }
+        .main-img {
+          object-fit: contain !important;
+          width: 100%; height: 100%;
+          border-radius: 28px;
+          box-shadow: 0 2.5px 15px #FFD70012;
+        }
+        /* Animasyonlar */
+        .anim-right { animation: slideRight .5s; }
+        .anim-left { animation: slideLeft .5s; }
+        @keyframes slideRight {
+          from { transform: translateX(54%); opacity: 0.3;}
+          to   { transform: translateX(0); opacity: 1;}
+        }
+        @keyframes slideLeft {
+          from { transform: translateX(-54%); opacity: 0.3;}
+          to   { transform: translateX(0); opacity: 1;}
+        }
+        .slider-dot { display: inline-block; cursor: pointer;}
+        .slider-dot.active { animation: bounceDot 0.45s; }
+        @keyframes bounceDot {
+          0% { transform: scale(1) translateY(0);}
+          40% { transform: scale(1.4) translateY(-8px);}
+          80% { transform: scale(1.2) translateY(-2px);}
+          100% { transform: scale(1.25) translateY(-2px);}
+        }
+        @media (max-width: 900px) {
+          .cinema-slider-container { width: 99vw; aspect-ratio: 2; }
+          .main-img-zone { width: 85vw; max-width: 98vw; }
+          .side-img { min-width: 50px; }
+        }
+        @media (max-width: 600px) {
+          .main-img-zone { border-radius: 14px; }
+          .side-img { border-radius: 12px; }
         }
       `}</style>
     </section>
