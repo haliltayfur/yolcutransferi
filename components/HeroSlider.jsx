@@ -1,7 +1,7 @@
 // === Dosya: components/HeroSlider.jsx ===
 
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
 const heroImages = [
@@ -9,62 +9,38 @@ const heroImages = [
   "/Hero6.png", "/Hero7.png", "/Hero8.png", "/Hero9.png"
 ];
 
-// **SVG Fish Scale MASK**
-const FishMask = ({ side }) => (
-  <svg width="100%" height="100%" style={{position:"absolute",top:0,left:0,pointerEvents:"none",zIndex:9}} viewBox="0 0 100 100" preserveAspectRatio="none">
-    <defs>
-      <linearGradient id={`fade${side}`} x1={side==="left"?1:0} y1="0" x2={side==="left"?0:1} y2="0">
-        <stop offset="0%" stopColor="#fff" stopOpacity="0.04"/>
-        <stop offset="60%" stopColor="#fff" stopOpacity="0.35"/>
-        <stop offset="85%" stopColor="#fff" stopOpacity="0.86"/>
-        <stop offset="100%" stopColor="#fff" stopOpacity="1"/>
-      </linearGradient>
-      <pattern id={`fish${side}`} patternUnits="userSpaceOnUse" width="16" height="14">
-        <ellipse cx="8" cy="7" rx="8" ry="7" fill={`url(#fade${side})`} />
-      </pattern>
-      <mask id={`fishMask${side}`}>
-        <rect width="100" height="100" fill={`url(#fish${side})`} />
-      </mask>
-    </defs>
-    <rect width="100" height="100" fill="#fff" mask={`url(#fishMask${side})`} />
-  </svg>
-);
-
 export default function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const sliderRef = useRef();
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const check = () => setIsMobile(window.innerWidth < 700);
+    const check = () => setIsMobile(window.innerWidth < 900);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // Otomatik geçiş
   useEffect(() => {
     if (isMobile) return;
     const timer = setTimeout(() => handleNav("right"), 9000);
     return () => clearTimeout(timer);
   }, [current, isMobile]);
 
-  function handleNav(direction) {
-    setCurrent((old) => {
-      if (direction === "right") return (old + 1) % heroImages.length;
-      else return (old - 1 + heroImages.length) % heroImages.length;
-    });
+  function handleNav(dir) {
+    setCurrent(prev =>
+      dir === "right"
+        ? (prev + 1) % heroImages.length
+        : (prev - 1 + heroImages.length) % heroImages.length
+    );
   }
 
-  const prevIdx = (current - 1 + heroImages.length) % heroImages.length;
-  const nextIdx = (current + 1) % heroImages.length;
-
-  // MOBILDE - ELLEME!
+  // === MOBILDE FULL-WIDTH, YÜKSEKLİK OTOMATİK, YANA OKLAR BUTONLAR ===
   if (isMobile) {
     return (
-      <section className="relative w-full flex flex-col items-center overflow-x-hidden select-none hero-cinema">
-        <div className="w-full h-3 block"></div>
-        <div className="relative w-full mob-slider-box aspect-[1.78]">
+      <section className="relative w-full select-none">
+        <div className="w-full h-3 block" />
+        <div className="relative w-full aspect-[1.78]">
           <Image
             src={heroImages[current]}
             alt=""
@@ -72,81 +48,102 @@ export default function HeroSlider() {
             className="object-cover rounded-xl shadow-lg transition-all"
             priority
             draggable={false}
-            style={{ borderRadius: "10px" }}
+            style={{ borderRadius: "11px" }}
           />
-          <div className="absolute left-2 top-1/2 -translate-y-1/2 z-30">
-            <button
-              aria-label="Sol"
-              className="mob-arrow"
-              onClick={() => handleNav("left")}
-            >&#8592;</button>
-          </div>
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 z-30">
-            <button
-              aria-label="Sağ"
-              className="mob-arrow"
-              onClick={() => handleNav("right")}
-            >&#8594;</button>
-          </div>
+          <button
+            aria-label="Önceki"
+            className="slider-arrow left-2"
+            style={{ left: 2 }}
+            onClick={() => handleNav("left")}
+          >&#8592;</button>
+          <button
+            aria-label="Sonraki"
+            className="slider-arrow right-2"
+            style={{ right: 2 }}
+            onClick={() => handleNav("right")}
+          >&#8594;</button>
+        </div>
+        <div className="flex justify-center gap-1 mt-3">
+          {heroImages.map((_, i) => (
+            <div
+              key={i}
+              className={`dot-mob ${i === current ? "active" : ""}`}
+              onClick={() => setCurrent(i)}
+            />
+          ))}
         </div>
         <style jsx>{`
-          .mob-slider-box { aspect-ratio: 1.78; min-height: 120px; }
-          .mob-arrow {
+          .slider-arrow {
+            position: absolute; top: 50%; z-index: 5;
+            transform: translateY(-50%);
             background: #FFD700;
-            border-radius: 100%;
-            border: none;
-            font-size: 1.5rem;
-            padding: 7px 13px;
-            color: #111;
-            box-shadow: 0 1px 8px #FFD70033;
+            border: none; border-radius: 50%;
+            color: #19160a;
+            font-size: 1.45rem;
+            padding: 7px 12px;
+            box-shadow: 0 1px 8px #FFD70035;
+            opacity: 0.86;
+            cursor: pointer;
+          }
+          .dot-mob {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #FFD70070;
+            margin: 0 2px;
+            cursor: pointer;
+          }
+          .dot-mob.active {
+            background: #FFD700;
+            border: 2px solid #fff9;
           }
         `}</style>
       </section>
     );
   }
 
-  // DESKTOP: BALIK DERİSİ EFFECT & MODERN!
+  // === DESKTOP: FULL-WIDTH SİNEMA SLIDER ===
   return (
-    <section className="relative w-full flex flex-col items-center select-none">
-      <div className="w-full h-8 block"></div>
-      <div className="fish-cinema-slider">
-        {/* Balık derisi parçalı efekti: Sol */}
-        <div className="fish-side fish-left" onClick={() => handleNav("left")}>
-          <Image
-            src={heroImages[prevIdx]}
-            alt="Önceki"
-            fill
-            className="object-cover fish-img"
-            draggable={false}
-            style={{ filter: "blur(2px) grayscale(20%) brightness(0.75)", opacity: .38 }}
-          />
-          <FishMask side="left"/>
-        </div>
-        {/* Balık derisi parçalı efekti: Sağ */}
-        <div className="fish-side fish-right" onClick={() => handleNav("right")}>
-          <Image
-            src={heroImages[nextIdx]}
-            alt="Sonraki"
-            fill
-            className="object-cover fish-img"
-            draggable={false}
-            style={{ filter: "blur(2px) grayscale(20%) brightness(0.75)", opacity: .38 }}
-          />
-          <FishMask side="right"/>
-        </div>
-        {/* Asıl ana slider görseli */}
-        <div className="fish-main">
-          <Image
-            src={heroImages[current]}
-            alt=""
-            fill
-            className="object-contain main-img"
-            priority
-            draggable={false}
-          />
-        </div>
+    <section className="relative w-full select-none flex flex-col items-center">
+      <div className="w-full h-8 block" /> {/* Header'dan boşluk */}
+      <div
+        ref={sliderRef}
+        className="cinema-slider-desktop relative flex items-center justify-center overflow-hidden rounded-3xl"
+        style={{
+          width: "min(94vw, 1850px)",
+          height: "min(70vw, 610px)",
+          minHeight: "360px",
+          maxHeight: "610px",
+          boxShadow: "0 10px 34px #000b, 0 4px 24px #FFD70018"
+        }}
+      >
+        <Image
+          src={heroImages[current]}
+          alt=""
+          fill
+          priority
+          draggable={false}
+          className="object-contain transition-all"
+          style={{
+            objectFit: "contain",
+            width: "100%",
+            height: "100%",
+            borderRadius: "22px"
+          }}
+        />
+        <button
+          aria-label="Önceki"
+          className="slider-arrow left-4"
+          style={{ left: 14 }}
+          onClick={() => handleNav("left")}
+        >&#8592;</button>
+        <button
+          aria-label="Sonraki"
+          className="slider-arrow right-4"
+          style={{ right: 14 }}
+          onClick={() => handleNav("right")}
+        >&#8594;</button>
         {/* Dotlar */}
-        <div className="absolute bottom-8 left-0 w-full flex justify-center z-30 gap-2 select-none">
+        <div className="absolute bottom-5 left-0 w-full flex justify-center z-30 gap-2 select-none">
           {heroImages.map((_, i) => (
             <div
               key={i}
@@ -157,44 +154,30 @@ export default function HeroSlider() {
         </div>
       </div>
       <style jsx>{`
-        .fish-cinema-slider {
-          width: 99vw; max-width: 1850px; aspect-ratio: 2.38;
-          min-height: 450px; max-height: 76vh;
-          position: relative; display: flex; align-items: center; justify-content: center;
-          background: #131212; border-radius: 28px;
-          overflow: visible;
-          box-shadow: 0 6px 32px #000b, 0 2.5px 15px #FFD70028;
+        .cinema-slider-desktop {
+          background: #191919;
         }
-        .fish-side {
-          position: absolute;
-          top: 0; width: 15vw; min-width: 110px; max-width: 200px;
-          height: 100%; z-index: 2; cursor: pointer; border-radius: 26px;
-          overflow: hidden;
-          transition: box-shadow .23s, filter .21s;
+        .slider-arrow {
+          position: absolute; top: 50%; z-index: 6;
+          transform: translateY(-50%);
+          background: #FFD700;
+          border: none; border-radius: 50%;
+          color: #19160a;
+          font-size: 2.15rem;
+          padding: 11px 17px;
+          box-shadow: 0 1px 14px #FFD70045;
+          opacity: 0.79;
+          cursor: pointer;
+          transition: opacity .18s;
         }
-        .fish-left { left: -6px; box-shadow: -4px 0 14px #0004; }
-        .fish-right { right: -6px; box-shadow: 4px 0 14px #0004; }
-        .fish-side:hover { box-shadow: 0 0 24px #FFD70066, 0 0 32px #FFD70022;}
-        .fish-img { width:100%;height:100%;object-fit:cover;}
-        .fish-main {
-          position: relative; z-index: 5;
-          width: 78vw; max-width: 1500px; height: 100%; aspect-ratio: 2.38;
-          border-radius: 27px; overflow: hidden;
-          background: #181817;
-        }
-        .main-img {
-          object-fit: contain !important;
-          width: 100%; height: 100%;
-          border-radius: 28px;
-          box-shadow: 0 2.5px 15px #FFD70012;
-        }
+        .slider-arrow:hover { opacity: 1; box-shadow: 0 1px 20px #FFD70080; }
         .slider-dot {
           background: #FFD70090;
-          border-radius: 50%; width: 12px; height: 12px;
-          margin: 0 4px; cursor: pointer;
+          border-radius: 50%; width: 14px; height: 14px;
+          margin: 0 3.5px; cursor: pointer;
           border: 2.5px solid #FFD70033;
-          transition: all 0.21s;
-          box-shadow: 0 1.5px 5px #FFD70020;
+          transition: all 0.17s;
+          box-shadow: 0 1.5px 5px #FFD70022;
         }
         .slider-dot.active {
           background: #FFD700;
@@ -202,12 +185,10 @@ export default function HeroSlider() {
           border: 2.5px solid #fff800;
         }
         @media (max-width: 1200px) {
-          .fish-cinema-slider { min-height: 350px; }
-          .fish-main { width: 82vw; }
+          .cinema-slider-desktop { height: min(67vw, 420px) !important; }
         }
         @media (max-width: 900px) {
-          .fish-cinema-slider { aspect-ratio: 2; min-height: 220px; }
-          .fish-main { width: 96vw; }
+          .cinema-slider-desktop { height: min(80vw, 270px) !important; }
         }
       `}</style>
     </section>
