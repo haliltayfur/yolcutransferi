@@ -1,14 +1,13 @@
 // === Dosya: components/TestimonialsSlider.jsx ===
 
 "use client";
-
 import { useState, useEffect } from "react";
 import { testimonials } from "../data/testimonials";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 900); // 900px altını mobile gibi ele al
+    const onResize = () => setIsMobile(window.innerWidth < 900);
     onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
@@ -57,21 +56,21 @@ export default function TestimonialsSlider() {
             key={idx}
             className="bg-[#181818] border border-gold/20 rounded-2xl px-6 py-5 shadow flex flex-col justify-between max-w-sm w-full transition-all"
             style={{
-              minHeight: isMobile ? 275 : 180, // %75 artırıldı
-              maxHeight: isMobile ? 330 : 230,
-              height: isMobile ? 275 : 180,
+              minHeight: isMobile ? 320 : 190,
+              maxHeight: isMobile ? 420 : 260,
+              height: "auto",
               boxShadow: "0 3px 18px #bfa65820",
             }}
           >
             <p
-              className="text-base font-medium mb-4"
+              className="text-[0.97rem] font-medium mb-4"
               style={{
-                lineHeight: "1.5em",
-                height: isMobile ? "6.7em" : "4em", // 4-5 satır sığar
+                lineHeight: "1.45em",
+                height: isMobile ? "10em" : "5.5em", // mobilde ~7 satıra kadar izin ver
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 display: "-webkit-box",
-                WebkitLineClamp: isMobile ? 5 : 3,
+                WebkitLineClamp: isMobile ? 7 : 4,
                 WebkitBoxOrient: "vertical",
               }}
             >
@@ -90,14 +89,13 @@ export default function TestimonialsSlider() {
         ))}
       </div>
       <style jsx>{`
-        @media (max-width: 640px) {
-          .text-4xl { font-size: 1.4rem !important; }
-          .max-w-sm { max-width: 98vw !important; }
-          .px-6 { padding-left: 10px !important; padding-right: 10px !important; }
+        @media (max-width: 700px) {
+          .max-w-sm { max-width: 99vw !important; }
+          .px-6 { padding-left: 7px !important; padding-right: 7px !important; }
         }
         @media (max-width: 400px) {
           .text-4xl { font-size: 1.13rem !important; }
-          .px-6 { padding-left: 6px !important; padding-right: 6px !important; }
+          .px-6 { padding-left: 4px !important; padding-right: 4px !important; }
         }
       `}</style>
     </section>
