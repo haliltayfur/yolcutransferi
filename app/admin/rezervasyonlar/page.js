@@ -1,3 +1,4 @@
+// app/admin/rezervasyonlar/page.js
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 
@@ -181,9 +182,9 @@ export default function AdminRezervasyonlar() {
       </div>
       <div className="overflow-x-auto bg-black/80 rounded-2xl border-2 border-[#bfa658]">
         {loading ? (
-          <p className="text-center py-6 text-gray-300">Yükleniyor...</p>
+          <p className="text-center py-6 text-gray-300 text-xl">Yükleniyor...</p>
         ) : list.length === 0 ? (
-          <p className="text-center py-6 text-gray-300">Hiç kayıt yok.</p>
+          <p className="text-center py-10 text-gray-400 text-xl font-semibold">Hiç kayıt yok.</p>
         ) : (
           <table className="w-full border-collapse min-w-[900px] text-sm">
             <thead>
@@ -238,3 +239,4 @@ export default function AdminRezervasyonlar() {
     </main>
   );
 }
+// app/admin/rezervasyonlar/page.js
