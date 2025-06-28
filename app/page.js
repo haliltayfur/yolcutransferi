@@ -14,7 +14,7 @@ export default function Home() {
       <HeroSlider />
       <section
         className="
-          flex flex-row justify-center items-start
+          flex flex-col lg:flex-row justify-center items-start
           gap-[10px]
           w-full max-w-[1260px] mx-auto
           px-2 md:px-0
@@ -32,22 +32,22 @@ export default function Home() {
             flex flex-col justify-center
             bg-black/85 border border-[#bfa658]
             rounded-2xl shadow-2xl
+            w-full lg:w-[800px]
+            min-h-[600px]
             p-0
           "
           style={{
-            width: 800,
-            height: 600,
-            minWidth: 800,
-            minHeight: 600,
+            minWidth: 0,
+            height: "auto",
             boxSizing: "border-box",
           }}
         >
           <VipTransferForm />
         </div>
-        {/* VIDEO */}
+        {/* VIDEO - SADECE LG VE ÜZERİ */}
         <div
           className="
-            flex items-center justify-center
+            hidden lg:flex items-center justify-center
             rounded-2xl overflow-hidden shadow-2xl border border-[#bfa658]
             bg-black/90
           "
