@@ -1,3 +1,5 @@
+// PATH: /app/rezervasyon/AdresAutoComplete.jsx
+
 "use client";
 import { useState, useEffect, useRef } from "react";
 
@@ -114,3 +116,4 @@ export default function AdresAutoComplete({ value, onChange, placeholder }) {
     </div>
   );
 }
+// PATH: /app/rezervasyon/AdresAutoComplete.jsx
