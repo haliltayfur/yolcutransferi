@@ -83,16 +83,16 @@ export default function Footer() {
               boxShadow: "0 3px 18px #bfa65833",
             }}
           >
-            <Image src="/tursab.png" alt="TÜRSAB" width={48} height={21} className="footer-card-img desktop-logo" />
-            <Image src="/mastercard.png" alt="MasterCard" width={48} height={21} className="footer-card-img desktop-logo" />
-            <Image src="/visa.png" alt="Visa" width={48} height={21} className="footer-card-img desktop-logo" />
-            <Image src="/Troy.png" alt="TROY" width={48} height={21} className="footer-card-img desktop-logo" />
-            <Image src="/iyzico.png" alt="iyzico" width={54} height={21} className="footer-card-img desktop-logo" />
+            <Image src="/tursab.png" alt="TÜRSAB" width={48} height={24} className="footer-card-img desktop-logo" />
+            <Image src="/mastercard.png" alt="MasterCard" width={48} height={24} className="footer-card-img desktop-logo" />
+            <Image src="/visa.png" alt="Visa" width={48} height={24} className="footer-card-img desktop-logo" />
+            <Image src="/Troy.png" alt="TROY" width={48} height={24} className="footer-card-img desktop-logo" />
+            <Image src="/iyzico.png" alt="iyzico" width={54} height={24} className="footer-card-img desktop-logo" />
           </div>
         </div>
       </div>
 
-      {/* Mobilde iletişim ve logolar AYNEN mevcut haliyle, elleme */}
+      {/* Mobilde iletişim ve logolar */}
       <div className="md:hidden flex flex-col items-start mt-2 mb-2 w-full max-w-6xl mx-auto pl-2">
         <h3 className="text-gold text-[1.08rem] font-bold mb-2 tracking-wide">İletişim</h3>
         <div className="flex items-center gap-3 text-[1.11rem] mb-2">
@@ -103,7 +103,7 @@ export default function Footer() {
           <a href="https://www.linkedin.com/company/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="LinkedIn"><FaLinkedin size={19} /></a>
           <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="X"><SiX size={19} /></a>
         </div>
-        {/* Mobilde logolar yine alt banda, aynı şekilde */}
+        {/* Mobilde logolar: büyük, yüksekliği eşit, padding ayarlı */}
         <div
           className="logo-band mt-2"
           style={{
@@ -115,20 +115,21 @@ export default function Footer() {
             alignItems: "center",
             justifyContent: "space-between",
             width: "98vw",
-            maxWidth: 370,
-            padding: "5px 10px",
+            maxWidth: 400,
+            padding: "6px 13px",
             marginLeft: 0,
-            marginTop: 5,
+            marginTop: 7,
             marginBottom: 4,
-            gap: "10px",
+            gap: "15px",
             boxShadow: "0 3px 12px #bfa65833",
           }}
         >
-          <Image src="/tursab.png" alt="TÜRSAB" width={28} height={13} className="footer-card-img mobile-logo" />
-          <Image src="/mastercard.png" alt="MasterCard" width={28} height={13} className="footer-card-img mobile-logo" />
-          <Image src="/visa.png" alt="Visa" width={28} height={13} className="footer-card-img mobile-logo" />
-          <Image src="/Troy.png" alt="TROY" width={28} height={13} className="footer-card-img mobile-logo" />
-          <Image src="/iyzico.png" alt="iyzico" width={32} height={13} className="footer-card-img mobile-logo" />
+          {/* Tüm logolar aynı yükseklik! */}
+          <Image src="/tursab.png" alt="TÜRSAB" width={36} height={27} className="footer-card-img mobile-logo" />
+          <Image src="/mastercard.png" alt="MasterCard" width={36} height={27} className="footer-card-img mobile-logo" />
+          <Image src="/visa.png" alt="Visa" width={36} height={27} className="footer-card-img mobile-logo" />
+          <Image src="/Troy.png" alt="TROY" width={36} height={27} className="footer-card-img mobile-logo" />
+          <Image src="/iyzico.png" alt="iyzico" width={42} height={27} className="footer-card-img mobile-logo" />
         </div>
       </div>
 
@@ -171,21 +172,22 @@ export default function Footer() {
         .footer-card-img {
           background: transparent;
           border-radius: 7px;
-          padding: 1.5px 5px;
-          height: 21px !important;
-          width: auto !important;
+          padding: 2px 7px;
           object-fit: contain;
           display: inline-block;
+          transition: all .2s;
         }
+        .desktop-logo { height: 24px !important; }
+        .mobile-logo { height: 27px !important; }
         @media (max-width: 900px) {
           .desktop-logo { height: 19px !important; padding: 2px 4px; width: auto !important; }
         }
         @media (max-width: 600px) {
-          .footer-card-img { height: 17px !important; padding: 1.5px 3px; }
+          .footer-card-img { height: 19px !important; }
           .logo-band { padding-left: 5px !important; padding-right: 5px !important; }
         }
         @media (max-width: 480px) {
-          .footer-card-img { height: 11px !important; padding: 1.5px 2px; }
+          .footer-card-img { height: 14px !important; }
           .logo-band { padding-left: 3px !important; padding-right: 3px !important; }
         }
       `}</style>
