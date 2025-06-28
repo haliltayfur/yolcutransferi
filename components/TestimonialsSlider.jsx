@@ -8,7 +8,7 @@ import { testimonials } from "../data/testimonials";
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 768);
+    const onResize = () => setIsMobile(window.innerWidth < 900); // 900px altını mobile gibi ele al
     onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
@@ -23,16 +23,18 @@ export default function TestimonialsSlider() {
   useEffect(() => {
     const interval = setInterval(() => {
       setTestimonialIndex(idx =>
-        isMobile
-          ? (idx + 1) % testimonials.length
-          : (idx + 3) % testimonials.length
+        (idx + (isMobile ? 2 : 3)) % testimonials.length
       );
     }, 10000);
     return () => clearInterval(interval);
   }, [isMobile, testimonialIndex]);
 
   const getVisibleTestimonials = () => {
-    if (isMobile) return [testimonials[testimonialIndex % testimonials.length]];
+    if (isMobile)
+      return [
+        testimonials[testimonialIndex % testimonials.length],
+        testimonials[(testimonialIndex + 1) % testimonials.length]
+      ];
     return [
       testimonials[testimonialIndex % testimonials.length],
       testimonials[(testimonialIndex + 1) % testimonials.length],
@@ -45,27 +47,31 @@ export default function TestimonialsSlider() {
       <h2 className="text-4xl font-bold mb-2.5 text-gold text-center">
         Müşteri Deneyimleri & Yorumları
       </h2>
-      <div className={`flex ${isMobile ? "flex-col items-center" : "flex-row"} gap-5 justify-center transition-all`}>
+      <div
+        className={`grid ${
+          isMobile ? "grid-cols-2" : "grid-cols-3"
+        } gap-5 justify-center transition-all w-full`}
+      >
         {getVisibleTestimonials().map((item, idx) => (
           <div
             key={idx}
-            className="bg-[#181818] border border-gold/20 rounded-2xl px-6 py-5 shadow flex flex-col justify-between min-h-[158px] max-w-sm w-full transition-all"
+            className="bg-[#181818] border border-gold/20 rounded-2xl px-6 py-5 shadow flex flex-col justify-between max-w-sm w-full transition-all"
             style={{
-              minHeight: 158,
-              maxHeight: 158,
-              height: 158,
+              minHeight: isMobile ? 275 : 180, // %75 artırıldı
+              maxHeight: isMobile ? 330 : 230,
+              height: isMobile ? 275 : 180,
               boxShadow: "0 3px 18px #bfa65820",
             }}
           >
             <p
               className="text-base font-medium mb-4"
               style={{
-                lineHeight: "1.35em",
-                height: "3.7em",
+                lineHeight: "1.5em",
+                height: isMobile ? "6.7em" : "4em", // 4-5 satır sığar
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 display: "-webkit-box",
-                WebkitLineClamp: 3,
+                WebkitLineClamp: isMobile ? 5 : 3,
                 WebkitBoxOrient: "vertical",
               }}
             >
