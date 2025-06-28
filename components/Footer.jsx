@@ -78,7 +78,7 @@ export default function Footer() {
       </div>
       {/* Alt BAND */}
       <div className="w-full flex flex-col items-center justify-center max-w-6xl mx-auto pt-2 pb-1">
-        {/* LOGO BANT (YENİ TASARIM) */}
+        {/* LOGO BANT (ARKA BEYAZ, ÇERÇEVE GOLD, YUVARLAK) */}
         <div
           className="
             flex flex-row items-center
@@ -90,11 +90,13 @@ export default function Footer() {
             rounded-2xl
             mb-1
             logo-band
+            logo-band-white
           "
           style={{
-            border: "1.8px solid #bfa658",
-            background: "#23201a",
-            minHeight: "49px",
+            border: "2px solid #bfa658",
+            background: "#fff",
+            minHeight: "51px",
+            boxShadow: "0 2px 12px #bfa65825"
           }}
         >
           <Image src="/tursab.png" alt="TÜRSAB" width={75} height={34} className="footer-card-img" />
@@ -133,14 +135,18 @@ export default function Footer() {
           transform: scale(1.11);
         }
         .footer-card-img {
-          background: #fff;
+          background: transparent;
           border-radius: 8px;
           padding: 3px 14px;
           height: 34px !important;
           width: auto !important;
           object-fit: contain;
-          box-shadow: 0 1px 8px 0 #3332;
           display: inline-block;
+        }
+        .logo-band-white {
+          background: #fff !important;
+          border: 2px solid #bfa658 !important;
+          border-radius: 20px !important;
         }
         @media (max-width: 900px) {
           .max-w-6xl { max-width: 98vw !important; }
