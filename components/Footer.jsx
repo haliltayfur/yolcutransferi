@@ -11,7 +11,7 @@ export default function Footer() {
       {/* Ana GRID: Mobilde 2 sütun, masaüstünde 3 sütun */}
       <div className="max-w-6xl mx-auto w-full grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-4 pb-4">
         {/* VIP Hizmetler */}
-        <div>
+        <div className="pl-2 md:pl-4">
           <h3 className="text-gold text-[1.08rem] font-bold mb-2 tracking-wide">VIP Hizmetler</h3>
           <ul className="flex flex-col gap-1 text-[0.97rem]">
             <li><a href="/vip-havalimani" className="footer-link">Havalimanı VIP Transfer</a></li>
@@ -23,11 +23,10 @@ export default function Footer() {
           </ul>
         </div>
         {/* Kurumsal & Yasal */}
-        <div>
+        <div className="pl-2 md:pl-4">
           <h3 className="text-gold text-[1.08rem] font-bold mb-2 tracking-wide">Kurumsal & Yasal</h3>
           <ul className="flex flex-col gap-1 text-[0.97rem]">
             <li><a href="/hakkimizda" className="footer-link">Hakkımızda</a></li>
-            {/* <li><a href="/kvkk" className="footer-link md:inline hidden">KVKK</a></li>  Mobilde gizli! */}
             <li className="md:block hidden"><a href="/kvkk" className="footer-link">KVKK</a></li>
             <li><a href="/gizlilik-politikasi" className="footer-link">Gizlilik</a></li>
             <li><a href="/kullanim-sartlari" className="footer-link">Kullanım Şartları</a></li>
