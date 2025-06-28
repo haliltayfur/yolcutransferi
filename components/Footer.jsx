@@ -86,12 +86,30 @@ export default function Footer() {
       </div>
       {/* Alt BAND */}
       <div className="w-full flex flex-col items-center justify-center max-w-6xl mx-auto pt-2 pb-1">
-        <div className="footer-cards flex flex-row items-center justify-center gap-3 flex-wrap mb-1">
-          <Image src="/tursab.png" alt="TÜRSAB" width={55} height={23} className="footer-card-img" />
-          <Image src="/mastercard.png" alt="MasterCard" width={41} height={23} className="footer-card-img" />
-          <Image src="/visa.png" alt="Visa" width={41} height={23} className="footer-card-img" />
-          <Image src="/Troy.png" alt="TROY" width={41} height={23} className="footer-card-img" />
-          <Image src="/iyzico.png" alt="iyzico" width={48} height={23} className="footer-card-img" />
+        {/* LOGO BANT (YENİ TASARIM) */}
+        <div
+          className="
+            flex flex-row items-center
+            justify-between
+            gap-5
+            w-full
+            bg-[#181818]
+            px-3
+            py-2
+            rounded-2xl
+            mb-1
+          "
+          style={{
+            borderLeft: "1px solid #bfa65866",
+            borderRight: "1px solid #bfa65866",
+            minHeight: "47px",
+          }}
+        >
+          <Image src="/tursab.png" alt="TÜRSAB" width={70} height={32} className="footer-card-img" />
+          <Image src="/mastercard.png" alt="MasterCard" width={52} height={32} className="footer-card-img" />
+          <Image src="/visa.png" alt="Visa" width={52} height={32} className="footer-card-img" />
+          <Image src="/Troy.png" alt="TROY" width={52} height={32} className="footer-card-img" />
+          <Image src="/iyzico.png" alt="iyzico" width={61} height={32} className="footer-card-img" />
         </div>
         <div className="text-[15px] text-gray-400 font-light text-center mb-0">
           © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
@@ -124,12 +142,12 @@ export default function Footer() {
         }
         .footer-card-img {
           background: #fff;
-          border-radius: 7px;
-          padding: 2px 8px;
-          height: 23px !important;
+          border-radius: 8px;
+          padding: 3px 13px;
+          height: 32px !important;
           width: auto !important;
           object-fit: contain;
-          box-shadow: 0 1px 6px 0 #3331;
+          box-shadow: 0 1px 8px 0 #3332;
           display: inline-block;
         }
         @media (max-width: 900px) {
@@ -137,13 +155,16 @@ export default function Footer() {
         }
         @media (max-width: 650px) {
           .grid-cols-2 { grid-template-columns: 1fr 1fr !important; }
-          .footer-cards { gap: 3px !important; }
           .footer-link, h3 { font-size: 0.95rem !important; }
         }
+        @media (max-width: 600px) {
+          .footer-card-img { height: 25px !important; padding: 3px 7px; }
+        }
         @media (max-width: 480px) {
-          .footer-card-img { height: 16px !important; }
+          .footer-card-img { height: 18px !important; padding: 2px 5px; }
           .footer-link, h3 { font-size: 0.85rem !important; }
           .text-[15px] { font-size: 0.74rem !important; }
+          .px-3 { padding-left: 6px !important; padding-right: 6px !important; }
         }
       `}</style>
     </footer>
