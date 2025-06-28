@@ -33,7 +33,10 @@ export default function HeroSlider() {
   };
 
   return (
-    <section className="relative w-full flex items-center justify-center overflow-hidden select-none hero-slider-cinema">
+    <section className="relative w-full flex items-center justify-center overflow-hidden select-none hero-slider-cinema-v2">
+      {/* SİYAH ARKA PLAN */}
+      <div className="absolute inset-0 bg-black z-0" />
+      {/* RESİMLER */}
       {heroImages.map((src, idx) => (
         <div
           key={src}
@@ -43,7 +46,6 @@ export default function HeroSlider() {
           style={{
             width: "100%",
             height: "100%",
-            background: "#000"
           }}
         >
           <Image
@@ -59,8 +61,9 @@ export default function HeroSlider() {
               height: "100%",
               maxHeight: "100%",
               maxWidth: "100%",
-              transition: "opacity 0.9s",
-              background: "#000"
+              background: "#000",
+              borderRadius: "18px",
+              boxShadow: "0 2px 24px 0 #0006"
             }}
           />
         </div>
@@ -69,7 +72,7 @@ export default function HeroSlider() {
       <button
         onClick={() => handleNav("left")}
         aria-label="Önceki"
-        className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-30 bg-black/25 hover:bg-gold/40 transition rounded-full w-11 h-11 flex items-center justify-center text-white opacity-60 hover:opacity-90 text-2xl"
+        className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 z-30 bg-black/40 hover:bg-gold/40 transition rounded-full w-11 h-11 flex items-center justify-center text-white opacity-60 hover:opacity-90 text-2xl"
         style={{ outline: "none", border: "none" }}
       >
         &#8592;
@@ -77,7 +80,7 @@ export default function HeroSlider() {
       <button
         onClick={() => handleNav("right")}
         aria-label="Sonraki"
-        className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-30 bg-black/25 hover:bg-gold/40 transition rounded-full w-11 h-11 flex items-center justify-center text-white opacity-60 hover:opacity-90 text-2xl"
+        className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 z-30 bg-black/40 hover:bg-gold/40 transition rounded-full w-11 h-11 flex items-center justify-center text-white opacity-60 hover:opacity-90 text-2xl"
         style={{ outline: "none", border: "none" }}
       >
         &#8594;
@@ -88,37 +91,57 @@ export default function HeroSlider() {
           <span
             key={i}
             className={`w-3 h-3 rounded-full ${i === currentSlide ? "bg-gold" : "bg-white/20"} border border-gold transition`}
-            style={{ display: "inline-block" }}
+            style={{ display: "inline-block", cursor: "pointer" }}
             onClick={() => { setCurrentSlide(i); setManualPause(true); }}
           />
         ))}
       </div>
+      {/* RESPONSIVE STİL */}
       <style jsx>{`
-        .hero-slider-cinema {
-          min-height: 260px;
-          height: 36vw;
-          max-height: 540px;
+        .hero-slider-cinema-v2 {
+          width: 100vw;
+          max-width: 100vw;
+          min-height: 45vw;
+          height: 46vw;
+          max-height: 63vh;
           background: #000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        @media (min-width: 1600px) {
+          .hero-slider-cinema-v2 {
+            min-height: 32vw;
+            height: 33vw;
+            max-height: 640px;
+          }
+        }
+        @media (max-width: 1200px) {
+          .hero-slider-cinema-v2 {
+            min-height: 38vw;
+            height: 45vw;
+            max-height: 52vw;
+          }
         }
         @media (max-width: 900px) {
-          .hero-slider-cinema {
-            min-height: 180px;
-            height: 45vw;
-            max-height: 340px;
+          .hero-slider-cinema-v2 {
+            min-height: 27vw;
+            height: 44vw;
+            max-height: 300px;
           }
         }
-        @media (max-width: 600px) {
-          .hero-slider-cinema {
+        @media (max-width: 700px) {
+          .hero-slider-cinema-v2 {
             min-height: 160px;
-            height: 48vw;
-            max-height: 220px;
+            height: 44vw;
+            max-height: 230px;
           }
         }
-        @media (max-width: 420px) {
-          .hero-slider-cinema {
-            min-height: 118px;
+        @media (max-width: 450px) {
+          .hero-slider-cinema-v2 {
+            min-height: 95px;
             height: 52vw;
-            max-height: 170px;
+            max-height: 128px;
           }
         }
       `}</style>
