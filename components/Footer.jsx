@@ -5,7 +5,7 @@ import { SiX } from "react-icons/si";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#151310] pt-12 pb-3 px-3 border-t border-[#FFD70022] text-gray-200 font-sans">
+    <footer className="bg-[#151310] pt-12 pb-3 px-3 border-t border-[#FFD70022] text-gray-200 font-sans z-50">
       {/* Ana GRID */}
       <div className="w-full flex justify-center">
         <div className="
@@ -72,13 +72,13 @@ export default function Footer() {
         </div>
       </div>
       {/* ALT BAND: Mobilde blok blok, masaüstünde yatayda üçe bölünür */}
-      <div className="w-full flex flex-col md:flex-row md:items-center justify-between max-w-6xl mx-auto pt-6 pb-2 gap-2">
+      <div className="footer-bottom-mobile w-full flex flex-col md:flex-row md:items-center justify-between max-w-6xl mx-auto pt-6 pb-2 gap-2">
         {/* Telif */}
         <div className="text-[15px] text-gray-400 flex-1 flex justify-center md:justify-start items-center">
           © {new Date().getFullYear()} <span className="text-gold font-semibold ml-1">YolcuTransferi.com</span> • Tüm hakları saklıdır.
         </div>
         {/* Orta logolar */}
-        <div className="flex flex-row items-center justify-center gap-3 flex-1">
+        <div className="footer-cards flex flex-row items-center justify-center gap-3 flex-1 flex-wrap">
           <Image src="/tursab.png" alt="TÜRSAB" width={54} height={28} className="footer-card-img" style={{objectFit:"contain"}} />
           <Image src="/mastercard.png" alt="MasterCard" width={44} height={28} className="footer-card-img" style={{objectFit:"contain"}} />
           <Image src="/visa.png" alt="Visa" width={44} height={28} className="footer-card-img" style={{objectFit:"contain"}} />
@@ -86,7 +86,7 @@ export default function Footer() {
           <Image src="/iyzico.png" alt="iyzico" width={54} height={30} className="footer-card-img" style={{objectFit:"contain"}} />
         </div>
         {/* Sağ Menü */}
-        <div className="flex gap-3 flex-1 justify-center md:justify-end items-center text-base">
+        <div className="footer-legal flex gap-3 flex-1 justify-center md:justify-end items-center text-base">
           <a href="/kvkk" className="footer-link">KVKK</a>
           <span className="hidden xs:inline">|</span>
           <a href="/gizlilik-politikasi" className="footer-link">Gizlilik</a>
@@ -130,7 +130,35 @@ export default function Footer() {
           display: inline-block;
         }
         @media (max-width: 700px) {
-          .footer-card-img { height: 25px !important; padding: 2px 5px; }
+          .footer-card-img { height: 22px !important; padding: 2px 6px; }
+        }
+        @media (max-width: 600px) {
+          .footer-bottom-mobile {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+          }
+          .footer-cards {
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            margin: 0 auto 0.4rem auto !important;
+          }
+          .footer-legal {
+            flex-direction: row;
+            justify-content: center !important;
+            font-size: 14px !important;
+            gap: 10px !important;
+            margin-bottom: 4px;
+          }
+          .footer-bottom-mobile > div {
+            justify-content: center !important;
+            text-align: center !important;
+          }
+        }
+        @media (max-width: 450px) {
+          .footer-card-img { height: 17px !important; }
+          .footer-link { font-size: 0.99rem !important; }
         }
       `}</style>
     </footer>
