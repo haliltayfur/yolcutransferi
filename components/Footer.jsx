@@ -2,7 +2,7 @@
 
 "use client";
 import Image from "next/image";
-import { FaWhatsapp, FaInstagram, FaPhoneAlt, FaEnvelope, FaLinkedin } from "react-icons/fa";
+import { FaWhatsapp, FaInstagram, FaPhoneAlt, FaEnvelope, FaLinkedin, FaMapMarkerAlt } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
 export default function Footer() {
@@ -68,44 +68,71 @@ export default function Footer() {
       <div className="md:hidden flex flex-row items-center gap-3 mt-2 mb-2 w-full max-w-6xl mx-auto pl-2">
         <h3 className="text-gold text-[1.08rem] font-bold tracking-wide m-0">İletişim</h3>
         <div className="flex items-center gap-2 ml-1">
-          <a href="tel:+905395267569" className="footer-social" aria-label="Telefon"><FaPhoneAlt size={19} /></a>
-          <a href="mailto:info@yolcutransferi.com" className="footer-social" aria-label="Mail"><FaEnvelope size={18} /></a>
-          <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="WhatsApp"><FaWhatsapp size={18} /></a>
-          <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="Instagram"><FaInstagram size={17} /></a>
-          <a href="https://www.linkedin.com/company/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="LinkedIn"><FaLinkedin size={17} /></a>
-          <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="X"><SiX size={17} /></a>
+          <a href="tel:+905395267569" className="footer-social" aria-label="Telefon"><FaPhoneAlt size={17} /></a>
+          <a href="mailto:info@yolcutransferi.com" className="footer-social" aria-label="Mail"><FaEnvelope size={16} /></a>
+          <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="WhatsApp"><FaWhatsapp size={16} /></a>
+          <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="Instagram"><FaInstagram size={15} /></a>
+          <a href="https://www.linkedin.com/company/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="LinkedIn"><FaLinkedin size={15} /></a>
+          <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="X"><SiX size={15} /></a>
         </div>
       </div>
       {/* Alt BAND: LOGO BANDI KOYU - GOLD ÇERÇEVE, kırık beyaz fon, responsive */}
       <div className="w-full flex flex-col items-center justify-center max-w-6xl mx-auto pt-2 pb-1">
+        {/* Türkiye Geneli ve logolar kutusu */}
         <div
-          className="
-            flex flex-row items-center
-            justify-between
-            gap-6
-            w-full
-            px-5
-            py-3
-            rounded-2xl
-            mb-1
-            logo-band
-            logo-band-light
-          "
-          style={{
-            border: "2px solid #bfa658",
-            background: "#f6f5f2", // kırık beyaz
-            minHeight: "46px",
-            boxShadow: "0 2px 16px #bfa65818"
-          }}
+          className="w-full flex flex-col items-center justify-center"
+          style={{marginBottom: "5px"}}
         >
-          <Image src="/tursab.png" alt="TÜRSAB" width={72} height={32} className="footer-card-img desktop-logo" />
-          <Image src="/mastercard.png" alt="MasterCard" width={72} height={32} className="footer-card-img desktop-logo" />
-          <Image src="/visa.png" alt="Visa" width={72} height={32} className="footer-card-img desktop-logo" />
-          <Image src="/Troy.png" alt="TROY" width={72} height={32} className="footer-card-img desktop-logo" />
-          <Image src="/iyzico.png" alt="iyzico" width={80} height={32} className="footer-card-img desktop-logo" />
-        </div>
-        <div className="text-[15px] text-gray-400 font-light text-center mb-0">
-          © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
+          {/* Sadece desktopta göster */}
+          <div className="hidden md:flex items-center justify-center w-full">
+            <div
+              className="flex flex-row items-center justify-between px-5 py-2 rounded-2xl logo-band-gold"
+              style={{
+                border: "2.5px solid #bfa658",
+                background: "#23201a",
+                minHeight: "44px",
+                width: "470px", // Ekrana göre ortalanır ve aynı genişlikte kalır
+                margin: "0 auto",
+                boxShadow: "0 2px 16px #bfa65818"
+              }}
+            >
+              <Image src="/tursab.png" alt="TÜRSAB" width={48} height={20} className="footer-card-img desktop-logo" />
+              <Image src="/mastercard.png" alt="MasterCard" width={48} height={20} className="footer-card-img desktop-logo" />
+              <Image src="/visa.png" alt="Visa" width={48} height={20} className="footer-card-img desktop-logo" />
+              <Image src="/Troy.png" alt="TROY" width={48} height={20} className="footer-card-img desktop-logo" />
+              <Image src="/iyzico.png" alt="iyzico" width={54} height={20} className="footer-card-img desktop-logo" />
+            </div>
+          </div>
+          {/* Sadece mobilde göster */}
+          <div className="flex md:hidden items-center justify-center w-full">
+            <div
+              className="flex flex-row items-center justify-between px-2 py-2 rounded-2xl logo-band-gold"
+              style={{
+                border: "2px solid #bfa658",
+                background: "#23201a",
+                minHeight: "28px",
+                width: "99vw",
+                margin: "0 auto",
+                maxWidth: "430px"
+              }}
+            >
+              <Image src="/tursab.png" alt="TÜRSAB" width={38} height={14} className="footer-card-img mobile-logo" />
+              <Image src="/mastercard.png" alt="MasterCard" width={36} height={14} className="footer-card-img mobile-logo" />
+              <Image src="/visa.png" alt="Visa" width={36} height={14} className="footer-card-img mobile-logo" />
+              <Image src="/Troy.png" alt="TROY" width={36} height={14} className="footer-card-img mobile-logo" />
+              <Image src="/iyzico.png" alt="iyzico" width={40} height={14} className="footer-card-img mobile-logo" />
+            </div>
+          </div>
+          {/* Türkiye geneli 7/24 yazısı ve © bandı */}
+          <div className="flex flex-col items-center justify-center mt-2 w-full">
+            <span className="flex items-center text-gold text-[16px] font-semibold tracking-wide mb-1" style={{gap: 6}}>
+              <FaMapMarkerAlt className="mr-1" style={{fontSize:18}} />
+              Türkiye Geneli 7/24 VIP Transfer Hizmeti
+            </span>
+            <div className="text-[15px] text-gray-400 font-light text-center mb-0">
+              © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
+            </div>
+          </div>
         </div>
       </div>
       <style jsx>{`
@@ -136,28 +163,26 @@ export default function Footer() {
         .footer-card-img {
           background: transparent;
           border-radius: 8px;
-          padding: 3px 13px;
-          height: 32px !important;
-          width: auto !important;
           object-fit: contain;
           display: inline-block;
           transition: all .2s;
         }
         @media (min-width: 900px) {
           .footer-card-img.desktop-logo {
-            height: 32px !important;
+            height: 20px !important;
             width: auto !important;
-            padding: 3px 13px;
+            padding: 1px 8px;
           }
         }
         @media (max-width: 900px) {
-          .desktop-logo { height: 24px !important; padding: 2px 7px; width: auto !important; }
-          .logo-band-light { min-height: 26px !important; }
+          .footer-card-img.mobile-logo {
+            height: 14px !important;
+            width: auto !important;
+            padding: 1px 4px;
+          }
         }
         @media (max-width: 600px) {
-          .footer-card-img { height: 18px !important; padding: 2px 4px; }
-          .logo-band { padding-left: 3px !important; padding-right: 3px !important; }
-          .logo-band-light { min-height: 18px !important; }
+          .logo-band-gold { min-height: 20px !important; }
         }
       `}</style>
     </footer>
