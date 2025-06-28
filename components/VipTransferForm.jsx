@@ -3,7 +3,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import EkstralarAccordion from "./EkstralarAccordion";
-import AdresAutoComplete from "./AdresAutoComplete";
+import AdresAutoComplete from "@/components/AdresAutoComplete";
 import { vehicles } from "../data/vehicleList";
 import { useRouter } from "next/navigation";
 
