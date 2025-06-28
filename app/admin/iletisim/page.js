@@ -1,3 +1,4 @@
+// app/admin/iletisim/page.js
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
@@ -20,6 +21,16 @@ export default function AdminIletisim() {
   const [total, setTotal] = useState(0);
   const [modalForm, setModalForm] = useState(null);
   const pollingRef = useRef();
+
+  // Modal açıkken body scroll'u engelle
+  useEffect(() => {
+    if (modalForm) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [modalForm]);
 
   // 180 sn'de bir güncelle
   useEffect(() => {
@@ -91,7 +102,7 @@ export default function AdminIletisim() {
   const pageCount = Math.ceil(total / pageSize);
   const goToPage = p => setPage(p);
 
-  // SADE ANA SÜTUNLAR:
+  // Tablo başlıkları
   const columns = [
     { name: "Kayıt No", className: "min-w-[135px] text-left" },
     { name: "Tarih", className: "min-w-[140px] text-left" },
@@ -124,11 +135,11 @@ export default function AdminIletisim() {
 
       <div className="overflow-x-auto bg-black/80 rounded-2xl border-2 border-[#bfa658]">
         {loading ? (
-          <p className="text-center py-6 text-gray-300">Yükleniyor...</p>
+          <p className="text-center py-8 text-gray-300 text-xl">Yükleniyor...</p>
         ) : error ? (
-          <p className="text-center py-6 text-red-400">Kayıtlar alınamadı</p>
+          <p className="text-center py-8 text-red-400 text-xl">Kayıtlar alınamadı</p>
         ) : forms.length === 0 ? (
-          <p className="text-center py-6 text-gray-300">Hiç kayıt yok.</p>
+          <p className="text-center py-14 text-gray-400 text-2xl font-semibold">Hiç kayıt yok.</p>
         ) : (
           <table className="w-full border-collapse min-w-[800px] text-sm">
             <thead>
@@ -257,3 +268,4 @@ export default function AdminIletisim() {
     </main>
   );
 }
+// app/admin/iletisim/page.js
