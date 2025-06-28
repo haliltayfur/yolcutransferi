@@ -17,7 +17,7 @@ export default function Footer() {
             <li><a href="/vip-havalimani" className="footer-link">Havalimanı VIP Transfer</a></li>
             <li><a href="/sehirler-arasi" className="footer-link">Şehirlerarası Transfer</a></li>
             <li><a href="/kurumsal" className="footer-link">Kurumsal Transfer</a></li>
-            <li className="md:block hidden"><a href="/dron-transfer" className="footer-link">Dron Yolcu Transferi</a></li>
+            <li className="md:block hidden"><a href="https://yolcutransferi.com/dron" className="footer-link">Dron Yolcu Transferi</a></li>
             <li><a href="/araclar" className="footer-link">VIP Araçlar</a></li>
             <li><a href="/rezervasyon" className="footer-link">Rezervasyon</a></li>
             <li><a href="/uyeol_sofor" className="footer-link">Şoför Başvurusu</a></li>
@@ -92,7 +92,7 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Mobilde iletişim sola yaslı, ikonlar yan yana, yukarıda, logoları elleme */}
+      {/* Mobilde iletişim ve logolar AYNEN mevcut haliyle, elleme */}
       <div className="md:hidden flex flex-col items-start mt-2 mb-2 w-full max-w-6xl mx-auto pl-2">
         <h3 className="text-gold text-[1.08rem] font-bold mb-2 tracking-wide">İletişim</h3>
         <div className="flex items-center gap-3 text-[1.11rem] mb-2">
@@ -103,16 +103,43 @@ export default function Footer() {
           <a href="https://www.linkedin.com/company/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="LinkedIn"><FaLinkedin size={19} /></a>
           <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="X"><SiX size={19} /></a>
         </div>
+        {/* Mobilde logolar yine alt banda, aynı şekilde */}
+        <div
+          className="logo-band mt-2"
+          style={{
+            background: "linear-gradient(90deg,#edece7 0%,#dbdbd7 100%)",
+            border: "2px solid #bfa658",
+            minHeight: "38px",
+            borderRadius: "12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "98vw",
+            maxWidth: 370,
+            padding: "5px 10px",
+            marginLeft: 0,
+            marginTop: 5,
+            marginBottom: 4,
+            gap: "10px",
+            boxShadow: "0 3px 12px #bfa65833",
+          }}
+        >
+          <Image src="/tursab.png" alt="TÜRSAB" width={28} height={13} className="footer-card-img mobile-logo" />
+          <Image src="/mastercard.png" alt="MasterCard" width={28} height={13} className="footer-card-img mobile-logo" />
+          <Image src="/visa.png" alt="Visa" width={28} height={13} className="footer-card-img mobile-logo" />
+          <Image src="/Troy.png" alt="TROY" width={28} height={13} className="footer-card-img mobile-logo" />
+          <Image src="/iyzico.png" alt="iyzico" width={32} height={13} className="footer-card-img mobile-logo" />
+        </div>
       </div>
 
-      {/* Alt BAND: Türkiye geneli metni ve copyright */}
+      {/* Alt BAND: Türkiye geneli ve copyright (desktopta tek satır, mobilde alt alta) */}
       <div className="w-full flex flex-col items-center justify-center max-w-6xl mx-auto pt-2 pb-1">
-        <div className="text-[15px] text-gold font-semibold text-center mb-0 flex items-center gap-1">
+        <div className="text-[15px] text-gold font-semibold text-center mb-0 flex items-center gap-1 flex-wrap justify-center">
           <FaMapMarkerAlt className="inline-block mr-1 text-gold" size={16} />
-          Türkiye Geneli 7/24 VIP Transfer Hizmeti
-        </div>
-        <div className="text-[15px] text-gray-400 font-light text-center mb-0">
-          © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
+          Türkiye Geneli 7/24 VIP Transfer Hizmeti &nbsp;
+          <span className="text-gray-400 font-light ml-2">
+            © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
+          </span>
         </div>
       </div>
 
@@ -154,11 +181,11 @@ export default function Footer() {
           .desktop-logo { height: 19px !important; padding: 2px 4px; width: auto !important; }
         }
         @media (max-width: 600px) {
-          .footer-card-img { height: 24px !important; padding: 2px 7px; }
+          .footer-card-img { height: 17px !important; padding: 1.5px 3px; }
           .logo-band { padding-left: 5px !important; padding-right: 5px !important; }
         }
         @media (max-width: 480px) {
-          .footer-card-img { height: 18px !important; padding: 2px 4px; }
+          .footer-card-img { height: 11px !important; padding: 1.5px 2px; }
           .logo-band { padding-left: 3px !important; padding-right: 3px !important; }
         }
       `}</style>
