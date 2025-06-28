@@ -1,7 +1,7 @@
 // PATH: /app/rezervasyon/RezervasyonForm.jsx
 
 "use client";
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import EkstralarAccordion from "./EkstralarAccordion";
 import AdresAutoComplete from "./AdresAutoComplete";
 import { vehicles } from "../../data/vehicleList";
