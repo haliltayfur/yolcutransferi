@@ -7,9 +7,9 @@ import { SiX } from "react-icons/si";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#151310] pt-8 pb-3 px-2 border-t border-[#FFD70033] text-gray-200 font-sans w-full z-50 relative overflow-hidden">
+    <footer className="bg-[#151310] pt-8 pb-3 px-2 border-t border-[#FFD70033] text-gray-200 font-sans w-full z-50">
       {/* Ana GRID: Mobilde 2 sütun, masaüstünde 3 sütun */}
-      <div className="max-w-6xl mx-auto w-full grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-4 pb-4 relative z-10">
+      <div className="max-w-6xl mx-auto w-full grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-4 pb-4">
         {/* VIP Hizmetler */}
         <div className="pl-2 md:pl-4">
           <h3 className="text-gold text-[1.08rem] font-bold mb-2 tracking-wide">VIP Hizmetler</h3>
@@ -17,6 +17,7 @@ export default function Footer() {
             <li><a href="/vip-havalimani" className="footer-link">Havalimanı VIP Transfer</a></li>
             <li><a href="/sehirler-arasi" className="footer-link">Şehirlerarası Transfer</a></li>
             <li><a href="/kurumsal" className="footer-link">Kurumsal Transfer</a></li>
+            <li className="md:block hidden"><a href="/dron-transfer" className="footer-link">Dron Yolcu Transferi</a></li>
             <li><a href="/araclar" className="footer-link">VIP Araçlar</a></li>
             <li><a href="/rezervasyon" className="footer-link">Rezervasyon</a></li>
             <li><a href="/uyeol_sofor" className="footer-link">Şoför Başvurusu</a></li>
@@ -35,7 +36,7 @@ export default function Footer() {
             <li><a href="/sss" className="footer-link">S.S.S.</a></li>
           </ul>
         </div>
-        {/* Masaüstünde iletişim blok */}
+        {/* Masaüstünde iletişim blok ve LOGOLAR */}
         <div className="hidden md:flex flex-col items-start justify-start">
           <h3 className="text-gold text-[1.08rem] font-bold mb-2 tracking-wide">İletişim</h3>
           <div className="flex flex-col gap-1 text-[0.97rem]">
@@ -62,66 +63,59 @@ export default function Footer() {
               </a>
             </div>
           </div>
+          {/* LOGO BANDI sadece desktopta ve iletişimin hemen altında */}
+          <div
+            className="logo-band mt-3"
+            style={{
+              background: "linear-gradient(90deg,#edece7 0%,#dbdbd7 100%)",
+              border: "2.5px solid #bfa658",
+              minHeight: "50px",
+              borderRadius: "15px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "360px",
+              padding: "7px 20px",
+              marginLeft: 0,
+              marginTop: 16,
+              marginBottom: 4,
+              gap: "13px",
+              boxShadow: "0 3px 18px #bfa65833",
+            }}
+          >
+            <Image src="/tursab.png" alt="TÜRSAB" width={48} height={21} className="footer-card-img desktop-logo" />
+            <Image src="/mastercard.png" alt="MasterCard" width={48} height={21} className="footer-card-img desktop-logo" />
+            <Image src="/visa.png" alt="Visa" width={48} height={21} className="footer-card-img desktop-logo" />
+            <Image src="/Troy.png" alt="TROY" width={48} height={21} className="footer-card-img desktop-logo" />
+            <Image src="/iyzico.png" alt="iyzico" width={54} height={21} className="footer-card-img desktop-logo" />
+          </div>
         </div>
       </div>
-      {/* Mobilde iletişim başlık ve ikonlar yan yana */}
-      <div className="md:hidden flex flex-row items-center gap-3 mt-2 mb-2 w-full max-w-6xl mx-auto pl-2 z-10">
-        <h3 className="text-gold text-[1.08rem] font-bold tracking-wide m-0">İletişim</h3>
-        <div className="flex items-center gap-2 ml-1">
-          <a href="tel:+905395267569" className="footer-social" aria-label="Telefon"><FaPhoneAlt size={17} /></a>
-          <a href="mailto:info@yolcutransferi.com" className="footer-social" aria-label="Mail"><FaEnvelope size={16} /></a>
-          <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="WhatsApp"><FaWhatsapp size={16} /></a>
-          <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="Instagram"><FaInstagram size={15} /></a>
-          <a href="https://www.linkedin.com/company/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="LinkedIn"><FaLinkedin size={15} /></a>
-          <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="X"><SiX size={15} /></a>
+
+      {/* Mobilde iletişim sola yaslı, ikonlar yan yana, yukarıda, logoları elleme */}
+      <div className="md:hidden flex flex-col items-start mt-2 mb-2 w-full max-w-6xl mx-auto pl-2">
+        <h3 className="text-gold text-[1.08rem] font-bold mb-2 tracking-wide">İletişim</h3>
+        <div className="flex items-center gap-3 text-[1.11rem] mb-2">
+          <a href="tel:+905395267569" className="footer-social" aria-label="Telefon"><FaPhoneAlt size={22} /></a>
+          <a href="mailto:info@yolcutransferi.com" className="footer-social" aria-label="Mail"><FaEnvelope size={20} /></a>
+          <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="WhatsApp"><FaWhatsapp size={20} /></a>
+          <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="Instagram"><FaInstagram size={19} /></a>
+          <a href="https://www.linkedin.com/company/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="LinkedIn"><FaLinkedin size={19} /></a>
+          <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="X"><SiX size={19} /></a>
         </div>
       </div>
-      {/* Alt BAND: LOGO BANDI ve Hareketli Grid */}
-      <div className="footer-bggrid w-full flex flex-col items-center justify-center max-w-6xl mx-auto pt-2 pb-1 relative z-20">
-        {/* LOGOLAR: */}
-        <div
-          className="
-            flex flex-row items-center
-            justify-between
-            gap-6
-            w-full
-            px-6
-            py-3
-            rounded-2xl
-            mb-2
-            logo-band
-            logo-band-gold
-            mx-auto
-          "
-          style={{
-            border: "2.5px solid #bfa658",
-            background: "rgba(245,242,234,0.86)", // kırık beyaz, çok açık ton
-            minHeight: "53px",
-            boxShadow: "0 2px 18px #bfa65820",
-            width: "480px",
-            maxWidth: "96vw"
-          }}
-        >
-          <Image src="/tursab.png" alt="TÜRSAB" width={38} height={16} className="footer-card-img desktop-logo" />
-          <Image src="/mastercard.png" alt="MasterCard" width={38} height={16} className="footer-card-img desktop-logo" />
-          <Image src="/visa.png" alt="Visa" width={38} height={16} className="footer-card-img desktop-logo" />
-          <Image src="/Troy.png" alt="TROY" width={38} height={16} className="footer-card-img desktop-logo" />
-          <Image src="/iyzico.png" alt="iyzico" width={45} height={16} className="footer-card-img desktop-logo" />
-        </div>
-        {/* TÜRKİYE GENELİ YAZISI: */}
-        <span className="flex items-center text-gold text-[16px] font-semibold tracking-wide mb-1 mt-1 justify-center"
-          style={{gap: 6}}
-        >
-          <FaMapMarkerAlt className="mr-1" style={{fontSize:18}} />
+
+      {/* Alt BAND: Türkiye geneli metni ve copyright */}
+      <div className="w-full flex flex-col items-center justify-center max-w-6xl mx-auto pt-2 pb-1">
+        <div className="text-[15px] text-gold font-semibold text-center mb-0 flex items-center gap-1">
+          <FaMapMarkerAlt className="inline-block mr-1 text-gold" size={16} />
           Türkiye Geneli 7/24 VIP Transfer Hizmeti
-        </span>
-        {/* © BANDI */}
+        </div>
         <div className="text-[15px] text-gray-400 font-light text-center mb-0">
           © {new Date().getFullYear()} <span className="text-gold font-semibold">YolcuTransferi.com</span> • Tüm hakları saklıdır.
         </div>
       </div>
-      {/* Hareketli arka plan grid animasyonu (footer-bggrid) */}
-      <div className="footer-bg-anim absolute bottom-0 left-0 w-full h-[170px] pointer-events-none z-0" aria-hidden />
+
       <style jsx>{`
         .footer-link {
           color: #e5e5e5;
@@ -149,47 +143,23 @@ export default function Footer() {
         }
         .footer-card-img {
           background: transparent;
-          border-radius: 8px;
+          border-radius: 7px;
+          padding: 1.5px 5px;
+          height: 21px !important;
+          width: auto !important;
           object-fit: contain;
           display: inline-block;
-          transition: all .2s;
-        }
-        @media (min-width: 900px) {
-          .footer-card-img.desktop-logo {
-            height: 16px !important;
-            width: auto !important;
-            padding: 1px 8px;
-          }
         }
         @media (max-width: 900px) {
-          .footer-card-img.desktop-logo {
-            height: 12px !important;
-            width: auto !important;
-            padding: 1px 3px;
-          }
+          .desktop-logo { height: 19px !important; padding: 2px 4px; width: auto !important; }
         }
         @media (max-width: 600px) {
-          .logo-band-gold { min-height: 18px !important; }
-          .footer-card-img.desktop-logo { height: 11px !important; }
+          .footer-card-img { height: 24px !important; padding: 2px 7px; }
+          .logo-band { padding-left: 5px !important; padding-right: 5px !important; }
         }
-        @media (max-width: 400px) {
-          .footer-card-img.desktop-logo { height: 8.5px !important; }
-        }
-        .footer-bg-anim {
-          background: repeating-linear-gradient(
-            135deg,
-            #F5F2EA 0 3px, 
-            #F5F2EA 18px, 
-            #23201a 18px, 
-            #23201a 21px
-          );
-          opacity: 0.2;
-          animation: bggridmove 8s linear infinite;
-          z-index: 1;
-        }
-        @keyframes bggridmove {
-          0% { background-position: 0 0; }
-          100% { background-position: 90px 60px; }
+        @media (max-width: 480px) {
+          .footer-card-img { height: 18px !important; padding: 2px 4px; }
+          .logo-band { padding-left: 3px !important; padding-right: 3px !important; }
         }
       `}</style>
     </footer>
