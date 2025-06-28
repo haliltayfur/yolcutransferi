@@ -38,29 +38,20 @@ export default function Footer() {
         </div>
         {/* Masaüstünde iletişim blok ve LOGOLAR */}
         <div className="hidden md:flex flex-col items-start justify-start">
-          <h3 className="text-gold text-[1.08rem] font-bold mb-2 tracking-wide">İletişim</h3>
-          <div className="flex flex-col gap-1 text-[0.97rem]">
-            <div className="flex items-center gap-2">
-              <FaPhoneAlt className="text-gold" />
-              <a href="tel:+905395267569" className="footer-link">+90 539 526 75 69</a>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaEnvelope className="text-gold" />
-              <a href="mailto:info@yolcutransferi.com" className="footer-link">info@yolcutransferi.com</a>
-            </div>
-            <div className="flex gap-2 mt-2">
-              <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="WhatsApp">
-                <FaWhatsapp size={21} />
+          <div className="flex items-center gap-4 w-full">
+            <h3 className="text-gold text-[1.08rem] font-bold tracking-wide mb-0 min-w-[85px]">İletişim</h3>
+            {/* İletişim bilgileri ve sosyal butonlar yan yana */}
+            <div className="flex items-center gap-4">
+              <a href="tel:+905395267569" className="footer-link flex items-center gap-1" aria-label="Telefon">
+                <FaPhoneAlt className="text-gold" size={16} /> <span className="hidden lg:inline">+90 539 526 75 69</span>
               </a>
-              <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="Instagram">
-                <FaInstagram size={20} />
+              <a href="mailto:info@yolcutransferi.com" className="footer-link flex items-center gap-1" aria-label="Mail">
+                <FaEnvelope className="text-gold" size={16} /> <span className="hidden lg:inline">info@yolcutransferi.com</span>
               </a>
-              <a href="https://www.linkedin.com/company/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="LinkedIn">
-                <FaLinkedin size={20} />
-              </a>
-              <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="X">
-                <SiX size={20} />
-              </a>
+              <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="WhatsApp"><FaWhatsapp size={19} /></a>
+              <a href="https://www.instagram.com/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="Instagram"><FaInstagram size={18} /></a>
+              <a href="https://www.linkedin.com/company/yolcutransferi/" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="LinkedIn"><FaLinkedin size={18} /></a>
+              <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="footer-social" aria-label="X"><SiX size={18} /></a>
             </div>
           </div>
           {/* LOGO BANDI sadece desktopta ve iletişimin hemen altında */}
