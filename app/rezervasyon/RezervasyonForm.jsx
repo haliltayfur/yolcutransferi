@@ -26,7 +26,6 @@ const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
-// Havalimanı keyword'leri
 const airportKeywords = [
   "havalimanı", "istanbul havalimanı", "iga", "ist", "sabiha gökçen", "saw", "eskişehir havalimanı",
   "antalya havalimanı", "ankara esenboğa", "esenboğa", "milas bodrum", "izmir adnan", "trabzon havalimanı"
@@ -95,8 +94,7 @@ export default function RezervasyonForm() {
     setShowSummary(true);
   }
 
-  // ===== ARAÇ FİLTRELEME MANTIĞI =====
-  // Segment ve kişi seçilene kadar araç gelmez.
+  // Araç filtreleme: Kişi sayısı ve segment olmadan listeleme!
   const minPeople = Number(people) || 0;
   const filteredVehicles =
     !segment || !people
@@ -110,13 +108,11 @@ export default function RezervasyonForm() {
             v.max >= minPeople
         );
 
-  // PNR gösterim mantığı
   const showPNR =
     transfer === "VIP Havalimanı Transferi" ||
     isAirportRelated(from) ||
     isAirportRelated(to);
 
-  // --- REZERVASYON ÖZETİ POPUP ---
   function SummaryPopup({ onClose }) {
     const basePrice = 4000;
     const allExtras = require("../../data/extrasByCategory").extrasListByCategory.flatMap(cat => cat.items);
@@ -126,7 +122,6 @@ export default function RezervasyonForm() {
     const kdv = araToplam * KDV_ORAN;
     const toplam = araToplam + kdv;
 
-    // Artır/azalt/sil
     function changeQty(key, dir) {
       setExtrasQty(q => ({
         ...q,
@@ -140,7 +135,6 @@ export default function RezervasyonForm() {
         return rest;
       });
     }
-
     function handlePayment() {
       const params = new URLSearchParams({
         from, to, people, segment, transfer, date, time, name, surname, tc, phone, email, pnr, note,
@@ -150,8 +144,6 @@ export default function RezervasyonForm() {
       }).toString();
       router.push(`/odeme?${params}`);
     }
-
-    // SEÇİLEN SEGMENTTEKİ UYGUN ARAÇLAR
     const summaryVehicles =
       !segment || !people
         ? []
@@ -202,9 +194,66 @@ export default function RezervasyonForm() {
               Seçtiğiniz segment ve kişi sayısına göre, size en uygun araç rezerve edilecektir.
             </div>
           </div>
-          {/* ... (diğer kısımlar aynı) */}
-          {/* Ekstralar Tablosu, Fiyatlar, Butonlar ... */}
-          {/* --- KODUN DİĞER KISMI DEĞİŞMEDİ, YUKARIDAKİ KOPYALANACAK --- */}
+          {/* Ekstralar Tablosu */}
+          <div className="mb-5">
+            <b className="block mb-2 text-[#bfa658] text-lg">Ekstralar:</b>
+            {selectedExtras.length === 0 && <span className="text-gray-400">Ekstra yok</span>}
+            {selectedExtras.length > 0 &&
+              <table className="w-full text-base mb-3">
+                <thead>
+                  <tr className="text-[#ffeec2] border-b border-[#bfa658]/40">
+                    <th className="text-left py-1 pl-1">Ürün</th>
+                    <th className="text-center w-20">Adet</th>
+                    <th className="text-right w-28">Birim</th>
+                    <th className="text-right w-28">Toplam</th>
+                    <th className="text-center w-12"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedExtras.map(extra => (
+                    <tr key={extra.key} className="border-b border-[#bfa658]/10">
+                      <td className="py-1 pl-1">{extra.label}</td>
+                      <td className="text-center">
+                        <div className="flex items-center gap-1 justify-center">
+                          <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, -1)}>-</button>
+                          <span className="w-7 text-center">{extrasQty[extra.key] || 1}</span>
+                          <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, +1)}>+</button>
+                        </div>
+                      </td>
+                      <td className="text-right">{extra.price.toLocaleString()}₺</td>
+                      <td className="text-right">{((extrasQty[extra.key] || 1) * extra.price).toLocaleString()}₺</td>
+                      <td className="text-center">
+                        <button type="button" onClick={() => removeExtra(extra.key)} className="text-red-400 font-bold hover:scale-125 transition-transform">🗑️</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            }
+          </div>
+          {/* Fiyatlar */}
+          <div className="w-full flex flex-col items-end gap-1 mt-2 text-base">
+            <div>Transfer Bedeli: <b>{basePrice.toLocaleString()} ₺</b></div>
+            <div>Ekstralar: <b>{extrasTotal.toLocaleString()} ₺</b></div>
+            <div>KDV: <b>{kdv.toLocaleString(undefined, { maximumFractionDigits: 2 })} ₺</b></div>
+            <div className="text-xl text-[#bfa658] font-bold">Toplam: {toplam.toLocaleString()} ₺</div>
+          </div>
+          {/* Butonlar */}
+          <div className="flex flex-col md:flex-row justify-between gap-4 mt-9">
+            <button
+              className="w-full md:w-auto bg-[#bfa658] hover:bg-[#ffeec2] text-black font-bold py-3 px-8 rounded-xl shadow-lg transition-colors"
+              onClick={handlePayment}
+            >
+              Onayla ve Ödemeye Geç
+            </button>
+            <button
+              className="w-full md:w-auto border border-[#bfa658] hover:bg-[#3b2c10] text-[#bfa658] font-semibold py-3 px-8 rounded-xl shadow-lg transition-colors"
+              onClick={onClose}
+              type="button"
+            >
+              Vazgeç
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -221,7 +270,24 @@ export default function RezervasyonForm() {
         autoComplete="on"
         className="grid grid-cols-1 md:grid-cols-2 gap-5"
       >
-        {/* ... (alanlar aynı, yukarıdaki gibi) */}
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
+          <AdresAutoComplete
+            value={from}
+            onChange={setFrom}
+            placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
+          />
+          {fieldErrors.from && <div className="text-red-400 text-xs mt-1">{fieldErrors.from}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
+          <AdresAutoComplete
+            value={to}
+            onChange={setTo}
+            placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
+          />
+          {fieldErrors.to && <div className="text-red-400 text-xs mt-1">{fieldErrors.to}</div>}
+        </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
           <select name="people" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
@@ -245,29 +311,188 @@ export default function RezervasyonForm() {
           </select>
           {fieldErrors.segment && <div className="text-red-400 text-xs mt-1">{fieldErrors.segment}</div>}
         </div>
-        {/* ... (diğer form alanları aynı) */}
-
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
+          <select name="transfer" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={transfer}
+            onChange={e => setTransfer(e.target.value)}>
+            <option value="">Seçiniz</option>
+            {allTransfers.map(opt =>
+              <option key={opt} value={opt}>{opt}</option>
+            )}
+          </select>
+          {fieldErrors.transfer && <div className="text-red-400 text-xs mt-1">{fieldErrors.transfer}</div>}
+        </div>
         {/* Araçlar kutusu */}
         <div className="md:col-span-2">
           <label className="font-bold text-[#bfa658] mb-2 block text-lg">Araçlar</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {filteredVehicles.length > 0 ? filteredVehicles.map((v) => (
-              <div key={v.value} className="border-2 border-[#bfa658] rounded-xl p-3 bg-black/70 flex flex-col items-center text-[#ffeec2]">
-                <div className="font-bold text-base">{v.label}</div>
-                <div className="text-xs text-[#bfa658] mb-1">{v.segment}</div>
-                <div className="text-xs">{v.max} Kişi</div>
-              </div>
-            )) : (
-              <div className="text-gray-400 col-span-3 text-center">
+            {(!people || !segment) ? (
+              <div className="text-[#ffeec2] col-span-3 opacity-80 text-center">
                 Lütfen kişi sayısı ve segment seçiniz.
               </div>
+            ) : (
+              filteredVehicles.length > 0 ? filteredVehicles.map((v) => (
+                <div key={v.value} className="border-2 border-[#bfa658] rounded-xl p-3 bg-black/70 flex flex-col items-center text-[#ffeec2]">
+                  <div className="font-bold text-base">{v.label}</div>
+                  <div className="text-xs text-[#bfa658] mb-1">{v.segment}</div>
+                  <div className="text-xs">{v.max} Kişi</div>
+                </div>
+              )) : (
+                <div className="text-red-400 col-span-3 text-center">Uygun araç bulunamadı.</div>
+              )
             )}
           </div>
           <div className="mt-2 text-sm text-[#ffeec2] opacity-90">
-            Seçtiğiniz segment ve kişi sayısına göre, size en uygun araç rezerve edilecektir.
+            Seçtiğiniz segment ve kişi sayısına uygun araçlardan biri, size en uygun şekilde rezerve edilecektir.
           </div>
         </div>
-        {/* ... (devamı aynı) */}
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
+          <input
+            name="date"
+            type="date"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={date}
+            onChange={e => setDate(e.target.value)}
+            min={new Date().toISOString().split("T")[0]}
+            autoComplete="on"
+          />
+          {fieldErrors.date && <div className="text-red-400 text-xs mt-1">{fieldErrors.date}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
+          <select name="time" className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={time}
+            onChange={e => setTime(e.target.value)}>
+            <option value="">Seçiniz</option>
+            {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
+          </select>
+          {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Ad</label>
+          <input
+            name="name"
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            autoComplete="given-name"
+          />
+          {fieldErrors.name && <div className="text-red-400 text-xs mt-1">{fieldErrors.name}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Soyad</label>
+          <input
+            name="surname"
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={surname}
+            onChange={e => setSurname(e.target.value)}
+            autoComplete="family-name"
+          />
+          {fieldErrors.surname && <div className="text-red-400 text-xs mt-1">{fieldErrors.surname}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">T.C. Kimlik No</label>
+          <input
+            name="tc"
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            maxLength={11}
+            pattern="[0-9]*"
+            value={tc}
+            onChange={e => handleTcChange(e.target.value)}
+            autoComplete="off"
+          />
+          {fieldErrors.tc && <div className="text-red-400 text-xs mt-1">{fieldErrors.tc}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Telefon</label>
+          <input
+            name="phone"
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            maxLength={11}
+            pattern="[0-9]*"
+            value={phone}
+            onChange={e => handlePhoneChange(e.target.value)}
+            autoComplete="tel"
+          />
+          {fieldErrors.phone && <div className="text-red-400 text-xs mt-1">{fieldErrors.phone}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">E-posta</label>
+          <input
+            name="email"
+            type="email"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            autoComplete="email"
+            placeholder="ornek@email.com"
+          />
+          {fieldErrors.email && <div className="text-red-400 text-xs mt-1">{fieldErrors.email}</div>}
+        </div>
+        {/* Sadece havalimanı transferi varsa PNR göster */}
+        {showPNR && (
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
+            <input
+              name="pnr"
+              type="text"
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={pnr}
+              onChange={e => setPnr(e.target.value)}
+              placeholder="Uçuş rezervasyon kodu (varsa)"
+            />
+          </div>
+        )}
+        <div className="md:col-span-2">
+          <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
+          <textarea
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            rows={2}
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Eklemek istediğiniz bir not var mı?"
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="font-bold text-[#bfa658] mb-2 block text-lg">Ekstralar</label>
+          <EkstralarAccordion
+            selectedExtras={extras}
+            setSelectedExtras={setExtras}
+            extrasQty={extrasQty}
+            setExtrasQty={setExtrasQty}
+          />
+        </div>
+        {/* KVKK Onay Kutusu */}
+        <div className="md:col-span-2 flex items-center mt-6">
+          <input
+            type="checkbox"
+            id="kvkk"
+            required
+            checked={kvkkChecked}
+            onChange={e => setKvkkChecked(e.target.checked)}
+            className="accent-[#bfa658] w-5 h-5"
+          />
+          <label htmlFor="kvkk" className="ml-2 text-[#ffeec2] text-sm">
+            <span className="underline cursor-pointer">
+              KVKK Aydınlatma Metni ve Politikası
+            </span>'nı okudum, onaylıyorum.
+          </label>
+        </div>
+        {fieldErrors.kvkk && <div className="text-red-400 text-xs mt-1 md:col-span-2">{fieldErrors.kvkk}</div>}
+        <div className="md:col-span-2 flex justify-end mt-6">
+          <button
+            type="submit"
+            className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition"
+          >
+            Rezervasyonu Tamamla
+          </button>
+        </div>
       </form>
       {showSummary && <SummaryPopup onClose={() => setShowSummary(false)} />}
     </section>
