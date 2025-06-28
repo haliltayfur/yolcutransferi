@@ -2,8 +2,78 @@
 
 "use client";
 import { useState, useEffect } from "react";
-import { testimonials } from "../data/testimonials";
 import { FaStar, FaStarHalfAlt } from "react-icons/fa";
+
+// Tüm yorumlar 5 yıldız, sadece 2 tanesi 4.5 yıldız
+const testimonials = [
+  {
+    name: "Murat E.",
+    avatar: "M",
+    comment: "Dijital ödeme kolaylığı ve hızlı iletişimle VIP hissettik. Herkese tavsiye ederim. Ekibin ilgisi harikaydı.",
+    stars: 5,
+    role: "IT Solutions Architect"
+  },
+  {
+    name: "Elena R.",
+    avatar: "E",
+    comment: "Very comfortable and safe transfer. The driver speaks English perfectly! Bir sonraki seyahatimizde tekrar tercih edeceğiz.",
+    stars: 5,
+    role: "Business Development Manager"
+  },
+  {
+    name: "Cem T.",
+    avatar: "C",
+    comment: "Havalimanı transferi için daima tercih ediyoruz, zamanında ve stressiz.",
+    stars: 4.5,
+    role: "Medical Specialist"
+  },
+  {
+    name: "Aslı K.",
+    avatar: "A",
+    comment: "Ailemle rahat, huzurlu bir yolculuk yaptık. Araçlar çok temiz ve konforlu, sürücüler çok nazik.",
+    stars: 5,
+    role: "HR Manager"
+  },
+  {
+    name: "Yusuf K.",
+    avatar: "Y",
+    comment: "Çocuk koltuğundan internete kadar her detay düşünülmüş. Ailecek çok memnun kaldık.",
+    stars: 4.5,
+    role: "Finance Executive"
+  },
+  {
+    name: "Elif B.",
+    avatar: "E",
+    comment: "Lüks ve güvenli ulaşım arayanlar için ideal. Şoförümüz çok profesyoneldi. Kesinlikle tavsiye ediyorum.",
+    stars: 5,
+    role: "Event Planner"
+  }
+];
+
+// En uzun yorumu bul ve sabit kutu boyu belirle
+const maxLen = testimonials.reduce((max, t) => (t.comment.length > max ? t.comment.length : max), 0);
+const getPaddedComment = (comment) => {
+  const maxLines = Math.ceil(maxLen / 32) + 1;
+  const currentLines = Math.ceil(comment.length / 32);
+  const lineDiff = maxLines - currentLines;
+  return comment + "\n".repeat(lineDiff > 0 ? lineDiff : 0);
+};
+
+// 5 yıldız çiz, altın/gri renk ile
+const getStars = (stars) => {
+  let output = [];
+  const fullStars = Math.floor(stars);
+  const hasHalf = stars % 1 !== 0;
+  for (let i = 0; i < 5; i++) {
+    if (i < fullStars)
+      output.push(<FaStar key={i} style={{ color: "#bfa658", fill: "#bfa658" }} size={18} />);
+    else if (i === fullStars && hasHalf)
+      output.push(<FaStarHalfAlt key={i} style={{ color: "#bfa658", fill: "#bfa658" }} size={18} />);
+    else
+      output.push(<FaStar key={i + 10} style={{ color: "#444", fill: "#444" }} size={18} />);
+  }
+  return output;
+};
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -15,36 +85,6 @@ function useIsMobile() {
   }, []);
   return isMobile;
 }
-
-// Kutu yüksekliğini, yıldız ve müşteri bilgisiyle birlikte, en uzun yoruma göre ayarla
-const maxLen =
-  Array.isArray(testimonials) && testimonials.length > 0
-    ? testimonials.reduce((max, t) => (t.comment.length > max ? t.comment.length : max), 0)
-    : 0;
-
-// Kısa yorumlara fazladan satır ekle
-const getPaddedComment = (comment) => {
-  const maxLines = Math.ceil(maxLen / 32) + 1;
-  const currentLines = Math.ceil(comment.length / 32);
-  const lineDiff = maxLines - currentLines;
-  return comment + "\n".repeat(lineDiff > 0 ? lineDiff : 0);
-};
-
-// Yıldızları çiz: 5 adet star, gerekirse en sonuncu yarım yıldız olur (altın/gri renk ile)
-const getStars = (stars) => {
-  let output = [];
-  const fullStars = Math.floor(stars);
-  const hasHalf = stars % 1 !== 0;
-  for (let i = 0; i < 5; i++) {
-    if (i < fullStars)
-      output.push(<FaStar key={i} style={{ color: "#bfa658", fill: "#bfa658" }} size={18} />);
-    else if (i === fullStars && hasHalf)
-      output.push(<FaStarHalfAlt key={i} style={{ color: "#bfa658", fill: "#bfa658" }} size={18} />);
-    else
-      output.push(<FaStar key={i} style={{ color: "#444", fill: "#444" }} size={18} />);
-  }
-  return output;
-};
 
 export default function TestimonialsSlider() {
   const [testimonialIndex, setTestimonialIndex] = useState(0);
