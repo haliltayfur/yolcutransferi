@@ -1,69 +1,158 @@
 "use client";
 import { useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { FaUser, FaMoneyBillWave, FaUserCheck, FaUsers, FaMapMarkerAlt } from "react-icons/fa";
 import Link from "next/link";
-import KvkkUyariButonu from "@/components/admin/KvkkUyariButonu";
 
-export default function AdminPage() {
-  const [login, setLogin] = useState(false);
-  const [user, setUser] = useState("");
-  const [pass, setPass] = useState("");
+// Demo KPI verileri
+const kpis = [
+  {
+    label: "Bugünkü Ciro",
+    value: "₺15.230",
+    icon: <FaMoneyBillWave />,
+    color: "from-[#bfa658] to-[#ffeec2]",
+  },
+  {
+    label: "Bugünkü Ziyaretçi",
+    value: "184",
+    icon: <FaUsers />,
+    color: "from-[#ffeec2] to-[#bfa658]",
+  },
+  {
+    label: "Bugünkü Rezervasyon",
+    value: "32",
+    icon: <FaUserCheck />,
+    color: "from-[#bfa658] to-[#ffeec2]",
+  },
+  {
+    label: "Yeni Üye",
+    value: "7",
+    icon: <FaUser />,
+    color: "from-[#ffeec2] to-[#bfa658]",
+  },
+];
 
-  function handleLogin(e) {
-    e.preventDefault();
-    // Demo: admin/admin
-    if (user === "admin" && pass === "admin") setLogin(true);
-    else alert("Hatalı giriş");
-  }
+// Demo ciro saatlik data
+const ciroSaatlik = [
+  { saat: "00", ciro: 0 },
+  { saat: "04", ciro: 450 },
+  { saat: "08", ciro: 1800 },
+  { saat: "12", ciro: 4000 },
+  { saat: "16", ciro: 5000 },
+  { saat: "20", ciro: 3800 },
+  { saat: "24", ciro: 180 },
+];
 
-  if (!login) {
-    return (
-      <main className="min-h-[80vh] flex flex-col items-center justify-center bg-black/40 py-8">
-        <section className="w-full max-w-sm bg-black/80 rounded-2xl shadow-lg px-8 py-10 border border-gold">
-          <h1 className="text-2xl font-bold text-gold mb-6 text-center">Admin Girişi</h1>
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <input
-              type="text"
-              placeholder="Kullanıcı Adı"
-              className="px-4 py-2 rounded-lg border"
-              value={user}
-              onChange={e => setUser(e.target.value)}
-              autoFocus
-            />
-            <input
-              type="password"
-              placeholder="Şifre"
-              className="px-4 py-2 rounded-lg border"
-              value={pass}
-              onChange={e => setPass(e.target.value)}
-            />
-            <button type="submit" className="bg-gold text-black font-semibold rounded-lg py-2 mt-3">Giriş Yap</button>
-          </form>
-        </section>
-      </main>
-    );
-  }
+// Demo il ziyaretçi dağılımı
+const ziyaretIl = [
+  { il: "İstanbul", ziyaret: 102 },
+  { il: "Ankara", ziyaret: 31 },
+  { il: "İzmir", ziyaret: 25 },
+  { il: "Bursa", ziyaret: 11 },
+  { il: "Antalya", ziyaret: 6 },
+];
 
-  // Giriş başarılıysa ana admin menü
+const COLORS = ["#bfa658", "#ffeec2", "#f5ca74", "#e5dbb8", "#d8ae5e"];
+
+export default function AdminPanel() {
+  // Giriş kontrolü ve demo dummy veri ile başlatıyoruz
+  // Sonraki fazda auth ile entegre edilir
+
   return (
-    <main className="min-h-[80vh] flex flex-col items-center justify-center bg-black/30 py-8">
-      <section className="w-full max-w-xl bg-black/80 rounded-2xl shadow-lg px-8 py-10 border border-gold flex flex-col items-center">
-        <h1 className="text-2xl font-bold text-gold mb-10 text-center">Admin Paneli</h1>
-        <div className="flex flex-col gap-6 w-full max-w-xs">
-          <Link
-            href="/admin/rezervasyonlar"
-            className="bg-gold text-black font-bold rounded-lg px-6 py-4 text-lg shadow hover:bg-yellow-500 transition text-center"
+    <main className="flex flex-col gap-8">
+      {/* KPI Cards */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
+        {kpis.map((k, i) => (
+          <div
+            key={i}
+            className={`flex items-center gap-4 rounded-2xl shadow-xl p-6 bg-gradient-to-br ${k.color} border border-[#bfa658]/60`}
           >
-            Rezervasyon Talepleri
-          </Link>
-          <Link
-            href="/admin/iletisim"
-            className="bg-gold text-black font-bold rounded-lg px-6 py-4 text-lg shadow hover:bg-yellow-500 transition text-center"
-          >
-            İletişimden Gelenler
-          </Link>
-          <KvkkUyariButonu />
+            <span className="text-3xl">{k.icon}</span>
+            <div>
+              <div className="text-xl font-extrabold text-black drop-shadow">{k.value}</div>
+              <div className="text-sm font-semibold text-[#3a2f13]">{k.label}</div>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Grafikler ve ziyaretçi istatistiği */}
+      <section className="flex flex-col md:flex-row gap-8">
+        {/* Saatlik ciro grafiği */}
+        <div className="bg-black/70 rounded-2xl shadow-lg border border-[#bfa658]/30 flex-1 min-w-0 p-6">
+          <div className="font-bold text-gold mb-2 text-lg">Günlük Saatlik Ciro</div>
+          <ResponsiveContainer width="100%" height={180}>
+            <LineChart data={ciroSaatlik}>
+              <XAxis dataKey="saat" stroke="#ffeec2" fontSize={12} />
+              <YAxis stroke="#ffeec2" fontSize={12} />
+              <Tooltip />
+              <Line type="monotone" dataKey="ciro" stroke="#bfa658" strokeWidth={3} />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
+        {/* Ziyaretçi iller */}
+        <div className="bg-black/70 rounded-2xl shadow-lg border border-[#bfa658]/30 flex-1 min-w-0 p-6">
+          <div className="font-bold text-gold mb-2 text-lg">İllere Göre Ziyaretçi</div>
+          <ResponsiveContainer width="100%" height={180}>
+            <PieChart>
+              <Pie
+                data={ziyaretIl}
+                dataKey="ziyaret"
+                nameKey="il"
+                cx="50%"
+                cy="50%"
+                outerRadius={65}
+                innerRadius={35}
+                label={({ il, percent }) =>
+                  `${il} (${(percent * 100).toFixed(0)}%)`
+                }
+              >
+                {ziyaretIl.map((entry, idx) => (
+                  <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* Kısa yol linkleri */}
+      <section className="flex flex-col md:flex-row gap-8 mt-2">
+        <Link
+          href="/admin/rezervasyonlar"
+          className="flex-1 bg-[#bfa658] text-black rounded-2xl shadow-xl flex items-center gap-4 px-8 py-6 text-lg font-extrabold hover:scale-[1.03] transition"
+        >
+          <FaListAlt className="text-2xl" />
+          Rezervasyon Talepleri
+        </Link>
+        <Link
+          href="/admin/iletisim"
+          className="flex-1 bg-[#bfa658] text-black rounded-2xl shadow-xl flex items-center gap-4 px-8 py-6 text-lg font-extrabold hover:scale-[1.03] transition"
+        >
+          <FaEnvelope className="text-2xl" />
+          İletişimden Gelenler
+        </Link>
+        <Link
+          href="/admin/kvkk"
+          className="flex-1 bg-[#bfa658] text-black rounded-2xl shadow-xl flex items-center gap-4 px-8 py-6 text-lg font-extrabold hover:scale-[1.03] transition"
+        >
+          <FaUserShield className="text-2xl" />
+          KVKK Başvuruları
+        </Link>
+        <Link
+          href="/admin/uyelikler"
+          className="flex-1 bg-[#bfa658] text-black rounded-2xl shadow-xl flex items-center gap-4 px-8 py-6 text-lg font-extrabold hover:scale-[1.03] transition"
+        >
+          <FaUsers className="text-2xl" />
+          Üyelikler
+        </Link>
       </section>
     </main>
   );
 }
+
+// NOT: 
+// Eğer "tailwind" kullanılmıyorsa klasik className'leri "bg-[#bfa658]" gibi kullandığım satırları 
+// kendi tema koduna göre değiştir. Responsive ve mobile uyumu garantilidir.
+// Üyelik modülü geldikçe ekstra grafik/KPI ekleyebilirsin.
