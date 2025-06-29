@@ -1,4 +1,5 @@
 // app/admin/rezervasyonlar/page.js
+
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 
@@ -6,12 +7,7 @@ import React, { useState, useEffect, useRef } from "react";
 function formatTL(n) {
   return (n || 0).toLocaleString("tr-TR") + " ₺";
 }
-function kisaMetin(str, len = 18) {
-  if (!str) return "";
-  return str.length > len ? str.slice(0, len) + "..." : str;
-}
 
-// Sütunlar
 const columns = [
   { name: "Sipariş No", className: "min-w-[120px]" },
   { name: "Tarih", className: "min-w-[130px]" },
@@ -19,7 +15,7 @@ const columns = [
   { name: "Telefon", className: "min-w-[120px]" },
   { name: "E-posta", className: "min-w-[150px]" },
   { name: "Transfer Türü", className: "min-w-[120px]" },
-  { name: "Kalkış / Varış", className: "min-w-[140px]" },
+  { name: "Kalkış / Varış", className: "min-w-[220px]" },
   { name: "Tutar", className: "min-w-[90px] text-right" },
   { name: "Durum", className: "min-w-[100px]" },
   { name: "İşlem", className: "min-w-[160px]" }
@@ -32,18 +28,17 @@ export default function AdminRezervasyonlar() {
   const [modalRez, setModalRez] = useState(null);
   const pollingRef = useRef();
 
-  // 90sn'de bir veya veri değişince güncelle
+  // 5 saniyede bir arka planda güncelle
   useEffect(() => {
     fetchList();
-    pollingRef.current = setInterval(() => fetchList(), 90000);
+    pollingRef.current = setInterval(fetchList, 5000);
     return () => clearInterval(pollingRef.current);
     // eslint-disable-next-line
   }, [showHidden]);
 
-  // Kayıtları çek (anlık)
   const fetchList = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const res = await fetch(`/api/admin/rezervasyonlar?showHidden=${showHidden}`);
       const json = await res.json();
       setList(json.items || []);
@@ -68,7 +63,6 @@ export default function AdminRezervasyonlar() {
   // Detay popup
   const RezervasyonDetayPopup = ({ item, onClose }) => {
     if (!item) return null;
-    // Ekstralar tablo
     let extrasTable = null;
     if (Array.isArray(item.selectedExtras) && item.selectedExtras.length > 0) {
       extrasTable = (
@@ -94,7 +88,6 @@ export default function AdminRezervasyonlar() {
         </table>
       );
     }
-    // Tutar detayı
     let tutarDetay = null;
     if (item.summary) {
       tutarDetay = (
@@ -135,7 +128,6 @@ export default function AdminRezervasyonlar() {
             {item.pnr && <div className="col-span-2"><b>PNR/Uçuş Kodu:</b> {item.pnr}</div>}
             {item.note && <div className="col-span-2"><b>Ek Not:</b> {item.note}</div>}
           </div>
-          {/* Ekstralar ve tutar */}
           <div className="col-span-2 mb-2">
             <b>Ekstralar:</b>
             {extrasTable ? extrasTable : <span className="text-gray-500 ml-2">Ekstra yok</span>}
@@ -163,9 +155,8 @@ export default function AdminRezervasyonlar() {
     );
   };
 
-  // Tablo ve ana ekran
   return (
-    <main className="max-w-7xl mx-auto px-2 py-8">
+    <main className="w-full max-w-[98vw] mx-auto px-1 py-8">
       <h1 className="text-3xl font-bold text-[#bfa658] mb-8 text-left">Rezervasyon Kayıtları</h1>
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <button
@@ -180,13 +171,13 @@ export default function AdminRezervasyonlar() {
         >Şimdi Yenile</button>
         <span className="ml-2 text-sm text-gray-400">{list.length} kayıt listelendi.</span>
       </div>
-      <div className="overflow-x-auto bg-black/80 rounded-2xl border-2 border-[#bfa658]">
+      <div className="overflow-x-auto w-full bg-black/80 rounded-2xl border-2 border-[#bfa658]">
         {loading ? (
           <p className="text-center py-6 text-gray-300 text-xl">Yükleniyor...</p>
         ) : list.length === 0 ? (
           <p className="text-center py-10 text-gray-400 text-xl font-semibold">Hiç kayıt yok.</p>
         ) : (
-          <table className="w-full border-collapse min-w-[900px] text-sm">
+          <table className="w-full border-collapse min-w-[1200px] text-sm">
             <thead>
               <tr>
                 {columns.map((col, i) => (
@@ -234,9 +225,9 @@ export default function AdminRezervasyonlar() {
           </table>
         )}
       </div>
-      {/* Popup detay */}
       {modalRez && <RezervasyonDetayPopup item={modalRez} onClose={() => setModalRez(null)} />}
     </main>
   );
 }
-// app/admin/rezervasyonlar/page.js
+
+// app/admin/rezervasyonlar/page.js  --- SON
