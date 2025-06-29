@@ -1,3 +1,5 @@
+// app/iletisim/page.jsx
+
 "use client";
 import { useState, useEffect } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
@@ -68,44 +70,52 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// Popup helper
-function PopupContent({ path, open, onClose }) {
-  const [loading, setLoading] = useState(false);
-  const [mainHtml, setMainHtml] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-    setLoading(true);
-    fetch(path)
-      .then(r => r.text())
-      .then(html => {
-        // Sadece <main> içeriğini al
-        const match = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
-        setMainHtml(match ? match[1] : "İçerik yüklenemedi.");
-      })
-      .catch(() => setMainHtml("İçerik alınamadı."))
-      .finally(() => setLoading(false));
-  }, [open, path]);
-
+// --- Politika Popup --- //
+function PolicyPopup({ open, onClose, onConfirm }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75">
-      <div className="bg-[#1b1b1b] rounded-2xl max-w-2xl w-full p-7 overflow-y-auto max-h-[82vh] border-2 border-[#bfa658] shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+      <div className="relative w-[96vw] md:w-[56vw] max-w-4xl bg-[#181405] rounded-2xl border-4 border-[#FFD700] p-10 pt-14 shadow-2xl flex flex-col overflow-hidden">
+        {/* Altın Sarısı X Butonu */}
         <button
-          className="absolute top-3 right-6 text-[#ffeec2] font-bold text-xl px-3 py-1 rounded-full bg-[#bfa658]/20 hover:bg-[#bfa658]/40 transition"
           onClick={onClose}
+          className="absolute top-5 right-5 text-[#FFD700] hover:text-[#fff9e3] text-4xl font-black w-12 h-12 flex items-center justify-center rounded-full bg-black/40 border-2 border-[#FFD700] hover:bg-[#ffd70022] transition"
           aria-label="Kapat"
         >
-          Kapat
+          <SiX />
         </button>
-        <div className="mt-2 space-y-3 text-[#ecd9aa]">
-          {loading
-            ? <div className="text-center text-[#ffeec2] py-8">Yükleniyor...</div>
-            : <div dangerouslySetInnerHTML={{ __html: mainHtml }} />}
+        <h2 className="text-2xl font-bold text-[#FFD700] mb-5 text-center">YolcuTransferi.com Politika ve Koşulları</h2>
+        <div className="text-sm text-[#ecd9aa] mb-10 max-h-none">
+          {/* Buraya gerçek politika metnini ekle veya props ile aktar */}
+          <p>
+            Tüm hizmetlerimiz, YolcuTransferi.com kullanıcı sözleşmesi, KVKK ve ilgili mevzuat kapsamında sunulur.
+            Kişisel verileriniz, sadece transfer ve rezervasyon işlemleriniz için işlenir, üçüncü kişilerle paylaşılmaz.
+            Detaylı bilgilendirme ve gizlilik politikamız için <a href="/kvkk" target="_blank" className="underline text-[#FFD700]">KVKK Aydınlatma Metni</a>’ni inceleyebilirsiniz.
+          </p>
+          <p className="mt-4">
+            Siteyi ve hizmeti kullanmaya devam ederek, tüm koşulları ve politikaları okuduğunuzu ve kabul ettiğinizi beyan edersiniz.
+          </p>
         </div>
+        <button
+          onClick={() => {
+            onConfirm && onConfirm();
+            onClose();
+          }}
+          className="mt-2 w-full py-3 rounded-xl bg-gradient-to-tr from-[#FFD700] to-[#BFA658] text-black font-bold text-lg shadow hover:scale-105 transition"
+        >
+          Tümünü okudum, onaylıyorum
+        </button>
       </div>
     </div>
   );
+}
+
+// --- Telefonu otomatik sıfırla --- //
+function formatPhone(val) {
+  if (!val) return "";
+  val = val.trim().replace(/\D/g, "");
+  if (val.startsWith("0")) return val.slice(0, 11);
+  return ("0" + val).slice(0, 11);
 }
 
 export default function Iletisim() {
@@ -118,7 +128,9 @@ export default function Iletisim() {
   const [buttonMsg, setButtonMsg] = useState("Mesajı Gönder");
   const [blocked, kaydet, remaining] = useRateLimit();
 
+  // --- Politika/KVKK popup state'i --- //
   const [popupOpen, setPopupOpen] = useState(false);
+  const [popupKvkkConfirmed, setPopupKvkkConfirmed] = useState(false);
 
   // Validasyonlar
   const adValid = isRealName(form.ad);
@@ -126,6 +138,24 @@ export default function Iletisim() {
   const phoneValid = isRealPhone(form.telefon);
   const emailValid = isRealEmail(form.email);
   const msgValid = isRealMsg(form.mesaj);
+
+  // Telefon inputunda başa sıfır ekle
+  const handlePhoneChange = (e) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 11) val = val.slice(0, 11);
+    if (val && val[0] !== "0") val = "0" + val;
+    if (val.startsWith("00")) val = "0" + val.slice(2);
+    setForm(f => ({ ...f, telefon: val }));
+    setErrors(er => ({ ...er, telefon: undefined }));
+  };
+
+  // Tümünü okudum, onaylıyorum popuptan gelirse, kutuyu işaretle
+  useEffect(() => {
+    if (popupKvkkConfirmed) {
+      setForm(f => ({ ...f, kvkkOnay: true }));
+      setPopupKvkkConfirmed(false);
+    }
+  }, [popupKvkkConfirmed]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -147,7 +177,7 @@ export default function Iletisim() {
     if (blocked) newErrors.global = "Çok hızlı gönderdiniz, lütfen biraz bekleyin.";
     if (!adValid) newErrors.ad = "Adınız en az 3 harf olmalı.";
     if (!soyadValid) newErrors.soyad = "Soyadınız en az 3 harf olmalı.";
-    if (!phoneValid) newErrors.telefon = "Telefon hatalı.";
+    if (!phoneValid) newErrors.telefon = "Telefon hatalı. 05xx xxx xx xx";
     if (!emailValid) newErrors.email = "Geçersiz e-posta.";
     if (!msgValid) newErrors.mesaj = "Mesaj en az 15 karakter, 3 kelime olmalı.";
     if (!form.iletisimTercihi) newErrors.iletisimTercihi = "İletişim tercihi zorunlu.";
@@ -192,9 +222,18 @@ export default function Iletisim() {
               className={`p-3 rounded-lg border flex-1 ${soyadValid ? "border-green-500" : form.soyad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={3} required />
           </div>
           <div className="flex gap-2">
-            <input type="tel" name="telefon" autoComplete="tel" placeholder="05xx xxx xx xx"
-              value={form.telefon} onChange={handleChange}
-              className={`p-3 rounded-lg border flex-1 ${phoneValid ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} maxLength={11} pattern="05\d{9}" required />
+            <input
+              type="tel"
+              name="telefon"
+              autoComplete="tel"
+              placeholder="05xx xxx xx xx"
+              value={form.telefon}
+              onChange={handlePhoneChange}
+              className={`p-3 rounded-lg border flex-1 ${phoneValid ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`}
+              maxLength={11}
+              pattern="05\d{9}"
+              required
+            />
             <input type="email" name="email" autoComplete="email" placeholder="E-posta"
               value={form.email} onChange={handleChange}
               className={`p-3 rounded-lg border flex-1 ${emailValid ? "border-green-500" : form.email ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} required />
@@ -307,8 +346,14 @@ export default function Iletisim() {
           </div>
         </div>
       </section>
-      {/* Politika ve şartlar popupu */}
-      <PopupContent path="/mesafeli-satis" open={popupOpen} onClose={() => setPopupOpen(false)} />
+      {/* Politika ve koşullar popup'u */}
+      <PolicyPopup
+        open={popupOpen}
+        onClose={() => setPopupOpen(false)}
+        onConfirm={() => setPopupKvkkConfirmed(true)}
+      />
     </main>
   );
 }
+
+// app/iletisim/page.jsx
