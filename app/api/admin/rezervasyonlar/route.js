@@ -1,11 +1,35 @@
 // app/api/admin/rezervasyonlar/route.js
+// app/api/admin/rezervasyonlar/route.js
 
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-// ... (Eğer başka GET/POST methodların varsa yukarıya ekle, bu sadece PATCH içindir.)
+// TÜM REZERVASYONLARI GETİR (GET)
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const showHidden = searchParams.get("showHidden") === "true";
+    const db = await connectToDatabase();
 
+    // Eğer 'hide' alanı varsa buna göre filtrele
+    const filter = showHidden ? {} : { hide: { $ne: true } };
+    const items = await db
+      .collection("rezervasyonlar")
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return NextResponse.json({ items });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err?.toString() || "Hata" },
+      { status: 500 }
+    );
+  }
+}
+
+// REZERVASYON DURUMUNU GÜNCELLE (PATCH)
 export async function PATCH(req) {
   try {
     const body = await req.json();
@@ -20,7 +44,10 @@ export async function PATCH(req) {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    return NextResponse.json({ error: err?.toString() || "Hata" }, { status: 500 });
+    return NextResponse.json(
+      { error: err?.toString() || "Hata" },
+      { status: 500 }
+    );
   }
 }
 
