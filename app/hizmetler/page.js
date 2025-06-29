@@ -31,8 +31,8 @@ const HIZMETLER = [
   },
   {
     title: "Tekne/Yat Kiralama & Özel Etkinlik",
-    desc: "İstanbul Boğazı’nda lüks yat/tekne ile evlilik teklifi, doğum günü ve VIP davet organizasyonları. Romantik akşam yemeği, müzik ve özel dekorasyon seçenekleriyle, rehberli grup turları ve özel etkinlikler için ayrıcalıklı hizmet.",
-    icon: "/yatbanner.jpg",  
+    desc: "İstanbul Boğazı’nda lüks yat/tekne ile evlilik teklifi, doğum günü veya VIP etkinlikler. Romantik akşam yemeği, müzik, özel dekorasyon ve rehberli turlar dahil, farklı kapasite ve rota seçenekleriyle ayrıcalıklı hizmet.",
+    icon: "/teknede-evlilik-banner.png",  // public klasöründe dosya adı birebir böyle olmalı!
     href: "/tekne-yat",
   },
   {
@@ -58,17 +58,19 @@ export default function Hizmetlerimiz() {
             tabIndex={0}
             aria-label={item.title}
           >
-            <div className="w-full max-w-[360px] h-[200px] md:h-[240px] mb-6 relative overflow-hidden rounded-[14px] border-4 border-gold/40 group-hover:border-gold/70 shadow-md">
+            <div className="w-full max-w-[360px] h-[200px] md:h-[220px] mb-6 relative overflow-hidden rounded-[14px] border-4 border-gold/40 group-hover:border-gold/70 shadow-md bg-[#222]">
               <Image
                 src={item.icon}
                 alt={item.title}
                 fill
                 className="object-cover transition-all duration-200 group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, 360px"
-                priority={item.title === "VIP Havalimanı Transferi"} // İlk görsel hızlı gelsin
+                priority={item.title === "VIP Havalimanı Transferi"}
               />
             </div>
-            <h3 className="font-bold text-xl md:text-2xl text-gold mb-2 text-center drop-shadow">{item.title}</h3>
+            <h3 className="font-bold text-xl md:text-2xl text-gold mb-2 text-center drop-shadow">
+              {item.title}
+            </h3>
             <p className="text-gray-200 text-center text-base leading-relaxed">
               {item.desc}
             </p>
@@ -78,3 +80,5 @@ export default function Hizmetlerimiz() {
     </main>
   );
 }
+
+// app/hizmetlerimiz/page.jsx
