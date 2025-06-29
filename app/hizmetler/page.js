@@ -1,3 +1,5 @@
+// app/hizmetlerimiz/page.jsx
+
 "use client";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,6 +30,12 @@ const HIZMETLER = [
     href: "/tur-gezi",
   },
   {
+    title: "Tekne/Yat Kiralama & Özel Etkinlik",
+    desc: "İstanbul Boğazı’nda lüks yat/tekne ile evlilik teklifi, doğum günü ve VIP davet organizasyonları. Romantik akşam yemeği, müzik ve özel dekorasyon seçenekleriyle, rehberli grup turları ve özel etkinlikler için ayrıcalıklı hizmet.",
+    icon: "/teknede-evlilik-banner.png",   // AI ile ürettiğin görseli /public'a eklemelisin
+    href: "/tekne-yat",
+  },
+  {
     title: "Dron Yolcu Transferi",
     desc: "Dron ile kısa mesafe VIP taşımacılık: geleceğin ulaşımıyla tanışın. (Pek yakında!)",
     icon: "/icon-dron.png",
@@ -38,27 +46,32 @@ const HIZMETLER = [
 export default function Hizmetlerimiz() {
   return (
     <main className="max-w-7xl mx-auto px-4 py-14">
-      <h2 className="text-3xl md:text-4xl font-extrabold text-gold mb-6 text-center">
+      <h2 className="text-3xl md:text-4xl font-extrabold text-gold mb-8 text-center tracking-tight">
         Hizmetlerimiz
       </h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 justify-center">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 justify-center">
         {HIZMETLER.map((item) => (
           <Link
             href={item.href}
             key={item.title}
-            className="flex flex-col items-center bg-black/70 rounded-2xl shadow-xl px-8 py-10 border border-gold/25 hover:border-gold hover:bg-black/90 transition-all cursor-pointer"
+            className="flex flex-col items-center bg-black/80 rounded-2xl shadow-xl px-6 py-8 md:px-8 md:py-10 border border-gold/25 hover:border-gold hover:bg-black/90 transition-all duration-200 cursor-pointer group"
+            tabIndex={0}
+            aria-label={item.title}
           >
-            <div className="w-[360px] h-[240px] mb-6 relative overflow-hidden rounded-[10px] border-4 border-gold/50 shadow-md">
+            <div className="w-full max-w-[360px] h-[200px] md:h-[240px] mb-6 relative overflow-hidden rounded-[14px] border-4 border-gold/40 group-hover:border-gold/70 shadow-md">
               <Image
                 src={item.icon}
                 alt={item.title}
                 fill
-                className="object-cover"
+                className="object-cover transition-all duration-200 group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, 360px"
+                priority={item.title === "VIP Havalimanı Transferi"} // İlk görsel hızlı gelsin
               />
             </div>
-            <h3 className="font-bold text-xl text-gold mb-2 text-center">{item.title}</h3>
-            <p className="text-gray-200 text-center">{item.desc}</p>
+            <h3 className="font-bold text-xl md:text-2xl text-gold mb-2 text-center drop-shadow">{item.title}</h3>
+            <p className="text-gray-200 text-center text-base leading-relaxed">
+              {item.desc}
+            </p>
           </Link>
         ))}
       </div>
