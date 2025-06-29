@@ -1,4 +1,3 @@
-// app/admin/rezervasyonlar/page.js
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
@@ -33,6 +32,10 @@ export default function AdminRezervasyonlar() {
   const [refreshFlag, setRefreshFlag] = useState(false);
   const pollingRef = useRef();
 
+  // Kaldırılan/aktif ayrımı için cache
+  const [activeList, setActiveList] = useState([]);
+  const [removedList, setRemovedList] = useState([]);
+
   // Modal açıkken body scroll'unu engelle
   useEffect(() => {
     if (modalRez) document.body.style.overflow = "hidden";
@@ -44,11 +47,16 @@ export default function AdminRezervasyonlar() {
   async function fetchList() {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/rezervasyonlar?showHidden=${showHidden}`);
+      const res = await fetch(`/api/admin/rezervasyonlar?showHidden=1`);
       const json = await res.json();
-      setList(json.items || []);
+      const arr = json.items || [];
+      setList(arr);
+      setActiveList(arr.filter(x => !x.hide));
+      setRemovedList(arr.filter(x => x.hide));
     } catch {
       setList([]);
+      setActiveList([]);
+      setRemovedList([]);
     }
     setLoading(false);
   }
@@ -60,8 +68,17 @@ export default function AdminRezervasyonlar() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, hide }),
     });
-    fetchList();
+    // Anlık olarak sadece local listede güncelle:
+    setActiveList(prev =>
+      hide ? prev.filter(item => item._id !== id) : [...prev, removedList.find(x => x._id === id)]
+    );
+    setRemovedList(prev =>
+      hide
+        ? [...prev, activeList.find(x => x._id === id)]
+        : prev.filter(item => item._id !== id)
+    );
     setModalRez(null);
+    setTimeout(fetchList, 500); // Yedek sync, backend ile kesin uyum için
   };
 
   // İlk açılış ve elle yenilemede
@@ -69,16 +86,17 @@ export default function AdminRezervasyonlar() {
     fetchList();
     pollingRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`/api/admin/rezervasyonlar?showHidden=${showHidden}`);
+        const res = await fetch(`/api/admin/rezervasyonlar?showHidden=1`);
         const json = await res.json();
-        if ((json.items || []).length !== list.length) {
-          setList(json.items || []);
-        }
+        const arr = json.items || [];
+        setList(arr);
+        setActiveList(arr.filter(x => !x.hide));
+        setRemovedList(arr.filter(x => x.hide));
       } catch {}
     }, 10000);
     return () => clearInterval(pollingRef.current);
     // eslint-disable-next-line
-  }, [refreshFlag, showHidden]);
+  }, [refreshFlag]);
 
   function handleShowHidden() {
     setShowHidden(s => !s);
@@ -89,24 +107,35 @@ export default function AdminRezervasyonlar() {
     setRefreshFlag(f => !f);
   }
 
-  // Excel export
+  // Excel export (tüm alanlar)
   function exportExcel() {
-    if (!list.length) return;
+    const exportArr = showHidden ? removedList : activeList;
+    if (!exportArr.length) return;
     const sheetData = [
-      ["Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Transfer Türü", "Kalkış", "Varış", "Kişi", "Araç", "Tutar", "Durum"],
-      ...list.map((r, i) => [
+      [
+        "Kayıt No", "Tarih", "Ad", "Soyad", "Telefon", "E-posta", "Segment", "Araç",
+        "Kişi", "TC", "KVKK Onayı", "Transfer Türü", "Kalkış", "Varış", "PNR",
+        "Ek Not", "Tutar", "Durum"
+      ],
+      ...exportArr.map((r, i) => [
         kayitNoUret(r, i),
         r.createdAt ? new Date(r.createdAt).toLocaleString("tr-TR") : "",
-        r.name + " " + (r.surname || ""),
-        r.phone,
-        r.email,
-        r.transfer,
-        r.from,
-        r.to,
-        r.people,
-        r.vehicle,
+        r.name || "",
+        r.surname || "",
+        r.phone || "",
+        r.email || "",
+        r.segment || "",
+        r.vehicle || "",
+        r.people || "",
+        r.tc || "",
+        r.kvkk ? "✓" : "✗",
+        r.transfer || "",
+        r.from || "",
+        r.to || "",
+        r.pnr || "",
+        r.note || "",
         r.summary?.toplam || 0,
-        r.status
+        r.status || ""
       ])
     ];
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
@@ -117,11 +146,12 @@ export default function AdminRezervasyonlar() {
   }
 
   // Pagination
-  const totalPages = Math.ceil(list.length / perPage);
-  const pagedList = list.slice((page - 1) * perPage, page * perPage);
+  const dataArr = showHidden ? removedList : activeList;
+  const totalPages = Math.ceil(dataArr.length / perPage);
+  const pagedList = dataArr.slice((page - 1) * perPage, page * perPage);
 
   const columns = [
-    "Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Transfer Türü", "Kalkış / Varış", "Tutar", "Durum", "İşlem"
+    "Kayıt No", "Tarih", "Ad", "Soyad", "Telefon", "E-posta", "Segment", "Araç", "Kişi", "TC", "KVKK", "Transfer Türü", "Kalkış / Varış", "Tutar", "Durum", "İşlem"
   ];
 
   // Detay Popup
@@ -190,13 +220,14 @@ export default function AdminRezervasyonlar() {
               <div><b>Telefon:</b> {item.phone}</div>
               <div><b>E-posta:</b> {item.email}</div>
               <div><b>Segment:</b> {item.segment}</div>
-              <div><b>Transfer Türü:</b> {item.transfer}</div>
               <div><b>Araç:</b> {item.vehicle}</div>
-              <div><b>Kalkış:</b> {item.from}</div>
-              <div><b>Varış:</b> {item.to}</div>
               <div><b>Kişi Sayısı:</b> {item.people}</div>
               <div><b>T.C.:</b> {item.tc}</div>
-              {item.pnr && <div className="col-span-2"><b>PNR/Uçuş Kodu:</b> {item.pnr}</div>}
+              <div><b>KVKK Onayı:</b> {item.kvkk ? "✓" : "✗"}</div>
+              <div><b>Transfer Türü:</b> {item.transfer}</div>
+              <div><b>Kalkış:</b> {item.from}</div>
+              <div><b>Varış:</b> {item.to}</div>
+              <div><b>PNR/Uçuş Kodu:</b> {item.pnr}</div>
               {item.note && <div className="col-span-2"><b>Ek Not:</b> {item.note}</div>}
             </div>
             <div className="col-span-2 mb-2">
@@ -257,7 +288,7 @@ export default function AdminRezervasyonlar() {
         >
           Şimdi Yenile
         </button>
-        <span className="ml-2 text-sm text-gray-400">{list.length} kayıt listelendi.</span>
+        <span className="ml-2 text-sm text-gray-400">{dataArr.length} kayıt listelendi.</span>
       </div>
       <div className="overflow-x-auto bg-black/80 rounded-2xl border-2 border-[#bfa658]">
         <table className="min-w-full text-sm border-separate border-spacing-0">
@@ -294,10 +325,20 @@ export default function AdminRezervasyonlar() {
                       : ""}
                   </td>
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
-                    {item.name} {item.surname}
+                    {item.name}
+                  </td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
+                    {item.surname}
                   </td>
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{item.phone}</td>
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{item.email}</td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{item.segment}</td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{item.vehicle}</td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{item.people}</td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{item.tc}</td>
+                  <td className="p-2 border-b border-[#bfa658] text-center" style={{ borderRight: '1px solid #bfa658' }}>
+                    {item.kvkk ? "✓" : "✗"}
+                  </td>
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{item.transfer}</td>
                   <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
                     {item.from} → {item.to}
