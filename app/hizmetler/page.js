@@ -31,7 +31,7 @@ const HIZMETLER = [
   },
   {
     title: "Tekne/Yat Kiralama & Özel Etkinlik",
-    desc: "İstanbul Boğazı’nda lüks yat/tekne ile evlilik teklifi, doğum günü veya VIP etkinlikler. Romantik akşam yemeği, müzik, özel dekorasyon ve rehberli turlar dahil, farklı kapasite ve rota seçenekleriyle ayrıcalıklı hizmet.",
+   desc: "İstanbul Boğazı’nda lüks yat/tekne ile evlilik teklifi, şirket etkinlikleri, özel kutlama ve grup turu hizmetleri.",
     icon: "/teknede-evlilik-banner.png",  // public klasöründe dosya adı birebir böyle olmalı!
     href: "/tekne-yat",
   },
