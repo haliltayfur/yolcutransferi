@@ -8,17 +8,18 @@ function formatTL(n) {
   return (n || 0).toLocaleString("tr-TR") + " ₺";
 }
 
+// Sütunlar
 const columns = [
-  { name: "Sipariş No", className: "min-w-[120px]" },
-  { name: "Tarih", className: "min-w-[130px]" },
-  { name: "Ad Soyad", className: "min-w-[120px]" },
-  { name: "Telefon", className: "min-w-[120px]" },
-  { name: "E-posta", className: "min-w-[150px]" },
-  { name: "Transfer Türü", className: "min-w-[120px]" },
-  { name: "Kalkış / Varış", className: "min-w-[220px]" },
-  { name: "Tutar", className: "min-w-[90px] text-right" },
-  { name: "Durum", className: "min-w-[100px]" },
-  { name: "İşlem", className: "min-w-[160px]" }
+  { name: "Sipariş No", key: "orderId", className: "min-w-[120px]" },
+  { name: "Tarih", key: "createdAt", className: "min-w-[130px]" },
+  { name: "Ad Soyad", key: "nameSurname", className: "min-w-[120px]" },
+  { name: "Telefon", key: "phone", className: "min-w-[120px]" },
+  { name: "E-posta", key: "email", className: "min-w-[150px]" },
+  { name: "Transfer Türü", key: "transfer", className: "min-w-[140px]" },
+  { name: "Kalkış / Varış", key: "route", className: "min-w-[180px]" },
+  { name: "Tutar", key: "total", className: "min-w-[90px] text-right" },
+  { name: "Durum", key: "status", className: "min-w-[100px]" },
+  { name: "İşlem", key: "actions", className: "min-w-[120px]" }
 ];
 
 export default function AdminRezervasyonlar() {
@@ -26,28 +27,51 @@ export default function AdminRezervasyonlar() {
   const [loading, setLoading] = useState(true);
   const [showHidden, setShowHidden] = useState(false);
   const [modalRez, setModalRez] = useState(null);
+  const [lastHash, setLastHash] = useState(""); // Arka planda değişiklik algılama için
   const pollingRef = useRef();
 
-  // 5 saniyede bir arka planda güncelle
+  // Sayfa ilk açıldığında ve showHidden değiştiğinde listeyi yükle
   useEffect(() => {
     fetchList();
-    pollingRef.current = setInterval(fetchList, 5000);
+    // 10 saniyede bir (arka planda sadece değişiklik varsa güncelle)
+    pollingRef.current = setInterval(bgCheckForUpdate, 10000);
     return () => clearInterval(pollingRef.current);
     // eslint-disable-next-line
   }, [showHidden]);
 
+  // Kullanıcı elle "Şimdi Yenile"ye basınca çağrılır
   const fetchList = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await fetch(`/api/admin/rezervasyonlar?showHidden=${showHidden}`);
       const json = await res.json();
       setList(json.items || []);
+      // Arka plan kontrolü için hash/guid sakla
+      setLastHash(createListHash(json.items || []));
     } catch {
       setList([]);
     } finally {
       setLoading(false);
     }
   };
+
+  // Sadece arka planda sessizce çalışır, veri değişmişse günceller
+  const bgCheckForUpdate = async () => {
+    try {
+      const res = await fetch(`/api/admin/rezervasyonlar?showHidden=${showHidden}`);
+      const json = await res.json();
+      const newHash = createListHash(json.items || []);
+      if (newHash !== lastHash) {
+        setList(json.items || []);
+        setLastHash(newHash);
+      }
+    } catch {/* sessiz geç */}
+  };
+
+  // Liste hash (sadece son 20 kaydı kıyasla, performans için)
+  function createListHash(items) {
+    return (items || []).slice(0, 20).map(i => i._id).join("-");
+  }
 
   // Kaldır (hide) veya Geri Al (unhide)
   const handleHideToggle = async (id, hide) => {
@@ -60,7 +84,7 @@ export default function AdminRezervasyonlar() {
     setModalRez(null);
   };
 
-  // Detay popup
+  // Detay popup (standart şablon)
   const RezervasyonDetayPopup = ({ item, onClose }) => {
     if (!item) return null;
     let extrasTable = null;
@@ -92,17 +116,17 @@ export default function AdminRezervasyonlar() {
     if (item.summary) {
       tutarDetay = (
         <div className="my-3 text-sm text-right">
-          <div><b>Transfer Bedeli:</b> {formatTL(item.summary.basePrice)}</div>
-          <div><b>Ekstralar:</b> {formatTL(item.summary.extrasTotal)}</div>
-          <div><b>KDV (%20):</b> {formatTL(item.summary.kdv)}</div>
-          <div className="font-bold text-lg"><b>Toplam:</b> {formatTL(item.summary.toplam)}</div>
+          <div>Transfer Bedeli: <b>{formatTL(item.summary.basePrice)}</b></div>
+          <div>Ekstralar: <b>{formatTL(item.summary.extrasTotal)}</b></div>
+          <div>KDV (%20): <b>{formatTL(item.summary.kdv)}</b></div>
+          <div style={{ fontWeight: "bold", fontSize: 18, color: "#bfa658" }}>Toplam: {formatTL(item.summary.toplam)}</div>
         </div>
       );
     }
     return (
       <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" onClick={onClose}>
         <div
-          className="bg-[#fffbef] max-w-2xl w-full rounded-2xl p-8 relative border-2 border-[#bfa658] overflow-y-auto max-h-[98vh]"
+          className="bg-[#232118] w-full max-w-xl rounded-2xl p-7 relative border-2 border-[#bfa658] overflow-y-auto max-h-[97vh]"
           onClick={e => e.stopPropagation()}
         >
           <button
@@ -110,13 +134,11 @@ export default function AdminRezervasyonlar() {
             className="absolute top-3 right-5 text-3xl font-bold text-[#bfa658] hover:text-red-400"
           >×</button>
           <h2 className="text-2xl font-bold mb-5 text-[#bfa658] text-center">Rezervasyon Detayı</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-[16px] mb-2 text-[#19160a]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-[16px] mb-2 text-[#ffeec2]">
             <div><b>Sipariş No:</b> {item.orderId}</div>
             <div><b>Durum:</b> {item.status}</div>
-            <div><b>Oluşturma:</b> {item.createdAt ? new Date(item.createdAt).toLocaleString("tr-TR") : "-"}</div>
-            <div><b>Kişi Sayısı:</b> {item.people}</div>
+            <div><b>Tarih/Saat:</b> {item.date} {item.time}</div>
             <div><b>Ad Soyad:</b> {item.name} {item.surname}</div>
-            <div><b>T.C.:</b> {item.tc}</div>
             <div><b>Telefon:</b> {item.phone}</div>
             <div><b>E-posta:</b> {item.email}</div>
             <div><b>Segment:</b> {item.segment}</div>
@@ -124,7 +146,8 @@ export default function AdminRezervasyonlar() {
             <div><b>Araç:</b> {item.vehicle}</div>
             <div><b>Kalkış:</b> {item.from}</div>
             <div><b>Varış:</b> {item.to}</div>
-            <div><b>Tarih/Saat:</b> {item.date} {item.time}</div>
+            <div><b>Kişi Sayısı:</b> {item.people}</div>
+            <div><b>T.C.:</b> {item.tc}</div>
             {item.pnr && <div className="col-span-2"><b>PNR/Uçuş Kodu:</b> {item.pnr}</div>}
             {item.note && <div className="col-span-2"><b>Ek Not:</b> {item.note}</div>}
           </div>
@@ -156,8 +179,8 @@ export default function AdminRezervasyonlar() {
   };
 
   return (
-    <main className="w-full max-w-[98vw] mx-auto px-1 py-8">
-      <h1 className="text-3xl font-bold text-[#bfa658] mb-8 text-left">Rezervasyon Kayıtları</h1>
+    <main className="w-full max-w-6xl mx-auto px-1 py-7">
+      <h1 className="text-3xl font-bold text-[#bfa658] mb-7 text-left">Rezervasyon Kayıtları</h1>
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <button
           onClick={() => setShowHidden(!showHidden)}
@@ -167,63 +190,57 @@ export default function AdminRezervasyonlar() {
         </button>
         <button
           onClick={fetchList}
-          className="bg-[#19160a] border border-[#bfa658] text-[#ffeec2] font-semibold px-4 py-2 rounded hover:bg-[#bfa658] hover:text-black text-sm shadow"
+          className="bg-[#bfa658] border border-[#bfa658] text-black font-semibold px-4 py-2 rounded hover:bg-[#ffeec2] hover:text-[#bfa658] text-sm shadow"
         >Şimdi Yenile</button>
-        <span className="ml-2 text-sm text-gray-400">{list.length} kayıt listelendi.</span>
+        <span className="ml-2 text-sm text-[#bfa658] font-bold">{list.length} kayıt listelendi.</span>
       </div>
-      <div className="overflow-x-auto w-full bg-black/80 rounded-2xl border-2 border-[#bfa658]">
-        {loading ? (
-          <p className="text-center py-6 text-gray-300 text-xl">Yükleniyor...</p>
-        ) : list.length === 0 ? (
-          <p className="text-center py-10 text-gray-400 text-xl font-semibold">Hiç kayıt yok.</p>
-        ) : (
-          <table className="w-full border-collapse min-w-[1200px] text-sm">
-            <thead>
-              <tr>
-                {columns.map((col, i) => (
-                  <th
-                    key={col.name}
-                    className={`p-2 border-b-2 border-[#bfa658] bg-black/90 text-[#ffeec2] font-bold ${col.className}`}
-                    style={{ borderRight: i !== columns.length - 1 ? '1px solid #bfa658' : undefined }}
-                  >{col.name}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {list.map((item, idx) => (
-                <tr key={item._id} className={item.hide ? "bg-[#331] text-gray-500" : "hover:bg-[#231d10] transition"}>
-                  <td className="p-2 border-b border-[#bfa658] font-semibold whitespace-nowrap">{item.orderId}</td>
-                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{item.createdAt ? new Date(item.createdAt).toLocaleString("tr-TR") : "-"}</td>
-                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{item.name} {item.surname}</td>
-                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{item.phone}</td>
-                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{item.email}</td>
-                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{item.transfer}</td>
-                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{item.from} → {item.to}</td>
-                  <td className="p-2 border-b border-[#bfa658] font-semibold text-right">{formatTL(item.summary?.toplam)}</td>
-                  <td className="p-2 border-b border-[#bfa658]">{item.status || "-"}</td>
-                  <td className="p-2 border-b border-[#bfa658] text-right">
-                    <button
-                      className="bg-[#bfa658] text-black px-3 py-1 rounded font-bold text-xs hover:opacity-80 shadow"
-                      onClick={() => setModalRez(item)}
-                      type="button"
-                    >Oku</button>
-                    {!item.hide ? (
-                      <button
-                        onClick={() => handleHideToggle(item._id, true)}
-                        className="bg-yellow-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition ml-2"
-                      >Kaldır</button>
-                    ) : (
-                      <button
-                        onClick={() => handleHideToggle(item._id, false)}
-                        className="bg-green-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-green-400 hover:text-black transition ml-2"
-                      >Geri Al</button>
-                    )}
-                  </td>
-                </tr>
+      <div className="overflow-x-auto w-full bg-[#151310] rounded-2xl border-2 border-[#bfa658]">
+        <table className="w-full border-collapse min-w-[1150px] text-sm">
+          <thead>
+            <tr>
+              {columns.map((col, i) => (
+                <th
+                  key={col.name}
+                  className={`p-2 border-b-2 border-[#bfa658] bg-[#19160a] text-[#ffeec2] font-bold ${col.className}`}
+                  style={{ borderRight: i !== columns.length - 1 ? '1px solid #bfa658' : undefined }}
+                >{col.name}</th>
               ))}
-            </tbody>
-          </table>
-        )}
+            </tr>
+          </thead>
+          <tbody>
+            {list.map((item, idx) => (
+              <tr key={item._id} className={item.hide ? "bg-[#33281a] text-gray-500" : "hover:bg-[#232118] transition"}>
+                <td className="p-2 border-b border-[#bfa658] font-semibold whitespace-nowrap">{item.orderId}</td>
+                <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{item.createdAt ? new Date(item.createdAt).toLocaleString("tr-TR") : "-"}</td>
+                <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{item.name} {item.surname}</td>
+                <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{item.phone}</td>
+                <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{item.email}</td>
+                <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{item.transfer}</td>
+                <td className="p-2 border-b border-[#bfa658] whitespace-nowrap">{item.from} → {item.to}</td>
+                <td className="p-2 border-b border-[#bfa658] font-semibold text-right">{formatTL(item.summary?.toplam)}</td>
+                <td className="p-2 border-b border-[#bfa658]">{item.status || "-"}</td>
+                <td className="p-2 border-b border-[#bfa658] text-right">
+                  <button
+                    className="bg-[#bfa658] text-black px-3 py-1 rounded font-bold text-xs hover:opacity-80 shadow border border-[#a08b50]"
+                    onClick={() => setModalRez(item)}
+                    type="button"
+                  >Oku</button>
+                  {!item.hide ? (
+                    <button
+                      onClick={() => handleHideToggle(item._id, true)}
+                      className="bg-yellow-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition ml-2"
+                    >Kaldır</button>
+                  ) : (
+                    <button
+                      onClick={() => handleHideToggle(item._id, false)}
+                      className="bg-green-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-green-400 hover:text-black transition ml-2"
+                    >Geri Al</button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
       {modalRez && <RezervasyonDetayPopup item={modalRez} onClose={() => setModalRez(null)} />}
     </main>
