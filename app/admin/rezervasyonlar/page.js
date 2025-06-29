@@ -1,37 +1,47 @@
 // app/admin/rezervasyonlar/page.js
-
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
+// Para formatı
 function formatTL(n) {
   return (n || 0).toLocaleString("tr-TR") + " ₺";
 }
 
-const columns = [
-  { name: "Sipariş No", key: "orderId", className: "min-w-[120px]" },
-  { name: "Tarih", key: "createdAt", className: "min-w-[130px]" },
-  { name: "Ad Soyad", key: "nameSurname", className: "min-w-[120px]" },
-  { name: "Telefon", key: "phone", className: "min-w-[120px]" },
-  { name: "E-posta", key: "email", className: "min-w-[150px]" },
-  { name: "Transfer Türü", key: "transfer", className: "min-w-[140px]" },
-  { name: "Kalkış / Varış", key: "route", className: "min-w-[180px]" },
-  { name: "Tutar", key: "total", className: "min-w-[90px] text-right" },
-  { name: "Durum", key: "status", className: "min-w-[100px]" },
-  { name: "İşlem", key: "actions", className: "min-w-[120px]" }
-];
+// Kayıt no üretici
+function kayitNoUret(rez, i) {
+  if (rez.orderId) return rez.orderId;
+  const tarihStr = rez.createdAt;
+  if (tarihStr) {
+    const t = new Date(tarihStr);
+    const yy = t.getFullYear();
+    const mm = String(t.getMonth() + 1).padStart(2, "0");
+    const dd = String(t.getDate()).padStart(2, "0");
+    return `rez${yy}${mm}${dd}_${String(i + 1).padStart(4, "0")}`;
+  }
+  return `rez_000${i + 1}`;
+}
 
 export default function AdminRezervasyonlar() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showHidden, setShowHidden] = useState(false);
   const [modalRez, setModalRez] = useState(null);
+  const [showHidden, setShowHidden] = useState(false);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [refreshFlag, setRefreshFlag] = useState(false);
+  const pollingRef = useRef();
 
+  // Modal açıkken body scroll'unu engelle
   useEffect(() => {
-    fetchList();
-    // eslint-disable-next-line
-  }, [showHidden]);
+    if (modalRez) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [modalRez]);
 
-  const fetchList = async () => {
+  // Backend verisini çek
+  async function fetchList() {
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/rezervasyonlar?showHidden=${showHidden}`);
@@ -39,11 +49,11 @@ export default function AdminRezervasyonlar() {
       setList(json.items || []);
     } catch {
       setList([]);
-    } finally {
-      setLoading(false);
     }
-  };
+    setLoading(false);
+  }
 
+  // Kaldır (hide) veya geri al (unhide)
   const handleHideToggle = async (id, hide) => {
     await fetch("/api/admin/rezervasyonlar", {
       method: "PATCH",
@@ -54,95 +64,293 @@ export default function AdminRezervasyonlar() {
     setModalRez(null);
   };
 
-  // Detay popup aynı kalabilir, yukarıdan kopyalanabilir...
+  // İlk açılış ve elle yenilemede
+  useEffect(() => {
+    fetchList();
+    pollingRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/admin/rezervasyonlar?showHidden=${showHidden}`);
+        const json = await res.json();
+        if ((json.items || []).length !== list.length) {
+          setList(json.items || []);
+        }
+      } catch {}
+    }, 10000);
+    return () => clearInterval(pollingRef.current);
+    // eslint-disable-next-line
+  }, [refreshFlag, showHidden]);
 
-  return (
-    <main className="w-full flex flex-col items-center justify-center px-2 py-10">
-      <h1 className="text-3xl font-bold text-[#bfa658] mb-7 text-left w-full max-w-5xl">Rezervasyon Kayıtları</h1>
-      <div className="flex flex-wrap gap-2 mb-4 max-w-5xl w-full">
-        <button
-          onClick={() => setShowHidden(!showHidden)}
-          className="bg-[#444] border border-[#bfa658] text-[#ffeec2] font-semibold px-4 py-2 rounded hover:bg-[#bfa658] hover:text-black text-sm shadow"
-        >
-          {showHidden ? "Kaldırılanları Gizle" : "Kaldırılanları Göster"}
-        </button>
-        <button
-          onClick={fetchList}
-          className="bg-[#bfa658] border border-[#bfa658] text-black font-semibold px-4 py-2 rounded hover:bg-[#ffeec2] hover:text-[#bfa658] text-sm shadow"
-        >Şimdi Yenile</button>
-        <span className="ml-2 text-sm text-[#bfa658] font-bold">{list.length} kayıt listelendi.</span>
-      </div>
-      {/* TABLO KUTUSU */}
-      <div className="w-full max-w-5xl bg-[#19160a] border-2 border-[#bfa658] rounded-2xl p-2 pt-3 pb-6 shadow-lg">
-        <div className="overflow-x-auto">
-          <table className="w-full border-separate border-spacing-0 text-[15px]">
-            <thead>
-              <tr>
-                {columns.map((col, i) => (
-                  <th
-                    key={col.name}
-                    className={`py-2 px-2 bg-[#19160a] text-[#ffeec2] font-semibold border-b-2 border-[#bfa658] ${col.className}`}
-                    style={{
-                      borderTopLeftRadius: i === 0 ? 12 : 0,
-                      borderTopRightRadius: i === columns.length - 1 ? 12 : 0,
-                      borderRight: i !== columns.length - 1 ? "1px solid #bfa658" : undefined
-                    }}
-                  >{col.name}</th>
-                ))}
+  function handleShowHidden() {
+    setShowHidden(s => !s);
+    setPage(1);
+  }
+
+  function handleRefresh() {
+    setRefreshFlag(f => !f);
+  }
+
+  // Excel export
+  function exportExcel() {
+    if (!list.length) return;
+    const sheetData = [
+      ["Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Transfer Türü", "Kalkış", "Varış", "Kişi", "Araç", "Tutar", "Durum"],
+      ...list.map((r, i) => [
+        kayitNoUret(r, i),
+        r.createdAt ? new Date(r.createdAt).toLocaleString("tr-TR") : "",
+        r.name + " " + (r.surname || ""),
+        r.phone,
+        r.email,
+        r.transfer,
+        r.from,
+        r.to,
+        r.people,
+        r.vehicle,
+        r.summary?.toplam || 0,
+        r.status
+      ])
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Rezervasyonlar");
+    const wbout = XLSX.write(wb, { type: "array", bookType: "xlsx" });
+    saveAs(new Blob([wbout], { type: "application/octet-stream" }), "rezervasyonlar.xlsx");
+  }
+
+  // Pagination
+  const totalPages = Math.ceil(list.length / perPage);
+  const pagedList = list.slice((page - 1) * perPage, page * perPage);
+
+  const columns = [
+    "Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Transfer Türü", "Kalkış / Varış", "Tutar", "Durum", "İşlem"
+  ];
+
+  // Detay Popup
+  const RezervasyonDetayPopup = ({ item, onClose }) => {
+    if (!item) return null;
+    let extrasTable = null;
+    if (Array.isArray(item.selectedExtras) && item.selectedExtras.length > 0) {
+      extrasTable = (
+        <table className="w-full mb-2 text-xs border border-[#bfa658] rounded">
+          <thead>
+            <tr className="bg-[#bfa658] text-black">
+              <th className="p-1">Ekstra</th>
+              <th className="p-1">Adet</th>
+              <th className="p-1">Birim</th>
+              <th className="p-1">Toplam</th>
+            </tr>
+          </thead>
+          <tbody>
+            {item.selectedExtras.map(e => (
+              <tr key={e.key} className="text-[#19160a]">
+                <td className="p-1">{e.label || e.key}</td>
+                <td className="p-1">{item.extrasQty?.[e.key] || 1}</td>
+                <td className="p-1">{e.price?.toLocaleString?.() || "-"}</td>
+                <td className="p-1">{((e.price || 0) * (item.extrasQty?.[e.key] || 1)).toLocaleString()} ₺</td>
               </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={columns.length} className="text-center py-7 text-[#ffeec2] font-bold text-xl">Yükleniyor...</td>
-                </tr>
-              ) : list.length === 0 ? (
-                <tr>
-                  <td colSpan={columns.length} className="text-center py-8 text-[#ffeec2] font-semibold text-lg">Hiç kayıt yok.</td>
-                </tr>
-              ) : (
-                list.map((item, idx) => (
-                  <tr key={item._id}
-                    className={`transition ${item.hide ? "bg-[#322b16] text-[#bfa658]" : "hover:bg-[#221d11]"}`}
-                    style={{ borderBottom: "1px solid #bfa658" }}>
-                    <td className="px-2 py-2 font-semibold text-[#ffeec2]">{item.orderId}</td>
-                    <td className="px-2 py-2">{item.createdAt ? new Date(item.createdAt).toLocaleString("tr-TR") : "-"}</td>
-                    <td className="px-2 py-2">{item.name} {item.surname}</td>
-                    <td className="px-2 py-2">{item.phone}</td>
-                    <td className="px-2 py-2">{item.email}</td>
-                    <td className="px-2 py-2">{item.transfer}</td>
-                    <td className="px-2 py-2">{item.from} → {item.to}</td>
-                    <td className="px-2 py-2 font-bold text-right">{formatTL(item.summary?.toplam)}</td>
-                    <td className="px-2 py-2">{item.status || "-"}</td>
-                    <td className="px-2 py-2 flex flex-wrap gap-1 justify-center">
-                      <button
-                        className="bg-[#bfa658] text-black px-2 py-1 rounded font-bold text-xs hover:opacity-80 shadow border border-[#a08b50]"
-                        onClick={() => setModalRez(item)}
-                        type="button"
-                      >Oku</button>
-                      {!item.hide ? (
-                        <button
-                          onClick={() => handleHideToggle(item._id, true)}
-                          className="bg-yellow-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
-                        >Kaldır</button>
-                      ) : (
-                        <button
-                          onClick={() => handleHideToggle(item._id, false)}
-                          className="bg-green-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-green-400 hover:text-black transition"
-                        >Geri Al</button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+    let tutarDetay = null;
+    if (item.summary) {
+      tutarDetay = (
+        <div className="my-3 text-sm text-right">
+          <div><b>Transfer Bedeli:</b> {formatTL(item.summary.basePrice)}</div>
+          <div><b>Ekstralar:</b> {formatTL(item.summary.extrasTotal)}</div>
+          <div><b>KDV (%20):</b> {formatTL(item.summary.kdv)}</div>
+          <div className="font-bold text-lg"><b>Toplam:</b> {formatTL(item.summary.toplam)}</div>
+        </div>
+      );
+    }
+    return (
+      <div
+        className="fixed left-0 top-0 w-full h-full bg-black/80 flex items-center justify-center z-50"
+        onClick={onClose}
+      >
+        <div
+          className="bg-white text-black p-0 rounded-xl max-w-2xl w-full shadow-2xl relative overflow-hidden"
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200 bg-[#f3ecd1]">
+            <div className="text-xl font-bold text-[#bfa658]">Rezervasyon Detayı</div>
+            <button
+              className="text-2xl text-gray-400 hover:text-black"
+              onClick={onClose}
+              aria-label="Kapat"
+            >×</button>
+          </div>
+          {/* Detay İçerik */}
+          <div className="px-6 py-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-[16px] mb-4">
+              <div><b>Kayıt No:</b> {kayitNoUret(item, 0)}</div>
+              <div><b>Tarih/Saat:</b> {item.date} {item.time}</div>
+              <div><b>Ad Soyad:</b> {item.name} {item.surname}</div>
+              <div><b>Telefon:</b> {item.phone}</div>
+              <div><b>E-posta:</b> {item.email}</div>
+              <div><b>Segment:</b> {item.segment}</div>
+              <div><b>Transfer Türü:</b> {item.transfer}</div>
+              <div><b>Araç:</b> {item.vehicle}</div>
+              <div><b>Kalkış:</b> {item.from}</div>
+              <div><b>Varış:</b> {item.to}</div>
+              <div><b>Kişi Sayısı:</b> {item.people}</div>
+              <div><b>T.C.:</b> {item.tc}</div>
+              {item.pnr && <div className="col-span-2"><b>PNR/Uçuş Kodu:</b> {item.pnr}</div>}
+              {item.note && <div className="col-span-2"><b>Ek Not:</b> {item.note}</div>}
+            </div>
+            <div className="col-span-2 mb-2">
+              <b>Ekstralar:</b>
+              {extrasTable ? extrasTable : <span className="text-gray-500 ml-2">Ekstra yok</span>}
+            </div>
+            {tutarDetay}
+          </div>
+          {/* Alt Butonlar */}
+          <div className="flex gap-3 justify-end bg-[#faf8ef] px-6 py-4 border-t border-gray-200">
+            {!item.hide ? (
+              <button
+                onClick={() => handleHideToggle(item._id, true)}
+                className="bg-yellow-800 text-[#ffeec2] px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
+              >Kaldır</button>
+            ) : (
+              <button
+                onClick={() => handleHideToggle(item._id, false)}
+                className="bg-green-800 text-[#ffeec2] px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-green-400 hover:text-black transition"
+              >Geri Al</button>
+            )}
+            <button
+              className="bg-black text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
+              onClick={onClose}
+            >
+              Kapat
+            </button>
+          </div>
         </div>
       </div>
-      {/* Detay popup */}
-      {modalRez && /* Buraya RezervasyonDetayPopup'u ekle */ null}
+    );
+  };
+
+  return (
+    <main className="max-w-6xl mx-auto px-2 py-8">
+      <h1 className="text-3xl font-bold text-[#bfa658] mb-8">Rezervasyon Kayıtları</h1>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <select
+          value={perPage}
+          onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }}
+          className="border border-[#bfa658] rounded px-2 py-1 text-sm bg-black text-[#bfa658] font-semibold focus:outline-none"
+        >
+          {[5, 10, 25, 50, 100].map((v) => <option key={v} value={v}>{v}</option>)}
+        </select>
+        <button onClick={exportExcel}
+          className="bg-[#bfa658] text-black px-4 py-2 rounded font-bold hover:opacity-80 text-sm shadow">
+          Excel (XLSX) İndir
+        </button>
+        <button
+          onClick={handleShowHidden}
+          className="bg-[#444] border border-[#bfa658] text-[#ffeec2] font-semibold px-4 py-2 rounded hover:bg-[#bfa658] hover:text-black text-sm shadow"
+        >
+          {showHidden ? "Aktifleri Göster" : "Kaldırılanları Göster"}
+        </button>
+        <button
+          onClick={handleRefresh}
+          className="bg-[#19160a] border border-[#bfa658] text-[#ffeec2] font-semibold px-4 py-2 rounded hover:bg-[#bfa658] hover:text-black text-sm shadow"
+        >
+          Şimdi Yenile
+        </button>
+        <span className="ml-2 text-sm text-gray-400">{list.length} kayıt listelendi.</span>
+      </div>
+      <div className="overflow-x-auto bg-black/80 rounded-2xl border-2 border-[#bfa658]">
+        <table className="min-w-full text-sm border-separate border-spacing-0">
+          <thead>
+            <tr>
+              {columns.map((col, i) => (
+                <th
+                  key={col}
+                  className="p-2 border-b-2 border-[#bfa658] bg-black/90 text-[#ffeec2] font-bold"
+                  style={{ borderRight: i !== columns.length - 1 ? '1px solid #bfa658' : undefined }}
+                >{col}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={columns.length} className="text-center py-6 text-gray-400 text-lg">Yükleniyor...</td>
+              </tr>
+            ) : pagedList.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length} className="text-center py-10 text-gray-400 text-xl font-semibold">Hiç kayıt yok.</td>
+              </tr>
+            ) : (
+              pagedList.map((item, i) => (
+                <tr key={item._id || i} className="hover:bg-[#231d10] transition">
+                  <td className="p-2 border-b border-[#bfa658] font-semibold"
+                    style={{ borderRight: '1px solid #bfa658' }}>
+                    {kayitNoUret(item, i + (page-1)*perPage)}
+                  </td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
+                    {item.createdAt
+                      ? new Date(item.createdAt).toLocaleString("tr-TR")
+                      : ""}
+                  </td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
+                    {item.name} {item.surname}
+                  </td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{item.phone}</td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{item.email}</td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{item.transfer}</td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
+                    {item.from} → {item.to}
+                  </td>
+                  <td className="p-2 border-b border-[#bfa658] font-bold text-right" style={{ borderRight: '1px solid #bfa658' }}>
+                    {formatTL(item.summary?.toplam)}
+                  </td>
+                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
+                    {item.status || "-"}
+                  </td>
+                  <td className="p-2 border-b border-[#bfa658] text-center min-w-[120px]">
+                    <button
+                      className="bg-[#bfa658] text-black px-3 py-1 rounded font-bold text-xs mr-1 hover:opacity-80 shadow"
+                      onClick={() => setModalRez(item)}
+                      type="button"
+                    >Oku</button>
+                    {!item.hide ? (
+                      <button
+                        onClick={() => handleHideToggle(item._id, true)}
+                        className="bg-yellow-800 text-[#ffeec2] px-2 py-1 rounded mr-2 text-xs font-semibold border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
+                      >Kaldır</button>
+                    ) : (
+                      <button
+                        onClick={() => handleHideToggle(item._id, false)}
+                        className="bg-green-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-green-400 hover:text-black transition"
+                      >Geri Al</button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-1 mt-5">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i + 1)}
+              className={`px-3 py-1 rounded font-bold border border-[#bfa658] mx-0.5 shadow-sm 
+                ${page === i + 1
+                  ? "bg-[#bfa658] text-black"
+                  : "bg-black text-[#bfa658] hover:bg-[#19160a] hover:text-white"}`}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+      )}
+      {/* Popup */}
+      {modalRez && <RezervasyonDetayPopup item={modalRez} onClose={() => setModalRez(null)} />}
     </main>
   );
 }
-
-// app/admin/rezervasyonlar/page.js --- SON
+// app/admin/rezervasyonlar/page.js
