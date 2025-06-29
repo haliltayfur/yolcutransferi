@@ -3,7 +3,7 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
-
+import Link from "next/link"
 const images = [
   "/Flux_Dev_A_luxurious_yacht_on_the_Bosphorus_in_Istanbul_elegan_1.jpg",
   "/Flux_Dev_A_luxurious_yacht_on_the_Bosphorus_in_Istanbul_elegan_3.jpg",
