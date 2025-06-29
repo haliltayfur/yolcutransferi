@@ -1,112 +1,116 @@
-// PATH: /app/rezervasyon/AdresAutoComplete.jsx
+// === PATH: components/AdresAutoComplete.jsx ===
 
 "use client";
 import { useState, useEffect, useRef } from "react";
 
-// JSON'lardan il/ilçe/semt/mahalle/havalimanı yükle
-function useAddressData() {
-  const [list, setList] = useState([]);
+// Tüm json’ları yükle
+const useAdresData = () => {
+  const [adresler, setAdresler] = useState({ sehirler: [], ilceler: [], mahalleler: [] });
   useEffect(() => {
     Promise.all([
       fetch("/dumps/sehirler.json").then(r => r.json()),
       fetch("/dumps/ilceler.json").then(r => r.json()),
-      fetch("/dumps/mahalleler.json").then(r => r.json()),
-      fetch("/dumps/airports.json").then(r => r.json()),
-    ]).then(([sehirler, ilceler, mahalleler, havalimanlari]) => {
-      // Hepsini tek diziye ekle
-      const adresler = [];
-      sehirler.forEach(sehir =>
-        adresler.push({ tip: "il", il: sehir.sehir_adi })
-      );
-      ilceler.forEach(ilce =>
-        adresler.push({ tip: "ilce", il: ilce.sehir_adi, ilce: ilce.ilce_adi })
-      );
-      mahalleler.forEach(mahalle =>
-        adresler.push({
-          tip: "mahalle",
-          il: mahalle.sehir_adi,
-          ilce: mahalle.ilce_adi,
-          mahalle: mahalle.mahalle_adi,
-        })
-      );
-      havalimanlari.forEach(h => adresler.push({ tip: "havalimani", ad: h.name }));
-      setList(adresler);
+      fetch("/dumps/mahalleler-1.json").then(r => r.json()).catch(()=>[]),
+      fetch("/dumps/mahalleler-2.json").then(r => r.json()).catch(()=>[]),
+      fetch("/dumps/mahalleler-3.json").then(r => r.json()).catch(()=>[]),
+      fetch("/dumps/mahalleler-4.json").then(r => r.json()).catch(()=>[]),
+    ]).then(([sehirler, ilceler, m1, m2, m3, m4]) => {
+      const mahalleler = [].concat(m1, m2, m3, m4);
+      setAdresler({ sehirler, ilceler, mahalleler });
     });
   }, []);
-  return list;
+  return adresler;
+};
+
+// Öneri hesapla (autocomplete)
+function getAdresOneri(query, { sehirler, ilceler, mahalleler }) {
+  if (!query || query.length < 2) return [];
+  const nq = query.toLocaleLowerCase("tr-TR");
+  let results = [];
+
+  // Mahalle bazlı
+  mahalleler.forEach(m => {
+    if (m.mahalle_adi && m.mahalle_adi.toLocaleLowerCase("tr-TR").includes(nq)) {
+      const ilce = ilceler.find(i => i.ilce_ID === m.ilce_ID);
+      const sehir = sehirler.find(s => s.sehir_ID === m.sehir_ID);
+      if (ilce && sehir)
+        results.push(`${sehir.sehir_title} / ${ilce.ilce_adi} / ${m.mahalle_adi}`);
+    }
+  });
+  // İlçe bazlı
+  ilceler.forEach(i => {
+    if (i.ilce_adi && i.ilce_adi.toLocaleLowerCase("tr-TR").includes(nq)) {
+      const sehir = sehirler.find(s => s.sehir_ID === i.sehir_ID);
+      if (sehir)
+        results.push(`${sehir.sehir_title} / ${i.ilce_adi}`);
+    }
+  });
+  // Şehir bazlı
+  sehirler.forEach(s => {
+    if (s.sehir_title.toLocaleLowerCase("tr-TR").includes(nq)) {
+      results.push(s.sehir_title);
+    }
+  });
+
+  // Dublicate’leri kaldır
+  results = Array.from(new Set(results));
+  return results.slice(0, 24);
 }
 
-function normalize(s) {
-  return s
-    .toLocaleLowerCase("tr-TR")
-    .replace(/[çÇ]/g, "c")
-    .replace(/[ğĞ]/g, "g")
-    .replace(/[ıİ]/g, "i")
-    .replace(/[öÖ]/g, "o")
-    .replace(/[şŞ]/g, "s")
-    .replace(/[üÜ]/g, "u")
-    .replace(/[\s\-\.]/g, "");
-}
-
-function getSuggestions(q, addressList) {
-  if (!q || q.length < 2) return [];
-  const nq = normalize(q);
-  return addressList
-    .filter(
-      (item) =>
-        (item.il && normalize(item.il).includes(nq)) ||
-        (item.ilce && normalize(item.ilce).includes(nq)) ||
-        (item.semt && normalize(item.semt).includes(nq)) ||
-        (item.mahalle && normalize(item.mahalle).includes(nq)) ||
-        (item.ad && normalize(item.ad).includes(nq))
-    )
-    .slice(0, 15)
-    .map((item) => {
-      if (item.tip === "il") return item.il;
-      if (item.tip === "ilce") return `${item.il} / ${item.ilce}`;
-      if (item.tip === "mahalle")
-        return `${item.il} / ${item.ilce} / ${item.mahalle}`;
-      if (item.tip === "havalimani") return item.ad;
-      return "";
-    });
-}
-
-// KULLANIM: <AdresAutoComplete value={from} onChange={setFrom} placeholder="Nereden?" />
-
-export default function AdresAutoComplete({ value, onChange, placeholder }) {
-  const addressList = useAddressData();
+// Ana component
+export default function AdresAutoComplete({ value, onChange, placeholder = "Nereden? İl / İlçe / Mahalle / Havalimanı" }) {
+  const adresler = useAdresData();
+  const [input, setInput] = useState(value || "");
   const [suggestions, setSuggestions] = useState([]);
-  const [focused, setFocused] = useState(false);
-  const ref = useRef();
+  const [showSug, setShowSug] = useState(false);
+  const inputRef = useRef();
 
   useEffect(() => {
-    setSuggestions(getSuggestions(value, addressList));
-  }, [value, addressList]);
+    setInput(value || "");
+  }, [value]);
+
+  useEffect(() => {
+    if (input.length > 1) {
+      setSuggestions(getAdresOneri(input, adresler));
+      setShowSug(true);
+    } else {
+      setSuggestions([]);
+      setShowSug(false);
+    }
+  }, [input, adresler]);
+
+  function handleSelect(val) {
+    setInput(val);
+    setShowSug(false);
+    if (onChange) onChange(val);
+  }
 
   return (
-    <div className="relative">
+    <div style={{ position: "relative", width: "100%" }}>
       <input
-        ref={ref}
         type="text"
-        className="input w-full"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={input}
+        ref={inputRef}
+        onChange={e => {
+          setInput(e.target.value);
+          if (onChange) onChange(e.target.value);
+        }}
         placeholder={placeholder}
+        className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-3 py-2"
         autoComplete="off"
-        onFocus={() => setFocused(true)}
-        onBlur={() => setTimeout(() => setFocused(false), 180)}
-        style={{ fontFamily: "Quicksand,sans-serif" }}
+        onFocus={() => setShowSug(input.length > 1 && suggestions.length > 0)}
+        onBlur={() => setTimeout(() => setShowSug(false), 120)}
+        style={{ minHeight: 45 }}
       />
-      {focused && suggestions.length > 0 && (
-        <ul className="absolute left-0 right-0 mt-1 bg-white text-black rounded-xl shadow-lg z-50 max-h-60 overflow-auto border border-[#bfa658]">
+      {/* Öneriler */}
+      {showSug && suggestions.length > 0 && (
+        <ul className="absolute left-0 right-0 mt-1 bg-[#181818] border border-[#bfa658] rounded-xl shadow-lg z-40 max-h-72 overflow-y-auto py-1">
           {suggestions.map((s, i) => (
             <li
               key={i}
-              className="px-4 py-2 cursor-pointer hover:bg-yellow-100"
-              onMouseDown={() => {
-                onChange(s);
-                setSuggestions([]);
-              }}
+              onMouseDown={() => handleSelect(s)}
+              className="px-3 py-2 cursor-pointer hover:bg-[#bfa658] hover:text-black transition text-sm"
+              style={{ borderBottom: "1px solid #3332" }}
             >
               {s}
             </li>
@@ -116,4 +120,5 @@ export default function AdresAutoComplete({ value, onChange, placeholder }) {
     </div>
   );
 }
-// PATH: /app/rezervasyon/AdresAutoComplete.jsx
+
+// === PATH END: components/AdresAutoComplete.jsx ===
