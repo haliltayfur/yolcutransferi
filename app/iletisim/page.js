@@ -1,5 +1,5 @@
-import React from "react";
 "use client";
+import React from "react";
 import { useState, useEffect, useRef } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
