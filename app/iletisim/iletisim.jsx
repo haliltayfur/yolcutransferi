@@ -39,7 +39,6 @@ function formatDuration(ms) {
 }
 
 // --- Akıllı rate-limit (anti-spam) ---
-// localStorage ile gönderim kayıtları
 function useAkilliRateLimit() {
   const [blocked, setBlocked] = useState(false);
   const [msg, setMsg] = useState("");
@@ -50,10 +49,7 @@ function useAkilliRateLimit() {
       let now = Date.now();
       let log = [];
       try { log = JSON.parse(localStorage.getItem("iletisim_log") || "[]"); } catch { }
-      // Sadece son 1 saat içindekiler
       log = log.filter(ts => now - ts < 60 * 60 * 1000);
-
-      // 1dk içinde 2’den fazla varsa
       const last1dk = log.filter(ts => now - ts < 60 * 1000);
       const last10dk = log.filter(ts => now - ts < 10 * 60 * 1000);
 
@@ -74,12 +70,10 @@ function useAkilliRateLimit() {
     return () => clearInterval(id);
   }, []);
 
-  // Yeni kayıt ekle
   function kaydet() {
     let now = Date.now();
     let log = [];
     try { log = JSON.parse(localStorage.getItem("iletisim_log") || "[]"); } catch { }
-    // Sadece son 1 saat içindekiler
     log = log.filter(ts => now - ts < 60 * 60 * 1000);
     log.push(now);
     localStorage.setItem("iletisim_log", JSON.stringify(log));
@@ -97,9 +91,67 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// --- Politika Popup ---
-function PolicyPopup({ open, onClose, onConfirm, children }) {
+// --- Dinamik Politika Popup --- //
+function PolicyPopup({ open, onClose, onConfirm }) {
+  const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [linkPopup, setLinkPopup] = useState(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setLoading(true);
+    fetch("/mesafeli-satis")
+      .then(r => r.text())
+      .then(html => {
+        // Sadece <main> içeriğini çek (hem SEO hem içerik güvenli!)
+        let match = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+        let mainHtml = match ? match[1] : "İçerik yüklenemedi.";
+        // Linklere click event ekle: başka bir popup açmak için
+        // Tüm linkleri data-popup ile değiştir
+        mainHtml = mainHtml.replace(/<a\s+href="([^"]+)"([^>]*)>([\s\S]*?)<\/a>/gi,
+          (m, href, rest, text) => {
+            // Sadece harici değilse ve yeni sekmede açılmıyorsa
+            if (/^https?:\/\//.test(href)) return m;
+            return `<a href="#" data-popup="${href}"${rest}>${text}</a>`;
+          }
+        );
+        setContent(mainHtml);
+      })
+      .catch(() => setContent("İçerik alınamadı."))
+      .finally(() => setLoading(false));
+  }, [open]);
+
+  // Linkleri yönet
+  useEffect(() => {
+    if (!open) return;
+    const root = document.getElementById("policy-popup-content");
+    if (!root) return;
+    function clickHandler(e) {
+      if (e.target.tagName === "A" && e.target.dataset.popup) {
+        e.preventDefault();
+        setLinkPopup(e.target.dataset.popup);
+      }
+    }
+    root.addEventListener("click", clickHandler);
+    return () => root.removeEventListener("click", clickHandler);
+  }, [open, content]);
+
+  // Ek popup için içerik fetch et
+  const [subPopupContent, setSubPopupContent] = useState("");
+  useEffect(() => {
+    if (!linkPopup) return;
+    fetch(linkPopup)
+      .then(r => r.text())
+      .then(html => {
+        let match = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+        let mainHtml = match ? match[1] : "İçerik yüklenemedi.";
+        setSubPopupContent(mainHtml);
+      })
+      .catch(() => setSubPopupContent("İçerik alınamadı."));
+  }, [linkPopup]);
+
   if (!open) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-[2.5px]">
       <div
@@ -114,23 +166,21 @@ function PolicyPopup({ open, onClose, onConfirm, children }) {
         >
           <SiX />
         </button>
-        {/* Başlık */}
         <h2 className="text-2xl md:text-3xl font-extrabold text-[#FFD700] pt-10 pb-2 text-center tracking-tight">
           YolcuTransferi.com Politika ve Koşulları
         </h2>
         {/* Sözleşme İçeriği */}
         <div className="grow w-full px-0 pt-0 pb-5 flex flex-col items-center">
           <div
+            id="policy-popup-content"
             className="w-full max-h-[60vh] min-h-[120px] overflow-y-auto rounded-2xl border-2 border-[#FFD70080] bg-black/80 px-6 md:px-10 py-7 mb-4 text-[#ecd9aa] text-base shadow-inner"
             style={{
               boxShadow: "0 0 0 2px #FFD70022, 0 3px 14px #19160a66",
+              wordBreak: "break-word"
             }}
-          >
-            {/* Senin gerçek sözleşme metnin veya fetch edilen HTML */}
-            {children}
-          </div>
+            dangerouslySetInnerHTML={{ __html: loading ? "<div style='text-align:center;padding:35px'>Yükleniyor...</div>" : content }}
+          />
         </div>
-        {/* Buton */}
         <div className="w-full flex justify-end px-6 pb-6">
           <button
             onClick={() => {
@@ -144,6 +194,27 @@ function PolicyPopup({ open, onClose, onConfirm, children }) {
           </button>
         </div>
       </div>
+      {/* Alt popup varsa aç */}
+      {linkPopup && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-[2px]">
+          <div className="relative w-[94vw] max-w-xl rounded-2xl border-2 border-[#FFD700] bg-gradient-to-br from-black via-[#19160a] to-[#302811] shadow-2xl p-0 flex flex-col">
+            <button
+              onClick={() => setLinkPopup(null)}
+              className="absolute top-3 right-3 text-[#FFD700] text-2xl font-black w-10 h-10 flex items-center justify-center rounded-full bg-[#19160a] border-2 border-[#FFD700] hover:bg-[#ffd70022] transition"
+              aria-label="Kapat"
+            >
+              <SiX />
+            </button>
+            <div className="grow w-full px-0 pt-10 pb-4 flex flex-col items-center">
+              <div
+                className="w-full max-h-[54vh] min-h-[90px] overflow-y-auto rounded-2xl border-2 border-[#FFD70080] bg-black/80 px-4 md:px-8 py-5 mb-2 text-[#ecd9aa] text-base shadow-inner"
+                style={{ boxShadow: "0 0 0 2px #FFD70022, 0 2px 10px #19160a66" }}
+                dangerouslySetInnerHTML={{ __html: subPopupContent || "Yükleniyor..." }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -156,7 +227,6 @@ function formatPhone(val) {
   return ("0" + val).slice(0, 11);
 }
 
-// --- Ana Sayfa ---
 export default function Iletisim() {
   const [form, setForm] = useState({
     ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "",
@@ -168,7 +238,6 @@ export default function Iletisim() {
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupKvkkConfirmed, setPopupKvkkConfirmed] = useState(false);
 
-  // Rate limit state
   const [blocked, blockedMsg, remaining, kaydetRate] = useAkilliRateLimit();
 
   // Telefon inputunda başa sıfır ekle
@@ -181,7 +250,6 @@ export default function Iletisim() {
     setErrors(er => ({ ...er, telefon: undefined }));
   };
 
-  // Tümünü okudum, onaylıyorum popuptan gelirse, kutuyu işaretle
   useEffect(() => {
     if (popupKvkkConfirmed) {
       setForm(f => ({ ...f, kvkkOnay: true }));
@@ -214,8 +282,6 @@ export default function Iletisim() {
     if (!isRealMsg(form.mesaj)) newErrors.mesaj = "Mesaj en az 15 karakter, 3 kelime olmalı.";
     if (!form.iletisimTercihi) newErrors.iletisimTercihi = "İletişim tercihi zorunlu.";
     if (!form.kvkkOnay) newErrors.kvkkOnay = "Koşulları kabul etmelisiniz.";
-
-    // Akıllı rate limit
     if (blocked) newErrors.global = blockedMsg;
 
     setErrors(newErrors);
@@ -237,27 +303,6 @@ export default function Iletisim() {
     }
     setForm({ ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "", iletisimTercihi: "", kvkkOnay: false });
   };
-
-  // KVKK / Politika popup içeriğini buradan güncelleyebilirsin
-  const popupContent = (
-    <>
-      <b className="text-xl text-[#FFD700] mb-2 block">Mesafeli Satış Sözleşmesi</b>
-      <div className="mb-2">YolcuTransferi.com'dan yapılan her rezervasyon aşağıdaki sözleşme koşullarına tabidir.</div>
-      <ul className="pl-4 space-y-2">
-        <li><b>1. Taraflar ve Tanımlar</b> <br />
-          Bu sözleşme, <b>YolcuTransferi.com</b> üzerinden hizmet alan gerçek/tüzel kişi ile taşımacılık, transfer, tekne turu ve organizasyon hizmeti sağlayan üçüncü taraf hizmet verenler ("Hizmet Sağlayıcı") arasında geçerlidir.</li>
-        <li><b>2. Hizmet Konusu</b> <br />
-          Müşteri, YolcuTransferi.com üzerinden; VIP transfer, havalimanı transferi, şehirlerarası taşıma, tekne turu, kurumsal organizasyon, dron vb. hizmetler için rezervasyon yapar.</li>
-        <li><b>3. Sorumluluk</b> <br />
-          Platform, yalnızca rezervasyon aracı kurumudur; asıl taşıyıcı veya organizatör değildir.</li>
-        <li><b>4. Gizlilik ve KVKK</b> <br />
-          Kişisel verileriniz, yalnızca rezervasyon işlemleri için kullanılır ve üçüncü kişilerle paylaşılmaz. Detaylar için <a href="/kvkk" className="underline text-[#FFD700]" target="_blank">KVKK Aydınlatma Metni</a>'ni inceleyin.</li>
-        <li><b>5. İptal, İade ve Değişiklik</b> <br />
-          Her rezervasyonun iptal/iade koşulları ilgili hizmet sağlayıcının şartlarına tabidir.</li>
-      </ul>
-      <div className="mt-2">Tüm hizmetlerimiz hakkında daha fazla bilgi ve detaylı metinler için <a href="/mesafeli-satis" className="underline text-[#FFD700]" target="_blank">Mesafeli Satış Sözleşmesi</a> sayfasına bakabilirsiniz.</div>
-    </>
-  );
 
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
@@ -407,9 +452,7 @@ export default function Iletisim() {
         open={popupOpen}
         onClose={() => setPopupOpen(false)}
         onConfirm={() => setPopupKvkkConfirmed(true)}
-      >
-        {popupContent}
-      </PolicyPopup>
+      />
     </main>
   );
 }
