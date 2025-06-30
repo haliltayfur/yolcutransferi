@@ -38,4 +38,13 @@ export default async function EklerPage() {
             {files.map(file => (
               <li key={file}>
                 <a href={file} target="_blank" rel="noopener noreferrer" className="text-[#ffd700] underline hover:text-white transition">
-                  {file.sp
+                  {file.split("/").pop()}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </main>
+  );
+}
