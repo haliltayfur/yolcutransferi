@@ -8,9 +8,7 @@ import path from "path";
 // uploads dizini: public/ekler/iletisim/YYYY-MM-DD/
 const UPLOAD_ROOT = path.join(process.cwd(), "public", "ekler", "iletisim");
 
-export const config = {
-  api: { bodyParser: false },
-};
+// *** DİKKAT: export const config satırı ARTIK YOK! ***
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
