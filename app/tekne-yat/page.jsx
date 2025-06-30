@@ -46,8 +46,8 @@ export default function TekneYat() {
           }}
           title=  "VIP Tekne ve Yat ile Özel Etkinlikler"
         >
-          Tekne / Yat Kiralama & Boğazda Lüks Etkinlikler
-        </h1>
+          VIP Tekne ve Yat ile Özel Etkinlikler
+        </h2>
 
         <p className="text-base md:text-lg text-[#ecd9aa] font-normal leading-relaxed mb-8 text-center">
           İstanbul Boğazı’nda, lüks yatlarımızla evlilik teklifi, kurumsal buluşmalar, grup gezileri, doğum günü ve her türlü VIP davet için unutulmaz anlar sunuyoruz.  
@@ -124,7 +124,7 @@ export default function TekneYat() {
         <div className="text-center mt-12">
           <Link href="/rezervasyon" className="inline-block">
             <button className="bg-gradient-to-tr from-[#cbb26a] to-[#bfa658] text-black font-bold text-lg px-8 py-4 rounded-xl shadow-lg border border-[#fff6ce] hover:scale-105 hover:from-[#e6d199] hover:to-[#c4ad5f] transition">
-              Tekne & Yat İçin Rezervasyon Yap
+              Rezervasyon Yap
             </button>
           </Link>
         </div>
