@@ -70,43 +70,87 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// --- Politika Popup --- //
-function PolicyPopup({ open, onClose, onConfirm }) {
+// --- Kurumsal popup component (dinamik içerik, linkte yeni popup) ---
+function DynamicPopup({ open, onClose, url, onConfirm, title = "YolcuTransferi.com Politika ve Koşulları" }) {
+  const [mainHtml, setMainHtml] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [subPopupUrl, setSubPopupUrl] = useState(null);
+
+  // İçeriği dinamik çek
+  useEffect(() => {
+    if (!open || !url) return;
+    setLoading(true);
+    fetch(url)
+      .then(r => r.text())
+      .then(html => {
+        // sadece <main> içeriğini al
+        const match = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+        setMainHtml(match ? match[1] : "İçerik yüklenemedi.");
+      })
+      .catch(() => setMainHtml("İçerik alınamadı."))
+      .finally(() => setLoading(false));
+  }, [open, url]);
+
+  // Linklere intercept: yeni popup açtır (aynı düzen, üstte göster)
+  function interceptLinks(e) {
+    const target = e.target.closest("a");
+    if (target && target.tagName === "A") {
+      e.preventDefault();
+      const href = target.getAttribute("href");
+      if (href) setSubPopupUrl(href);
+    }
+  }
+
   if (!open) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="relative w-[96vw] md:w-[56vw] max-w-4xl bg-[#181405] rounded-2xl border-4 border-[#FFD700] p-10 pt-14 shadow-2xl flex flex-col overflow-hidden">
-        {/* Altın Sarısı X Butonu */}
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 text-[#FFD700] hover:text-[#fff9e3] text-4xl font-black w-12 h-12 flex items-center justify-center rounded-full bg-black/40 border-2 border-[#FFD700] hover:bg-[#ffd70022] transition"
-          aria-label="Kapat"
-        >
-          <SiX />
-        </button>
-        <h2 className="text-2xl font-bold text-[#FFD700] mb-5 text-center">YolcuTransferi.com Politika ve Koşulları</h2>
-        <div className="text-sm text-[#ecd9aa] mb-10 max-h-none">
-          {/* Buraya gerçek politika metnini ekle veya props ile aktar */}
-          <p>
-            Tüm hizmetlerimiz, YolcuTransferi.com kullanıcı sözleşmesi, KVKK ve ilgili mevzuat kapsamında sunulur.
-            Kişisel verileriniz, sadece transfer ve rezervasyon işlemleriniz için işlenir, üçüncü kişilerle paylaşılmaz.
-            Detaylı bilgilendirme ve gizlilik politikamız için <a href="/kvkk" target="_blank" className="underline text-[#FFD700]">KVKK Aydınlatma Metni</a>’ni inceleyebilirsiniz.
-          </p>
-          <p className="mt-4">
-            Siteyi ve hizmeti kullanmaya devam ederek, tüm koşulları ve politikaları okuduğunuzu ve kabul ettiğinizi beyan edersiniz.
-          </p>
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+        <div className="relative w-[98vw] max-w-2xl md:w-[56vw] md:max-w-3xl min-h-[340px] bg-[#fffdfa] rounded-3xl shadow-2xl border-2 border-[#FFD700] px-0 pt-0 pb-0 overflow-hidden flex flex-col">
+          {/* Kapat (X) Butonu: her zaman görünür, altın sarısı */}
+          <button
+            onClick={onClose}
+            className="absolute top-0 left-0 md:left-6 md:top-6 text-[#FFD700] text-[40px] md:text-[46px] font-black w-16 h-16 flex items-center justify-center bg-transparent border-0 z-10 hover:scale-110 transition"
+            aria-label="Kapat"
+          >
+            <SiX />
+          </button>
+
+          {/* Başlık */}
+          <div className="w-full py-6 px-8 border-b border-[#FFD700] text-center text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight bg-white sticky top-0 z-10">
+            {title}
+          </div>
+          {/* İçerik */}
+          <div
+            className="flex-1 px-5 md:px-10 py-6 md:py-8 text-gray-800 overflow-y-auto max-h-[66vh] text-base md:text-lg"
+            style={{ fontFamily: "inherit", lineHeight: "1.6", background: "none" }}
+            onClick={interceptLinks}
+            dangerouslySetInnerHTML={{ __html: loading ? "<div class='text-center text-[#bfa658]'>Yükleniyor...</div>" : mainHtml }}
+          />
+          {/* En altta onay butonu */}
+          <div className="py-4 px-5 md:px-10 border-t border-[#FFD700] bg-white flex justify-end">
+            <button
+              onClick={() => {
+                if (onConfirm) onConfirm();
+                onClose();
+              }}
+              className="min-w-[180px] py-3 rounded-xl bg-gradient-to-tr from-[#FFD700] to-[#BFA658] text-black font-bold text-lg shadow hover:scale-105 transition"
+            >
+              Tümünü okudum, onaylıyorum
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => {
-            onConfirm && onConfirm();
-            onClose();
-          }}
-          className="mt-2 w-full py-3 rounded-xl bg-gradient-to-tr from-[#FFD700] to-[#BFA658] text-black font-bold text-lg shadow hover:scale-105 transition"
-        >
-          Tümünü okudum, onaylıyorum
-        </button>
       </div>
-    </div>
+      {/* ALT: Link popup (yeni popup üstüne açılır, kapatınca ana popup'a dönülür) */}
+      {subPopupUrl && (
+        <DynamicPopup
+          open={!!subPopupUrl}
+          onClose={() => setSubPopupUrl(null)}
+          url={subPopupUrl}
+          title=""
+        />
+      )}
+    </>
   );
 }
 
@@ -347,9 +391,10 @@ export default function Iletisim() {
         </div>
       </section>
       {/* Politika ve koşullar popup'u */}
-      <PolicyPopup
+      <DynamicPopup
         open={popupOpen}
         onClose={() => setPopupOpen(false)}
+        url="/mesafeli-satis"
         onConfirm={() => setPopupKvkkConfirmed(true)}
       />
     </main>
