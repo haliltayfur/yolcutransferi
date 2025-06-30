@@ -44,7 +44,7 @@ export default function TekneYat() {
             width: "100%",
             display: "block"
           }}
-          title="Tekne / Yat Kiralama & Boğazda Lüks Etkinlikler"
+          title=  "VIP Tekne ve Yat ile Özel Etkinlikler"
         >
           Tekne / Yat Kiralama & Boğazda Lüks Etkinlikler
         </h1>
