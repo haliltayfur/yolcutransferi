@@ -1,7 +1,5 @@
-// === Dosya: app/iletisim/page.jsx ===
-
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
@@ -44,7 +42,8 @@ function useAkilliRateLimit() {
   const [msg, setMsg] = useState("");
   const [remaining, setRemaining] = useState(0);
 
-  useEffect(() => {
+  // Her 1 sn'de rate kontrolü yap
+  React.useEffect(() => {
     let id = setInterval(() => {
       let now = Date.now();
       let log = [];
@@ -91,134 +90,6 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// --- Dinamik Politika Popup --- //
-function PolicyPopup({ open, onClose, onConfirm }) {
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [linkPopup, setLinkPopup] = useState(null);
-
-  useEffect(() => {
-    if (!open) return;
-    setLoading(true);
-    fetch("/mesafeli-satis")
-      .then(r => r.text())
-      .then(html => {
-        // Sadece <main> içeriğini çek (hem SEO hem içerik güvenli!)
-        let match = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
-        let mainHtml = match ? match[1] : "İçerik yüklenemedi.";
-        // Linklere click event ekle: başka bir popup açmak için
-        // Tüm linkleri data-popup ile değiştir
-        mainHtml = mainHtml.replace(/<a\s+href="([^"]+)"([^>]*)>([\s\S]*?)<\/a>/gi,
-          (m, href, rest, text) => {
-            // Sadece harici değilse ve yeni sekmede açılmıyorsa
-            if (/^https?:\/\//.test(href)) return m;
-            return `<a href="#" data-popup="${href}"${rest}>${text}</a>`;
-          }
-        );
-        setContent(mainHtml);
-      })
-      .catch(() => setContent("İçerik alınamadı."))
-      .finally(() => setLoading(false));
-  }, [open]);
-
-  // Linkleri yönet
-  useEffect(() => {
-    if (!open) return;
-    const root = document.getElementById("policy-popup-content");
-    if (!root) return;
-    function clickHandler(e) {
-      if (e.target.tagName === "A" && e.target.dataset.popup) {
-        e.preventDefault();
-        setLinkPopup(e.target.dataset.popup);
-      }
-    }
-    root.addEventListener("click", clickHandler);
-    return () => root.removeEventListener("click", clickHandler);
-  }, [open, content]);
-
-  // Ek popup için içerik fetch et
-  const [subPopupContent, setSubPopupContent] = useState("");
-  useEffect(() => {
-    if (!linkPopup) return;
-    fetch(linkPopup)
-      .then(r => r.text())
-      .then(html => {
-        let match = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
-        let mainHtml = match ? match[1] : "İçerik yüklenemedi.";
-        setSubPopupContent(mainHtml);
-      })
-      .catch(() => setSubPopupContent("İçerik alınamadı."));
-  }, [linkPopup]);
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-[2.5px]">
-      <div
-  className="relative w-[98vw] max-w-[1400px] md:w-[70vw] rounded-3xl shadow-2xl border-2 border-[#FFD700] p-0 bg-gradient-to-br from-black via-[#19160a] to-[#302811] flex flex-col"
-  style={{ minHeight: "370px", minWidth: "320px" }}
->
-        {/* Kapat Butonu */}
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 text-[#FFD700] hover:text-[#fff9e3] text-3xl font-black w-12 h-12 flex items-center justify-center rounded-full bg-[#19160a] border-2 border-[#FFD700] hover:bg-[#ffd70022] z-10 transition"
-          aria-label="Kapat"
-        >
-          <SiX />
-        </button>
-        <h2 className="text-2xl md:text-3xl font-extrabold text-[#FFD700] pt-10 pb-2 text-center tracking-tight">
-          YolcuTransferi.com Politika ve Koşulları
-        </h2>
-        {/* Sözleşme İçeriği */}
-        <div className="grow w-full px-0 pt-0 pb-5 flex flex-col items-center">
-          <div
-            id="policy-popup-content"
-            className="w-full max-h-[60vh] min-h-[120px] overflow-y-auto rounded-2xl border-2 border-[#FFD70080] bg-black/80 px-6 md:px-10 py-7 mb-4 text-[#ecd9aa] text-base shadow-inner"
-            style={{
-              boxShadow: "0 0 0 2px #FFD70022, 0 3px 14px #19160a66",
-              wordBreak: "break-word"
-            }}
-            dangerouslySetInnerHTML={{ __html: loading ? "<div style='text-align:center;padding:35px'>Yükleniyor...</div>" : content }}
-          />
-        </div>
-        <div className="w-full flex justify-end px-6 pb-6">
-          <button
-            onClick={() => {
-              onConfirm && onConfirm();
-              onClose();
-            }}
-            className="px-7 py-3 bg-gradient-to-tr from-[#FFD700] to-[#BFA658] rounded-xl text-black font-bold text-lg shadow hover:scale-105 transition"
-            style={{ minWidth: 180 }}
-          >
-            Tümünü okudum, onaylıyorum
-          </button>
-        </div>
-      </div>
-      {/* Alt popup varsa aç */}
-      {linkPopup && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-[2px]">
-          <div className="relative w-[94vw] max-w-xl rounded-2xl border-2 border-[#FFD700] bg-gradient-to-br from-black via-[#19160a] to-[#302811] shadow-2xl p-0 flex flex-col">
-            <button
-              onClick={() => setLinkPopup(null)}
-              className="absolute top-3 right-3 text-[#FFD700] text-2xl font-black w-10 h-10 flex items-center justify-center rounded-full bg-[#19160a] border-2 border-[#FFD700] hover:bg-[#ffd70022] transition"
-              aria-label="Kapat"
-            >
-              <SiX />
-            </button>
-            <div className="grow w-full px-0 pt-10 pb-4 flex flex-col items-center">
-              <div
-                className="w-full max-h-[54vh] min-h-[90px] overflow-y-auto rounded-2xl border-2 border-[#FFD70080] bg-black/80 px-4 md:px-8 py-5 mb-2 text-[#ecd9aa] text-base shadow-inner"
-                style={{ boxShadow: "0 0 0 2px #FFD70022, 0 2px 10px #19160a66" }}
-                dangerouslySetInnerHTML={{ __html: subPopupContent || "Yükleniyor..." }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // --- Telefonu otomatik sıfırla ---
 function formatPhone(val) {
   if (!val) return "";
@@ -227,17 +98,18 @@ function formatPhone(val) {
   return ("0" + val).slice(0, 11);
 }
 
-export default function Iletisim() {
+export default function IletisimForm() {
+  const fileInput = useRef(null);
   const [form, setForm] = useState({
     ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "",
-    iletisimTercihi: "", kvkkOnay: false
+    iletisimTercihi: "", kvkkOnay: false, ek: null
   });
   const [errors, setErrors] = useState({});
   const [buttonStatus, setButtonStatus] = useState("normal");
   const [buttonMsg, setButtonMsg] = useState("Mesajı Gönder");
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupKvkkConfirmed, setPopupKvkkConfirmed] = useState(false);
-
+  const [ekAd, setEkAd] = useState("");
   const [blocked, blockedMsg, remaining, kaydetRate] = useAkilliRateLimit();
 
   // Telefon inputunda başa sıfır ekle
@@ -250,7 +122,7 @@ export default function Iletisim() {
     setErrors(er => ({ ...er, telefon: undefined }));
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (popupKvkkConfirmed) {
       setForm(f => ({ ...f, kvkkOnay: true }));
       setPopupKvkkConfirmed(false);
@@ -267,13 +139,33 @@ export default function Iletisim() {
     setErrors({ ...errors, iletisimTercihi: undefined });
   };
 
+  // Dosya seçme kontrolü (10 MB sınırı, uzantı kontrolü)
+  const handleEkChange = e => {
+    const file = e.target.files[0];
+    if (!file) { setEkAd(""); setForm(f => ({ ...f, ek: null })); return; }
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Maksimum dosya boyutu 10 MB olmalı.");
+      setEkAd(""); setForm(f => ({ ...f, ek: null }));
+      e.target.value = "";
+      return;
+    }
+    const ext = file.name.split(".").pop().toLowerCase();
+    if (!["jpg", "jpeg", "png", "pdf", "doc", "docx", "xls", "xlsx", "zip"].includes(ext)) {
+      alert("Yalnızca JPG, PNG, PDF, DOC, XLS, ZIP uzantıları destekleniyor.");
+      setEkAd(""); setForm(f => ({ ...f, ek: null }));
+      e.target.value = "";
+      return;
+    }
+    setEkAd(file.name);
+    setForm(f => ({ ...f, ek: file }));
+  };
+
   function resetButton() {
     setTimeout(() => { setButtonMsg("Mesajı Gönder"); setButtonStatus("normal"); }, 6000);
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     let newErrors = {};
     if (!isRealName(form.ad)) newErrors.ad = "Adınız en az 3 harf olmalı.";
     if (!isRealName(form.soyad)) newErrors.soyad = "Soyadınız en az 3 harf olmalı.";
@@ -285,36 +177,44 @@ export default function Iletisim() {
     if (blocked) newErrors.global = blockedMsg;
 
     setErrors(newErrors);
-
     if (Object.keys(newErrors).length > 0) {
       setButtonStatus("error"); setButtonMsg("Eksik alanlar var"); resetButton(); return;
     }
-    setButtonStatus("success"); setButtonMsg("Teşekkürler, mesajınız alındı."); resetButton();
-    kaydetRate();
+
+    setButtonStatus("loading"); setButtonMsg("Gönderiliyor...");
+
+    // FormData ile gönder
+    const formData = new FormData();
+    Object.entries(form).forEach(([key, val]) => {
+      if (key === "ek" && val) {
+        formData.append("ek", val);
+      } else if (key !== "ek") {
+        formData.append(key, val);
+      }
+    });
+
     try {
       await fetch("/api/iletisim", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: formData,
       });
-    }
-    catch {
+      setButtonStatus("success"); setButtonMsg("Teşekkürler, mesajınız alındı."); resetButton();
+      kaydetRate();
+      setForm({ ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "", iletisimTercihi: "", kvkkOnay: false, ek: null });
+      setEkAd("");
+      if (fileInput.current) fileInput.current.value = "";
+    } catch {
       setButtonStatus("error"); setButtonMsg("Sunucu hatası, tekrar deneyin."); resetButton();
     }
-    setForm({ ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "", iletisimTercihi: "", kvkkOnay: false });
   };
 
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
       <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] mt-16 mb-10">
-        {/* Başlık ve slogan */}
-        <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-1 text-center">
-          İletişim
-        </h1>
-        <div className="text-lg text-[#ffeec2] font-semibold text-center mb-8">
-          7/24 VIP Müşteri Hattı • Kişiye özel ayrıcalık
-        </div>
-        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3 bg-black/70 rounded-2xl p-6 border border-[#bfa658]/60 shadow">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-1 text-center">İletişim</h1>
+        <div className="text-lg text-[#ffeec2] font-semibold text-center mb-8">7/24 VIP Müşteri Hattı • Kişiye özel ayrıcalık</div>
+        
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3 bg-black/70 rounded-2xl p-6 border border-[#bfa658]/60 shadow" encType="multipart/form-data">
           <div className="flex gap-2">
             <input type="text" name="ad" autoComplete="given-name" placeholder="Ad"
               value={form.ad} onChange={handleChange}
@@ -348,6 +248,23 @@ export default function Iletisim() {
           </select>
           <textarea name="mesaj" placeholder="Mesajınız" value={form.mesaj} onChange={handleChange}
             className={`p-3 rounded-lg border ${isRealMsg(form.mesaj) ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={15} required rows={3} />
+
+          {/* Dosya Ekle */}
+          <div>
+            <input
+              type="file"
+              name="ek"
+              ref={fileInput}
+              accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.zip"
+              onChange={handleEkChange}
+              className="block w-full mb-2 text-xs text-[#bfa658] bg-[#181611] rounded-lg border border-[#bfa658] py-2 px-3"
+            />
+            <span className="text-xs text-[#ffeec2] block mb-2">
+              (İsteğe bağlı) JPG, PNG, PDF, DOC, XLS, ZIP – Maks: 10 MB
+              {ekAd && <span className="ml-2 text-green-400">✓ {ekAd}</span>}
+            </span>
+          </div>
+
           <span className="text-sm text-gray-300 font-bold ml-1 mt-2">İletişim tercihinizi seçiniz</span>
           <div className="flex flex-row gap-3 w-full mb-2 flex-wrap">
             {ILETISIM_TERCIHLERI.map((item) => (
@@ -374,6 +291,7 @@ export default function Iletisim() {
             ))}
           </div>
           {errors.iletisimTercihi && <span className="text-xs text-red-400 font-bold pl-2">{errors.iletisimTercihi}</span>}
+
           <div className="flex items-center gap-2 mt-1">
             <input
               type="checkbox"
@@ -396,6 +314,7 @@ export default function Iletisim() {
             </span>
           </div>
           {errors.kvkkOnay && <span className="text-xs text-red-400 font-bold pl-2">{errors.kvkkOnay}</span>}
+
           <button
             type="submit"
             className={`font-bold py-3 px-8 rounded-xl text-lg mt-2 w-full shadow transition text-black
@@ -405,7 +324,7 @@ export default function Iletisim() {
                   ? "bg-red-600"
                   : "bg-[#bfa658] hover:bg-yellow-600"}`}
             style={{ minHeight: 50, minWidth: 180 }}
-            disabled={blocked}
+            disabled={blocked || buttonStatus === "loading"}
           >
             {blocked
               ? blockedMsg + (remaining > 0 ? ` (${formatDuration(remaining)})` : "")
@@ -448,13 +367,7 @@ export default function Iletisim() {
         </div>
       </section>
       {/* Politika ve koşullar popup'u */}
-      <PolicyPopup
-        open={popupOpen}
-        onClose={() => setPopupOpen(false)}
-        onConfirm={() => setPopupKvkkConfirmed(true)}
-      />
+      {/* PolicyPopup bileşenini buraya ekleyebilirsin. (gerekirse ayrı dosyadan import et) */}
     </main>
   );
 }
-
-// === Dosya SONU: app/iletisim/page.jsx ===
