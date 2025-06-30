@@ -1,4 +1,4 @@
-// app/iletisim/page.jsx
+// === Dosya: app/iletisim/page.jsx ===
 
 "use client";
 import { useState, useEffect } from "react";
@@ -37,27 +37,54 @@ function formatDuration(ms) {
   const sec = totalSec % 60;
   return `${min > 0 ? min + "dk " : ""}${sec}sn`;
 }
-function useRateLimit() {
+
+// --- Akıllı rate-limit (anti-spam) ---
+// localStorage ile gönderim kayıtları
+function useAkilliRateLimit() {
   const [blocked, setBlocked] = useState(false);
+  const [msg, setMsg] = useState("");
   const [remaining, setRemaining] = useState(0);
+
   useEffect(() => {
     let id = setInterval(() => {
-      let last = Number(localStorage.getItem("iletisim_last") || "0");
       let now = Date.now();
-      if (now - last < 5000) {
+      let log = [];
+      try { log = JSON.parse(localStorage.getItem("iletisim_log") || "[]"); } catch { }
+      // Sadece son 1 saat içindekiler
+      log = log.filter(ts => now - ts < 60 * 60 * 1000);
+
+      // 1dk içinde 2’den fazla varsa
+      const last1dk = log.filter(ts => now - ts < 60 * 1000);
+      const last10dk = log.filter(ts => now - ts < 10 * 60 * 1000);
+
+      if (last10dk.length >= 3) {
         setBlocked(true);
-        setRemaining(5000 - (now - last));
+        setMsg("10 dakika içinde 3’ten fazla gönderim yapıldı. Lütfen 1 saat sonra tekrar deneyin.");
+        setRemaining(60 * 60 * 1000 - (now - log[log.length - 1]));
+      } else if (last1dk.length >= 2) {
+        setBlocked(true);
+        setMsg("Aynı dakika içinde birden fazla gönderim tespit edildi. Lütfen 1 dakika bekleyip tekrar deneyin.");
+        setRemaining(60 * 1000 - (now - log[log.length - 1]));
       } else {
         setBlocked(false);
+        setMsg("");
         setRemaining(0);
       }
     }, 1000);
     return () => clearInterval(id);
   }, []);
+
+  // Yeni kayıt ekle
   function kaydet() {
-    localStorage.setItem("iletisim_last", Date.now().toString());
+    let now = Date.now();
+    let log = [];
+    try { log = JSON.parse(localStorage.getItem("iletisim_log") || "[]"); } catch { }
+    // Sadece son 1 saat içindekiler
+    log = log.filter(ts => now - ts < 60 * 60 * 1000);
+    log.push(now);
+    localStorage.setItem("iletisim_log", JSON.stringify(log));
   }
-  return [blocked, kaydet, remaining];
+  return [blocked, msg, remaining, kaydet];
 }
 
 const ILETISIM_NEDENLERI = [
@@ -70,91 +97,58 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// --- Kurumsal popup component (dinamik içerik, linkte yeni popup) ---
-function DynamicPopup({ open, onClose, url, onConfirm, title = "YolcuTransferi.com Politika ve Koşulları" }) {
-  const [mainHtml, setMainHtml] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [subPopupUrl, setSubPopupUrl] = useState(null);
-
-  // İçeriği dinamik çek
-  useEffect(() => {
-    if (!open || !url) return;
-    setLoading(true);
-    fetch(url)
-      .then(r => r.text())
-      .then(html => {
-        // sadece <main> içeriğini al
-        const match = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
-        setMainHtml(match ? match[1] : "İçerik yüklenemedi.");
-      })
-      .catch(() => setMainHtml("İçerik alınamadı."))
-      .finally(() => setLoading(false));
-  }, [open, url]);
-
-  // Linklere intercept: yeni popup açtır (aynı düzen, üstte göster)
-  function interceptLinks(e) {
-    const target = e.target.closest("a");
-    if (target && target.tagName === "A") {
-      e.preventDefault();
-      const href = target.getAttribute("href");
-      if (href) setSubPopupUrl(href);
-    }
-  }
-
+// --- Politika Popup ---
+function PolicyPopup({ open, onClose, onConfirm, children }) {
   if (!open) return null;
-
   return (
-    <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-        <div className="relative w-[98vw] max-w-2xl md:w-[56vw] md:max-w-3xl min-h-[340px] bg-[#fffdfa] rounded-3xl shadow-2xl border-2 border-[#FFD700] px-0 pt-0 pb-0 overflow-hidden flex flex-col">
-          {/* Kapat (X) Butonu: her zaman görünür, altın sarısı */}
-          <button
-            onClick={onClose}
-            className="absolute top-0 left-0 md:left-6 md:top-6 text-[#FFD700] text-[40px] md:text-[46px] font-black w-16 h-16 flex items-center justify-center bg-transparent border-0 z-10 hover:scale-110 transition"
-            aria-label="Kapat"
-          >
-            <SiX />
-          </button>
-
-          {/* Başlık */}
-          <div className="w-full py-6 px-8 border-b border-[#FFD700] text-center text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight bg-white sticky top-0 z-10">
-            {title}
-          </div>
-          {/* İçerik */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-[2.5px]">
+      <div
+        className="relative w-[98vw] max-w-3xl md:w-[48vw] rounded-3xl shadow-2xl border-2 border-[#FFD700] p-0 bg-gradient-to-br from-black via-[#19160a] to-[#302811] flex flex-col"
+        style={{ minHeight: "370px", minWidth: "320px" }}
+      >
+        {/* Kapat Butonu */}
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 text-[#FFD700] hover:text-[#fff9e3] text-3xl font-black w-12 h-12 flex items-center justify-center rounded-full bg-[#19160a] border-2 border-[#FFD700] hover:bg-[#ffd70022] z-10 transition"
+          aria-label="Kapat"
+        >
+          <SiX />
+        </button>
+        {/* Başlık */}
+        <h2 className="text-2xl md:text-3xl font-extrabold text-[#FFD700] pt-10 pb-2 text-center tracking-tight">
+          YolcuTransferi.com Politika ve Koşulları
+        </h2>
+        {/* Sözleşme İçeriği */}
+        <div className="grow w-full px-0 pt-0 pb-5 flex flex-col items-center">
           <div
-            className="flex-1 px-5 md:px-10 py-6 md:py-8 text-gray-800 overflow-y-auto max-h-[66vh] text-base md:text-lg"
-            style={{ fontFamily: "inherit", lineHeight: "1.6", background: "none" }}
-            onClick={interceptLinks}
-            dangerouslySetInnerHTML={{ __html: loading ? "<div class='text-center text-[#bfa658]'>Yükleniyor...</div>" : mainHtml }}
-          />
-          {/* En altta onay butonu */}
-          <div className="py-4 px-5 md:px-10 border-t border-[#FFD700] bg-white flex justify-end">
-            <button
-              onClick={() => {
-                if (onConfirm) onConfirm();
-                onClose();
-              }}
-              className="min-w-[180px] py-3 rounded-xl bg-gradient-to-tr from-[#FFD700] to-[#BFA658] text-black font-bold text-lg shadow hover:scale-105 transition"
-            >
-              Tümünü okudum, onaylıyorum
-            </button>
+            className="w-full max-h-[60vh] min-h-[120px] overflow-y-auto rounded-2xl border-2 border-[#FFD70080] bg-black/80 px-6 md:px-10 py-7 mb-4 text-[#ecd9aa] text-base shadow-inner"
+            style={{
+              boxShadow: "0 0 0 2px #FFD70022, 0 3px 14px #19160a66",
+            }}
+          >
+            {/* Senin gerçek sözleşme metnin veya fetch edilen HTML */}
+            {children}
           </div>
         </div>
+        {/* Buton */}
+        <div className="w-full flex justify-end px-6 pb-6">
+          <button
+            onClick={() => {
+              onConfirm && onConfirm();
+              onClose();
+            }}
+            className="px-7 py-3 bg-gradient-to-tr from-[#FFD700] to-[#BFA658] rounded-xl text-black font-bold text-lg shadow hover:scale-105 transition"
+            style={{ minWidth: 180 }}
+          >
+            Tümünü okudum, onaylıyorum
+          </button>
+        </div>
       </div>
-      {/* ALT: Link popup (yeni popup üstüne açılır, kapatınca ana popup'a dönülür) */}
-      {subPopupUrl && (
-        <DynamicPopup
-          open={!!subPopupUrl}
-          onClose={() => setSubPopupUrl(null)}
-          url={subPopupUrl}
-          title=""
-        />
-      )}
-    </>
+    </div>
   );
 }
 
-// --- Telefonu otomatik sıfırla --- //
+// --- Telefonu otomatik sıfırla ---
 function formatPhone(val) {
   if (!val) return "";
   val = val.trim().replace(/\D/g, "");
@@ -162,6 +156,7 @@ function formatPhone(val) {
   return ("0" + val).slice(0, 11);
 }
 
+// --- Ana Sayfa ---
 export default function Iletisim() {
   const [form, setForm] = useState({
     ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "",
@@ -170,18 +165,11 @@ export default function Iletisim() {
   const [errors, setErrors] = useState({});
   const [buttonStatus, setButtonStatus] = useState("normal");
   const [buttonMsg, setButtonMsg] = useState("Mesajı Gönder");
-  const [blocked, kaydet, remaining] = useRateLimit();
-
-  // --- Politika/KVKK popup state'i --- //
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupKvkkConfirmed, setPopupKvkkConfirmed] = useState(false);
 
-  // Validasyonlar
-  const adValid = isRealName(form.ad);
-  const soyadValid = isRealName(form.soyad);
-  const phoneValid = isRealPhone(form.telefon);
-  const emailValid = isRealEmail(form.email);
-  const msgValid = isRealMsg(form.mesaj);
+  // Rate limit state
+  const [blocked, blockedMsg, remaining, kaydetRate] = useAkilliRateLimit();
 
   // Telefon inputunda başa sıfır ekle
   const handlePhoneChange = (e) => {
@@ -217,21 +205,26 @@ export default function Iletisim() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     let newErrors = {};
-    if (blocked) newErrors.global = "Çok hızlı gönderdiniz, lütfen biraz bekleyin.";
-    if (!adValid) newErrors.ad = "Adınız en az 3 harf olmalı.";
-    if (!soyadValid) newErrors.soyad = "Soyadınız en az 3 harf olmalı.";
-    if (!phoneValid) newErrors.telefon = "Telefon hatalı. 05xx xxx xx xx";
-    if (!emailValid) newErrors.email = "Geçersiz e-posta.";
-    if (!msgValid) newErrors.mesaj = "Mesaj en az 15 karakter, 3 kelime olmalı.";
+    if (!isRealName(form.ad)) newErrors.ad = "Adınız en az 3 harf olmalı.";
+    if (!isRealName(form.soyad)) newErrors.soyad = "Soyadınız en az 3 harf olmalı.";
+    if (!isRealPhone(form.telefon)) newErrors.telefon = "Telefon hatalı. 05xx xxx xx xx";
+    if (!isRealEmail(form.email)) newErrors.email = "Geçersiz e-posta.";
+    if (!isRealMsg(form.mesaj)) newErrors.mesaj = "Mesaj en az 15 karakter, 3 kelime olmalı.";
     if (!form.iletisimTercihi) newErrors.iletisimTercihi = "İletişim tercihi zorunlu.";
     if (!form.kvkkOnay) newErrors.kvkkOnay = "Koşulları kabul etmelisiniz.";
+
+    // Akıllı rate limit
+    if (blocked) newErrors.global = blockedMsg;
+
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
       setButtonStatus("error"); setButtonMsg("Eksik alanlar var"); resetButton(); return;
     }
-    setButtonStatus("success"); setButtonMsg("Teşekkürler, mesajınız alındı."); resetButton(); kaydet();
+    setButtonStatus("success"); setButtonMsg("Teşekkürler, mesajınız alındı."); resetButton();
+    kaydetRate();
     try {
       await fetch("/api/iletisim", {
         method: "POST",
@@ -245,6 +238,27 @@ export default function Iletisim() {
     setForm({ ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "", iletisimTercihi: "", kvkkOnay: false });
   };
 
+  // KVKK / Politika popup içeriğini buradan güncelleyebilirsin
+  const popupContent = (
+    <>
+      <b className="text-xl text-[#FFD700] mb-2 block">Mesafeli Satış Sözleşmesi</b>
+      <div className="mb-2">YolcuTransferi.com'dan yapılan her rezervasyon aşağıdaki sözleşme koşullarına tabidir.</div>
+      <ul className="pl-4 space-y-2">
+        <li><b>1. Taraflar ve Tanımlar</b> <br />
+          Bu sözleşme, <b>YolcuTransferi.com</b> üzerinden hizmet alan gerçek/tüzel kişi ile taşımacılık, transfer, tekne turu ve organizasyon hizmeti sağlayan üçüncü taraf hizmet verenler ("Hizmet Sağlayıcı") arasında geçerlidir.</li>
+        <li><b>2. Hizmet Konusu</b> <br />
+          Müşteri, YolcuTransferi.com üzerinden; VIP transfer, havalimanı transferi, şehirlerarası taşıma, tekne turu, kurumsal organizasyon, dron vb. hizmetler için rezervasyon yapar.</li>
+        <li><b>3. Sorumluluk</b> <br />
+          Platform, yalnızca rezervasyon aracı kurumudur; asıl taşıyıcı veya organizatör değildir.</li>
+        <li><b>4. Gizlilik ve KVKK</b> <br />
+          Kişisel verileriniz, yalnızca rezervasyon işlemleri için kullanılır ve üçüncü kişilerle paylaşılmaz. Detaylar için <a href="/kvkk" className="underline text-[#FFD700]" target="_blank">KVKK Aydınlatma Metni</a>'ni inceleyin.</li>
+        <li><b>5. İptal, İade ve Değişiklik</b> <br />
+          Her rezervasyonun iptal/iade koşulları ilgili hizmet sağlayıcının şartlarına tabidir.</li>
+      </ul>
+      <div className="mt-2">Tüm hizmetlerimiz hakkında daha fazla bilgi ve detaylı metinler için <a href="/mesafeli-satis" className="underline text-[#FFD700]" target="_blank">Mesafeli Satış Sözleşmesi</a> sayfasına bakabilirsiniz.</div>
+    </>
+  );
+
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
       <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] mt-16 mb-10">
@@ -255,15 +269,14 @@ export default function Iletisim() {
         <div className="text-lg text-[#ffeec2] font-semibold text-center mb-8">
           7/24 VIP Müşteri Hattı • Kişiye özel ayrıcalık
         </div>
-        
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3 bg-black/70 rounded-2xl p-6 border border-[#bfa658]/60 shadow">
           <div className="flex gap-2">
             <input type="text" name="ad" autoComplete="given-name" placeholder="Ad"
               value={form.ad} onChange={handleChange}
-              className={`p-3 rounded-lg border flex-1 ${adValid ? "border-green-500" : form.ad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={3} required />
+              className={`p-3 rounded-lg border flex-1 ${isRealName(form.ad) ? "border-green-500" : form.ad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={3} required />
             <input type="text" name="soyad" autoComplete="family-name" placeholder="Soyad"
               value={form.soyad} onChange={handleChange}
-              className={`p-3 rounded-lg border flex-1 ${soyadValid ? "border-green-500" : form.soyad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={3} required />
+              className={`p-3 rounded-lg border flex-1 ${isRealName(form.soyad) ? "border-green-500" : form.soyad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={3} required />
           </div>
           <div className="flex gap-2">
             <input
@@ -273,14 +286,14 @@ export default function Iletisim() {
               placeholder="05xx xxx xx xx"
               value={form.telefon}
               onChange={handlePhoneChange}
-              className={`p-3 rounded-lg border flex-1 ${phoneValid ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`}
+              className={`p-3 rounded-lg border flex-1 ${isRealPhone(form.telefon) ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`}
               maxLength={11}
               pattern="05\d{9}"
               required
             />
             <input type="email" name="email" autoComplete="email" placeholder="E-posta"
               value={form.email} onChange={handleChange}
-              className={`p-3 rounded-lg border flex-1 ${emailValid ? "border-green-500" : form.email ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} required />
+              className={`p-3 rounded-lg border flex-1 ${isRealEmail(form.email) ? "border-green-500" : form.email ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} required />
           </div>
           <select name="neden" value={form.neden} onChange={handleChange}
             className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition text-base" required>
@@ -289,7 +302,7 @@ export default function Iletisim() {
             ))}
           </select>
           <textarea name="mesaj" placeholder="Mesajınız" value={form.mesaj} onChange={handleChange}
-            className={`p-3 rounded-lg border ${msgValid ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={15} required rows={3} />
+            className={`p-3 rounded-lg border ${isRealMsg(form.mesaj) ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={15} required rows={3} />
           <span className="text-sm text-gray-300 font-bold ml-1 mt-2">İletişim tercihinizi seçiniz</span>
           <div className="flex flex-row gap-3 w-full mb-2 flex-wrap">
             {ILETISIM_TERCIHLERI.map((item) => (
@@ -350,7 +363,7 @@ export default function Iletisim() {
             disabled={blocked}
           >
             {blocked
-              ? `Çok hızlı gönderdiniz. ${formatDuration(remaining)} sonra tekrar deneyin.`
+              ? blockedMsg + (remaining > 0 ? ` (${formatDuration(remaining)})` : "")
               : buttonMsg}
           </button>
           {Object.keys(errors).length > 0 && (
@@ -361,7 +374,6 @@ export default function Iletisim() {
             </div>
           )}
         </form>
-
         {/* Sosyal medya ve iletişim bilgileri */}
         <div className="w-full border-t border-[#bfa658] mt-10 pt-6">
           <div className="flex flex-wrap gap-4 mb-3 justify-center">
@@ -391,14 +403,15 @@ export default function Iletisim() {
         </div>
       </section>
       {/* Politika ve koşullar popup'u */}
-      <DynamicPopup
+      <PolicyPopup
         open={popupOpen}
         onClose={() => setPopupOpen(false)}
-        url="/mesafeli-satis"
         onConfirm={() => setPopupKvkkConfirmed(true)}
-      />
+      >
+        {popupContent}
+      </PolicyPopup>
     </main>
   );
 }
 
-// app/iletisim/page.jsx
+// === Dosya SONU: app/iletisim/page.jsx ===
