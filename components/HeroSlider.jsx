@@ -26,7 +26,7 @@ export default function HeroSlider() {
     return () => clearTimeout(timer);
   }, [current, isMobile]);
 
-  // Mobilde eski kod (değişmiyor!)
+  // Mobil: değişmiyor
   if (isMobile) {
     return (
       <section className="relative w-full select-none">
@@ -68,19 +68,19 @@ export default function HeroSlider() {
     );
   }
 
-  // Desktopta: Sadece resim, %10 daha büyük ve dotlar
+  // Desktopta: Gri zemin ve background KALDIRILDI!
   return (
     <section className="relative w-full select-none flex flex-col items-center">
-      <div className="w-full h-8 block" /> {/* Header'dan boşluk */}
+      <div className="w-full h-8 block" />
       <div
         className="cinema-slider-desktop relative flex items-center justify-center overflow-hidden rounded-3xl"
         style={{
-          width: "min(100vw, 2000px)",    // %10 daha geniş!
-          height: "min(78vw, 670px)",     // %10 daha yüksek!
+          width: "min(100vw, 2000px)",
+          height: "min(78vw, 670px)",
           minHeight: "380px",
           maxHeight: "670px",
           boxShadow: "0 10px 34px #000b, 0 4px 24px #FFD70018",
-          background: "#181818",
+          // background: "#181818", // Griyi kaldırdık!
         }}
       >
         <Image
@@ -110,7 +110,7 @@ export default function HeroSlider() {
       </div>
       <style jsx>{`
         .cinema-slider-desktop {
-          background: #191919;
+          /* background: #191919;  Griyi kaldırdık! */
         }
         .slider-dot {
           background: #FFD70090;
