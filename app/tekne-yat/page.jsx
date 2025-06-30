@@ -31,16 +31,17 @@ export default function TekneYat() {
       <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-4 md:px-12 py-10 bg-gradient-to-br from-black via-[#19160a] to-[#302811] mt-16 mb-10">
 
         {/* ŞEHİRLER ARASI SAYFASIYLA AYNI FONT VE BOYDA BAŞLIK */}
-        <h1
-          className="text-[2.1rem] md:text-[2.6rem] font-extrabold text-[#bfa658] tracking-tight text-center mb-5 leading-tight"
-          style={{
-            fontFamily: "Poppins, sans-serif",
-            textShadow: "0 2px 10px #000, 0 0 3px #ffd700aa",
-            letterSpacing: "0.01em"
-          }}
-        >
-          VIP Tekne ve Yat ile Özel Etkinlikler
-        </h1>
+       <h1
+  className="font-extrabold text-[#bfa658] tracking-tight text-center mb-5 leading-tight"
+  style={{
+    fontSize: "26px",
+    fontFamily: "Poppins, sans-serif",
+    textShadow: "0 2px 10px #000, 0 0 3px #ffd700aa",
+    letterSpacing: "0.01em"
+  }}
+>
+  VIP Tekne ve Yat ile Özel Etkinlikler
+</h1>
 
         <p className="text-base md:text-lg text-[#ecd9aa] font-normal leading-relaxed mb-8 text-center">
           İstanbul Boğazı’nda, lüks teknelerimiz ve yatlarımızda evlilik teklifi, kurumsal buluşmalar, grup gezileri, doğum günü ve her türlü VIP davet için unutulmaz anlar sunuyoruz. 
