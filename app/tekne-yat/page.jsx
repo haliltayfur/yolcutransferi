@@ -5,9 +5,17 @@ import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 
-// ...images aynı...
-
 export default function TekneYat() {
+  // images array'i burada!
+  const images = [
+    "/Flux_Dev_A_luxurious_yacht_on_the_Bosphorus_in_Istanbul_elegan_1.jpg",
+    "/Flux_Dev_A_luxurious_yacht_on_the_Bosphorus_in_Istanbul_elegan_3.jpg",
+    "/Flux_Dev_A_luxurious_yacht_on_the_Bosphorus_in_Istanbul_elegan_0.jpg",
+    "/Flux_Dev_A_luxurious_yacht_on_the_Bosphorus_in_Istanbul_elegan_3 (1).jpg",
+    "/Flux_Dev_very_big_A_modern_yacht_on_the_Bosphorus_a_group_of_t_3.jpg",
+    "/Flux_Dev_A_modern_yacht_on_the_Bosphorus_a_group_of_tourists_e_0.jpg",
+  ];
+
   const [showModal, setShowModal] = useState(false);
   const [current, setCurrent] = useState(0);
 
@@ -27,7 +35,7 @@ export default function TekneYat() {
         <h1
           className="font-extrabold text-[#bfa658] text-center mb-5 leading-tight"
           style={{
-            fontSize: "clamp(1.6rem, 4vw, 2.8rem)", // min 1.6rem, max 2.8rem arası
+            fontSize: "clamp(1.6rem, 4vw, 2.8rem)",
             textShadow: "0 2px 10px #000, 0 0 3px #ffd700aa",
             letterSpacing: "0.01em",
             overflow: "hidden",
