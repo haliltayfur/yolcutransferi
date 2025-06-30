@@ -30,7 +30,7 @@ const HIZMETLER = [
     href: "/tur-gezi",
   },
   {
-    title: "Tekne/Yat Kiralama & Özel Etkinlik",
+    title: "Tekne & Özel Etkinlik",
    desc: "İstanbul Boğazı’nda lüks yat/tekne ile evlilik teklifi, şirket etkinlikleri, özel kutlama ve grup turu hizmetleri.",
     icon: "/teknede-evlilik-banner.png",  // public klasöründe dosya adı birebir böyle olmalı!
     href: "/tekne-yat",
