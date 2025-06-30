@@ -155,9 +155,9 @@ function PolicyPopup({ open, onClose, onConfirm }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-[2.5px]">
       <div
-        className="relative w-[98vw] max-w-3xl md:w-[48vw] rounded-3xl shadow-2xl border-2 border-[#FFD700] p-0 bg-gradient-to-br from-black via-[#19160a] to-[#302811] flex flex-col"
-        style={{ minHeight: "370px", minWidth: "320px" }}
-      >
+  className="relative w-[98vw] max-w-[1400px] md:w-[70vw] rounded-3xl shadow-2xl border-2 border-[#FFD700] p-0 bg-gradient-to-br from-black via-[#19160a] to-[#302811] flex flex-col"
+  style={{ minHeight: "370px", minWidth: "320px" }}
+>
         {/* Kapat Butonu */}
         <button
           onClick={onClose}
