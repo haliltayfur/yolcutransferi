@@ -93,9 +93,8 @@ const ILETISIM_TERCIHLERI = [
 function PolicyPopup({ open, onClose, onConfirm }) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
-  const [linkPopup, setLinkPopup] = useState(null);
 
-  // Popup scroll lock
+  // Arka plan scroll'u disable et
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -113,87 +112,42 @@ function PolicyPopup({ open, onClose, onConfirm }) {
       .then(html => {
         let match = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
         let mainHtml = match ? match[1] : "İçerik yüklenemedi.";
-        mainHtml = mainHtml.replace(/<a\s+href="([^"]+)"([^>]*)>([\s\S]*?)<\/a>/gi,
-          (m, href, rest, text) => {
-            if (/^https?:\/\//.test(href)) return m;
-            return `<a href="#" data-popup="${href}"${rest}>${text}</a>`;
-          }
-        );
         setContent(mainHtml);
       })
       .catch(() => setContent("İçerik alınamadı."))
       .finally(() => setLoading(false));
   }, [open]);
 
-  // Linklere event: yeni popup açtırmak için
-  useEffect(() => {
-    if (!open) return;
-    const root = document.getElementById("policy-popup-content");
-    if (!root) return;
-    function clickHandler(e) {
-      if (e.target.tagName === "A" && e.target.dataset.popup) {
-        e.preventDefault();
-        setLinkPopup(e.target.dataset.popup);
-      }
-    }
-    root.addEventListener("click", clickHandler);
-    return () => root.removeEventListener("click", clickHandler);
-  }, [open, content]);
-
-  // Ek popup
-  const [subPopupContent, setSubPopupContent] = useState("");
-  useEffect(() => {
-    if (!linkPopup) return;
-    fetch(linkPopup)
-      .then(r => r.text())
-      .then(html => {
-        let match = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
-        let mainHtml = match ? match[1] : "İçerik yüklenemedi.";
-        setSubPopupContent(mainHtml);
-      })
-      .catch(() => setSubPopupContent("İçerik alınamadı."));
-  }, [linkPopup]);
-
   if (!open) return null;
-
-  // Popup iç çerçeve boyutları
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-[2.5px]">
       <div
-        className="relative w-[99vw] max-w-[1100px] md:w-[70vw] rounded-3xl shadow-2xl border-2 border-[#FFD700] p-0 bg-gradient-to-br from-black via-[#19160a] to-[#302811] flex flex-col items-center"
+        className="relative w-[98vw] max-w-[1280px] md:w-[75vw] rounded-3xl shadow-2xl border-2 border-[#FFD700] p-0 bg-gradient-to-br from-black via-[#19160a] to-[#302811] flex flex-col items-center"
         style={{ minHeight: "370px", minWidth: "320px" }}
       >
-        {/* Üst Başlık */}
-        <div className="w-full flex items-center justify-center pt-8 pb-2 relative">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-[#FFD700] text-center tracking-tight w-full">
-            YolcuTransferi.com Politika ve Koşulları
-          </h2>
-          <button
-            onClick={onClose}
-            className="absolute right-6 top-1/2 -translate-y-1/2 bg-[#FFD700] text-black font-bold rounded-xl px-5 py-2 shadow hover:scale-105 transition border border-[#e5c840]"
-            style={{ fontSize: 18 }}
-          >
-            Kapat
-          </button>
-        </div>
-        {/* Sözleşme İçeriği */}
-        <div className="grow w-full flex flex-col items-center px-0 pt-0 pb-5">
-          <div
-            id="policy-popup-content"
-            className="w-[97%] max-h-[62vh] min-h-[120px] overflow-y-auto rounded-2xl border-2 border-[#FFD70080] bg-black/80 px-6 md:px-10 py-7 mb-4 text-[#ecd9aa] text-base shadow-inner hide-scrollbar"
-            style={{
-              boxShadow: "0 0 0 2px #FFD70022, 0 3px 14px #19160a66",
-              wordBreak: "break-word"
-            }}
-            dangerouslySetInnerHTML={{ __html: loading ? "<div style='text-align:center;padding:35px'>Yükleniyor...</div>" : content }}
-          />
-        </div>
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-7 px-8 py-2 bg-gradient-to-tr from-[#FFD700] to-[#bfa658] text-black font-extrabold rounded-xl shadow hover:scale-105 transition text-lg"
+        >
+          Kapat
+        </button>
+        <h2 className="text-2xl md:text-3xl font-extrabold text-[#FFD700] pt-10 pb-2 text-center tracking-tight w-full"
+            style={{marginBottom: '10px', marginTop: '10px'}}
+        >
+          YolcuTransferi.com Politika ve Koşulları
+        </h2>
+        <div
+          className="w-[97%] max-h-[65vh] min-h-[120px] overflow-y-auto rounded-2xl border-2 border-[#FFD70080] bg-black/80 px-6 md:px-10 py-7 mb-4 text-[#ecd9aa] text-base shadow-inner"
+          style={{
+            boxShadow: "0 0 0 2px #FFD70022, 0 3px 14px #19160a66",
+            wordBreak: "break-word",
+            marginTop: "0px"
+          }}
+          dangerouslySetInnerHTML={{ __html: loading ? "<div style='text-align:center;padding:35px'>Yükleniyor...</div>" : content }}
+        />
         <div className="w-full flex justify-center px-6 pb-6">
           <button
-            onClick={() => {
-              onConfirm && onConfirm();
-              onClose();
-            }}
+            onClick={() => { onConfirm && onConfirm(); onClose(); }}
             className="px-7 py-3 bg-gradient-to-tr from-[#FFD700] to-[#BFA658] rounded-xl text-black font-bold text-lg shadow hover:scale-105 transition"
             style={{ minWidth: 180 }}
           >
@@ -201,31 +155,6 @@ function PolicyPopup({ open, onClose, onConfirm }) {
           </button>
         </div>
       </div>
-      {/* Alt popup varsa aç */}
-      {linkPopup && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-[2px]">
-          <div className="relative w-[94vw] max-w-xl rounded-2xl border-2 border-[#FFD700] bg-gradient-to-br from-black via-[#19160a] to-[#302811] shadow-2xl flex flex-col">
-            <div className="w-full flex justify-between items-center pt-4 px-6">
-              <span className="text-lg font-bold text-[#FFD700]">Detay</span>
-              <button
-                onClick={() => setLinkPopup(null)}
-                className="bg-[#FFD700] text-black font-bold rounded-xl px-5 py-2 ml-3 shadow hover:scale-105 transition border border-[#e5c840]"
-                style={{ fontSize: 17 }}
-              >Kapat</button>
-            </div>
-            <div
-              className="w-full max-h-[54vh] min-h-[90px] overflow-y-auto rounded-2xl border-2 border-[#FFD70080] bg-black/80 px-4 md:px-8 py-5 mb-2 text-[#ecd9aa] text-base shadow-inner hide-scrollbar"
-              style={{ boxShadow: "0 0 0 2px #FFD70022, 0 2px 10px #19160a66" }}
-              dangerouslySetInnerHTML={{ __html: subPopupContent || "Yükleniyor..." }}
-            />
-          </div>
-        </div>
-      )}
-      <style jsx global>{`
-        .hide-scrollbar::-webkit-scrollbar { width: 0 !important; background: transparent; }
-        .hide-scrollbar { scrollbar-width: none !important; -ms-overflow-style: none; }
-        .hide-scrollbar { overflow-y: auto; }
-      `}</style>
     </div>
   );
 }
@@ -241,7 +170,7 @@ function formatPhone(val) {
 export default function Iletisim() {
   const [form, setForm] = useState({
     ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "",
-    iletisimTercihi: "", kvkkOnay: false
+    iletisimTercihi: "", kvkkOnay: false, ek: null
   });
   const [errors, setErrors] = useState({});
   const [buttonStatus, setButtonStatus] = useState("normal");
@@ -269,9 +198,13 @@ export default function Iletisim() {
   }, [popupKvkkConfirmed]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
-    setErrors({ ...errors, [name]: undefined });
+    const { name, value, type, checked, files } = e.target;
+    if (type === "file") {
+      setForm({ ...form, ek: files && files[0] ? files[0] : null });
+    } else {
+      setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+      setErrors({ ...errors, [name]: undefined });
+    }
   };
   const handleIletisimTercihiChange = (value) => {
     setForm({ ...form, iletisimTercihi: value });
@@ -302,74 +235,14 @@ export default function Iletisim() {
     }
     setButtonStatus("success"); setButtonMsg("Teşekkürler, mesajınız alındı."); resetButton();
     kaydetRate();
-    try {
-      await fetch("/api/iletisim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-    }
-    catch {
-      setButtonStatus("error"); setButtonMsg("Sunucu hatası, tekrar deneyin."); resetButton();
-    }
-    setForm({ ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "", iletisimTercihi: "", kvkkOnay: false });
-  };
-
-  // --- Dosya eklemesi için ref ve kontrol (10MB limiti) ---
-  const [ek, setEk] = useState(null);
-  const [ekError, setEkError] = useState("");
-  const ekRef = useRef();
-
-  // --- Kısa scroll için: sadece popup scroll yapsın! ---
-  useEffect(() => {
-    if (popupOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [popupOpen]);
-
-  // --- Ekle birlikte submit için multipart formData ---
-  const handleFileChange = (e) => {
-    setEkError("");
-    const file = e.target.files[0];
-    if (!file) { setEk(null); return; }
-    if (file.size > 10 * 1024 * 1024) {
-      setEkError("Ek en fazla 10MB olabilir.");
-      ekRef.current.value = "";
-      setEk(null);
-      return;
-    }
-    setEk(file);
-  };
-
-  const handleSubmitWithFile = async (e) => {
-    e.preventDefault();
-
-    let newErrors = {};
-    if (!isRealName(form.ad)) newErrors.ad = "Adınız en az 3 harf olmalı.";
-    if (!isRealName(form.soyad)) newErrors.soyad = "Soyadınız en az 3 harf olmalı.";
-    if (!isRealPhone(form.telefon)) newErrors.telefon = "Telefon hatalı. 05xx xxx xx xx";
-    if (!isRealEmail(form.email)) newErrors.email = "Geçersiz e-posta.";
-    if (!isRealMsg(form.mesaj)) newErrors.mesaj = "Mesaj en az 15 karakter, 3 kelime olmalı.";
-    if (!form.iletisimTercihi) newErrors.iletisimTercihi = "İletişim tercihi zorunlu.";
-    if (!form.kvkkOnay) newErrors.kvkkOnay = "Koşulları kabul etmelisiniz.";
-    if (blocked) newErrors.global = blockedMsg;
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length > 0) {
-      setButtonStatus("error"); setButtonMsg("Eksik alanlar var"); resetButton(); return;
-    }
-    setButtonStatus("success"); setButtonMsg("Teşekkürler, mesajınız alındı."); resetButton();
-    kaydetRate();
+    // FormData ile gönder (ek için)
+    const fd = new FormData();
+    Object.entries(form).forEach(([k, v]) => {
+      if (k === "ek" && v) fd.append("ek", v);
+      else if (k !== "ek") fd.append(k, v);
+    });
 
     try {
-      const fd = new FormData();
-      for (const key in form) fd.append(key, form[key]);
-      if (ek) fd.append("ek", ek);
-
       await fetch("/api/iletisim", {
         method: "POST",
         body: fd,
@@ -378,28 +251,26 @@ export default function Iletisim() {
     catch {
       setButtonStatus("error"); setButtonMsg("Sunucu hatası, tekrar deneyin."); resetButton();
     }
-    setForm({ ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "", iletisimTercihi: "", kvkkOnay: false });
-    setEk(null); if (ekRef.current) ekRef.current.value = "";
+    setForm({ ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "", iletisimTercihi: "", kvkkOnay: false, ek: null });
   };
 
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
       <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] mt-16 mb-10">
-        {/* Başlık ve slogan */}
         <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-1 text-center">
           İletişim
         </h1>
         <div className="text-lg text-[#ffeec2] font-semibold text-center mb-8">
           7/24 VIP Müşteri Hattı • Kişiye özel ayrıcalık
         </div>
-        <form onSubmit={handleSubmitWithFile} className="w-full flex flex-col gap-3 bg-black/70 rounded-2xl p-6 border border-[#bfa658]/60 shadow" encType="multipart/form-data">
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3 bg-black/70 rounded-2xl p-6 border border-[#bfa658]/60 shadow" encType="multipart/form-data">
           <div className="flex gap-2">
             <input type="text" name="ad" autoComplete="given-name" placeholder="Ad"
               value={form.ad} onChange={handleChange}
-              className={`p-3 rounded-lg border flex-1 ${isRealName(form.ad) ? "border-green-500" : form.ad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={3} required />
+              className={`p-3 rounded-lg border flex-1 ${isRealName(form.ad) ? "border-green-500" : form.ad ? "border-red-600" : "border-[#423c1c]"} bg-[#eafff71a] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={3} required />
             <input type="text" name="soyad" autoComplete="family-name" placeholder="Soyad"
               value={form.soyad} onChange={handleChange}
-              className={`p-3 rounded-lg border flex-1 ${isRealName(form.soyad) ? "border-green-500" : form.soyad ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={3} required />
+              className={`p-3 rounded-lg border flex-1 ${isRealName(form.soyad) ? "border-green-500" : form.soyad ? "border-red-600" : "border-[#423c1c]"} bg-[#eafff71a] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={3} required />
           </div>
           <div className="flex gap-2">
             <input
@@ -409,39 +280,46 @@ export default function Iletisim() {
               placeholder="05xx xxx xx xx"
               value={form.telefon}
               onChange={handlePhoneChange}
-              className={`p-3 rounded-lg border flex-1 ${isRealPhone(form.telefon) ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`}
+              className={`p-3 rounded-lg border flex-1 ${isRealPhone(form.telefon) ? "border-green-500" : form.telefon ? "border-red-600" : "border-[#423c1c]"} bg-[#eafff71a] text-[#e7e7e7] focus:border-[#bfa658] transition`}
               maxLength={11}
               pattern="05\d{9}"
               required
             />
             <input type="email" name="email" autoComplete="email" placeholder="E-posta"
               value={form.email} onChange={handleChange}
-              className={`p-3 rounded-lg border flex-1 ${isRealEmail(form.email) ? "border-green-500" : form.email ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} required />
+              className={`p-3 rounded-lg border flex-1 ${isRealEmail(form.email) ? "border-green-500" : form.email ? "border-red-600" : "border-[#423c1c]"} bg-[#eafff71a] text-[#e7e7e7] focus:border-[#bfa658] transition`} required />
           </div>
           <select name="neden" value={form.neden} onChange={handleChange}
-            className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition text-base" required>
+            className="p-3 rounded-lg border border-[#423c1c] bg-[#eafff71a] text-[#e7e7e7] focus:border-[#bfa658] transition text-base" required>
             {ILETISIM_NEDENLERI.map((neden, i) => (
               <option key={neden} value={neden}>{neden}</option>
             ))}
           </select>
           <textarea name="mesaj" placeholder="Mesajınız" value={form.mesaj} onChange={handleChange}
-            className={`p-3 rounded-lg border ${isRealMsg(form.mesaj) ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={15} required rows={3} />
-          {/* Dosya ek alanı */}
-          <div className="flex flex-col md:flex-row gap-3 items-center mb-1">
-            <label className="block text-xs font-bold text-[#FFD700] cursor-pointer">
-              <span>Ek Dosya (opsiyonel, max 10MB): </span>
+            className={`p-3 rounded-lg border ${isRealMsg(form.mesaj) ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#eafff71a] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={15} required rows={3} />
+          {/* Ek dosya */}
+          <div className="flex flex-col gap-1">
+            <label className="text-[13px] text-[#FFD700] font-bold flex items-center gap-2">
+              Ek Dosya <span className="text-gray-400">(opsiyonel, max 10MB)</span>
+            </label>
+            <label className="relative flex items-center">
               <input
-                ref={ekRef}
                 type="file"
                 name="ek"
                 accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.zip"
-                onChange={handleFileChange}
-                className="block mt-1 text-xs text-gray-300"
-                style={{ minWidth: 190, background: "transparent" }}
+                onChange={handleChange}
+                className="hidden"
+                id="fileUploadInput"
               />
+              <span
+                className="inline-block bg-gradient-to-tr from-[#FFD700] to-[#BFA658] text-black px-4 py-2 rounded-l-xl font-bold cursor-pointer hover:scale-105 transition"
+                onClick={() => document.getElementById("fileUploadInput").click()}
+                style={{ minWidth: 120, textAlign: "center" }}
+              >Dosya Seç</span>
+              <span className="inline-block px-3 py-2 bg-black/40 border border-[#FFD70080] text-[#ffeec2] rounded-r-xl font-mono truncate max-w-[220px]">
+                {form.ek && form.ek.name ? form.ek.name : "Seçilmedi"}
+              </span>
             </label>
-            {ek && <span className="text-green-400 font-bold text-xs ml-2">{ek.name}</span>}
-            {ekError && <span className="text-red-400 font-bold text-xs ml-2">{ekError}</span>}
           </div>
           <span className="text-sm text-gray-300 font-bold ml-1 mt-2">İletişim tercihinizi seçiniz</span>
           <div className="flex flex-row gap-3 w-full mb-2 flex-wrap">
