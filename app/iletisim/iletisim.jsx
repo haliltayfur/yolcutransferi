@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// === Yardımcı Fonksiyonlar ===
+// Yardımcı fonksiyonlar (kısaltılmadı)
 function isRealEmail(val) {
   if (!val) return false;
   const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
@@ -36,7 +36,6 @@ function formatDuration(ms) {
   return `${min > 0 ? min + "dk " : ""}${sec}sn`;
 }
 
-// === Rate Limit Hook ===
 function useAkilliRateLimit() {
   const [blocked, setBlocked] = useState(false);
   const [msg, setMsg] = useState("");
@@ -79,7 +78,6 @@ function useAkilliRateLimit() {
   return [blocked, msg, remaining, kaydet];
 }
 
-// === Sabitler ===
 const ILETISIM_NEDENLERI = [
   "Bilgi Talebi", "Transfer Rezervasyonu", "Teklif Almak İstiyorum",
   "İş Birliği / Ortaklık", "Geri Bildirim / Öneri", "Şikayet Bildirimi", "Diğer"
@@ -90,7 +88,7 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// === PolicyPopup ===
+// Mesafeli Satış popup - KVKK popup tasarımında
 function PolicyPopup({ onClose, onConfirm }) {
   const [html, setHtml] = useState("");
   const [loading, setLoading] = useState(true);
@@ -169,7 +167,6 @@ function PolicyPopup({ onClose, onConfirm }) {
   );
 }
 
-// === Ana Form Component ===
 export default function IletisimForm() {
   const fileInput = useRef(null);
   const [form, setForm] = useState({
@@ -307,9 +304,10 @@ export default function IletisimForm() {
         </select>
         <textarea name="mesaj" placeholder="Mesajınız" value={form.mesaj} onChange={handleChange}
           className={`p-3 rounded-lg border ${isRealMsg(form.mesaj) ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={15} required rows={3} />
-        {/* Dosya Seç Butonu */}
-        <div className="flex flex-col">
-          <label className="relative w-full">
+
+        {/* --- Dosya seç (ufak ve sola yaslı) --- */}
+        <div className="flex flex-col items-start">
+          <label className="relative" style={{ width: "130px" }}>
             <input
               type="file"
               name="ek"
@@ -317,20 +315,22 @@ export default function IletisimForm() {
               accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.zip"
               onChange={handleEkChange}
               className="opacity-0 absolute left-0 top-0 w-full h-full z-10 cursor-pointer"
-              style={{ width: "100%", height: 45, cursor: "pointer" }}
+              style={{ width: "100%", height: 28, cursor: "pointer" }}
             />
             <div
-              className="flex items-center justify-center w-full py-3 rounded-xl bg-[#bfa658] text-black font-semibold text-lg shadow cursor-pointer hover:bg-yellow-600 transition"
-              style={{ minHeight: 45 }}
+              className="flex items-center justify-start pl-2 w-full h-7 rounded bg-[#bfa658] text-black font-semibold text-xs shadow cursor-pointer hover:bg-yellow-600 transition"
+              style={{ minHeight: 28, maxWidth: 130, fontSize: "12px", paddingRight: 8 }}
             >
               {selectedFileName ? (
-                <span className="truncate w-full">{selectedFileName}</span>
+                <span className="truncate">{selectedFileName}</span>
               ) : (
-                <span>📎 Dosya Seç (opsiyonel)</span>
+                <span>📎 Dosya Seç</span>
               )}
             </div>
           </label>
         </div>
+        {/* --- /Dosya seç --- */}
+
         <span className="text-sm text-gray-300 font-bold ml-1 mt-2">İletişim tercihinizi seçiniz</span>
         <div className="flex flex-row gap-3 w-full mb-2 flex-wrap">
           {ILETISIM_TERCIHLERI.map((item) => (
