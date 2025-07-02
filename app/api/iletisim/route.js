@@ -1,4 +1,3 @@
-// app/api/iletisim/route.js
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Resend } from "resend";
@@ -11,6 +10,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req) {
   try {
+    console.log("POST /api/iletisim çağrıldı");
     const form = formidable({
       multiples: false,
       maxFileSize: 10 * 1024 * 1024,
@@ -61,9 +61,11 @@ export async function POST(req) {
       ek: ekYolu,
       kvkkOnay: body.kvkkOnay === "true" || body.kvkkOnay === true
     };
+
+    console.log("Veritabanına ekleniyor:", yeniKayit);
+
     await db.collection("iletisimForms").insertOne(yeniKayit);
 
-    // E-posta gönderimi (aynen senin kodun)
     let ekSatiri = ekYolu
       ? `<b>Ek Dosya:</b> <a href="https://yolcutransferi.com${ekYolu}" target="_blank">Dosyayı Görüntüle / İndir</a><br/>`
       : "";
@@ -85,6 +87,7 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true, kayitNo, ek: ekYolu });
   } catch (err) {
+    console.error("Kayıt eklenirken hata:", err);
     return NextResponse.json({ error: err.toString() }, { status: 500 });
   }
 }
