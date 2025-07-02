@@ -1,18 +1,85 @@
-// app/iletisim/page.js
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// Yardımcı fonksiyonlar
-function isRealEmail(val) { /* ... */ /* yukarıdakiyle aynı */ }
-function isRealName(val) { /* ... */ }
-function isRealPhone(val) { /* ... */ }
-function isRealMsg(val) { /* ... */ }
-function formatDuration(ms) { /* ... */ }
+// === Yardımcı Fonksiyonlar ===
+function isRealEmail(val) {
+  if (!val) return false;
+  const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
+  return regex.test(val);
+}
+function isRealName(val) {
+  if (!val || val.length < 3) return false;
+  if (!/^[a-zA-ZığüşöçİĞÜŞÖÇ ]+$/.test(val)) return false;
+  let v = val.trim().toLowerCase();
+  if (["asd", "qwe", "poi", "test", "xxx", "zzz", "klm", "asdf", "deneme"].includes(v)) return false;
+  if (/^([a-zA-ZğüşöçİĞÜŞÖÇ])\1+$/.test(v)) return false;
+  return true;
+}
+function isRealPhone(val) {
+  if (!val) return false;
+  return /^05\d{9}$/.test(val);
+}
+function isRealMsg(val) {
+  if (!val || val.length < 15) return false;
+  let wordCount = val.trim().split(/\s+/).length;
+  if (wordCount < 3) return false;
+  if (/([a-z])\1{3,}/.test(val.toLowerCase())) return false;
+  return true;
+}
+function formatDuration(ms) {
+  if (!ms || ms < 1000) return "1 sn";
+  const totalSec = Math.ceil(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return `${min > 0 ? min + "dk " : ""}${sec}sn`;
+}
 
-function useAkilliRateLimit() { /* ... */ }
+// === Rate Limit Hook ===
+function useAkilliRateLimit() {
+  const [blocked, setBlocked] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [remaining, setRemaining] = useState(0);
 
+  useEffect(() => {
+    let id = setInterval(() => {
+      let now = Date.now();
+      let log = [];
+      try { log = JSON.parse(localStorage.getItem("iletisim_log") || "[]"); } catch { }
+      log = log.filter(ts => now - ts < 60 * 60 * 1000);
+      const last1dk = log.filter(ts => now - ts < 60 * 1000);
+      const last10dk = log.filter(ts => now - ts < 10 * 60 * 1000);
+
+      if (last10dk.length >= 3) {
+        setBlocked(true);
+        setMsg("10 dakika içinde 3’ten fazla gönderim yapıldı. Lütfen 1 saat sonra tekrar deneyin.");
+        setRemaining(60 * 60 * 1000 - (now - log[log.length - 1]));
+      } else if (last1dk.length >= 2) {
+        setBlocked(true);
+        setMsg("Aynı dakika içinde birden fazla gönderim tespit edildi. Lütfen 1 dakika bekleyip tekrar deneyin.");
+        setRemaining(60 * 1000 - (now - log[log.length - 1]));
+      } else {
+        setBlocked(false);
+        setMsg("");
+        setRemaining(0);
+      }
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  function kaydet() {
+    let now = Date.now();
+    let log = [];
+    try { log = JSON.parse(localStorage.getItem("iletisim_log") || "[]"); } catch { }
+    log = log.filter(ts => now - ts < 60 * 60 * 1000);
+    log.push(now);
+    localStorage.setItem("iletisim_log", JSON.stringify(log));
+  }
+  return [blocked, msg, remaining, kaydet];
+}
+
+// === Sabitler ===
 const ILETISIM_NEDENLERI = [
   "Bilgi Talebi", "Transfer Rezervasyonu", "Teklif Almak İstiyorum",
   "İş Birliği / Ortaklık", "Geri Bildirim / Öneri", "Şikayet Bildirimi", "Diğer"
@@ -23,7 +90,7 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// Mesafeli Satış popup - KVKK popup tasarımında
+// === PolicyPopup ===
 function PolicyPopup({ onClose, onConfirm }) {
   const [html, setHtml] = useState("");
   const [loading, setLoading] = useState(true);
@@ -87,7 +154,6 @@ function PolicyPopup({ onClose, onConfirm }) {
             style={{ border: "none", outline: "none", maxWidth: 300 }}
           >Onaylıyorum</button>
         </div>
-        {/* Responsive */}
         <style>{`
           @media (max-width: 900px) {
             .relative.rounded-2xl {
@@ -103,6 +169,7 @@ function PolicyPopup({ onClose, onConfirm }) {
   );
 }
 
+// === Ana Form Component ===
 export default function IletisimForm() {
   const fileInput = useRef(null);
   const [form, setForm] = useState({
@@ -240,7 +307,7 @@ export default function IletisimForm() {
         </select>
         <textarea name="mesaj" placeholder="Mesajınız" value={form.mesaj} onChange={handleChange}
           className={`p-3 rounded-lg border ${isRealMsg(form.mesaj) ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={15} required rows={3} />
-        {/* --- Dosya seç --- */}
+        {/* Dosya Seç Butonu */}
         <div className="flex flex-col">
           <label className="relative w-full">
             <input
@@ -264,7 +331,6 @@ export default function IletisimForm() {
             </div>
           </label>
         </div>
-        {/* --- /Dosya seç --- */}
         <span className="text-sm text-gray-300 font-bold ml-1 mt-2">İletişim tercihinizi seçiniz</span>
         <div className="flex flex-row gap-3 w-full mb-2 flex-wrap">
           {ILETISIM_TERCIHLERI.map((item) => (
