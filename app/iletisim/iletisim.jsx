@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
@@ -42,8 +42,7 @@ function useAkilliRateLimit() {
   const [msg, setMsg] = useState("");
   const [remaining, setRemaining] = useState(0);
 
-  // Her 1 sn'de rate kontrolü yap
-  React.useEffect(() => {
+  useEffect(() => {
     let id = setInterval(() => {
       let now = Date.now();
       let log = [];
@@ -98,6 +97,29 @@ function formatPhone(val) {
   return ("0" + val).slice(0, 11);
 }
 
+// --- Politika/KVKK Popup Bileşeni ---
+function PolicyPopup({ onClose, onConfirm }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">
+      <div className="bg-white rounded-2xl p-6 max-w-lg w-full relative shadow-2xl">
+        <button onClick={onClose} className="absolute top-2 right-4 text-2xl text-gray-700 font-bold hover:text-red-500">&times;</button>
+        <h2 className="text-xl font-bold mb-3 text-gray-900">Politika ve Koşullar</h2>
+        <div className="text-sm text-gray-700 mb-5 max-h-56 overflow-auto">
+          <p>
+            Kişisel verileriniz <b>YolcuTransferi.com</b> tarafından gizlilik ve yasalara uygun şekilde işlenmektedir. Detaylı KVKK metni için <a href="/kvkk" className="underline text-blue-600" target="_blank" rel="noopener noreferrer">buraya tıklayın</a>.
+          </p>
+        </div>
+        <button
+          onClick={() => { onConfirm(); onClose(); }}
+          className="bg-[#bfa658] hover:bg-yellow-600 text-black font-bold rounded-lg px-6 py-2 w-full"
+        >
+          Kabul Ediyorum
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function IletisimForm() {
   const fileInput = useRef(null);
   const [form, setForm] = useState({
@@ -122,7 +144,7 @@ export default function IletisimForm() {
     setErrors(er => ({ ...er, telefon: undefined }));
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (popupKvkkConfirmed) {
       setForm(f => ({ ...f, kvkkOnay: true }));
       setPopupKvkkConfirmed(false);
@@ -367,7 +389,12 @@ export default function IletisimForm() {
         </div>
       </section>
       {/* Politika ve koşullar popup'u */}
-      {/* PolicyPopup bileşenini buraya ekleyebilirsin. (gerekirse ayrı dosyadan import et) */}
+      {popupOpen && (
+        <PolicyPopup
+          onClose={() => setPopupOpen(false)}
+          onConfirm={() => setPopupKvkkConfirmed(true)}
+        />
+      )}
     </main>
   );
 }
