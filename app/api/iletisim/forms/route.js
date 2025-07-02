@@ -1,8 +1,10 @@
+// === app/api/iletisim/forms/route.js ===
+
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-// Tarih kodu ve özel kayıtNo oluşturucu
+// Kayıt no için tarih kodu
 function tarihKodu() {
   const now = new Date();
   const yyyy = now.getFullYear();
@@ -11,13 +13,14 @@ function tarihKodu() {
   return `iletisim${yyyy}${mm}${dd}_`;
 }
 
+// Sıradaki kayıt no'yu üret
 async function nextKayitNo(db, dateCode) {
   const regex = new RegExp("^" + dateCode);
   const count = await db.collection("iletisimForms").countDocuments({ kayitNo: { $regex: regex } });
   return dateCode + String(count + 1).padStart(5, "0");
 }
 
-// ---- GET (listeleme) ----
+// === GET: Kayıtları listele ===
 export async function GET(req) {
   try {
     const url = new URL(req.url, "http://localhost");
@@ -38,22 +41,28 @@ export async function GET(req) {
 
     return NextResponse.json({ items: forms, total });
   } catch (e) {
+    console.error("API GET iletisim/forms hata:", e);
     return NextResponse.json({ error: "Kayıtlar alınamadı" }, { status: 500 });
   }
 }
 
-// ---- PATCH (Kaldır/Geri Ekle) ----
+// === PATCH: Kaldır / Geri Ekle ===
 export async function PATCH(req) {
-  const { id, kaldirildi } = await req.json();
-  const db = await connectToDatabase();
-  await db.collection("iletisimForms").updateOne(
-    { _id: new ObjectId(id) },
-    { $set: { kaldirildi: !!kaldirildi } }
-  );
-  return NextResponse.json({ success: true });
+  try {
+    const { id, kaldirildi } = await req.json();
+    const db = await connectToDatabase();
+    await db.collection("iletisimForms").updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { kaldirildi: !!kaldirildi } }
+    );
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    console.error("API PATCH iletisim/forms hata:", e);
+    return NextResponse.json({ error: "Kayıt güncellenemedi" }, { status: 500 });
+  }
 }
 
-// ---- POST (Yeni Kayıt) ----
+// === POST: Yeni Kayıt (manuel eklemek için; formdan ekleme başka endpoint üzerinden) ===
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -70,7 +79,6 @@ export async function POST(req) {
       return NextResponse.json({ error: "KVKK onayı zorunlu" }, { status: 400 });
     }
 
-    // Türkçe karakterleri bozmadan kayıt!
     await db.collection("iletisimForms").insertOne({
       kayitNo,
       ad,
@@ -87,7 +95,9 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true });
   } catch (e) {
-    console.error("İletişim formu eklenirken hata:", e);
+    console.error("API POST iletisim/forms hata:", e);
     return NextResponse.json({ error: "Kayıt eklenemedi" }, { status: 500 });
   }
 }
+
+// === app/api/iletisim/forms/route.js ===
