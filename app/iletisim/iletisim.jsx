@@ -1,31 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FaWhatsapp, FaPhone, FaEnvelope } from "react-icons/fa";
+import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-const ILETISIM_NEDENLERI = [
-  "Bilgi Talebi", "Transfer Rezervasyonu", "Teklif Almak İstiyorum",
-  "İş Birliği / Ortaklık", "Geri Bildirim / Öneri", "Şikayet Bildirimi", "Diğer"
-];
-const ILETISIM_TERCIHLERI = [
-  { label: "WhatsApp", value: "WhatsApp", icon: <FaWhatsapp className="text-[#25d366] mr-1" size={16} /> },
-  { label: "Telefon", value: "Telefon", icon: <FaPhone className="text-[#51A5FB] mr-1" size={16} /> },
-  { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
-];
-
-// Yardımcı fonksiyonlar
-function isRealEmail(val) { if (!val) return false; const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i; return regex.test(val);}
-function isRealName(val) { if (!val || val.length < 3) return false; return /^[a-zA-ZığüşöçİĞÜŞÖÇ ]+$/.test(val);}
-function isRealPhone(val) { return /^05\d{9}$/.test(val);}
-function isRealMsg(val) { if (!val || val.length < 15) return false; return val.trim().split(/\s+/).length >= 3; }
-
-function formatDuration(ms) {
-  if (!ms || ms < 1000) return "1 sn";
-  const totalSec = Math.ceil(ms / 1000);
-  const min = Math.floor(totalSec / 60);
-  const sec = totalSec % 60;
-  return `${min > 0 ? min + "dk " : ""}${sec}sn`;
-}
+// Yardımcı fonksiyonlar ve validasyonlar...
+function isRealEmail(val) { if (!val) return false; const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i; return regex.test(val); }
+function isRealName(val) { if (!val || val.length < 3) return false; if (!/^[a-zA-ZığüşöçİĞÜŞÖÇ ]+$/.test(val)) return false; let v = val.trim().toLowerCase(); if (["asd", "qwe", "poi", "test", "xxx", "zzz", "klm", "asdf", "deneme"].includes(v)) return false; if (/^([a-zA-ZğüşöçİĞÜŞÖÇ])\1+$/.test(v)) return false; return true; }
+function isRealPhone(val) { if (!val) return false; return /^05\d{9}$/.test(val); }
+function isRealMsg(val) { if (!val || val.length < 15) return false; let wordCount = val.trim().split(/\s+/).length; if (wordCount < 3) return false; if (/([a-z])\1{3,}/.test(val.toLowerCase())) return false; return true; }
+function formatDuration(ms) { if (!ms || ms < 1000) return "1 sn"; const totalSec = Math.ceil(ms / 1000); const min = Math.floor(totalSec / 60); const sec = totalSec % 60; return `${min > 0 ? min + "dk " : ""}${sec}sn`; }
 function useRateLimit() {
   const [blocked, setBlocked] = useState(false);
   const [remaining, setRemaining] = useState(0);
@@ -43,32 +26,70 @@ function useRateLimit() {
     }, 1000);
     return () => clearInterval(id);
   }, []);
-  function kaydet() {
-    localStorage.setItem("iletisim_last", Date.now().toString());
-  }
+  function kaydet() { localStorage.setItem("iletisim_last", Date.now().toString()); }
   return [blocked, kaydet, remaining];
 }
+const ILETISIM_NEDENLERI = [
+  "Bilgi Talebi", "Transfer Rezervasyonu", "Teklif Almak İstiyorum",
+  "İş Birliği / Ortaklık", "Geri Bildirim / Öneri", "Şikayet Bildirimi", "Diğer"
+];
+const ILETISIM_TERCIHLERI = [
+  { label: "WhatsApp", value: "WhatsApp", icon: <FaWhatsapp className="text-[#25d366] mr-1" size={16} /> },
+  { label: "Telefon", value: "Telefon", icon: <FaPhone className="text-[#51A5FB] mr-1" size={16} /> },
+  { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
+];
 
-// Politika Popup
-function PolicyPopup({ open, onClose, onConfirm, html }) {
+// Politika/KVKK Popup, metni dışarıdan çeker:
+function PolicyPopup({ open, onClose, onConfirm }) {
+  const [mesafeli, setMesafeli] = useState("");
+  useEffect(() => {
+    if (!open) return;
+    fetch("https://yolcutransferi.com/mesafeli-satis")
+      .then(r => r.text())
+      .then(html => {
+        // Sadece ana içerik kısmını almak için basic bir parse
+        const match = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+        setMesafeli(match ? match[1] : html);
+      });
+  }, [open]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
       <div
-        className="relative bg-[#181405] rounded-2xl border-4 border-[#FFD700] p-8 pt-14 shadow-2xl flex flex-col overflow-hidden"
-        style={{ width: "80vw", maxWidth: 900, minHeight: 300 }}
+        className="relative rounded-2xl border-4 border-[#FFD700] shadow-2xl overflow-hidden bg-gradient-to-br from-black via-[#19160a] to-[#302811]"
+        style={{
+          width: "80vw", maxWidth: 1000, minWidth: 260, maxHeight: "93vh", padding: 0, boxShadow: "0 0 24px 0 #bfa65899"
+        }}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-5 text-[#FFD700] hover:text-[#fff9e3] text-lg font-bold w-auto px-5 h-10 flex items-center justify-center rounded bg-black/30 border-2 border-[#FFD700] hover:bg-[#ffd70022] transition"
-        >Kapat</button>
-        <h2 className="text-2xl font-bold text-[#FFD700] mb-5 text-center">YolcuTransferi.com Politika ve Koşulları</h2>
-        <div className="text-sm text-[#ecd9aa] mb-6 max-h-[60vh] overflow-auto" dangerouslySetInnerHTML={{ __html: html || "" }} />
-        <button
-          onClick={() => { onConfirm && onConfirm(); onClose(); }}
-          className="mt-2 w-full py-3 rounded-xl bg-gradient-to-tr from-[#FFD700] to-[#BFA658] text-black font-bold text-lg shadow hover:scale-105 transition"
-        >Tümünü okudum, onaylıyorum</button>
+          className="absolute top-3 right-6 text-2xl font-bold text-[#FFD700] hover:text-yellow-400 focus:outline-none z-20 bg-black/80 px-5 py-2 rounded-xl border border-[#FFD700]"
+          style={{ transform: "translateY(-1rem)" }}
+        >
+          Kapat
+        </button>
+        <div className="py-6 px-6 max-h-[77vh] overflow-y-auto text-[#ffeec2] text-base leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: mesafeli || "Yükleniyor..." }}
+        />
+        <div className="px-4 py-5 flex justify-center border-t border-[#FFD700]/30">
+          <button
+            onClick={() => { onConfirm && onConfirm(); onClose(); }}
+            className="w-full py-3 rounded-xl bg-gradient-to-tr from-[#FFD700] to-[#BFA658] text-black font-bold text-lg shadow hover:scale-105 transition"
+          >
+            Tümünü okudum, onaylıyorum
+          </button>
+        </div>
       </div>
+      <style>{`
+        @media (max-width: 900px) {
+          .relative.rounded-2xl {
+            width: 97vw !important;
+            min-width: 0 !important;
+            max-width: 97vw !important;
+            padding: 0 !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -84,56 +105,19 @@ export default function Iletisim() {
   const [blocked, kaydet, remaining] = useRateLimit();
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupKvkkConfirmed, setPopupKvkkConfirmed] = useState(false);
-  const [policyHtml, setPolicyHtml] = useState("");
 
-  // Politika HTML'ini uzaktan çek
-  useEffect(() => {
-    if (popupOpen && !policyHtml) {
-      fetch("https://yolcutransferi.com/mesafeli-satis")
-        .then(r => r.text())
-        .then(html => {
-          // <main> veya <section> içeriğini ayıkla
-          const div = document.createElement("div");
-          div.innerHTML = html;
-          let content = div.querySelector("main") || div.querySelector("section") || div;
-          setPolicyHtml(content.innerHTML);
-        });
-    }
-  }, [popupOpen, policyHtml]);
-
-  useEffect(() => {
-    if (popupKvkkConfirmed) {
-      setForm(f => ({ ...f, kvkkOnay: true }));
-      setPopupKvkkConfirmed(false);
-    }
-  }, [popupKvkkConfirmed]);
-
+  // Validasyonlar
   const adValid = isRealName(form.ad);
   const soyadValid = isRealName(form.soyad);
   const phoneValid = isRealPhone(form.telefon);
   const emailValid = isRealEmail(form.email);
   const msgValid = isRealMsg(form.mesaj);
 
-  const handlePhoneChange = (e) => {
-    let val = e.target.value.replace(/\D/g, "");
-    if (val.length > 11) val = val.slice(0, 11);
-    if (val && val[0] !== "0") val = "0" + val;
-    if (val.startsWith("00")) val = "0" + val.slice(2);
-    setForm(f => ({ ...f, telefon: val }));
-    setErrors(er => ({ ...er, telefon: undefined }));
-  };
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
-    setErrors({ ...errors, [name]: undefined });
-  };
-  const handleIletisimTercihiChange = (value) => {
-    setForm({ ...form, iletisimTercihi: value });
-    setErrors({ ...errors, iletisimTercihi: undefined });
-  };
-  function resetButton() {
-    setTimeout(() => { setButtonMsg("Mesajı Gönder"); setButtonStatus("normal"); }, 6000);
-  }
+  useEffect(() => { if (popupKvkkConfirmed) { setForm(f => ({ ...f, kvkkOnay: true })); setPopupKvkkConfirmed(false); } }, [popupKvkkConfirmed]);
+  const handleChange = (e) => { const { name, value, type, checked } = e.target; setForm({ ...form, [name]: type === "checkbox" ? checked : value }); setErrors({ ...errors, [name]: undefined }); };
+  const handleIletisimTercihiChange = (value) => { setForm({ ...form, iletisimTercihi: value }); setErrors({ ...errors, iletisimTercihi: undefined }); };
+  function resetButton() { setTimeout(() => { setButtonMsg("Mesajı Gönder"); setButtonStatus("normal"); }, 6000); }
+  const handlePhoneChange = (e) => { let val = e.target.value.replace(/\D/g, ""); if (val.length > 11) val = val.slice(0, 11); if (val && val[0] !== "0") val = "0" + val; if (val.startsWith("00")) val = "0" + val.slice(2); setForm(f => ({ ...f, telefon: val })); setErrors(er => ({ ...er, telefon: undefined })); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -168,7 +152,6 @@ export default function Iletisim() {
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
       <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] mt-16 mb-10">
-        {/* Başlık ve slogan */}
         <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-1 text-center">
           İletişim
         </h1>
@@ -280,13 +263,41 @@ export default function Iletisim() {
             </div>
           )}
         </form>
-        <PolicyPopup
-          open={popupOpen}
-          onClose={() => setPopupOpen(false)}
-          onConfirm={() => setPopupKvkkConfirmed(true)}
-          html={policyHtml}
-        />
+
+        {/* Sosyal medya ve iletişim bilgileri */}
+        <div className="w-full border-t border-[#bfa658] mt-10 pt-6">
+          <div className="flex flex-wrap gap-4 mb-3 justify-center">
+            <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="WhatsApp"><FaWhatsapp size={28} /></a>
+            <a href="https://instagram.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="Instagram"><FaInstagram size={28} /></a>
+            <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="X"><SiX size={28} /></a>
+          </div>
+          <div className="flex flex-wrap gap-6 justify-center mb-2 text-[#ffeec2] text-base font-semibold">
+            <span className="flex items-center gap-2"><FaPhone className="opacity-80" />+90 539 526 75 69</span>
+            <span className="flex items-center gap-2"><FaEnvelope className="opacity-80" />info@yolcutransferi.com</span>
+            <span className="flex items-center gap-2"><FaMapMarkerAlt className="opacity-80" />Ümraniye, İnkılap Mah. Plazalar Bölgesi</span>
+          </div>
+        </div>
+        {/* Konum haritası */}
+        <div className="w-full flex justify-center mt-8">
+          <div style={{ width: "100%", maxWidth: "900px", height: "210px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
+            <iframe
+              title="YolcuTransferi.com Konum"
+              width="100%"
+              height="210"
+              frameBorder="0"
+              style={{ border: 0 }}
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d24081.262044014337!2d29.0903967!3d41.0319917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac9cd7fd8d1ef%3A0xf6f8ff72b91ed1db!2sENPLAZA!5e0!3m2!1str!2str!4v1717693329992!5m2!1str!2str"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </div>
       </section>
+      {/* Politika ve koşullar popup'u */}
+      <PolicyPopup
+        open={popupOpen}
+        onClose={() => setPopupOpen(false)}
+        onConfirm={() => setPopupKvkkConfirmed(true)}
+      />
     </main>
   );
 }
