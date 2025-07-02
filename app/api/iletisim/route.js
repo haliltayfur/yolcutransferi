@@ -7,13 +7,12 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function POST(req) {
   try {
     const body = await req.json();
-
-    // Gerekli alanlar:
     const { ad, soyad, telefon, email, neden, mesaj, iletisimTercihi, kvkkOnay } = body;
+
     if (!ad || !soyad || !telefon || !email || !neden || !mesaj || !iletisimTercihi || !kvkkOnay)
       return NextResponse.json({ error: "Eksik alanlar var." }, { status: 400 });
 
-    // Kayıt no üret
+    // Kayıt No Üret
     const now = new Date();
     const dateStr = `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}`;
     const db = await connectToDatabase();
@@ -22,15 +21,9 @@ export async function POST(req) {
     });
     const kayitNo = `iletisim${dateStr}_${String(countToday + 1).padStart(5, "0")}`;
 
-    // DB'ye yaz
+    // DB'ye Yaz
     const yeniKayit = {
-      ad,
-      soyad,
-      telefon,
-      email,
-      neden,
-      mesaj,
-      iletisimTercihi,
+      ad, soyad, telefon, email, neden, mesaj, iletisimTercihi,
       kvkkOnay: !!kvkkOnay,
       kayitNo,
       kaldirildi: false,
@@ -38,7 +31,7 @@ export async function POST(req) {
     };
     await db.collection("iletisimForms").insertOne(yeniKayit);
 
-    // Adminlere mail
+    // Adminlere Mail
     await resend.emails.send({
       from: "YolcuTransferi <info@yolcutransferi.com>",
       to: ["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"],
@@ -53,7 +46,7 @@ export async function POST(req) {
         <b>Kayıt No:</b> ${kayitNo}`
     });
 
-    // Müşteriye otomatik cevap
+    // Müşteriye Mail
     await resend.emails.send({
       from: "YolcuTransferi <info@yolcutransferi.com>",
       to: [email],
