@@ -5,10 +5,9 @@ import formidable from "formidable";
 import { promises as fs } from "fs";
 import path from "path";
 
+export const dynamic = "force-dynamic";
 const UPLOAD_ROOT = path.join(process.cwd(), "public", "ekler", "iletisim");
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-export const dynamic = "force-dynamic";
 
 export async function POST(req) {
   try {
@@ -65,11 +64,22 @@ export async function POST(req) {
 
     await db.collection("iletisimForms").insertOne(yeniKayit);
 
+    // Kurumsal otomatik cevap: Kullanıcıya bilgilendirme
+    await resend.emails.send({
+      from: "YolcuTransferi <info@yolcutransferi.com>",
+      to: body.email,
+      subject: "İletişim Mesajınız Alındı",
+      html: `Sayın ${body.ad} ${body.soyad || ""},<br>
+        İletişim sayfamız üzerinden bize ulaştığınız için teşekkür ederiz.<br>
+        Mesajınız alınmıştır. En kısa sürede, tercih ettiğiniz iletişim kanalı üzerinden sizinle iletişime geçilecektir.<br><br>
+        Saygılarımızla,<br>
+        YolcuTransferi.com Ekibi`
+    });
+
+    // Admin'e ilet (ek dosya linkiyle)
     let ekSatiri = ekYolu
       ? `<b>Ek Dosya:</b> <a href="https://yolcutransferi.com${ekYolu}" target="_blank">Dosyayı Görüntüle / İndir</a><br/>`
       : "";
-
-    // Site yönetimine giden mail
     await resend.emails.send({
       from: "YolcuTransferi <info@yolcutransferi.com>",
       to: ["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"],
@@ -84,24 +94,6 @@ export async function POST(req) {
              <b>KVKK Onay:</b> ${yeniKayit.kvkkOnay ? "Evet" : "Hayır"}<br/>
              <b>Kayıt No:</b> ${yeniKayit.kayitNo}`
     });
-
-    // KULLANICIYA bilgi maili
-    if (yeniKayit.email && /\S+@\S+\.\S+/.test(yeniKayit.email)) {
-      await resend.emails.send({
-        from: "YolcuTransferi <info@yolcutransferi.com>",
-        to: [yeniKayit.email],
-        subject: "İletişim Formu Bilgilendirme",
-        html: `
-        Sayın ${yeniKayit.ad || ""} ${yeniKayit.soyad || ""},
-        <br/><br/>
-        İletişim sayfamızdan gönderdiğiniz mesaj tarafımıza ulaşmıştır. Talebiniz kayıt altına alınmıştır. En kısa sürede tercih ettiğiniz iletişim kanalınız üzerinden tarafınıza geri dönüş yapılacaktır.
-        <br/><br/>
-        <b>Gönderdiğiniz Mesaj:</b> <br/>
-        ${yeniKayit.mesaj}
-        <br/><br/>
-        YolcuTransferi.com ekibi`
-      });
-    }
 
     return NextResponse.json({ success: true, kayitNo, ek: ekYolu });
   } catch (err) {
