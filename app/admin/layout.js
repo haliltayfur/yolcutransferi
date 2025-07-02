@@ -1,32 +1,25 @@
-// app/admin/layout.js
 "use client";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import AdminSidebar from "@/components/AdminSidebar";
 import { FaBars } from "react-icons/fa";
 
-// Basit Auth Kontrolü: localStorage'a "admin_auth" = "ok" olarak bakıyor
-// Gerçek projede bunu cookie, JWT veya session ile yapmalısın!
-function useAdminAuth() {
-  const router = useRouter();
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const isLogged = localStorage.getItem("admin_auth") === "ok";
-      if (!isLogged) router.replace("/admin/login"); // Eğer giriş yoksa login'e yönlendir
-    }
-  }, [router]);
-}
-
 export default function AdminLayout({ children }) {
-  useAdminAuth(); // Her admin sayfasında çalışır
+  useAdminAuth();
 
+  // --- senin önceki kodun ---
   const [mobileMenu, setMobileMenu] = useState(false);
   const mobileMenuRef = useRef();
 
   useEffect(() => {
-    if (mobileMenu) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
+    if (mobileMenu) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [mobileMenu]);
 
   useEffect(() => {
@@ -47,11 +40,9 @@ export default function AdminLayout({ children }) {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-black via-[#19160a] to-[#282314]">
-      {/* Sidebar - Desktop */}
       <aside className="hidden md:flex flex-col w-64 bg-black/95 border-r border-[#bfa658] shadow-2xl fixed inset-y-0 left-0 z-30">
         <AdminSidebar />
       </aside>
-      {/* Mobile Hamburger */}
       <button
         className="md:hidden fixed top-4 left-4 z-40 bg-black/90 border-2 border-[#bfa658] rounded-xl p-3 shadow-xl text-[#bfa658] active:scale-95 transition"
         aria-label="Menüyü Aç"
@@ -59,10 +50,8 @@ export default function AdminLayout({ children }) {
       >
         <FaBars size={26} />
       </button>
-      {/* Sidebar - Mobile Açılır */}
       {mobileMenu && (
         <div className="fixed inset-0 z-50 flex">
-          {/* Yan menü kutusu */}
           <nav
             ref={mobileMenuRef}
             className="w-72 bg-black/95 border-r border-[#bfa658] shadow-2xl flex flex-col h-full p-0 animate-slidein"
@@ -70,14 +59,12 @@ export default function AdminLayout({ children }) {
           >
             <AdminSidebar closeMenu={() => setMobileMenu(false)} />
           </nav>
-          {/* Koyu arka plan */}
           <div
             className="flex-1 bg-black/60"
             onClick={() => setMobileMenu(false)}
           ></div>
         </div>
       )}
-      {/* Main content */}
       <div className="flex flex-col flex-1 md:ml-64 min-h-screen">
         <header className="w-full py-4 px-6 flex justify-between items-center border-b border-[#bfa658] bg-black/90 shadow z-10 sticky top-0">
           <span className="text-2xl font-extrabold tracking-wide text-[#bfa658]">YolcuTransferi Admin Panel</span>
