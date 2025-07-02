@@ -27,17 +27,17 @@ export default function AdminIletisim() {
   const [showRemoved, setShowRemoved] = useState(false);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  const [refreshFlag, setRefreshFlag] = useState(false);
   const pollingRef = useRef();
 
+  // Modal açıkken body scroll'u engelle
   useEffect(() => {
     if (modalForm) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
     return () => { document.body.style.overflow = ""; };
   }, [modalForm]);
 
-  // Backend verisini çek
-  async function fetchForms() {
+  // Kayıtları çek
+  const fetchForms = async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/iletisim");
@@ -51,14 +51,13 @@ export default function AdminIletisim() {
       setFiltered(arr.filter(f => !f.kaldirildi));
       setRemovedForms(arr.filter(f => f.kaldirildi));
     } catch (e) {
-      setForms([]);
-      setFiltered([]);
-      setRemovedForms([]);
+      setForms([]); setFiltered([]); setRemovedForms([]);
     }
     setLoading(false);
-  }
+  };
 
-  async function handleKaldir(_id) {
+  // Kaldır
+  const handleKaldir = async (_id) => {
     await fetch(`/api/admin/iletisim/${_id}/kaldir`, { method: "POST" });
     setForms(f => f.map(row => row._id === _id ? { ...row, kaldirildi: true } : row));
     setFiltered(f => f.filter(row => row._id !== _id));
@@ -67,46 +66,33 @@ export default function AdminIletisim() {
       ...removedForms,
     ]);
     setModalForm(null);
-  }
+  };
 
-  async function handleSil(_id) {
+  // Sil
+  const handleSil = async (_id) => {
     await fetch(`/api/admin/iletisim/${_id}`, { method: "DELETE" });
     setForms(f => f.filter(row => row._id !== _id));
     setFiltered(f => f.filter(row => row._id !== _id));
     setRemovedForms(f => f.filter(row => row._id !== _id));
     setModalForm(null);
-  }
+  };
 
+  // 60 saniyede bir otomatik güncelle (ve ilk açılışta)
   useEffect(() => {
     fetchForms();
-    pollingRef.current = setInterval(async () => {
-      try {
-        const res = await fetch("/api/admin/iletisim");
-        const data = await res.json();
-        let arr = Array.isArray(data.forms) ? data.forms : [];
-        arr = arr.map(x => ({
-          ...x,
-          kaldirildi: x.kaldirildi || false,
-        }));
-        if (arr.length !== forms.length) {
-          setForms(arr);
-          setFiltered(arr.filter(f => !f.kaldirildi));
-          setRemovedForms(arr.filter(f => f.kaldirildi));
-        }
-      } catch {}
-    }, 5000);
+    pollingRef.current = setInterval(fetchForms, 60000);
     return () => clearInterval(pollingRef.current);
-    // eslint-disable-next-line
-  }, [refreshFlag]);
+  }, []);
 
-  function handleShowRemoved() {
-    setShowRemoved(s => !s);
-    setPage(1);
-  }
-  function handleRefresh() {
-    setRefreshFlag(f => !f);
-  }
+  // Butonla güncelle
+  const handleRefresh = () => fetchForms();
 
+  // Tabloda gösterilecek veriler ve sayfa hesaplamaları
+  const dataArr = showRemoved ? removedForms : filtered;
+  const totalPages = Math.max(1, Math.ceil(dataArr.length / perPage));
+  const pagedForms = dataArr.slice((page - 1) * perPage, page * perPage);
+
+  // Export to Excel
   function exportExcel() {
     const arr = showRemoved ? removedForms : filtered;
     if (!arr.length) return;
@@ -132,10 +118,6 @@ export default function AdminIletisim() {
     saveAs(new Blob([wbout], { type: "application/octet-stream" }), "iletisim_basvurulari.xlsx");
   }
 
-  const dataArr = showRemoved ? removedForms : filtered;
-  const totalPages = Math.max(1, Math.ceil(dataArr.length / perPage));
-  const pagedForms = dataArr.slice((page - 1) * perPage, page * perPage);
-
   const columns = [
     "Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Neden", "Mesaj", "İşlem"
   ];
@@ -156,7 +138,7 @@ export default function AdminIletisim() {
           Excel (XLSX) İndir
         </button>
         <button
-          onClick={handleShowRemoved}
+          onClick={() => { setShowRemoved(s => !s); setPage(1); }}
           className="bg-[#444] border border-[#bfa658] text-[#ffeec2] font-semibold px-4 py-2 rounded hover:bg-[#bfa658] hover:text-black text-sm shadow"
         >
           {showRemoved ? "Aktifleri Göster" : "Kaldırılanları Göster"}
@@ -194,35 +176,31 @@ export default function AdminIletisim() {
             ) : (
               pagedForms.map((form, i) => (
                 <tr key={form._id || i} className="hover:bg-[#231d10] transition">
-                  <td className="p-2 border-b border-[#bfa658] font-semibold" style={{ borderRight: '1px solid #bfa658' }}>
-                    {kayitNoUret(form, i + (page-1)*perPage)}
-                  </td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
-                    {form.createdAt ? format(new Date(form.createdAt), "dd.MM.yyyy HH:mm") : ""}
-                  </td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.ad} {form.soyad}</td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.telefon}</td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.email}</td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>{form.neden}</td>
-                  <td className="p-2 border-b border-[#bfa658]" style={{ borderRight: '1px solid #bfa658' }}>
+                  <td className="p-2 border-b border-[#bfa658] font-semibold whitespace-nowrap" style={{ borderRight: '1px solid #bfa658', maxWidth: 100 }}>{kayitNoUret(form, i + (page-1)*perPage)}</td>
+                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658', maxWidth: 130 }}>{form.createdAt ? format(new Date(form.createdAt), "dd.MM.yyyy HH:mm") : ""}</td>
+                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658', maxWidth: 120 }}>{form.ad} {form.soyad}</td>
+                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658', maxWidth: 110 }}>{form.telefon}</td>
+                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658', maxWidth: 170 }}>{form.email}</td>
+                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658', maxWidth: 120 }}>{form.neden}</td>
+                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658', maxWidth: 200 }}>
                     {form.mesaj && form.mesaj.length > 30 ? form.mesaj.slice(0, 30) + "..." : form.mesaj}
                   </td>
-                  <td className="p-2 border-b border-[#bfa658] text-center min-w-[120px]">
+                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap min-w-[145px] text-center flex gap-1 items-center justify-center">
+                    <button
+                      className="bg-[#bfa658] px-2 py-1 rounded text-xs font-semibold hover:bg-yellow-500"
+                      onClick={() => setModalForm(form)}
+                      type="button"
+                    >Oku</button>
                     {!form.kaldirildi && (
                       <button
                         onClick={() => handleKaldir(form._id)}
-                        className="bg-yellow-800 text-[#ffeec2] px-2 py-1 rounded mr-2 text-xs font-semibold border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
+                        className="bg-yellow-800 text-[#ffeec2] px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
                       >Kaldır</button>
                     )}
                     <button
                       onClick={() => handleSil(form._id)}
                       className="bg-red-700 text-white px-2 py-1 rounded text-xs font-semibold border border-[#bfa658] hover:bg-red-400 hover:text-black transition"
                     >Sil</button>
-                    <button
-                      className="bg-[#bfa658] px-2 py-1 rounded text-xs font-semibold hover:bg-yellow-500 ml-2"
-                      onClick={() => setModalForm(form)}
-                      type="button"
-                    >Oku</button>
                   </td>
                 </tr>
               ))
@@ -246,20 +224,20 @@ export default function AdminIletisim() {
           ))}
         </div>
       )}
-      {/* Popup Detay */}
+
+      {/* Modal */}
       {modalForm && (
-        <div className="fixed left-0 top-0 w-full h-full bg-black/80 flex items-center justify-center z-50"
-          onClick={() => setModalForm(null)}
-        >
+        <div className="fixed left-0 top-0 w-full h-full bg-black/80 flex items-center justify-center z-50" onClick={() => setModalForm(null)}>
           <div
-            className="bg-white text-black p-0 rounded-xl max-w-2xl w-full shadow-2xl relative overflow-hidden"
+            className="bg-gradient-to-br from-black via-[#19160a] to-[#302811] border-2 border-[#bfa658] text-[#ffeec2] p-0 rounded-xl max-w-2xl w-full shadow-2xl relative overflow-hidden"
+            style={{ minWidth: 300, maxWidth: 600 }}
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200 bg-[#f3ecd1]">
+            <div className="flex justify-between items-center px-6 py-3 border-b border-[#bfa658] bg-transparent">
               <div className="text-xl font-bold text-[#bfa658]">Mesaj Detayı</div>
               <button
-                className="text-2xl text-gray-400 hover:text-black"
+                className="text-2xl text-[#bfa658] hover:text-yellow-400"
                 onClick={() => setModalForm(null)}
                 aria-label="Kapat"
               >×</button>
@@ -277,13 +255,13 @@ export default function AdminIletisim() {
                 <div><b>KVKK Onay:</b> {modalForm.kvkkOnay ? "Evet" : "Hayır"}</div>
               </div>
               <div className="mb-1 text-[15px]"><b>Mesaj:</b></div>
-              <div className="bg-gray-100 rounded-md p-3 text-gray-900 font-mono max-h-48 overflow-y-auto whitespace-pre-line break-words">{modalForm.mesaj}</div>
+              <div className="bg-[#23201a] rounded-md p-3 text-[#ffeec2] font-mono max-h-48 overflow-y-auto whitespace-pre-line break-words">{modalForm.mesaj}</div>
               {modalForm.ek && (
-                <div className="mt-4"><b>Ek Dosya:</b> <a href={modalForm.ek} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Görüntüle/İndir</a></div>
+                <div className="mt-4"><b>Ek Dosya:</b> <a href={modalForm.ek} target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">Görüntüle/İndir</a></div>
               )}
             </div>
             {/* Alt Butonlar */}
-            <div className="flex gap-3 justify-end bg-[#faf8ef] px-6 py-4 border-t border-gray-200">
+            <div className="flex gap-3 justify-end bg-transparent px-6 py-4 border-t border-[#bfa658]">
               {!modalForm.kaldirildi && (
                 <button
                   onClick={() => handleKaldir(modalForm._id)}
@@ -295,11 +273,9 @@ export default function AdminIletisim() {
                 className="bg-red-700 text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-red-400 hover:text-black transition"
               >Sil</button>
               <button
-                className="bg-black text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
+                className="bg-black text-[#ffeec2] px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
                 onClick={() => setModalForm(null)}
-              >
-                Kapat
-              </button>
+              >Kapat</button>
             </div>
           </div>
         </div>
