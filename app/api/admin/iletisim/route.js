@@ -1,4 +1,3 @@
-// app/api/admin/iletisim/route.js
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 
@@ -13,6 +12,7 @@ export async function GET() {
       .toArray();
     return NextResponse.json({ forms });
   } catch (error) {
+    console.error("API HATASI:", error);
     return NextResponse.json({ error: "Kayıtlar alınamadı." }, { status: 500 });
   }
 }
