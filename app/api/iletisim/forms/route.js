@@ -1,10 +1,9 @@
-// === app/api/iletisim/forms/route.js ===
-
+// app/api/iletisim/forms/route.js
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-// Kayıt no için tarih kodu
+// Kayıt no için tarih kodu (gerekiyorsa kullanılır)
 function tarihKodu() {
   const now = new Date();
   const yyyy = now.getFullYear();
@@ -13,20 +12,13 @@ function tarihKodu() {
   return `iletisim${yyyy}${mm}${dd}_`;
 }
 
-// Sıradaki kayıt no'yu üret
-async function nextKayitNo(db, dateCode) {
-  const regex = new RegExp("^" + dateCode);
-  const count = await db.collection("iletisimForms").countDocuments({ kayitNo: { $regex: regex } });
-  return dateCode + String(count + 1).padStart(5, "0");
-}
-
-// === GET: Kayıtları listele ===
+// === GET: Kayıtları listele (sayfalı, kaldırılmamışlar) ===
 export async function GET(req) {
   try {
     const url = new URL(req.url, "http://localhost");
     const showRemoved = url.searchParams.get("showRemoved") === "true";
     const page = parseInt(url.searchParams.get("page") || "1", 10);
-    const pageSize = parseInt(url.searchParams.get("pageSize") || "5", 10);
+    const pageSize = parseInt(url.searchParams.get("pageSize") || "20", 10);
 
     const db = await connectToDatabase();
     const query = showRemoved ? {} : { kaldirildi: { $ne: true } };
@@ -62,42 +54,15 @@ export async function PATCH(req) {
   }
 }
 
-// === POST: Yeni Kayıt (manuel eklemek için; formdan ekleme başka endpoint üzerinden) ===
-export async function POST(req) {
+// === DELETE (opsiyonel) ===
+export async function DELETE(req) {
   try {
-    const body = await req.json();
+    const { id } = await req.json();
     const db = await connectToDatabase();
-    const dateCode = tarihKodu();
-    const kayitNo = await nextKayitNo(db, dateCode);
-
-    const {
-      ad, soyad, telefon, email, neden, mesaj, iletisimTercihi, kvkkOnay
-    } = body;
-
-    // KVKK checkbox işaretlenmeden kayıt yapılmasın
-    if (!kvkkOnay) {
-      return NextResponse.json({ error: "KVKK onayı zorunlu" }, { status: 400 });
-    }
-
-    await db.collection("iletisimForms").insertOne({
-      kayitNo,
-      ad,
-      soyad,
-      telefon,
-      email,
-      neden,
-      mesaj,
-      iletisimTercihi,
-      kvkkOnay: !!kvkkOnay, // bool olarak kaydedilsin
-      kaldirildi: false,
-      createdAt: new Date()
-    });
-
+    await db.collection("iletisimForms").deleteOne({ _id: new ObjectId(id) });
     return NextResponse.json({ success: true });
   } catch (e) {
-    console.error("API POST iletisim/forms hata:", e);
-    return NextResponse.json({ error: "Kayıt eklenemedi" }, { status: 500 });
+    console.error("API DELETE iletisim/forms hata:", e);
+    return NextResponse.json({ error: "Kayıt silinemedi" }, { status: 500 });
   }
 }
-
-// === app/api/iletisim/forms/route.js ===
