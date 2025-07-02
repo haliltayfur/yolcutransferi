@@ -310,3 +310,54 @@ export default function Iletisim() {
                   : "bg-[#bfa658] hover:bg-yellow-600"}`}
             style={{ minHeight: 50, minWidth: 180 }}
             disabled={blocked}
+          >
+            {blocked
+              ? `Çok hızlı gönderdiniz. ${formatDuration(remaining)} sonra tekrar deneyin.`
+              : buttonMsg}
+          </button>
+          {Object.keys(errors).length > 0 && (
+            <div className="mt-2 flex flex-col gap-1">
+              {Object.values(errors).map((err, i) => (
+                <span key={i} className="text-xs text-red-400 pl-2 font-bold">{err}</span>
+              ))}
+            </div>
+          )}
+        </form>
+
+        {/* Sosyal medya ve iletişim bilgileri */}
+        <div className="w-full border-t border-[#bfa658] mt-10 pt-6">
+          <div className="flex flex-wrap gap-4 mb-3 justify-center">
+            <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="WhatsApp"><FaWhatsapp size={28} /></a>
+            <a href="https://instagram.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="Instagram"><FaInstagram size={28} /></a>
+            <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="X"><SiX size={28} /></a>
+          </div>
+          <div className="flex flex-wrap gap-6 justify-center mb-2 text-[#ffeec2] text-base font-semibold">
+            <span className="flex items-center gap-2"><FaPhone className="opacity-80" />+90 539 526 75 69</span>
+            <span className="flex items-center gap-2"><FaEnvelope className="opacity-80" />info@yolcutransferi.com</span>
+            <span className="flex items-center gap-2"><FaMapMarkerAlt className="opacity-80" />Ümraniye, İnkılap Mah. Plazalar Bölgesi</span>
+          </div>
+        </div>
+        {/* Konum haritası */}
+        <div className="w-full flex justify-center mt-8">
+          <div style={{ width: "100%", maxWidth: "900px", height: "210px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
+            <iframe
+              title="YolcuTransferi.com Konum"
+              width="100%"
+              height="210"
+              frameBorder="0"
+              style={{ border: 0 }}
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d24081.262044014337!2d29.0903967!3d41.0319917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac9cd7fd8d1ef%3A0xf6f8ff72b91ed1db!2sENPLAZA!5e0!3m2!1str!2str!4v1717693329992!5m2!1str!2str"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </div>
+      </section>
+      {/* Politika ve koşullar popup'u */}
+      <PolicyPopup
+        open={popupOpen}
+        onClose={() => setPopupOpen(false)}
+        onConfirm={() => setPopupKvkkConfirmed(true)}
+      />
+    </main>
+  );
+}
