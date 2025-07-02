@@ -1,8 +1,10 @@
+// app/iletisim/page.jsx
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
+import { SiX } from "react-icons/si";
 
-// Yardımcı validasyon fonksiyonları...
+// Validasyon yardımcıları
 function isRealEmail(val) {
   if (!val) return false;
   const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
@@ -70,6 +72,7 @@ function useAkilliRateLimit() {
   }
   return [blocked, msg, remaining, kaydet];
 }
+
 const ILETISIM_NEDENLERI = [
   "Bilgi Talebi", "Transfer Rezervasyonu", "Teklif Almak İstiyorum",
   "İş Birliği / Ortaklık", "Geri Bildirim / Öneri", "Şikayet Bildirimi", "Diğer"
@@ -80,7 +83,7 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta" }
 ];
 
-// === POPUP ===
+// === Politika Popup ===
 function PolicyPopup({ open, onClose, onConfirm }) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
@@ -98,38 +101,31 @@ function PolicyPopup({ open, onClose, onConfirm }) {
       .finally(() => setLoading(false));
   }, [open]);
   if (!open) return null;
-  // Scroll sadece popup içinde, arka plan dondurulur
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-      <div
-        className="relative rounded-3xl border-2 border-[#FFD700] bg-gradient-to-br from-black via-[#19160a] to-[#302811] shadow-2xl flex flex-col items-center"
-        style={{ width: "min(98vw, 1200px)", minHeight: 370, padding: 0 }}
-      >
+      <div className="relative rounded-3xl border-2 border-[#FFD700] bg-gradient-to-br from-black via-[#19160a] to-[#302811] shadow-2xl flex flex-col items-center"
+        style={{ width: "min(98vw, 1200px)", minHeight: 370, padding: 0 }}>
         {/* Başlık ve kapat butonu */}
         <div className="w-full flex justify-between items-center px-10 pt-8 pb-2">
           <div className="w-full text-center">
-            <span className="text-2xl md:text-3xl font-extrabold text-[#FFD700] tracking-tight">YolcuTransferi.com Politika ve Koşulları</span>
+            <span className="text-2xl md:text-3xl font-extrabold text-[#FFD700] tracking-tight">
+              YolcuTransferi.com Politika ve Koşulları
+            </span>
           </div>
           <button
             onClick={onClose}
             className="ml-3 px-7 py-3 bg-[#FFD700] hover:bg-yellow-400 text-black font-bold rounded-xl transition"
-            style={{ fontSize: "1.07rem", fontWeight: 700, minWidth: 80 }}
-          >
+            style={{ fontSize: "1.07rem", fontWeight: 700, minWidth: 80 }}>
             Kapat
           </button>
         </div>
-        {/* İçerik */}
-        <div
-          className="w-full flex flex-col items-center"
-          style={{ padding: "0 2.5vw 0 2.5vw", marginBottom: "28px" }}
-        >
-          <div
-            className="w-full"
+        <div className="w-full flex flex-col items-center"
+          style={{ padding: "0 2.5vw 0 2.5vw", marginBottom: "28px" }}>
+          <div className="w-full"
             style={{
               borderRadius: "2.5rem",
               background: "rgba(18,14,5,0.98)",
@@ -143,12 +139,10 @@ function PolicyPopup({ open, onClose, onConfirm }) {
             }}
             dangerouslySetInnerHTML={{ __html: loading ? "<div style='text-align:center;padding:35px'>Yükleniyor...</div>" : content }}
           />
-          {/* Buton */}
           <button
             onClick={() => { onConfirm && onConfirm(); onClose(); }}
             className="block mx-auto mt-8 px-7 py-3 bg-gradient-to-tr from-[#FFD700] to-[#BFA658] rounded-xl text-black font-bold text-lg shadow hover:scale-105 transition"
-            style={{ minWidth: 220 }}
-          >
+            style={{ minWidth: 220 }}>
             Tümünü okudum, onaylıyorum
           </button>
         </div>
@@ -177,7 +171,6 @@ export default function Iletisim() {
     }
   }, [popupKvkkConfirmed]);
 
-  // Form işlemleri
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
@@ -195,7 +188,6 @@ export default function Iletisim() {
     setForm(f => ({ ...f, telefon: val }));
     setErrors(er => ({ ...er, telefon: undefined }));
   };
-  // Dosya seçimi
   const handleEkChange = (e) => {
     const file = e.target.files && e.target.files[0];
     setForm(f => ({ ...f, ek: file || null }));
@@ -203,7 +195,6 @@ export default function Iletisim() {
   function resetButton() {
     setTimeout(() => { setButtonMsg("Mesajı Gönder"); setButtonStatus("normal"); }, 6000);
   }
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     let newErrors = {};
@@ -221,7 +212,6 @@ export default function Iletisim() {
     }
     setButtonStatus("success"); setButtonMsg("Teşekkürler, mesajınız alındı."); resetButton();
     kaydetRate();
-
     // FormData ile gönder
     const fd = new FormData();
     Object.entries(form).forEach(([k, v]) => {
@@ -363,11 +353,21 @@ export default function Iletisim() {
             </div>
           )}
         </form>
-        {/* Sosyal medya ve iletişim bilgileri... */}
+        {/* Sosyal medya ve iletişim bilgileri */}
         <div className="w-full border-t border-[#bfa658] mt-10 pt-6">
           <div className="flex flex-wrap gap-4 mb-3 justify-center">
-            <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="WhatsApp"><FaWhatsapp size={28} /></a>
-            <a href="https://instagram.com/yolcutransferi" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="Instagram"><FaInstagram size={28} /></a>
+            <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="WhatsApp">
+              <FaWhatsapp size={28} />
+            </a>
+            <a href="https://instagram.com/yolcutransferi" target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="Instagram">
+              <FaInstagram size={28} />
+            </a>
+            <a href="https://x.com/yolcutransferi" target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="X">
+              <SiX size={28} />
+            </a>
           </div>
           <div className="flex flex-wrap gap-6 justify-center mb-2 text-[#ffeec2] text-base font-semibold">
             <span className="flex items-center gap-2"><FaPhone className="opacity-80" />+90 539 526 75 69</span>
@@ -375,6 +375,7 @@ export default function Iletisim() {
             <span className="flex items-center gap-2"><FaMapMarkerAlt className="opacity-80" />Ümraniye, İnkılap Mah. Plazalar Bölgesi</span>
           </div>
         </div>
+        {/* Konum haritası */}
         <div className="w-full flex justify-center mt-8">
           <div style={{ width: "100%", maxWidth: "900px", height: "210px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
             <iframe
@@ -384,12 +385,14 @@ export default function Iletisim() {
               frameBorder="0"
               style={{ border: 0 }}
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d24081.262044014337!2d29.0903967!3d41.0319917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac9cd7fd8d1ef%3A0xf6f8ff72b91ed1db!2sENPLAZA!5e0!3m2!1str!2str!4v1717693329992!5m2!1str!2str"
-              allowFullScreen
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
             ></iframe>
           </div>
         </div>
       </section>
-      {/* Politika ve koşullar popup'u */}
+      {/* Politika popup */}
       <PolicyPopup
         open={popupOpen}
         onClose={() => setPopupOpen(false)}
