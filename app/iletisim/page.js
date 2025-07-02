@@ -1,8 +1,6 @@
 "use client";
-import IletisimForm from "./IletisimForm";
+import IletisimForm from "./iletisim";
 
 export default function Page() {
   return <IletisimForm />;
 }
-
-// app/iletisim/page.js
