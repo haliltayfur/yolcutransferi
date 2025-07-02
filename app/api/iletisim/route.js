@@ -1,4 +1,3 @@
-// app/api/iletisim/route.js
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Resend } from "resend";
@@ -6,20 +5,21 @@ import formidable from "formidable";
 import { promises as fs } from "fs";
 import path from "path";
 
+export const dynamic = "force-dynamic"; // Next.js 14 gereği
+
 const UPLOAD_ROOT = path.join(process.cwd(), "public", "ekler", "iletisim");
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export const config = { api: { bodyParser: false } }; // Vercel bug fix
-
 export async function POST(req) {
   try {
+    // Form-data parse
     const form = formidable({
       multiples: false,
       maxFileSize: 10 * 1024 * 1024,
       filter: part => {
         if (!part.originalFilename) return false;
         const ext = path.extname(part.originalFilename || "").toLowerCase();
-        return [".jpg",".jpeg",".png",".pdf",".doc",".docx",".xls",".xlsx",".zip"].includes(ext);
+        return [".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".zip"].includes(ext);
       },
       keepExtensions: true
     });
@@ -47,6 +47,7 @@ export async function POST(req) {
       ekYolu = `/ekler/iletisim/${today}/${newName}`;
     }
 
+    // Kayıt No
     const db = await connectToDatabase();
     const now = new Date();
     const dateStr = `${String(now.getDate()).padStart(2,"0")}${String(now.getMonth()+1).padStart(2,"0")}${now.getFullYear()}`;
@@ -66,6 +67,7 @@ export async function POST(req) {
 
     await db.collection("iletisimForms").insertOne(yeniKayit);
 
+    // E-posta
     let ekSatiri = ekYolu
       ? `<b>Ek Dosya:</b> <a href="https://yolcutransferi.com${ekYolu}" target="_blank">Dosyayı Görüntüle / İndir</a><br/>`
       : "";
@@ -87,6 +89,7 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true, kayitNo, ek: ekYolu });
   } catch (err) {
+    console.error("Kayıt eklenirken hata:", err);
     return NextResponse.json({ error: err.toString() }, { status: 500 });
   }
 }
