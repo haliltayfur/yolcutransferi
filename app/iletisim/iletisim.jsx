@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// --- Yardımcı fonksiyonlar ---
+// Yardımcı fonksiyonlar (kısaltılmadı)
 function isRealEmail(val) {
   if (!val) return false;
   const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
@@ -37,7 +37,6 @@ function formatDuration(ms) {
   return `${min > 0 ? min + "dk " : ""}${sec}sn`;
 }
 
-// --- Akıllı rate-limit (anti-spam) ---
 function useAkilliRateLimit() {
   const [blocked, setBlocked] = useState(false);
   const [msg, setMsg] = useState("");
@@ -90,33 +89,81 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// --- Telefonu otomatik sıfırla ---
-function formatPhone(val) {
-  if (!val) return "";
-  val = val.trim().replace(/\D/g, "");
-  if (val.startsWith("0")) return val.slice(0, 11);
-  return ("0" + val).slice(0, 11);
-}
-
-// --- Politika/KVKK Popup Bileşeni ---
+// KVKK Popup tam metinli, %70 genişlik, scrollable
 function PolicyPopup({ onClose, onConfirm }) {
+  // (Gerçekten kullanmak istediğin KVKK metniyle değiştir!)
+  const kvkkMetni = `
+6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) kapsamında, YolcuTransferi.com tarafından paylaştığınız kişisel veriler, yalnızca iletişim/rezervasyon süreçleri, müşteri memnuniyeti ve yasal yükümlülüklerin yerine getirilmesi amacıyla işlenmektedir. Verileriniz üçüncü kişilerle paylaşılmaz. Detaylı aydınlatma metnine web sitemizdeki KVKK sayfasından ulaşabilirsiniz.
+
+• Kişisel verileriniz, mevzuata uygun şekilde güvenli biçimde saklanır.
+• Kanuni zorunluluk harici hiçbir şekilde üçüncü kişiyle paylaşılmaz.
+• İstediğiniz zaman verilerinizin silinmesini talep edebilirsiniz.
+
+KVKK kapsamındaki tüm haklarınızı ve yükümlülüklerimizi okumak için aşağıya göz atabilirsiniz.
+—
+Aydınlatma Metni Özeti:
+1. Veri Sorumlusu: YolcuTransferi.com
+2. İşlenen Kişisel Veriler: Ad, soyad, telefon, e-posta, mesaj içerikleri, IP adresi.
+3. Amaç: Rezervasyon, iletişim, hizmet sunumu, hukuki zorunluluklar, müşteri memnuniyeti.
+4. Aktarım: Yasal yükümlülük haricinde üçüncü kişilere aktarılmaz.
+5. Saklama: Bilgileriniz makul süre boyunca sistemde tutulur, sonra silinir.
+6. Haklarınız: Kişisel verilerinizin işlenip işlenmediğini öğrenme, düzeltilmesini veya silinmesini talep etme, işleme itiraz etme.
+
+Tam metni https://yolcutransferi.com/kvkk adresinden okuyabilirsiniz.
+  `;
+
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">
-      <div className="bg-white rounded-2xl p-6 max-w-lg w-full relative shadow-2xl">
-        <button onClick={onClose} className="absolute top-2 right-4 text-2xl text-gray-700 font-bold hover:text-red-500">&times;</button>
-        <h2 className="text-xl font-bold mb-3 text-gray-900">Politika ve Koşullar</h2>
-        <div className="text-sm text-gray-700 mb-5 max-h-56 overflow-auto">
-          <p>
-            Kişisel verileriniz <b>YolcuTransferi.com</b> tarafından gizlilik ve yasalara uygun şekilde işlenmektedir. Detaylı KVKK metni için <a href="/kvkk" className="underline text-blue-600" target="_blank" rel="noopener noreferrer">buraya tıklayın</a>.
-          </p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
+      <div
+        className="relative rounded-2xl bg-white p-6 shadow-2xl overflow-hidden"
+        style={{
+          width: "70vw",
+          maxWidth: 700,
+          minWidth: 260,
+          maxHeight: "95vh",
+          paddingTop: 32,
+        }}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-5 text-2xl font-bold text-gray-500 hover:text-red-600 focus:outline-none z-20"
+        >
+          ×
+        </button>
+        <h2 className="text-2xl font-extrabold text-gray-900 mb-3 text-center">Politika ve Koşullar</h2>
+        <div
+          className="overflow-y-auto text-sm text-gray-800 px-1 py-2 mb-5"
+          style={{
+            maxHeight: "50vh",
+            minHeight: 180,
+            border: "1px solid #f3e7d0",
+            borderRadius: 12,
+            background: "#faf9f5",
+            scrollbarWidth: "thin",
+          }}
+        >
+          {kvkkMetni.split("\n").map((line, i) => (
+            <p key={i} style={{ marginBottom: 8 }}>{line}</p>
+          ))}
         </div>
         <button
           onClick={() => { onConfirm(); onClose(); }}
-          className="bg-[#bfa658] hover:bg-yellow-600 text-black font-bold rounded-lg px-6 py-2 w-full"
+          className="w-full py-3 mt-3 rounded-xl font-bold text-lg bg-[#bfa658] hover:bg-yellow-600 text-black transition shadow"
+          style={{ border: "none", outline: "none" }}
         >
-          Kabul Ediyorum
+          Onaylıyorum
         </button>
       </div>
+      <style>{`
+        @media (max-width: 768px) {
+          .relative.rounded-2xl.bg-white.p-6.shadow-2xl.overflow-hidden {
+            width: 98vw !important;
+            min-width: 0 !important;
+            max-width: 98vw !important;
+            padding: 16px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -132,18 +179,7 @@ export default function IletisimForm() {
   const [buttonMsg, setButtonMsg] = useState("Mesajı Gönder");
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupKvkkConfirmed, setPopupKvkkConfirmed] = useState(false);
-  const [ekAd, setEkAd] = useState("");
   const [blocked, blockedMsg, remaining, kaydetRate] = useAkilliRateLimit();
-
-  // Telefon inputunda başa sıfır ekle
-  const handlePhoneChange = (e) => {
-    let val = e.target.value.replace(/\D/g, "");
-    if (val.length > 11) val = val.slice(0, 11);
-    if (val && val[0] !== "0") val = "0" + val;
-    if (val.startsWith("00")) val = "0" + val.slice(2);
-    setForm(f => ({ ...f, telefon: val }));
-    setErrors(er => ({ ...er, telefon: undefined }));
-  };
 
   useEffect(() => {
     if (popupKvkkConfirmed) {
@@ -152,6 +188,35 @@ export default function IletisimForm() {
     }
   }, [popupKvkkConfirmed]);
 
+  // Dosya seçiminde yazı, uyarı, etiket yok.
+  const handleEkChange = e => {
+    const file = e.target.files[0];
+    if (!file) { setForm(f => ({ ...f, ek: null })); return; }
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Maksimum dosya boyutu 10 MB olmalı.");
+      setForm(f => ({ ...f, ek: null }));
+      e.target.value = "";
+      return;
+    }
+    const ext = file.name.split(".").pop().toLowerCase();
+    if (!["jpg", "jpeg", "png", "pdf", "doc", "docx", "xls", "xlsx", "zip"].includes(ext)) {
+      alert("JPG, PNG, PDF, DOC, XLS, ZIP uzantıları desteklenir.");
+      setForm(f => ({ ...f, ek: null }));
+      e.target.value = "";
+      return;
+    }
+    setForm(f => ({ ...f, ek: file }));
+  };
+
+  // Diğer handlerlar (kısaltılmadı)
+  const handlePhoneChange = (e) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 11) val = val.slice(0, 11);
+    if (val && val[0] !== "0") val = "0" + val;
+    if (val.startsWith("00")) val = "0" + val.slice(2);
+    setForm(f => ({ ...f, telefon: val }));
+    setErrors(er => ({ ...er, telefon: undefined }));
+  };
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
@@ -160,27 +225,6 @@ export default function IletisimForm() {
   const handleIletisimTercihiChange = (value) => {
     setForm({ ...form, iletisimTercihi: value });
     setErrors({ ...errors, iletisimTercihi: undefined });
-  };
-
-  // Dosya seçme kontrolü (10 MB sınırı, uzantı kontrolü)
-  const handleEkChange = e => {
-    const file = e.target.files[0];
-    if (!file) { setEkAd(""); setForm(f => ({ ...f, ek: null })); return; }
-    if (file.size > 10 * 1024 * 1024) {
-      alert("Maksimum dosya boyutu 10 MB olmalı.");
-      setEkAd(""); setForm(f => ({ ...f, ek: null }));
-      e.target.value = "";
-      return;
-    }
-    const ext = file.name.split(".").pop().toLowerCase();
-    if (!["jpg", "jpeg", "png", "pdf", "doc", "docx", "xls", "xlsx", "zip"].includes(ext)) {
-      alert("Yalnızca JPG, PNG, PDF, DOC, XLS, ZIP uzantıları destekleniyor.");
-      setEkAd(""); setForm(f => ({ ...f, ek: null }));
-      e.target.value = "";
-      return;
-    }
-    setEkAd(file.name);
-    setForm(f => ({ ...f, ek: file }));
   };
 
   function resetButton() {
@@ -205,26 +249,17 @@ export default function IletisimForm() {
     }
 
     setButtonStatus("loading"); setButtonMsg("Gönderiliyor...");
-
-    // FormData ile gönder
     const formData = new FormData();
     Object.entries(form).forEach(([key, val]) => {
-      if (key === "ek" && val) {
-        formData.append("ek", val);
-      } else if (key !== "ek") {
-        formData.append(key, val);
-      }
+      if (key === "ek" && val) formData.append("ek", val);
+      else if (key !== "ek") formData.append(key, val);
     });
 
     try {
-      await fetch("/api/iletisim", {
-        method: "POST",
-        body: formData,
-      });
+      await fetch("/api/iletisim", { method: "POST", body: formData });
       setButtonStatus("success"); setButtonMsg("Teşekkürler, mesajınız alındı."); resetButton();
       kaydetRate();
       setForm({ ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "", iletisimTercihi: "", kvkkOnay: false, ek: null });
-      setEkAd("");
       if (fileInput.current) fileInput.current.value = "";
     } catch {
       setButtonStatus("error"); setButtonMsg("Sunucu hatası, tekrar deneyin."); resetButton();
@@ -271,20 +306,22 @@ export default function IletisimForm() {
           className={`p-3 rounded-lg border ${isRealMsg(form.mesaj) ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={15} required rows={3} />
 
         {/* Dosya Ekle */}
-        <div>
-          <input
-            type="file"
-            name="ek"
-            ref={fileInput}
-            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.zip"
-            onChange={handleEkChange}
-            className="block w-full mb-2 text-xs text-[#bfa658] bg-[#181611] rounded-lg border border-[#bfa658] py-2 px-3"
-          />
-          <span className="text-xs text-[#ffeec2] block mb-2">
-            (İsteğe bağlı) JPG, PNG, PDF, DOC, XLS, ZIP – Maks: 10 MB
-            {ekAd && <span className="ml-2 text-green-400">✓ {ekAd}</span>}
-          </span>
-        </div>
+        <input
+          type="file"
+          name="ek"
+          ref={fileInput}
+          accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.zip"
+          onChange={handleEkChange}
+          className="block w-full rounded-lg border border-[#bfa658] py-2 px-3 text-sm bg-[#181611] text-[#bfa658] focus:outline-none focus:ring-2 focus:ring-[#bfa658] transition"
+          style={{
+            borderRadius: 12,
+            background: "#181611",
+            color: "#bfa658",
+            fontWeight: 600,
+            marginBottom: 0,
+          }}
+        />
+
         <span className="text-sm text-gray-300 font-bold ml-1 mt-2">İletişim tercihinizi seçiniz</span>
         <div className="flex flex-row gap-3 w-full mb-2 flex-wrap">
           {ILETISIM_TERCIHLERI.map((item) => (
