@@ -73,4 +73,92 @@ export default function IletisimForm() {
       <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3 bg-black/70 rounded-2xl p-6 border border-[#bfa658]/60 shadow">
         <div className="flex gap-2">
           <input type="text" name="ad" placeholder="Ad" value={form.ad} onChange={handleChange}
-            className={`p-3 rounded-lg border flex-1 bg-[#181611] text-[#e7e7e7] border-[#423c1c] focus:border-[#bfa658] transiti
+            className={`p-3 rounded-lg border flex-1 bg-[#181611] text-[#e7e7e7] border-[#423c1c] focus:border-[#bfa658] transition`} minLength={3} required />
+          <input type="text" name="soyad" placeholder="Soyad" value={form.soyad} onChange={handleChange}
+            className={`p-3 rounded-lg border flex-1 bg-[#181611] text-[#e7e7e7] border-[#423c1c] focus:border-[#bfa658] transition`} minLength={2} required />
+        </div>
+        <div className="flex gap-2">
+          <input type="tel" name="telefon" placeholder="05xx xxx xx xx"
+            value={form.telefon} onChange={handleChange}
+            className={`p-3 rounded-lg border flex-1 bg-[#181611] text-[#e7e7e7] border-[#423c1c] focus:border-[#bfa658] transition`} maxLength={11} required />
+          <input type="email" name="email" placeholder="E-posta"
+            value={form.email} onChange={handleChange}
+            className={`p-3 rounded-lg border flex-1 bg-[#181611] text-[#e7e7e7] border-[#423c1c] focus:border-[#bfa658] transition`} required />
+        </div>
+        <select name="neden" value={form.neden} onChange={handleChange}
+          className="p-3 rounded-lg border border-[#423c1c] bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition text-base" required>
+          {ILETISIM_NEDENLERI.map((neden, i) => (
+            <option key={neden} value={neden}>{neden}</option>
+          ))}
+        </select>
+        <textarea name="mesaj" placeholder="Mesajınız" value={form.mesaj} onChange={handleChange}
+          className={`p-3 rounded-lg border bg-[#181611] text-[#e7e7e7] border-[#423c1c] focus:border-[#bfa658] transition`} minLength={10} required rows={3} />
+        <span className="text-sm text-gray-300 font-bold ml-1 mt-2">İletişim tercihinizi seçiniz</span>
+        <div className="flex flex-row gap-3 w-full mb-2 flex-wrap">
+          {ILETISIM_TERCIHLERI.map((item) => (
+            <label
+              key={item.value}
+              className={`flex items-center gap-1 px-4 py-1 rounded-full border font-bold text-xs cursor-pointer
+              select-none shadow-md transition
+              ${form.iletisimTercihi === item.value
+                ? "bg-black border-[#FFD700] text-[#FFD700]"
+                : "bg-black border-[#bfa658] text-white hover:bg-gray-900 hover:border-gray-400"}`}
+              style={{ minWidth: 90, justifyContent: 'center' }}
+            >
+              <input
+                type="radio"
+                name="iletisimTercihi"
+                value={item.value}
+                checked={form.iletisimTercihi === item.value}
+                onChange={() => handleIletisimTercihiChange(item.value)}
+                className="hidden"
+              />
+              {item.icon}
+              {item.label}
+            </label>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <input
+            type="checkbox"
+            name="kvkkOnay"
+            checked={form.kvkkOnay}
+            onChange={handleChange}
+            required
+            className="accent-[#FFD700] w-4 h-4"
+          />
+          <span className="text-xs text-gray-200">
+            <a
+              href="/kvkk"
+              target="_blank"
+              className="underline text-[#FFD700] hover:text-[#bfa658] cursor-pointer"
+            >
+              YolcuTransferi.com politika ve koşullarını
+            </a>{" "}
+            okudum, kabul ediyorum.
+          </span>
+        </div>
+        <button
+          type="submit"
+          className={`font-bold py-3 px-8 rounded-xl text-lg mt-2 w-full shadow transition text-black
+            ${buttonStatus === "success"
+              ? "bg-green-500"
+              : buttonStatus === "error"
+                ? "bg-red-600"
+                : "bg-[#bfa658] hover:bg-yellow-600"}`}
+          style={{ minHeight: 50, minWidth: 180 }}
+          disabled={buttonStatus === "loading"}
+        >
+          {buttonMsg}
+        </button>
+        {Object.keys(errors).length > 0 && (
+          <div className="mt-2 flex flex-col gap-1">
+            {Object.values(errors).map((err, i) => (
+              <span key={i} className="text-xs text-red-400 pl-2 font-bold">{err}</span>
+            ))}
+          </div>
+        )}
+      </form>
+    </section>
+  );
+}
