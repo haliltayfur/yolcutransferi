@@ -1,4 +1,3 @@
-// app/iletisim/iletisim.jsx
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
@@ -89,28 +88,25 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// KVKK Popup tam metinli, %70 genişlik, scrollable
+// Mesafeli Satış popup'ı (canlı olarak fetch eder)
 function PolicyPopup({ onClose, onConfirm }) {
-  // (Gerçekten kullanmak istediğin KVKK metniyle değiştir!)
-  const kvkkMetni = `
-6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) kapsamında, YolcuTransferi.com tarafından paylaştığınız kişisel veriler, yalnızca iletişim/rezervasyon süreçleri, müşteri memnuniyeti ve yasal yükümlülüklerin yerine getirilmesi amacıyla işlenmektedir. Verileriniz üçüncü kişilerle paylaşılmaz. Detaylı aydınlatma metnine web sitemizdeki KVKK sayfasından ulaşabilirsiniz.
+  const [html, setHtml] = useState("");
+  const [loading, setLoading] = useState(true);
 
-• Kişisel verileriniz, mevzuata uygun şekilde güvenli biçimde saklanır.
-• Kanuni zorunluluk harici hiçbir şekilde üçüncü kişiyle paylaşılmaz.
-• İstediğiniz zaman verilerinizin silinmesini talep edebilirsiniz.
-
-KVKK kapsamındaki tüm haklarınızı ve yükümlülüklerimizi okumak için aşağıya göz atabilirsiniz.
-—
-Aydınlatma Metni Özeti:
-1. Veri Sorumlusu: YolcuTransferi.com
-2. İşlenen Kişisel Veriler: Ad, soyad, telefon, e-posta, mesaj içerikleri, IP adresi.
-3. Amaç: Rezervasyon, iletişim, hizmet sunumu, hukuki zorunluluklar, müşteri memnuniyeti.
-4. Aktarım: Yasal yükümlülük haricinde üçüncü kişilere aktarılmaz.
-5. Saklama: Bilgileriniz makul süre boyunca sistemde tutulur, sonra silinir.
-6. Haklarınız: Kişisel verilerinizin işlenip işlenmediğini öğrenme, düzeltilmesini veya silinmesini talep etme, işleme itiraz etme.
-
-Tam metni https://yolcutransferi.com/kvkk adresinden okuyabilirsiniz.
-  `;
+  useEffect(() => {
+    setLoading(true);
+    fetch("https://yolcutransferi.com/mesafeli-satis")
+      .then(res => res.text())
+      .then(htmlStr => {
+        // İçerik kısmını çek, header ve footer'ı çıkar
+        const div = document.createElement("div");
+        div.innerHTML = htmlStr;
+        // content'in yolcutransferi.com'da <main> veya ana içerik <section> içinde olduğunu varsayıyoruz
+        let content = div.querySelector("main") || div.querySelector("section") || div;
+        setHtml(content.innerHTML);
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
@@ -118,9 +114,9 @@ Tam metni https://yolcutransferi.com/kvkk adresinden okuyabilirsiniz.
         className="relative rounded-2xl bg-white p-6 shadow-2xl overflow-hidden"
         style={{
           width: "70vw",
-          maxWidth: 700,
+          maxWidth: 900,
           minWidth: 260,
-          maxHeight: "95vh",
+          maxHeight: "94vh",
           paddingTop: 32,
         }}
       >
@@ -132,9 +128,9 @@ Tam metni https://yolcutransferi.com/kvkk adresinden okuyabilirsiniz.
         </button>
         <h2 className="text-2xl font-extrabold text-gray-900 mb-3 text-center">Politika ve Koşullar</h2>
         <div
-          className="overflow-y-auto text-sm text-gray-800 px-1 py-2 mb-5"
+          className="overflow-y-auto text-base text-gray-800 px-2 py-2 mb-5"
           style={{
-            maxHeight: "50vh",
+            maxHeight: "55vh",
             minHeight: 180,
             border: "1px solid #f3e7d0",
             borderRadius: 12,
@@ -142,9 +138,10 @@ Tam metni https://yolcutransferi.com/kvkk adresinden okuyabilirsiniz.
             scrollbarWidth: "thin",
           }}
         >
-          {kvkkMetni.split("\n").map((line, i) => (
-            <p key={i} style={{ marginBottom: 8 }}>{line}</p>
-          ))}
+          {loading
+            ? <div className="text-center py-10 text-lg text-gray-400">Yükleniyor...</div>
+            : <div dangerouslySetInnerHTML={{ __html: html }} />
+          }
         </div>
         <button
           onClick={() => { onConfirm(); onClose(); }}
@@ -153,17 +150,17 @@ Tam metni https://yolcutransferi.com/kvkk adresinden okuyabilirsiniz.
         >
           Onaylıyorum
         </button>
-      </div>
-      <style>{`
-        @media (max-width: 768px) {
-          .relative.rounded-2xl.bg-white.p-6.shadow-2xl.overflow-hidden {
-            width: 98vw !important;
-            min-width: 0 !important;
-            max-width: 98vw !important;
-            padding: 16px !important;
+        <style>{`
+          @media (max-width: 768px) {
+            .relative.rounded-2xl.bg-white.p-6.shadow-2xl.overflow-hidden {
+              width: 98vw !important;
+              min-width: 0 !important;
+              max-width: 98vw !important;
+              padding: 10px !important;
+            }
           }
-        }
-      `}</style>
+        `}</style>
+      </div>
     </div>
   );
 }
@@ -188,7 +185,6 @@ export default function IletisimForm() {
     }
   }, [popupKvkkConfirmed]);
 
-  // Dosya seçiminde yazı, uyarı, etiket yok.
   const handleEkChange = e => {
     const file = e.target.files[0];
     if (!file) { setForm(f => ({ ...f, ek: null })); return; }
@@ -208,7 +204,6 @@ export default function IletisimForm() {
     setForm(f => ({ ...f, ek: file }));
   };
 
-  // Diğer handlerlar (kısaltılmadı)
   const handlePhoneChange = (e) => {
     let val = e.target.value.replace(/\D/g, "");
     if (val.length > 11) val = val.slice(0, 11);
@@ -304,8 +299,6 @@ export default function IletisimForm() {
         </select>
         <textarea name="mesaj" placeholder="Mesajınız" value={form.mesaj} onChange={handleChange}
           className={`p-3 rounded-lg border ${isRealMsg(form.mesaj) ? "border-green-500" : form.mesaj ? "border-red-600" : "border-[#423c1c]"} bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658] transition`} minLength={15} required rows={3} />
-
-        {/* Dosya Ekle */}
         <input
           type="file"
           name="ek"
@@ -321,7 +314,6 @@ export default function IletisimForm() {
             marginBottom: 0,
           }}
         />
-
         <span className="text-sm text-gray-300 font-bold ml-1 mt-2">İletişim tercihinizi seçiniz</span>
         <div className="flex flex-row gap-3 w-full mb-2 flex-wrap">
           {ILETISIM_TERCIHLERI.map((item) => (
@@ -348,7 +340,6 @@ export default function IletisimForm() {
           ))}
         </div>
         {errors.iletisimTercihi && <span className="text-xs text-red-400 font-bold pl-2">{errors.iletisimTercihi}</span>}
-
         <div className="flex items-center gap-2 mt-1">
           <input
             type="checkbox"
@@ -371,7 +362,6 @@ export default function IletisimForm() {
           </span>
         </div>
         {errors.kvkkOnay && <span className="text-xs text-red-400 font-bold pl-2">{errors.kvkkOnay}</span>}
-
         <button
           type="submit"
           className={`font-bold py-3 px-8 rounded-xl text-lg mt-2 w-full shadow transition text-black
@@ -395,7 +385,6 @@ export default function IletisimForm() {
           </div>
         )}
       </form>
-      {/* Sosyal medya ve iletişim bilgileri */}
       <div className="w-full border-t border-[#bfa658] mt-10 pt-6">
         <div className="flex flex-wrap gap-4 mb-3 justify-center">
           <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="WhatsApp"><FaWhatsapp size={28} /></a>
@@ -408,7 +397,6 @@ export default function IletisimForm() {
           <span className="flex items-center gap-2"><FaMapMarkerAlt className="opacity-80" />Ümraniye, İnkılap Mah. Plazalar Bölgesi</span>
         </div>
       </div>
-      {/* Konum haritası */}
       <div className="w-full flex justify-center mt-8">
         <div style={{ width: "100%", maxWidth: "900px", height: "210px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
           <iframe
@@ -422,7 +410,6 @@ export default function IletisimForm() {
           ></iframe>
         </div>
       </div>
-      {/* Politika ve koşullar popup'u */}
       {popupOpen && (
         <PolicyPopup
           onClose={() => setPopupOpen(false)}
