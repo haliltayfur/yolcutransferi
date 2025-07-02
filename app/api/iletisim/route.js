@@ -1,64 +1,71 @@
+// /app/api/iletisim/route.js
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Resend } from "resend";
 
+// ENV'DEN KEY'i çek
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req) {
   try {
+    // 1) JSON al
     const body = await req.json();
-    const { ad, soyad, telefon, email, neden, mesaj, iletisimTercihi, kvkkOnay } = body;
 
-    if (!ad || !soyad || !telefon || !email || !neden || !mesaj || !iletisimTercihi || !kvkkOnay)
-      return NextResponse.json({ error: "Eksik alanlar var." }, { status: 400 });
+    // VALIDASYON: KVKK ve zorunlu alanlar
+    if (!body.ad || !body.soyad || !body.telefon || !body.email || !body.mesaj || !body.iletisimTercihi || !body.kvkkOnay) {
+      return NextResponse.json({ error: "Lütfen tüm zorunlu alanları doldurun." }, { status: 400 });
+    }
 
-    // Kayıt No Üret
-    const now = new Date();
-    const dateStr = `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}`;
+    // 2) DB'ye kayıt at
     const db = await connectToDatabase();
+    const now = new Date();
+    const dateStr = `${String(now.getDate()).padStart(2,"0")}${String(now.getMonth()+1).padStart(2,"0")}${now.getFullYear()}`;
     const countToday = await db.collection("iletisimForms").countDocuments({
       createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) }
     });
-    const kayitNo = `iletisim${dateStr}_${String(countToday + 1).padStart(5, "0")}`;
+    const kayitNo = `iletisim${dateStr}_${String(countToday+1).padStart(5,"0")}`;
 
-    // DB'ye Yaz
     const yeniKayit = {
-      ad, soyad, telefon, email, neden, mesaj, iletisimTercihi,
-      kvkkOnay: !!kvkkOnay,
-      kayitNo,
+      ...body,
+      createdAt: now,
       kaldirildi: false,
-      createdAt: new Date()
+      kayitNo,
+      kvkkOnay: body.kvkkOnay === "true" || body.kvkkOnay === true
     };
     await db.collection("iletisimForms").insertOne(yeniKayit);
 
-    // Adminlere Mail
+    // 3) Müşteriye onay maili
+    await resend.emails.send({
+      from: "YolcuTransferi <info@yolcutransferi.com>",
+      to: [body.email],
+      subject: "Yolcu Transferi İletişim",
+      html: `<b>${body.neden || ""}</b> konulu mesajınızı uzman ekibimize ilettik.<br/>
+             Tercih ettiğiniz gibi size <b>${body.iletisimTercihi}</b> üzerinden ulaşacağız.<br/><br/>
+             <b>Kayıt No:</b> ${kayitNo}<br/>
+             <b>Mesajınız:</b><br/>
+             <div style="border:1px solid #ffeec2;border-radius:8px;padding:8px 16px;margin:8px 0;color:#000;background:#fff8e1">
+             ${body.mesaj.replace(/\n/g, "<br/>")}
+             </div>
+             <br/>
+             7/24 VIP Yolcu Transferi için Yolcutransferi.com olarak her zaman yanınızdayız.`
+    });
+
+    // 4) Admin ve byhalil'e info maili (KISA & KURUMSAL)
     await resend.emails.send({
       from: "YolcuTransferi <info@yolcutransferi.com>",
       to: ["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"],
       subject: "Yeni İletişim Mesajı",
-      html: `<b>Ad Soyad:</b> ${ad} ${soyad}<br/>
-        <b>Telefon:</b> ${telefon}<br/>
-        <b>E-posta:</b> ${email}<br/>
-        <b>Mesaj:</b> ${mesaj}<br/>
-        <b>İletişim Nedeni:</b> <b>${neden}</b><br/>
-        <b>Tercih:</b> <b>${iletisimTercihi}</b><br/>
-        <b>KVKK Onay:</b> ${kvkkOnay ? "Evet" : "Hayır"}<br/>
-        <b>Kayıt No:</b> ${kayitNo}`
-    });
-
-    // Müşteriye Mail
-    await resend.emails.send({
-      from: "YolcuTransferi <info@yolcutransferi.com>",
-      to: [email],
-      subject: "Yolcu Transferi İletişim",
-      html: `<b>${neden}</b> konulu mesajınızı ekibimize ilettik.<br/>
-        Tercih ettiğiniz gibi size <b>${iletisimTercihi}</b> üzerinden ulaşacağız.<br/>
-        <br/>
-        <b>Kayıt No:</b> ${kayitNo}<br/>
-        <b>Mesajınız:</b><br/>
-        <div style="background:#f7f3e4;padding:8px 12px;border-radius:10px;border:1px solid #ede5bb;color:#3d3621;">${mesaj}</div>
-        <br/>
-        7/24 VIP Yolcu Transferi için YolcuTransferi.com olarak her zaman yanınızdayız.`
+      html: `<b>Ad Soyad:</b> ${body.ad} ${body.soyad || ""}<br/>
+             <b>Telefon:</b> ${body.telefon}<br/>
+             <b>E-posta:</b> ${body.email}<br/>
+             <b>İletişim Nedeni:</b> ${body.neden}<br/>
+             <b>Tercih:</b> ${body.iletisimTercihi}<br/>
+             <b>Kayıt No:</b> ${kayitNo}<br/>
+             <b>Mesaj:</b><br/>
+             <div style="border:1px solid #ffeec2;border-radius:8px;padding:8px 16px;margin:8px 0;color:#000;background:#fff8e1">
+             ${body.mesaj.replace(/\n/g, "<br/>")}
+             </div>
+             <b>KVKK Onay:</b> ${body.kvkkOnay ? "Evet" : "Hayır"}<br/>`
     });
 
     return NextResponse.json({ success: true, kayitNo });
