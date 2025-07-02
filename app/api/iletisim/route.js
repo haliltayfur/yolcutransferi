@@ -1,3 +1,4 @@
+// app/api/iletisim/route.js
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Resend } from "resend";
@@ -5,19 +6,20 @@ import formidable from "formidable";
 import { promises as fs } from "fs";
 import path from "path";
 
+// Not: Next 13/14'te edge runtime veya config export etmeyin!
 const UPLOAD_ROOT = path.join(process.cwd(), "public", "ekler", "iletisim");
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req) {
   try {
-    console.log("POST /api/iletisim çağrıldı");
+    // Form-data'yı ayrıştır
     const form = formidable({
       multiples: false,
       maxFileSize: 10 * 1024 * 1024,
       filter: part => {
         if (!part.originalFilename) return false;
         const ext = path.extname(part.originalFilename || "").toLowerCase();
-        return [".jpg",".jpeg",".png",".pdf",".doc",".docx",".xls",".xlsx",".zip"].includes(ext);
+        return [".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".zip"].includes(ext);
       },
       keepExtensions: true
     });
@@ -28,10 +30,12 @@ export async function POST(req) {
       })
     );
 
+    // Alanları topla
     const body = Object.fromEntries(
       Object.entries(data.fields).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])
     );
 
+    // Ek dosya kaydet
     let ekYolu = "";
     if (data.files.ek) {
       const file = data.files.ek;
@@ -39,20 +43,22 @@ export async function POST(req) {
       const targetDir = path.join(UPLOAD_ROOT, today);
       await fs.mkdir(targetDir, { recursive: true });
       const ext = path.extname(file.originalFilename || "").toLowerCase();
-      const newName = `${Date.now()}_${Math.random().toString(36).substr(2,6)}${ext}`;
+      const newName = `${Date.now()}_${Math.random().toString(36).substr(2, 6)}${ext}`;
       const dest = path.join(targetDir, newName);
       await fs.copyFile(file.filepath, dest);
       ekYolu = `/ekler/iletisim/${today}/${newName}`;
     }
 
+    // Kayıt No üret
     const db = await connectToDatabase();
     const now = new Date();
-    const dateStr = `${String(now.getDate()).padStart(2,"0")}${String(now.getMonth()+1).padStart(2,"0")}${now.getFullYear()}`;
+    const dateStr = `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}`;
     const countToday = await db.collection("iletisimForms").countDocuments({
       createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) }
     });
-    const kayitNo = `iletisim${dateStr}_${String(countToday+1).padStart(5,"0")}`;
+    const kayitNo = `iletisim${dateStr}_${String(countToday + 1).padStart(5, "0")}`;
 
+    // Kaydı DB'ye yaz
     const yeniKayit = {
       ...body,
       createdAt: new Date(),
@@ -61,11 +67,9 @@ export async function POST(req) {
       ek: ekYolu,
       kvkkOnay: body.kvkkOnay === "true" || body.kvkkOnay === true
     };
-
-    console.log("Veritabanına ekleniyor:", yeniKayit);
-
     await db.collection("iletisimForms").insertOne(yeniKayit);
 
+    // E-posta bildirimi
     let ekSatiri = ekYolu
       ? `<b>Ek Dosya:</b> <a href="https://yolcutransferi.com${ekYolu}" target="_blank">Dosyayı Görüntüle / İndir</a><br/>`
       : "";
