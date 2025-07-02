@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// Yardımcı fonksiyonlar (kısaltılmadı)
 function isRealEmail(val) {
   if (!val) return false;
   const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
@@ -35,7 +34,6 @@ function formatDuration(ms) {
   const sec = totalSec % 60;
   return `${min > 0 ? min + "dk " : ""}${sec}sn`;
 }
-
 function useAkilliRateLimit() {
   const [blocked, setBlocked] = useState(false);
   const [msg, setMsg] = useState("");
@@ -66,7 +64,6 @@ function useAkilliRateLimit() {
     }, 1000);
     return () => clearInterval(id);
   }, []);
-
   function kaydet() {
     let now = Date.now();
     let log = [];
@@ -77,7 +74,6 @@ function useAkilliRateLimit() {
   }
   return [blocked, msg, remaining, kaydet];
 }
-
 const ILETISIM_NEDENLERI = [
   "Bilgi Talebi", "Transfer Rezervasyonu", "Teklif Almak İstiyorum",
   "İş Birliği / Ortaklık", "Geri Bildirim / Öneri", "Şikayet Bildirimi", "Diğer"
@@ -88,22 +84,16 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// Mesafeli Satış popup'ı (canlı olarak fetch eder)
 function PolicyPopup({ onClose, onConfirm }) {
   const [html, setHtml] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    fetch("https://yolcutransferi.com/mesafeli-satis")
+    fetch("/api/mesafeli-icerik")
       .then(res => res.text())
-      .then(htmlStr => {
-        // İçerik kısmını çek, header ve footer'ı çıkar
-        const div = document.createElement("div");
-        div.innerHTML = htmlStr;
-        // content'in yolcutransferi.com'da <main> veya ana içerik <section> içinde olduğunu varsayıyoruz
-        let content = div.querySelector("main") || div.querySelector("section") || div;
-        setHtml(content.innerHTML);
+      .then(content => {
+        setHtml(content);
         setLoading(false);
       });
   }, []);
