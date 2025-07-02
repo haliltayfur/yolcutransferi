@@ -1,3 +1,4 @@
+// app/api/iletisim/route.js
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Resend } from "resend";
@@ -5,19 +6,14 @@ import formidable from "formidable";
 import { promises as fs } from "fs";
 import path from "path";
 
-// uploads dizini: public/ekler/iletisim/YYYY-MM-DD/
 const UPLOAD_ROOT = path.join(process.cwd(), "public", "ekler", "iletisim");
-
-// *** DİKKAT: export const config satırı ARTIK YOK! ****
-
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req) {
   try {
-    // 1. Dosya ve alanları ayıkla (form-data)
     const form = formidable({
       multiples: false,
-      maxFileSize: 10 * 1024 * 1024, // 10 MB
+      maxFileSize: 10 * 1024 * 1024,
       filter: part => {
         if (!part.originalFilename) return false;
         const ext = path.extname(part.originalFilename || "").toLowerCase();
@@ -32,19 +28,16 @@ export async function POST(req) {
       })
     );
 
-    // 2. Alanlar
     const body = Object.fromEntries(
       Object.entries(data.fields).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])
     );
 
-    // 3. Ek dosya işleme ve kaydetme (günlük klasör)
     let ekYolu = "";
     if (data.files.ek) {
       const file = data.files.ek;
-      const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+      const today = new Date().toISOString().slice(0, 10);
       const targetDir = path.join(UPLOAD_ROOT, today);
       await fs.mkdir(targetDir, { recursive: true });
-      // Benzersiz isim: timestamp_randomuzantı
       const ext = path.extname(file.originalFilename || "").toLowerCase();
       const newName = `${Date.now()}_${Math.random().toString(36).substr(2,6)}${ext}`;
       const dest = path.join(targetDir, newName);
@@ -52,7 +45,6 @@ export async function POST(req) {
       ekYolu = `/ekler/iletisim/${today}/${newName}`;
     }
 
-    // 4. Yeni kayıt numarası üret (iletisimYYYYMMDD_00001)
     const db = await connectToDatabase();
     const now = new Date();
     const dateStr = `${String(now.getDate()).padStart(2,"0")}${String(now.getMonth()+1).padStart(2,"0")}${now.getFullYear()}`;
@@ -61,7 +53,6 @@ export async function POST(req) {
     });
     const kayitNo = `iletisim${dateStr}_${String(countToday+1).padStart(5,"0")}`;
 
-    // 5. Kayıt ve mail için hazırlık
     const yeniKayit = {
       ...body,
       createdAt: new Date(),
@@ -72,7 +63,7 @@ export async function POST(req) {
     };
     await db.collection("iletisimForms").insertOne(yeniKayit);
 
-    // 6. E-posta gönder
+    // E-posta gönderimi (aynen senin kodun)
     let ekSatiri = ekYolu
       ? `<b>Ek Dosya:</b> <a href="https://yolcutransferi.com${ekYolu}" target="_blank">Dosyayı Görüntüle / İndir</a><br/>`
       : "";
