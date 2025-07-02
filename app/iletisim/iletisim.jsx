@@ -1,113 +1,94 @@
-// app/iletisim/iletisim.jsx
 "use client";
-import React, { useState, useRef } from "react";
-import { FaWhatsapp, FaPhone, FaEnvelope, FaPaperclip } from "react-icons/fa";
+import React, { useRef, useState } from "react";
 
-const ILETISIM_TERCIHLERI = [
-  { label: "WhatsApp", value: "WhatsApp", icon: <FaWhatsapp className="text-[#25d366] mr-1" size={16} /> },
-  { label: "Telefon", value: "Telefon", icon: <FaPhone className="text-[#51A5FB] mr-1" size={16} /> },
-  { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
-];
-
-export default function IletisimForm() {
-  const [form, setForm] = useState({ ad: "", soyad: "", telefon: "", email: "", neden: "Bilgi Talebi", mesaj: "", iletisimTercihi: "", kvkkOnay: false, ek: null });
-  const [errors, setErrors] = useState({});
+export default function Iletisim() {
+  const fileInput = useRef(null);
+  const [form, setForm] = useState({
+    ad: "", soyad: "", telefon: "", email: "", neden: "Bilgi Talebi", mesaj: "",
+    iletisimTercihi: "", kvkkOnay: false, ek: null
+  });
+  const [selectedFileName, setSelectedFileName] = useState("");
   const [buttonMsg, setButtonMsg] = useState("Mesajı Gönder");
-  const [buttonStatus, setButtonStatus] = useState("normal");
-  const [popupOpen, setPopupOpen] = useState(false);
-  const fileInput = useRef();
+  const [errors, setErrors] = useState({});
 
-  // ... validation fonksiyonları (kısaltıldı, yukarıdan aynen alabilirsin)
+  // Yardımcı validasyonlar eklenebilir (isRealName, isRealEmail vs.)
+
+  const handleEkChange = e => {
+    const file = e.target.files[0];
+    if (!file) { setForm(f => ({ ...f, ek: null })); setSelectedFileName(""); return; }
+    setForm(f => ({ ...f, ek: file }));
+    setSelectedFileName(file.name);
+  };
 
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
     setForm(f => ({ ...f, [name]: type === "checkbox" ? checked : value }));
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // ... validation check (kısaltıldı)
+    setButtonMsg("Gönderiliyor...");
     const formData = new FormData();
     Object.entries(form).forEach(([key, val]) => {
       if (key === "ek" && val) formData.append("ek", val);
       else if (key !== "ek") formData.append(key, val);
     });
-    setButtonStatus("loading"); setButtonMsg("Gönderiliyor...");
+
     try {
-      await fetch("/api/iletisim", { method: "POST", body: formData });
-      setButtonStatus("success"); setButtonMsg("Teşekkürler!");
+      const res = await fetch("/api/iletisim", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Sunucu hatası");
+      setButtonMsg("Teşekkürler, mesajınız alındı.");
       setForm({ ad: "", soyad: "", telefon: "", email: "", neden: "Bilgi Talebi", mesaj: "", iletisimTercihi: "", kvkkOnay: false, ek: null });
+      setSelectedFileName("");
       if (fileInput.current) fileInput.current.value = "";
-      setTimeout(() => { setButtonMsg("Mesajı Gönder"); setButtonStatus("normal"); }, 4000);
     } catch {
-      setButtonStatus("error"); setButtonMsg("Sunucu hatası");
+      setButtonMsg("Sunucu hatası, tekrar deneyin.");
     }
+    setTimeout(() => setButtonMsg("Mesajı Gönder"), 6000);
   };
 
   return (
-    <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] mt-16 mb-10">
+    <section className="w-full max-w-3xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] mt-16 mb-10">
       <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-1 text-center">İletişim</h1>
       <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3 bg-black/70 rounded-2xl p-6 border border-[#bfa658]/60 shadow" encType="multipart/form-data">
-        {/* ... Alanlar, yukarıdan kopyala */}
-        {/* Dosya Seç Butonu */}
-        <div className="flex items-center gap-2">
-          <input
-            type="file"
-            name="ek"
-            ref={fileInput}
-            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.zip"
-            onChange={e => setForm(f => ({ ...f, ek: e.target.files[0] }))}
-            className="hidden"
-            id="ek-dosya"
-          />
-          <label htmlFor="ek-dosya" className="flex items-center gap-2 px-3 py-2 bg-[#bfa658] rounded-md text-black text-sm font-bold cursor-pointer">
-            <FaPaperclip /> Dosya Seç (opsiyonel)
-          </label>
+        <div className="flex gap-2">
+          <input type="text" name="ad" placeholder="Ad" value={form.ad} onChange={handleChange} className="p-3 rounded-lg border flex-1 bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658]" minLength={3} required />
+          <input type="text" name="soyad" placeholder="Soyad" value={form.soyad} onChange={handleChange} className="p-3 rounded-lg border flex-1 bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658]" minLength={3} required />
         </div>
-        {/* İletişim Tercihleri */}
+        <div className="flex gap-2">
+          <input type="tel" name="telefon" placeholder="05xx xxx xx xx" value={form.telefon} onChange={handleChange} className="p-3 rounded-lg border flex-1 bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658]" required />
+          <input type="email" name="email" placeholder="E-posta" value={form.email} onChange={handleChange} className="p-3 rounded-lg border flex-1 bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658]" required />
+        </div>
+        <select name="neden" value={form.neden} onChange={handleChange} className="p-3 rounded-lg border bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658]" required>
+          <option>Bilgi Talebi</option>
+          <option>Transfer Rezervasyonu</option>
+          <option>Teklif Almak İstiyorum</option>
+          <option>İş Birliği / Ortaklık</option>
+          <option>Geri Bildirim / Öneri</option>
+          <option>Şikayet Bildirimi</option>
+          <option>Diğer</option>
+        </select>
+        <textarea name="mesaj" placeholder="Mesajınız" value={form.mesaj} onChange={handleChange} className="p-3 rounded-lg border bg-[#181611] text-[#e7e7e7] focus:border-[#bfa658]" minLength={10} required rows={3} />
+        <div className="flex items-center gap-2 mb-1">
+          <input type="file" name="ek" ref={fileInput} accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.zip" onChange={handleEkChange} className="w-48 text-sm block" style={{fontSize:"14px",padding:"4px"}} />
+          {selectedFileName && <span className="text-xs text-gray-300">{selectedFileName}</span>}
+        </div>
         <span className="text-sm text-gray-300 font-bold ml-1 mt-2">İletişim tercihinizi seçiniz</span>
         <div className="flex flex-row gap-3 w-full mb-2 flex-wrap">
-          {ILETISIM_TERCIHLERI.map(item => (
-            <label key={item.value}
-              className={`flex items-center gap-1 px-4 py-1 rounded-full border font-bold text-xs cursor-pointer
-                select-none shadow-md transition
-                ${form.iletisimTercihi === item.value
-                  ? "bg-black border-[#FFD700] text-[#FFD700]"
-                  : "bg-black border-[#bfa658] text-white hover:bg-gray-900 hover:border-gray-400"}`}
-              style={{ minWidth: 90, justifyContent: 'center' }}>
-              <input type="radio" name="iletisimTercihi" value={item.value} checked={form.iletisimTercihi === item.value} onChange={handleChange} className="hidden" />
-              {item.icon}{item.label}
+          {["WhatsApp", "Telefon", "E-posta"].map((val, i) => (
+            <label key={val} className={`flex items-center gap-1 px-4 py-1 rounded-full border font-bold text-xs cursor-pointer ${form.iletisimTercihi === val ? "bg-black border-[#FFD700] text-[#FFD700]" : "bg-black border-[#bfa658] text-white hover:bg-gray-900 hover:border-gray-400"}`}>
+              <input type="radio" name="iletisimTercihi" value={val} checked={form.iletisimTercihi === val} onChange={handleChange} className="hidden" />
+              {val}
             </label>
           ))}
         </div>
-        {/* KVKK Link & Onay */}
         <div className="flex items-center gap-2 mt-1">
           <input type="checkbox" name="kvkkOnay" checked={form.kvkkOnay} onChange={handleChange} required className="accent-[#FFD700] w-4 h-4" />
-          <button type="button" className="underline text-[#FFD700] hover:text-[#bfa658] bg-transparent border-0 outline-none cursor-pointer p-0" onClick={() => setPopupOpen(true)}>
-            YolcuTransferi.com politika ve koşullarını
-          </button>
-          <span className="text-xs text-gray-200">okudum, kabul ediyorum.</span>
+          <span className="text-xs text-gray-200">
+            <a href="/kvkk" className="underline text-[#FFD700] hover:text-[#bfa658]" target="_blank" rel="noopener noreferrer">YolcuTransferi.com politika ve koşullarını</a> okudum, kabul ediyorum.
+          </span>
         </div>
-        {/* Popup */}
-        {popupOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => setPopupOpen(false)}>
-            <div className="bg-[#19160a] rounded-2xl border-2 border-[#bfa658] shadow-2xl p-6 max-w-lg w-full" onClick={e => e.stopPropagation()}>
-              <h2 className="text-2xl font-bold mb-4 text-[#bfa658]">Politika ve Koşullar</h2>
-              <div className="text-[#ffeec2] text-sm max-h-96 overflow-y-auto">
-                {/* Burada sitenden fetch veya direkt html gömebilirsin */}
-                YolcuTransferi.com Mesafeli Satış Sözleşmesi ve KVKK metni buraya gelecek.
-              </div>
-              <button onClick={() => setPopupOpen(false)} className="mt-4 bg-[#bfa658] text-black px-6 py-2 rounded font-bold shadow">Kapat</button>
-            </div>
-          </div>
-        )}
-        <button type="submit"
-          className={`font-bold py-3 px-8 rounded-xl text-lg mt-2 w-full shadow transition text-black
-            ${buttonStatus === "success" ? "bg-green-500" : buttonStatus === "error" ? "bg-red-600" : "bg-[#bfa658] hover:bg-yellow-600"}`}
-          style={{ minHeight: 50, minWidth: 180 }}
-          disabled={buttonStatus === "loading"}>
-          {buttonMsg}
-        </button>
+        <button type="submit" className="font-bold py-3 px-8 rounded-xl text-lg mt-2 w-full shadow text-black bg-[#bfa658] hover:bg-yellow-600">{buttonMsg}</button>
       </form>
     </section>
   );
