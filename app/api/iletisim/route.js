@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Resend } from "resend";
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req) {
@@ -8,12 +9,7 @@ export async function POST(req) {
     const body = await req.json();
     const db = await connectToDatabase();
 
-    const now = new Date();
-    const dateStr = `${String(now.getDate()).padStart(2,"0")}${String(now.getMonth()+1).padStart(2,"0")}${now.getFullYear()}`;
-    const countToday = await db.collection("iletisimForms").countDocuments({
-      createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) }
-    });
-    const kayitNo = `iletisim${dateStr}_${String(countToday+1).padStart(5,"0")}`;
+    const kayitNo = "iletisim_" + Date.now();
 
     const yeniKayit = {
       ...body,
@@ -25,7 +21,7 @@ export async function POST(req) {
 
     await db.collection("iletisimForms").insertOne(yeniKayit);
 
-    // E-posta gönder
+    // Mail gönder
     await resend.emails.send({
       from: "YolcuTransferi <info@yolcutransferi.com>",
       to: ["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"],
