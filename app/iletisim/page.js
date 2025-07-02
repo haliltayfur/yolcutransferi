@@ -1,4 +1,4 @@
-// app/iletisim/page.js
+
 "use client";
 import React from "react";
 import IletisimForm from "./iletisim";
@@ -10,3 +10,4 @@ export default function Page() {
     </main>
   );
 }
+// app/iletisim/page.js
