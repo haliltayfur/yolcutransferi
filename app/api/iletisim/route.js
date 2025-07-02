@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req) {
   try {
-    const body = await req.json(); // Dosya yoksa, JSON olarak alıyoruz
+    const body = await req.json();
     const db = await connectToDatabase();
 
     const now = new Date();
