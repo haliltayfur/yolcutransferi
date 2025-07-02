@@ -1,25 +1,34 @@
+// app/admin/layout.js
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import AdminSidebar from "@/components/AdminSidebar";
 import { FaBars } from "react-icons/fa";
 
+// Basit Auth Kontrolü: localStorage'a "admin_auth" = "ok" olarak bakıyor
+// Gerçek projede bunu cookie, JWT veya session ile yapmalısın!
+function useAdminAuth() {
+  const router = useRouter();
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isLogged = localStorage.getItem("admin_auth") === "ok";
+      if (!isLogged) router.replace("/admin/login"); // Eğer giriş yoksa login'e yönlendir
+    }
+  }, [router]);
+}
+
 export default function AdminLayout({ children }) {
+  useAdminAuth(); // Her admin sayfasında çalışır
+
   const [mobileMenu, setMobileMenu] = useState(false);
   const mobileMenuRef = useRef();
 
-  // Menüyü açıkken arka plan scroll'unu engelle
   useEffect(() => {
-    if (mobileMenu) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    if (mobileMenu) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
   }, [mobileMenu]);
 
-  // Menü açıkken dışarı tıklayınca kapat
   useEffect(() => {
     function handleClick(e) {
       if (
@@ -72,7 +81,6 @@ export default function AdminLayout({ children }) {
       <div className="flex flex-col flex-1 md:ml-64 min-h-screen">
         <header className="w-full py-4 px-6 flex justify-between items-center border-b border-[#bfa658] bg-black/90 shadow z-10 sticky top-0">
           <span className="text-2xl font-extrabold tracking-wide text-[#bfa658]">YolcuTransferi Admin Panel</span>
-          {/* Buraya kullanıcı adı/avatar ekleyebilirsin */}
           <span className="text-[#ffeec2] font-semibold text-lg hidden md:block">Admin</span>
         </header>
         <main className="flex-1 p-4 md:p-8">{children}</main>
