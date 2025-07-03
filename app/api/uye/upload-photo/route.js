@@ -1,31 +1,38 @@
 // app/api/uye/upload-photo/route.js
 import { NextResponse } from "next/server";
-import path from "path";
-import { promises as fs } from "fs";
-
-// ZORUNLU: Vercel'de dosya sistemine erişim YOK! Sadece yerel testte /public'e yazabilirsin.
-// Gerçek deploy için bir bulut servisine (S3 vb) upload etmelisin. Ama local geliştirme ve demo için aşağıdaki kod çalışır.
+import { put } from "@vercel/blob";
+import { nanoid } from "nanoid";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request) {
   const formData = await request.formData();
   const file = formData.get("file");
-  const filename = formData.get("filename");
+  const filename = formData.get("filename"); // ör: Uye_Musteri030724_10001.png
 
   if (!file || !filename) {
     return NextResponse.json({ success: false, error: "Dosya veya isim eksik." });
   }
 
-  // Okunan dosyayı /public altına yaz
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
+  // Uygun mime/type kontrolü (image)
+  if (!file.type.startsWith("image/")) {
+    return NextResponse.json({ success: false, error: "Yalnızca resim dosyası yüklenebilir." });
+  }
 
-  const filePath = path.join(process.cwd(), "public", filename);
+  // Vercel Blob'a upload (üye numarası ile sabit isim)
+  // Aynı isimli dosya yüklenirse eskiyi siler (üzerine yazar!)
   try {
-    await fs.writeFile(filePath, buffer);
-    return NextResponse.json({ success: true, photoUrl: `/${filename}` });
+    const blob = await put(
+      `uyeresimleri/${filename}`,
+      file,
+      {
+        access: "public",
+        addRandomSuffix: false, // İsim sabit kalsın, hep aynı üyeno.png
+      }
+    );
+    // blob.url: https://<deploy-id>.blob.vercel-storage.com/uyeresimleri/filename.png
+    return NextResponse.json({ success: true, photoUrl: blob.url });
   } catch (e) {
-    return NextResponse.json({ success: false, error: "Dosya kaydedilemedi." });
+    return NextResponse.json({ success: false, error: "Blob upload hatası: " + e.message });
   }
 }
