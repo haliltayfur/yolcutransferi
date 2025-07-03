@@ -1,3 +1,4 @@
+// components/Header.jsx
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -5,6 +6,7 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
+// Menüdeki sayfalar
 const menuItems = [
   { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
@@ -18,6 +20,9 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const burgerRef = useRef(null);
   const menuBoxRef = useRef(null);
+
+  // KULLANICI STATE
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     function handleClick(e) {
@@ -34,10 +39,27 @@ export default function Header() {
     return () => window.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
 
+  // GİRİŞ KONTROL
+  useEffect(() => {
+    try {
+      const u = JSON.parse(localStorage.getItem("user_info"));
+      if (u) setUser(u);
+      else setUser(null);
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
+  function handleLogout() {
+    localStorage.removeItem("user_info");
+    setUser(null);
+    window.location.href = "/";
+  }
+
   return (
     <header className="w-full bg-black shadow-2xl z-40 border-b border-[#FFD70044]">
       <div className="flex items-center justify-between px-8 lg:px-20 py-2 w-full" style={{ minHeight: 90 }}>
-        {/* Logo büyük */}
+        {/* Logo */}
         <Link href="/" className="flex items-center min-w-0" style={{ height: "80px" }}>
           <Image
             src="/LOGO.png"
@@ -53,6 +75,7 @@ export default function Header() {
             }}
           />
         </Link>
+
         {/* Menü: %10 daha büyük font/padding */}
         <nav className="hidden lg:flex flex-1 justify-center items-center">
           <div className="flex items-center gap-[28px]">
@@ -67,20 +90,45 @@ export default function Header() {
             ))}
           </div>
         </nav>
-        {/* Giriş/Üye Ol Butonları ve Sosyal */}
+
+        {/* Giriş/Üye Ol veya Kullanıcı */}
         <div className="hidden lg:flex items-center gap-3 ml-5">
-          <Link
-            href="/login"
-            className="header-btn-outline"
-          >
-            Giriş Yap
-          </Link>
-          <Link
-            href="/register"
-            className="header-btn"
-          >
-            Üye Ol
-          </Link>
+          {!user ? (
+            <>
+              <Link href="/login" className="header-btn-outline">
+                Giriş Yap
+              </Link>
+              <Link href="/register" className="header-btn">
+                Üye Ol
+              </Link>
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => window.location.href = "/profil"}
+                className="outline-none focus:outline-none"
+                title="Profil"
+                style={{ display: "flex", alignItems: "center", border: "none", background: "none" }}
+              >
+                <img
+                  src={user.photo || "/profile-default.png"}
+                  alt="Profil"
+                  className="w-9 h-9 rounded-full border-2 border-yellow-500 object-cover mr-2"
+                  style={{ background: "#333" }}
+                />
+              </button>
+              <span className="font-semibold text-yellow-300 mr-2">
+                Hoşgeldin, {user.ad || user.email}
+              </span>
+              <button
+                className="ml-2 text-sm text-gray-400 underline"
+                onClick={handleLogout}
+              >
+                Çıkış Yap
+              </button>
+            </div>
+          )}
+          {/* Sosyal Medya */}
           <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="header-social ml-2">
             <FaWhatsapp className="w-7 h-7" />
           </a>
@@ -91,6 +139,7 @@ export default function Header() {
             <SiX className="w-7 h-7" />
           </a>
         </div>
+
         {/* Hamburger - sadece mobilde */}
         <button
           ref={burgerRef}
@@ -123,20 +172,45 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
-              <Link
-                href="/login"
-                className="header-btn-outline mt-6"
-                onClick={() => setMenuOpen(false)}
-              >
-                Giriş Yap
-              </Link>
-              <Link
-                href="/register"
-                className="header-btn mt-3"
-                onClick={() => setMenuOpen(false)}
-              >
-                Üye Ol
-              </Link>
+              {!user ? (
+                <>
+                  <Link
+                    href="/login"
+                    className="header-btn-outline mt-6"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Giriş Yap
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="header-btn mt-3"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Üye Ol
+                  </Link>
+                </>
+              ) : (
+                <div className="flex flex-col gap-2 mt-4">
+                  <button
+                    onClick={() => { setMenuOpen(false); window.location.href = "/profil"; }}
+                    className="flex items-center gap-2 text-yellow-300 font-semibold hover:underline"
+                  >
+                    <img
+                      src={user.photo || "/profile-default.png"}
+                      alt="Profil"
+                      className="w-8 h-8 rounded-full border-2 border-yellow-500 object-cover"
+                      style={{ background: "#333" }}
+                    />
+                    Profilim
+                  </button>
+                  <button
+                    onClick={() => { setMenuOpen(false); handleLogout(); }}
+                    className="text-gray-400 underline text-sm mt-1 text-left"
+                  >
+                    Çıkış Yap
+                  </button>
+                </div>
+              )}
               <div className="flex items-center gap-2 mt-7 justify-center">
                 <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="header-social">
                   <FaWhatsapp className="w-7 h-7" />
@@ -227,3 +301,4 @@ export default function Header() {
     </header>
   );
 }
+// components/Header.jsx
