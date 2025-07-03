@@ -6,7 +6,7 @@ import AdminSidebar from "@/components/AdminSidebar";
 import { FaBars } from "react-icons/fa";
 
 export default function AdminLayout({ children }) {
-  const isAuth = useAdminAuth(); // yetki kontrolünü bekle
+  const { loading, isAuth } = useAdminAuth();
 
   const [mobileMenu, setMobileMenu] = useState(false);
   const mobileMenuRef = useRef();
@@ -26,7 +26,8 @@ export default function AdminLayout({ children }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [mobileMenu]);
 
-  if (!isAuth) return null; // yetki tamamlanana kadar hiçbir şey gösterme
+  if (loading) return null;  // İlk kontrol bitene kadar hiçbir şey gösterme
+  if (!isAuth) return null;  // Yetkisiz ise zaten yönlendirme yapılır
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-black via-[#19160a] to-[#282314]">
