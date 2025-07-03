@@ -34,5 +34,6 @@ export async function POST(req) {
   return NextResponse.json({ success: true });
 }
 
-// Export kodları testte görmek için (prod'da silin!)
-export { codes };
+// --- DİKKAT ---
+// "export { codes };" satırını kaldırdım!
+// Build'ın geçmesi için başka hiçbir export olmamalı.
