@@ -1,6 +1,6 @@
 //app/api/admin/auth/verify-code/route.js
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
+import { connectToDatabase } from "@/lib/mongodb"; // senin kodun
 
 export async function POST(req) {
   const { email, code } = await req.json();
@@ -17,6 +17,7 @@ export async function POST(req) {
     await db.collection("admin_codes").deleteOne({ email });
     return NextResponse.json({ success: false, error: "Kodun süresi dolmuş." }, { status: 400 });
   }
+  // Kod doğrulandıktan sonra sil
   await db.collection("admin_codes").deleteOne({ email });
   return NextResponse.json({ success: true });
 }
