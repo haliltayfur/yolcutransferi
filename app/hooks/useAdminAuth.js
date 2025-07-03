@@ -7,15 +7,16 @@ export function useAdminAuth() {
   const router = useRouter();
   const pathname = usePathname();
   const timerRef = useRef();
-  const [isAuth, setIsAuth] = useState(false);
+  const [state, setState] = useState({ loading: true, isAuth: false });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const auth = localStorage.getItem("admin_auth");
       if (auth !== "ok") {
         router.replace(`/admin/login?next=${encodeURIComponent(pathname)}`);
+        setState({ loading: false, isAuth: false });
       } else {
-        setIsAuth(true);
+        setState({ loading: false, isAuth: true });
       }
 
       const resetTimer = () => {
@@ -38,6 +39,6 @@ export function useAdminAuth() {
     }
   }, [router, pathname]);
 
-  return isAuth;
+  return state;
 }
 // PATH: app/hooks/useAdminAuth.js
