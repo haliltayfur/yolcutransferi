@@ -1,5 +1,6 @@
 "use client";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
+
+import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useState, useRef, useEffect } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import { FaBars } from "react-icons/fa";
