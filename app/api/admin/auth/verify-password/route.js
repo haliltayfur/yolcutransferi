@@ -1,20 +1,20 @@
+//app/api/admin/auth/verify-password/route.js
 import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
-
-// (Gerçekte DB'de olmalı! Şimdilik basit demo için dosya içi hash)
-const ADMIN_EMAIL = "info@yolcutransferi.com";
-// Senin belirlediğin şifreyi bcrypt ile hashleyip şuraya ekle.
-// ÖRNEK ŞİFRE: "Halil123!"
-const ADMIN_HASH = "$2a$10$8FMwB2XSh2cYos0XeUYsKOJk1J1N50zsl2ZkyR1bFZolF0txBhZ8u"; // 
 
 export async function POST(req) {
   const { email, password } = await req.json();
-  if (email !== ADMIN_EMAIL) {
+  const db = await connectToDatabase();
+  const admin = await db.collection("admin_users").findOne({ email });
+
+  if (!admin) {
     return NextResponse.json({ success: false, error: "Yetkisiz." }, { status: 401 });
   }
-  const isValid = await bcrypt.compare(password, ADMIN_HASH);
+  const isValid = await bcrypt.compare(password, admin.passwordHash);
   if (!isValid) {
     return NextResponse.json({ success: false, error: "Şifre hatalı." }, { status: 401 });
   }
   return NextResponse.json({ success: true });
 }
+//app/api/admin/auth/verify-password/route.js
