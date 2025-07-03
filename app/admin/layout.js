@@ -1,3 +1,4 @@
+//app/admin/layout.js
 "use client";
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useState, useRef, useEffect } from "react";
@@ -56,3 +57,4 @@ export default function AdminLayout({ children }) {
     </div>
   );
 }
+//app/admin/layout.js
