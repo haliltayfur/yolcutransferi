@@ -1,49 +1,42 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { FaEnvelope, FaUser, FaFileAlt, FaChartLine, FaUsers, FaCogs, FaSignOutAlt } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { FaEnvelope, FaUsersCog, FaCog, FaUserShield, FaSignOutAlt } from "react-icons/fa";
 
 export default function AdminSidebar({ closeMenu }) {
-  const pathname = usePathname();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Çıkış (Logout) fonksiyonu
-  const handleLogout = () => {
+  useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("admin_auth");
-      window.location.href = "/admin/login";
+      setIsLoggedIn(localStorage.getItem("admin_auth") === "ok");
     }
-    if (closeMenu) closeMenu();
-  };
+  }, []);
+
+  if (!isLoggedIn) return null;
+
+  function logout() {
+    localStorage.removeItem("admin_auth");
+    window.location.href = "/admin/login";
+  }
 
   return (
-    <nav className="flex flex-col gap-1 h-full p-4">
-      <Link href="/admin" className={`flex items-center gap-3 px-4 py-2 rounded font-bold text-lg ${pathname === "/admin" ? "bg-[#bfa658]/30 text-[#FFD700]" : "text-[#ffeec2] hover:bg-[#bfa658]/20"}`}>
-        <FaChartLine /> Panel
-      </Link>
-      <Link href="/admin/rezervasyonlar" className={`flex items-center gap-3 px-4 py-2 rounded font-bold text-lg ${pathname.includes("rezervasyonlar") ? "bg-[#bfa658]/30 text-[#FFD700]" : "text-[#ffeec2] hover:bg-[#bfa658]/20"}`}>
-        <FaFileAlt /> Rezervasyonlar
-      </Link>
-      <Link href="/admin/iletisim" className={`flex items-center gap-3 px-4 py-2 rounded font-bold text-lg ${pathname.includes("iletisim") ? "bg-[#bfa658]/30 text-[#FFD700]" : "text-[#ffeec2] hover:bg-[#bfa658]/20"}`}>
+    <nav className="flex flex-col gap-2 py-6 px-2 h-full">
+      <Link href="/admin/iletisim" className="flex items-center gap-3 px-4 py-3 hover:bg-[#1a170c] rounded-xl text-lg font-semibold text-[#ffeec2]">
         <FaEnvelope /> İletişim
       </Link>
-      <Link href="/admin/kvkk" className={`flex items-center gap-3 px-4 py-2 rounded font-bold text-lg ${pathname.includes("kvkk") ? "bg-[#bfa658]/30 text-[#FFD700]" : "text-[#ffeec2] hover:bg-[#bfa658]/20"}`}>
-        <FaFileAlt /> KVKK Başvuruları
+      <Link href="/admin/kvkk" className="flex items-center gap-3 px-4 py-3 hover:bg-[#1a170c] rounded-xl text-lg font-semibold text-[#ffeec2]">
+        <FaUserShield /> KVKK Başvuruları
       </Link>
-      <Link href="/admin/uyelikler" className={`flex items-center gap-3 px-4 py-2 rounded font-bold text-lg ${pathname.includes("uyelik") ? "bg-[#bfa658]/30 text-[#FFD700]" : "text-[#ffeec2] hover:bg-[#bfa658]/20"}`}>
-        <FaUsers /> Üyelikler
+      <Link href="/admin/uyelikler" className="flex items-center gap-3 px-4 py-3 hover:bg-[#1a170c] rounded-xl text-lg font-semibold text-[#ffeec2]">
+        <FaUsersCog /> Üyelikler
       </Link>
-      <Link href="/admin/ayarlar" className={`flex items-center gap-3 px-4 py-2 rounded font-bold text-lg ${pathname.includes("ayarlar") ? "bg-[#bfa658]/30 text-[#FFD700]" : "text-[#ffeec2] hover:bg-[#bfa658]/20"}`}>
-        <FaCogs /> Ayarlar
+      <Link href="/admin/ayarlar" className="flex items-center gap-3 px-4 py-3 hover:bg-[#1a170c] rounded-xl text-lg font-semibold text-[#ffeec2]">
+        <FaCog /> Ayarlar
       </Link>
-
-      {/* Çıkış Butonu */}
-      <button
-        onClick={handleLogout}
-        className="flex items-center gap-3 mt-auto px-4 py-2 rounded font-bold text-lg bg-[#bfa658]/30 text-[#c62a2a] hover:bg-[#FFD700] hover:text-black transition w-full"
-        style={{ marginTop: "auto" }}
-      >
+      <button onClick={logout} className="mt-auto px-4 py-3 rounded-xl bg-[#4e170c] hover:bg-[#a32e00] text-white flex items-center gap-3 font-bold">
         <FaSignOutAlt /> Çıkış Yap
       </button>
+      {closeMenu && <button onClick={closeMenu} className="mt-2 w-full text-center text-[#bfa658]">Menüyü Kapat</button>}
     </nav>
   );
 }
