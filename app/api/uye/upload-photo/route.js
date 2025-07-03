@@ -1,49 +1,38 @@
-// app/api/uye/upload-photo/route.js
-
-import { promises as fs } from "fs";
-import path from "path";
 import formidable from "formidable";
+import fs from "fs";
+import path from "path";
 import { connectToDatabase } from "@/lib/mongodb";
 
+// Next.js 14+ ile uyumlu! Sadece aşağıdaki export kullanılacak.
 export const dynamic = "force-dynamic";
 
-// ✔️ Vercel Next 14.2 için doğru config:
-export const routeSegmentConfig = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 export async function POST(req) {
-  // Dosya upload işlemi
-  const form = formidable({ multiples: false, uploadDir: "/tmp", keepExtensions: true });
+  // Klasik upload logic'i (formidable ile)
+  const form = formidable({ multiples: false, uploadDir: "./public", keepExtensions: true });
+  const data = await new Promise((resolve, reject) => {
+    form.parse(req, (err, fields, files) => {
+      if (err) reject(err);
+      else resolve({ fields, files });
+    });
+  });
 
-  // Buffer'ı al
-  const data = await req.formData();
-  const file = data.get("file"); // <input name="file" />
-  const uyeNo = data.get("uyeNo"); // <input name="uyeNo" />
-
-  if (!file || !uyeNo) {
-    return Response.json({ success: false, error: "Dosya veya üye numarası eksik" }, { status: 400 });
+  // Dosyayı adlandır
+  const { files, fields } = data;
+  const uyeNo = fields.uyeNo || "unknown";
+  const file = files && files.foto;
+  let filename = "";
+  if (file) {
+    filename = `uye_${uyeNo}.png`;
+    const dest = path.join(process.cwd(), "public", filename);
+    fs.renameSync(file.filepath, dest);
   }
 
-  // Dosya adı: Üye numarasına göre kaydet
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const uploadDir = path.join(process.cwd(), "public");
-  const fileName = `${uyeNo}.png`;
-  const filePath = path.join(uploadDir, fileName);
+  // DB güncellemesi yapılabilir
+  // const db = await connectToDatabase();
+  // await db.collection("uyeler").updateOne({ uyeNo }, { $set: { fotoUrl: `/uye_${uyeNo}.png` } });
 
-  // Kayıt et
-  await fs.writeFile(filePath, buffer);
-
-  // İstersen DB'de de üyeye profil resmi kaydını güncelle
-  const db = await connectToDatabase();
-  await db.collection("uyeler").updateOne(
-    { uyeNo },
-    { $set: { fotoUrl: `/public/${fileName}` } }
-  );
-
-  return Response.json({ success: true, fileName });
+  return new Response(JSON.stringify({ success: true, url: filename ? `/${filename}` : "" }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
 }
-
-// app/api/uye/upload-photo/route.js
