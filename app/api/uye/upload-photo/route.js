@@ -2,42 +2,30 @@
 import { NextResponse } from "next/server";
 import path from "path";
 import { promises as fs } from "fs";
-import formidable from "formidable";
 
-// Next.js özel ayar (formidable ile dosya parse etmek için)
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// ZORUNLU: Vercel'de dosya sistemine erişim YOK! Sadece yerel testte /public'e yazabilirsin.
+// Gerçek deploy için bir bulut servisine (S3 vb) upload etmelisin. Ama local geliştirme ve demo için aşağıdaki kod çalışır.
 
-export async function POST(req) {
-  // formidable ile dosya al
-  const form = new formidable.IncomingForm();
-  form.uploadDir = "/tmp";
-  form.keepExtensions = true;
+export const dynamic = "force-dynamic";
 
-  return new Promise((resolve, reject) => {
-    form.parse(req, async (err, fields, files) => {
-      if (err) return resolve(NextResponse.json({ success: false, error: "Yükleme hatası" }));
+export async function POST(request) {
+  const formData = await request.formData();
+  const file = formData.get("file");
+  const filename = formData.get("filename");
 
-      const file = files.file;
-      const filename = fields.filename || "user.png";
+  if (!file || !filename) {
+    return NextResponse.json({ success: false, error: "Dosya veya isim eksik." });
+  }
 
-      // Dosya yolu: /public/üyeno.png
-      const targetPath = path.join(process.cwd(), "public", filename);
+  // Okunan dosyayı /public altına yaz
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
 
-      try {
-        await fs.copyFile(file.filepath, targetPath);
-        resolve(
-          NextResponse.json({
-            success: true,
-            photoUrl: `/${filename}`,
-          })
-        );
-      } catch (e) {
-        resolve(NextResponse.json({ success: false, error: "Kayıt hatası" }));
-      }
-    });
-  });
+  const filePath = path.join(process.cwd(), "public", filename);
+  try {
+    await fs.writeFile(filePath, buffer);
+    return NextResponse.json({ success: true, photoUrl: `/${filename}` });
+  } catch (e) {
+    return NextResponse.json({ success: false, error: "Dosya kaydedilemedi." });
+  }
 }
