@@ -1,9 +1,9 @@
 // app/admin/login/page.jsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function AdminLogin() {
+function LoginInner() {
   const [email, setEmail] = useState("");
   const [step, setStep] = useState(1);
   const [code, setCode] = useState("");
@@ -14,7 +14,6 @@ export default function AdminLogin() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Zaten girişli ise direkt admin'e yönlendir
       if (localStorage.getItem("admin_auth") === "ok") {
         router.replace("/admin");
       }
@@ -43,8 +42,7 @@ export default function AdminLogin() {
     });
     const data = await r.json();
     if (data.success) {
-      setStep(3);
-      setMsg("");
+      setStep(3); setMsg("");
     } else setMsg(data.error || "Kod yanlış veya süresi dolmuş.");
   }
 
@@ -57,9 +55,7 @@ export default function AdminLogin() {
     });
     const data = await r.json();
     if (data.success) {
-      // Giriş başarılı, admin_auth anahtarını yaz
       localStorage.setItem("admin_auth", "ok");
-      // Yönlendirme
       const next = searchParams.get("next") || "/admin";
       window.location.href = next;
     } else setMsg(data.error || "Şifre hatalı.");
@@ -124,6 +120,15 @@ export default function AdminLogin() {
         <div className="mt-4 text-center text-[#ffeec2]">{msg}</div>
       </div>
     </main>
+  );
+}
+
+export default function AdminLoginPage() {
+  // Suspense ile sarmak artık zorunlu!
+  return (
+    <Suspense fallback={<div>Yükleniyor...</div>}>
+      <LoginInner />
+    </Suspense>
   );
 }
 // app/admin/login/page.jsx
