@@ -1,16 +1,14 @@
+//app/api/admin/auth/request-code/route.js
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-// Yalnızca bu mailler giriş yapabilir!
+// Kullanılacak admin mailler (dilersen artırabilirsin)
 const allowedEmails = [
   "info@yolcutransferi.com",
   "byhaliltayfur@hotmail.com"
 ];
-
 const CODE_TIMEOUT = 5 * 60 * 1000; // 5 dakika
 
-// Kodu geçici saklamak için, bunu gerçek ortamda DB/Redis ile yapmalısın!
-// ŞİMDİLİK sadece demo/test için RAM'de tutalım:
 global.codes = global.codes || {};
 
 export async function POST(req) {
@@ -18,10 +16,8 @@ export async function POST(req) {
   if (!allowedEmails.includes(email)) {
     return NextResponse.json({ success: false, error: "Bu email yetkili değil." }, { status: 403 });
   }
-  // Kod oluştur
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   global.codes[email] = { code, expires: Date.now() + CODE_TIMEOUT };
-  // Mail gönder
   const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({
     from: "YolcuTransferi Admin <info@yolcutransferi.com>",
@@ -34,3 +30,4 @@ export async function POST(req) {
   });
   return NextResponse.json({ success: true });
 }
+//app/api/admin/auth/request-code/route.js
