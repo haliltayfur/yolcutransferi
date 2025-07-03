@@ -1,3 +1,4 @@
+//app/hooks/useAdminAuth.js
 "use client";
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -8,7 +9,6 @@ export function useAdminAuth() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Login sayfasında koruma uygulama
       if (pathname.startsWith("/admin/login")) return;
       const auth = localStorage.getItem("admin_auth");
       if (auth !== "ok") {
@@ -17,3 +17,4 @@ export function useAdminAuth() {
     }
   }, [router, pathname]);
 }
+//app/hooks/useAdminAuth.js
