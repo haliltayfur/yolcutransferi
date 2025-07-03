@@ -1,38 +1,49 @@
 // app/api/uye/upload-photo/route.js
-import { NextResponse } from "next/server";
-import { put } from "@vercel/blob";
-import { nanoid } from "nanoid";
+
+import { promises as fs } from "fs";
+import path from "path";
+import formidable from "formidable";
+import { connectToDatabase } from "@/lib/mongodb";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request) {
-  const formData = await request.formData();
-  const file = formData.get("file");
-  const filename = formData.get("filename"); // ör: Uye_Musteri030724_10001.png
+// ✔️ Vercel Next 14.2 için doğru config:
+export const routeSegmentConfig = {
+  api: {
+    bodyParser: false,
+  },
+};
 
-  if (!file || !filename) {
-    return NextResponse.json({ success: false, error: "Dosya veya isim eksik." });
+export async function POST(req) {
+  // Dosya upload işlemi
+  const form = formidable({ multiples: false, uploadDir: "/tmp", keepExtensions: true });
+
+  // Buffer'ı al
+  const data = await req.formData();
+  const file = data.get("file"); // <input name="file" />
+  const uyeNo = data.get("uyeNo"); // <input name="uyeNo" />
+
+  if (!file || !uyeNo) {
+    return Response.json({ success: false, error: "Dosya veya üye numarası eksik" }, { status: 400 });
   }
 
-  // Uygun mime/type kontrolü (image)
-  if (!file.type.startsWith("image/")) {
-    return NextResponse.json({ success: false, error: "Yalnızca resim dosyası yüklenebilir." });
-  }
+  // Dosya adı: Üye numarasına göre kaydet
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const uploadDir = path.join(process.cwd(), "public");
+  const fileName = `${uyeNo}.png`;
+  const filePath = path.join(uploadDir, fileName);
 
-  // Vercel Blob'a upload (üye numarası ile sabit isim)
-  // Aynı isimli dosya yüklenirse eskiyi siler (üzerine yazar!)
-  try {
-    const blob = await put(
-      `uyeresimleri/${filename}`,
-      file,
-      {
-        access: "public",
-        addRandomSuffix: false, // İsim sabit kalsın, hep aynı üyeno.png
-      }
-    );
-    // blob.url: https://<deploy-id>.blob.vercel-storage.com/uyeresimleri/filename.png
-    return NextResponse.json({ success: true, photoUrl: blob.url });
-  } catch (e) {
-    return NextResponse.json({ success: false, error: "Blob upload hatası: " + e.message });
-  }
+  // Kayıt et
+  await fs.writeFile(filePath, buffer);
+
+  // İstersen DB'de de üyeye profil resmi kaydını güncelle
+  const db = await connectToDatabase();
+  await db.collection("uyeler").updateOne(
+    { uyeNo },
+    { $set: { fotoUrl: `/public/${fileName}` } }
+  );
+
+  return Response.json({ success: true, fileName });
 }
+
+// app/api/uye/upload-photo/route.js
