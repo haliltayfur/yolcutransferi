@@ -9,8 +9,9 @@ const allowedEmails = [
 
 const CODE_TIMEOUT = 5 * 60 * 1000; // 5 dakika
 
-// Kodu geçici saklamak için (gerçek projede DB ya da cache kullanılır)
-const codes = {};
+// Kodu geçici saklamak için, bunu gerçek ortamda DB/Redis ile yapmalısın!
+// ŞİMDİLİK sadece demo/test için RAM'de tutalım:
+global.codes = global.codes || {};
 
 export async function POST(req) {
   const { email } = await req.json();
@@ -19,7 +20,7 @@ export async function POST(req) {
   }
   // Kod oluştur
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  codes[email] = { code, expires: Date.now() + CODE_TIMEOUT };
+  global.codes[email] = { code, expires: Date.now() + CODE_TIMEOUT };
   // Mail gönder
   const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({
@@ -33,7 +34,3 @@ export async function POST(req) {
   });
   return NextResponse.json({ success: true });
 }
-
-// --- DİKKAT ---
-// "export { codes };" satırını kaldırdım!
-// Build'ın geçmesi için başka hiçbir export olmamalı.
