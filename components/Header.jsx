@@ -6,7 +6,6 @@ import Image from "next/image";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// Menüdeki sayfalar
 const menuItems = [
   { name: "Anasayfa", href: "/" },
   { name: "Hizmetler", href: "/hizmetler" },
@@ -18,11 +17,17 @@ const menuItems = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const burgerRef = useRef(null);
   const menuBoxRef = useRef(null);
 
-  // KULLANICI STATE
-  const [user, setUser] = useState(null);
+  useEffect(() => {
+    // Kullanıcı login olduysa localStorage'dan çek
+    if (typeof window !== "undefined") {
+      const u = localStorage.getItem("user");
+      setUser(u ? JSON.parse(u) : null);
+    }
+  }, []);
 
   useEffect(() => {
     function handleClick(e) {
@@ -39,27 +44,9 @@ export default function Header() {
     return () => window.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
 
-  // GİRİŞ KONTROL
-  useEffect(() => {
-    try {
-      const u = JSON.parse(localStorage.getItem("user_info"));
-      if (u) setUser(u);
-      else setUser(null);
-    } catch {
-      setUser(null);
-    }
-  }, []);
-
-  function handleLogout() {
-    localStorage.removeItem("user_info");
-    setUser(null);
-    window.location.href = "/";
-  }
-
   return (
     <header className="w-full bg-black shadow-2xl z-40 border-b border-[#FFD70044]">
       <div className="flex items-center justify-between px-8 lg:px-20 py-2 w-full" style={{ minHeight: 90 }}>
-        {/* Logo */}
         <Link href="/" className="flex items-center min-w-0" style={{ height: "80px" }}>
           <Image
             src="/LOGO.png"
@@ -75,8 +62,6 @@ export default function Header() {
             }}
           />
         </Link>
-
-        {/* Menü: %10 daha büyük font/padding */}
         <nav className="hidden lg:flex flex-1 justify-center items-center">
           <div className="flex items-center gap-[28px]">
             {menuItems.map((item) => (
@@ -90,8 +75,7 @@ export default function Header() {
             ))}
           </div>
         </nav>
-
-        {/* Giriş/Üye Ol veya Kullanıcı */}
+        {/* Sağ üstte login kontrolü */}
         <div className="hidden lg:flex items-center gap-3 ml-5">
           {!user ? (
             <>
@@ -104,31 +88,21 @@ export default function Header() {
             </>
           ) : (
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => window.location.href = "/profil"}
-                className="outline-none focus:outline-none"
-                title="Profil"
-                style={{ display: "flex", alignItems: "center", border: "none", background: "none" }}
-              >
-                <img
-                  src={user.photo || "/profile-default.png"}
-                  alt="Profil"
-                  className="w-9 h-9 rounded-full border-2 border-yellow-500 object-cover mr-2"
-                  style={{ background: "#333" }}
-                />
-              </button>
-              <span className="font-semibold text-yellow-300 mr-2">
-                Hoşgeldin, {user.ad || user.email}
+              <span className="font-bold text-[#FFD700] text-lg">
+                Hoşgeldin, {user.ad || user.isim || user.name || "Üye"}
               </span>
-              <button
-                className="ml-2 text-sm text-gray-400 underline"
-                onClick={handleLogout}
-              >
-                Çıkış Yap
-              </button>
+              <Link href="/profil">
+                <Image
+                  src={user.fotoUrl || "/default-user.png"}
+                  alt="Profil"
+                  width={46}
+                  height={46}
+                  className="rounded-full border-2 border-[#FFD700] shadow-md hover:scale-110 cursor-pointer"
+                  style={{ objectFit: "cover" }}
+                />
+              </Link>
             </div>
           )}
-          {/* Sosyal Medya */}
           <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="header-social ml-2">
             <FaWhatsapp className="w-7 h-7" />
           </a>
@@ -139,7 +113,6 @@ export default function Header() {
             <SiX className="w-7 h-7" />
           </a>
         </div>
-
         {/* Hamburger - sadece mobilde */}
         <button
           ref={burgerRef}
@@ -190,26 +163,21 @@ export default function Header() {
                   </Link>
                 </>
               ) : (
-                <div className="flex flex-col gap-2 mt-4">
-                  <button
-                    onClick={() => { setMenuOpen(false); window.location.href = "/profil"; }}
-                    className="flex items-center gap-2 text-yellow-300 font-semibold hover:underline"
-                  >
-                    <img
-                      src={user.photo || "/profile-default.png"}
-                      alt="Profil"
-                      className="w-8 h-8 rounded-full border-2 border-yellow-500 object-cover"
-                      style={{ background: "#333" }}
-                    />
-                    Profilim
-                  </button>
-                  <button
-                    onClick={() => { setMenuOpen(false); handleLogout(); }}
-                    className="text-gray-400 underline text-sm mt-1 text-left"
-                  >
-                    Çıkış Yap
-                  </button>
-                </div>
+                <Link
+                  href="/profil"
+                  className="header-btn mt-3 flex gap-2 items-center"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <span>Profilim</span>
+                  <Image
+                    src={user.fotoUrl || "/default-user.png"}
+                    alt="Profil"
+                    width={40}
+                    height={40}
+                    className="rounded-full border-2 border-[#FFD700] ml-1"
+                    style={{ objectFit: "cover" }}
+                  />
+                </Link>
               )}
               <div className="flex items-center gap-2 mt-7 justify-center">
                 <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="header-social">
@@ -251,7 +219,7 @@ export default function Header() {
           box-shadow: 0 2px 10px 0 rgba(255,215,0,0.12);
           transition: all .15s;
           margin-left: 5px;
-          height: 48px;         /* Sosyal medya yüksekliğiyle aynı */
+          height: 48px;
           display: flex; align-items: center;
         }
         .header-btn:hover {
@@ -265,13 +233,13 @@ export default function Header() {
           color: #FFD700;
           border: 2px solid #FFD700;
           font-weight: 900;
-          font-size: 1.15rem;   /* %10 büyük */
+          font-size: 1.15rem;
           border-radius: 15px;
-          padding: 0.63rem 1.85rem; /* %10 büyük */
+          padding: 0.63rem 1.85rem;
           box-shadow: 0 2px 8px 0 rgba(255,215,0,0.10);
           margin-left: 3px;
           transition: all .14s;
-          height: 48px;         /* Sosyal medya yüksekliğiyle aynı */
+          height: 48px;
           display: flex; align-items: center;
         }
         .header-btn-outline:hover {
