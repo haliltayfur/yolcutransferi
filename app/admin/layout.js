@@ -6,7 +6,7 @@ import AdminSidebar from "@/components/AdminSidebar";
 import { FaBars } from "react-icons/fa";
 
 export default function AdminLayout({ children }) {
-  useAdminAuth(); // Yetki kontrolü ve idle logout
+  const isAuth = useAdminAuth(); // yetki kontrolünü bekle
 
   const [mobileMenu, setMobileMenu] = useState(false);
   const mobileMenuRef = useRef();
@@ -26,6 +26,8 @@ export default function AdminLayout({ children }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [mobileMenu]);
 
+  if (!isAuth) return null; // yetki tamamlanana kadar hiçbir şey gösterme
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-black via-[#19160a] to-[#282314]">
       <aside className="hidden md:flex flex-col w-64 bg-black/95 border-r border-[#bfa658] shadow-2xl fixed inset-y-0 left-0 z-30">
@@ -40,11 +42,7 @@ export default function AdminLayout({ children }) {
       </button>
       {mobileMenu && (
         <div className="fixed inset-0 z-50 flex">
-          <nav
-            ref={mobileMenuRef}
-            className="w-72 bg-black/95 border-r border-[#bfa658] shadow-2xl flex flex-col h-full p-0 animate-slidein"
-            style={{ minWidth: "240px" }}
-          >
+          <nav ref={mobileMenuRef} className="w-72 bg-black/95 border-r border-[#bfa658] shadow-2xl flex flex-col h-full p-0 animate-slidein">
             <AdminSidebar closeMenu={() => setMobileMenu(false)} />
           </nav>
           <div className="flex-1 bg-black/60" onClick={() => setMobileMenu(false)}></div>
@@ -57,10 +55,6 @@ export default function AdminLayout({ children }) {
         </header>
         <main className="flex-1 p-4 md:p-8">{children}</main>
       </div>
-      <style jsx global>{`
-        @keyframes slidein { from { transform: translateX(-110%);} to { transform: translateX(0);} }
-        .animate-slidein { animation: slidein 0.24s cubic-bezier(0.4,0,0.2,1);}
-      `}</style>
     </div>
   );
 }
