@@ -1,7 +1,7 @@
 //app/api/admin/auth/request-code/route.js
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { connectToDatabase } from "@/lib/mongodb"; // kendi connection fonksiyonunu kullan!
+import { connectToDatabase } from "@/lib/mongodb"; // senin kodun
 
 const allowedEmails = [
   "info@yolcutransferi.com",
@@ -16,7 +16,7 @@ export async function POST(req) {
   }
   const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-  // Kod veritabanına yazılıyor
+  // Kod veritabanına yazılıyor (patlatmaz, upsert!)
   const db = await connectToDatabase();
   await db.collection("admin_codes").updateOne(
     { email },
