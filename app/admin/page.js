@@ -1,122 +1,170 @@
-// app/admin/page.js
+//app/admin/page.js
 "use client";
-import { 
-  FaUser, 
-  FaMoneyBillWave, 
-  FaUserCheck, 
-  FaUsers, 
-  FaMapMarkerAlt, 
-  FaListAlt, 
-  FaEnvelope, 
-  FaUserShield 
+import { useEffect, useState } from "react";
+import {
+  FaUser, FaMoneyBillWave, FaUserCheck, FaUsers, FaListAlt, FaEnvelope, FaUserShield, FaCog
 } from "react-icons/fa";
 import Link from "next/link";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import React from "react";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
-// Demo KPI verileri
-const kpis = [
-  {
-    label: "Bugünkü Ciro",
-    value: "₺15.230",
-    icon: <FaMoneyBillWave />,
-    color: "from-[#bfa658] to-[#ffeec2]",
-  },
-  {
-    label: "Bugünkü Ziyaretçi",
-    value: "184",
-    icon: <FaUsers />,
-    color: "from-[#ffeec2] to-[#bfa658]",
-  },
-  {
-    label: "Bugünkü Rezervasyon",
-    value: "32",
-    icon: <FaUserCheck />,
-    color: "from-[#bfa658] to-[#ffeec2]",
-  },
-  {
-    label: "Yeni Üye",
-    value: "7",
-    icon: <FaUser />,
-    color: "from-[#ffeec2] to-[#bfa658]",
-  },
-];
-
-// Demo ciro saatlik data
-const ciroSaatlik = [
-  { saat: "00", ciro: 0 },
-  { saat: "04", ciro: 450 },
-  { saat: "08", ciro: 1800 },
-  { saat: "12", ciro: 4000 },
-  { saat: "16", ciro: 5000 },
-  { saat: "20", ciro: 3800 },
-  { saat: "24", ciro: 180 },
-];
-
-// Demo il ziyaretçi dağılımı
-const ziyaretIl = [
-  { il: "İstanbul", ziyaret: 102 },
-  { il: "Ankara", ziyaret: 31 },
-  { il: "İzmir", ziyaret: 25 },
-  { il: "Bursa", ziyaret: 11 },
-  { il: "Antalya", ziyaret: 6 },
-];
-
+// Renkler
 const COLORS = ["#bfa658", "#ffeec2", "#f5ca74", "#e5dbb8", "#d8ae5e"];
 
 export default function AdminPanel() {
-  // Giriş kontrolü ve demo dummy veri ile başlatıyoruz
+  const [kpis, setKpis] = useState({
+    bugunCiro: 0, buAyCiro: 0, bugunZiyaretci: 0, bugunRez: 0,
+    bugunIsler: [], yeniUyeler: { musteri: 0, sofor: 0, firma: 0, isbirligi: 0 }
+  });
+  const [pieData, setPieData] = useState([]);
+  const [detayList, setDetayList] = useState([]);
+  const [detayBaslik, setDetayBaslik] = useState("");
+
+  // Tüm datayı paralel çek
+  useEffect(() => {
+    async function fetchData() {
+      const [res1, res2, res3, res4, res5] = await Promise.all([
+        fetch("/api/rezervasyon"),
+        fetch("/api/visitors"),
+        fetch("/api/uyelikler"),
+        fetch("/api/iletisim"),
+        fetch("/api/kvkk/forms")
+      ]);
+      const rez = await res1.json();
+      const vis = await res2.json();
+      const uye = await res3.json();
+      const ile = await res4.json();
+      const kvkk = await res5.json();
+
+      // Bugünkü ve bu ayki ciro
+      const now = new Date();
+      const today = now.toISOString().slice(0, 10);
+      const ayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      let bugunCiro = 0, buAyCiro = 0, bugunRez = 0, bugunIsler = [];
+      (rez.items || []).forEach(r => {
+        const trf = new Date(r.transferTarihi);
+        const odendi = r.odemeDurumu === "tamamlandi";
+        const tarihStr = trf.toISOString().slice(0, 10);
+        if (odendi && tarihStr === today) {
+          bugunCiro += r.tutar;
+          bugunRez++;
+          bugunIsler.push(r);
+        }
+        if (odendi && trf.toISOString().slice(0, 7) === ayStr) {
+          buAyCiro += r.tutar;
+        }
+      });
+
+      // Yeni Üyeler (bu ay)
+      const yeniUyeler = { musteri: 0, sofor: 0, firma: 0, isbirligi: 0 };
+      (uye.items || []).forEach(u => {
+        if (u.createdAt && u.createdAt.slice(0, 7) === ayStr) {
+          yeniUyeler[u.tip] = (yeniUyeler[u.tip] || 0) + 1;
+        }
+      });
+
+      // İl dağılımı (üyelerin iline göre)
+      const ilSayim = {};
+      (uye.items || []).forEach(u => {
+        if (u.il) ilSayim[u.il] = (ilSayim[u.il] || 0) + 1;
+      });
+      const pie = Object.entries(ilSayim).map(([il, count]) => ({ name: il, value: count }));
+
+      setKpis({
+        bugunCiro, buAyCiro, bugunZiyaretci: vis.count,
+        bugunRez, bugunIsler, yeniUyeler
+      });
+      setPieData(pie);
+    }
+    fetchData();
+  }, []);
+
+  // Tıklanınca detay listesi açan handler
+  function handleDetay(baslik, arr) {
+    setDetayBaslik(baslik);
+    setDetayList(arr);
+  }
 
   return (
     <main className="flex flex-col gap-8">
       {/* KPI Cards */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
-        {kpis.map((k, i) => (
-          <div
-            key={i}
-            className={`flex items-center gap-4 rounded-2xl shadow-xl p-6 bg-gradient-to-br ${k.color} border border-[#bfa658]/60`}
-          >
-            <span className="text-3xl">{k.icon}</span>
-            <div>
-              <div className="text-xl font-extrabold text-black drop-shadow">{k.value}</div>
-              <div className="text-sm font-semibold text-[#3a2f13]">{k.label}</div>
-            </div>
+        {/* Bugünkü & Bu Ayki Ciro */}
+        <div
+          onClick={() => handleDetay("Bugünkü Ciro Detayı", kpis.bugunIsler)}
+          className="flex items-center gap-4 rounded-2xl shadow-xl p-6 bg-gradient-to-br from-[#bfa658] to-[#ffeec2] border border-[#bfa658]/60 cursor-pointer"
+        >
+          <span className="text-3xl"><FaMoneyBillWave /></span>
+          <div>
+            <div className="text-xl font-extrabold text-black">{kpis.bugunCiro.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</div>
+            <div className="text-sm font-semibold text-[#3a2f13]">Bugünkü Ciro</div>
           </div>
-        ))}
+        </div>
+        <div
+          onClick={() => handleDetay("Bu Ayki Ciro Detayı", [])}
+          className="flex items-center gap-4 rounded-2xl shadow-xl p-6 bg-gradient-to-br from-[#ffeec2] to-[#bfa658] border border-[#bfa658]/60 cursor-pointer"
+        >
+          <span className="text-3xl"><FaMoneyBillWave /></span>
+          <div>
+            <div className="text-xl font-extrabold text-black">{kpis.buAyCiro.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}</div>
+            <div className="text-sm font-semibold text-[#3a2f13]">Bu Ay Ciro</div>
+          </div>
+        </div>
+        {/* Ziyaretçi */}
+        <div
+          onClick={() => handleDetay("Bugünkü Ziyaretçi", [])}
+          className="flex items-center gap-4 rounded-2xl shadow-xl p-6 bg-gradient-to-br from-[#bfa658] to-[#ffeec2] border border-[#bfa658]/60 cursor-pointer"
+        >
+          <span className="text-3xl"><FaUsers /></span>
+          <div>
+            <div className="text-xl font-extrabold text-black">{kpis.bugunZiyaretci}</div>
+            <div className="text-sm font-semibold text-[#3a2f13]">Bugünkü Ziyaretçi</div>
+          </div>
+        </div>
+        {/* Bugünkü Rezervasyon */}
+        <div
+          onClick={() => handleDetay("Bugünkü Rezervasyon", kpis.bugunIsler)}
+          className="flex items-center gap-4 rounded-2xl shadow-xl p-6 bg-gradient-to-br from-[#ffeec2] to-[#bfa658] border border-[#bfa658]/60 cursor-pointer"
+        >
+          <span className="text-3xl"><FaUserCheck /></span>
+          <div>
+            <div className="text-xl font-extrabold text-black">{kpis.bugunRez}</div>
+            <div className="text-sm font-semibold text-[#3a2f13]">Bugünkü Rezervasyon</div>
+          </div>
+        </div>
+        {/* Yeni Üye */}
+        <div
+          onClick={() => handleDetay("Yeni Üyeler", Object.entries(kpis.yeniUyeler).map(([tip, count]) => ({ tip, count })))}
+          className="flex items-center gap-4 rounded-2xl shadow-xl p-6 bg-gradient-to-br from-[#ffeec2] to-[#bfa658] border border-[#bfa658]/60 cursor-pointer col-span-2 md:col-span-4"
+        >
+          <span className="text-3xl"><FaUser /></span>
+          <div>
+            <div className="text-xl font-extrabold text-black">
+              {["musteri", "sofor", "firma", "isbirligi"].map(tip => `${tip}: ${kpis.yeniUyeler[tip] || 0}`).join(" / ")}
+            </div>
+            <div className="text-sm font-semibold text-[#3a2f13]">Yeni Üye</div>
+          </div>
+        </div>
       </section>
 
-      {/* Grafikler ve ziyaretçi istatistiği */}
+      {/* İllere Göre Üyeler */}
       <section className="flex flex-col md:flex-row gap-8">
-        {/* Saatlik ciro grafiği */}
         <div className="bg-black/70 rounded-2xl shadow-lg border border-[#bfa658]/30 flex-1 min-w-0 p-6">
-          <div className="font-bold text-gold mb-2 text-lg">Günlük Saatlik Ciro</div>
-          <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={ciroSaatlik}>
-              <XAxis dataKey="saat" stroke="#ffeec2" fontSize={12} />
-              <YAxis stroke="#ffeec2" fontSize={12} />
-              <Tooltip />
-              <Line type="monotone" dataKey="ciro" stroke="#bfa658" strokeWidth={3} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        {/* Ziyaretçi iller */}
-        <div className="bg-black/70 rounded-2xl shadow-lg border border-[#bfa658]/30 flex-1 min-w-0 p-6">
-          <div className="font-bold text-gold mb-2 text-lg">İllere Göre Ziyaretçi</div>
+          <div className="font-bold text-gold mb-2 text-lg">İllere Göre Üyeler</div>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie
-                data={ziyaretIl}
-                dataKey="ziyaret"
-                nameKey="il"
+                data={pieData}
+                dataKey="value"
+                nameKey="name"
                 cx="50%"
                 cy="50%"
                 outerRadius={65}
                 innerRadius={35}
-                label={({ il, percent }) =>
-                  `${il} (${(percent * 100).toFixed(0)}%)`
+                label={({ name, percent }) =>
+                  `${name} (${(percent * 100).toFixed(0)}%)`
                 }
               >
-                {ziyaretIl.map((entry, idx) => (
+                {pieData.map((entry, idx) => (
                   <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
                 ))}
               </Pie>
@@ -126,7 +174,7 @@ export default function AdminPanel() {
         </div>
       </section>
 
-      {/* Kısa yol linkleri */}
+      {/* Kısa Yol Kutuları */}
       <section className="flex flex-col md:flex-row gap-8 mt-2">
         <Link
           href="/admin/rezervasyonlar"
@@ -157,8 +205,40 @@ export default function AdminPanel() {
           Üyelikler
         </Link>
       </section>
+
+      {/* Detay Popup */}
+      {detayBaslik && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center" onClick={() => setDetayBaslik("")}>
+          <div className="bg-white text-black rounded-xl p-8 max-w-2xl w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">{detayBaslik}</h2>
+              <button className="text-3xl text-gray-400 hover:text-black" onClick={() => setDetayBaslik("")}>×</button>
+            </div>
+            <div>
+              {/* Ciro ve rezervasyon detayı örneği */}
+              {detayList.length === 0
+                ? <div className="text-lg text-gray-600">Detay verisi yok.</div>
+                : (
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr>
+                        {Object.keys(detayList[0]).map((k) => <th key={k} className="p-1 border-b">{k}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {detayList.map((r, i) => (
+                        <tr key={i}>
+                          {Object.values(r).map((v, idx) => <td key={idx} className="p-1 border-b">{String(v)}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
-
-// app/admin/page.js
+//app/admin/page.js
