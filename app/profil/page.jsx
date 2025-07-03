@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 
 export default function ProfilPage() {
   const [user, setUser] = useState(null);
+  const [edit, setEdit] = useState(false);
+  const [form, setForm] = useState({});
   const [photo, setPhoto] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [status, setStatus] = useState("");
@@ -13,6 +15,7 @@ export default function ProfilPage() {
     try {
       const u = JSON.parse(localStorage.getItem("user_info"));
       setUser(u);
+      setForm(u);
       setPhoto(u?.photo || "");
     } catch {
       setUser(null);
@@ -31,15 +34,9 @@ export default function ProfilPage() {
     if (!selectedFile || !user) return setStatus("Dosya seçilmedi!");
 
     const formData = new FormData();
-    // Kullanıcıya özel dosya ismi: _id.png (veya email.png)
-    const filename =
-      (user._id
-        ? String(user._id)
-        : user.email
-        ? user.email.replace(/[@.]/g, "")
-        : "user") + ".png";
+    // Kullanıcıya özel dosya ismi: üyeno.png
     formData.append("file", selectedFile);
-    formData.append("filename", filename);
+    formData.append("filename", `${user.uyeNo}.png`);
 
     setStatus("Yükleniyor...");
     const r = await fetch("/api/uye/upload-photo", {
@@ -51,10 +48,36 @@ export default function ProfilPage() {
       setPhoto(data.photoUrl);
       const newUser = { ...user, photo: data.photoUrl };
       setUser(newUser);
+      setForm(newUser);
       localStorage.setItem("user_info", JSON.stringify(newUser));
       setStatus("Profil fotoğrafı başarıyla yüklendi!");
     } else {
       setStatus(data.error || "Yükleme hatası!");
+    }
+  }
+
+  // Bilgileri kaydet
+  async function handleSave(e) {
+    e.preventDefault();
+    setStatus("Kaydediliyor...");
+    // Sadece üyeno değiştirilemez!
+    const saveForm = { ...form };
+    delete saveForm.uyeNo;
+
+    const r = await fetch("/api/uye/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uyeNo: user.uyeNo, ...saveForm }),
+    });
+    const data = await r.json();
+    if (data.success) {
+      setUser(data.uye);
+      setForm(data.uye);
+      localStorage.setItem("user_info", JSON.stringify(data.uye));
+      setEdit(false);
+      setStatus("Güncellendi.");
+    } else {
+      setStatus(data.error || "Kayıt hatası!");
     }
   }
 
@@ -103,31 +126,116 @@ export default function ProfilPage() {
           </form>
         </div>
 
-        {/* Kullanıcı Bilgileri */}
-        <div className="w-full max-w-lg">
-          <div className="flex flex-col gap-2">
-            <div>
-              <span className="font-bold text-[#bfa658] mr-1">Ad Soyad:</span>
-              {user.ad || "-"}
-            </div>
-            <div>
-              <span className="font-bold text-[#bfa658] mr-1">E-posta:</span>
-              {user.email || "-"}
-            </div>
-            <div>
-              <span className="font-bold text-[#bfa658] mr-1">Telefon:</span>
-              {user.telefon || "-"}
-            </div>
-            <div>
-              <span className="font-bold text-[#bfa658] mr-1">Üyelik Tipi:</span>
-              {user.type || "-"}
-            </div>
-            <div>
-              <span className="font-bold text-[#bfa658] mr-1">Şehir:</span>
-              {user.il || "-"}
-            </div>
+        {/* Bilgiler - Düzenleme */}
+        <form
+          onSubmit={handleSave}
+          className="w-full max-w-lg flex flex-col gap-2 mt-4"
+        >
+          <div>
+            <span className="font-bold text-[#bfa658] mr-1">Üye Numarası:</span>
+            {user.uyeNo}
           </div>
-        </div>
+          {user.type === "firma" && (
+            <div>
+              <span className="font-bold text-[#bfa658] mr-1">Firma Adı:</span>
+              {edit ? (
+                <input
+                  value={form.firmaAdi || ""}
+                  onChange={e =>
+                    setForm(f => ({ ...f, firmaAdi: e.target.value }))
+                  }
+                  className="border px-2 py-1 rounded"
+                />
+              ) : (
+                user.firmaAdi || "-"
+              )}
+            </div>
+          )}
+          <div>
+            <span className="font-bold text-[#bfa658] mr-1">Ad Soyad:</span>
+            {edit ? (
+              <input
+                value={form.ad || ""}
+                onChange={e => setForm(f => ({ ...f, ad: e.target.value }))}
+                className="border px-2 py-1 rounded"
+              />
+            ) : (
+              user.ad || "-"
+            )}
+          </div>
+          <div>
+            <span className="font-bold text-[#bfa658] mr-1">E-posta:</span>
+            {edit ? (
+              <input
+                value={form.email || ""}
+                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                className="border px-2 py-1 rounded"
+              />
+            ) : (
+              user.email || "-"
+            )}
+          </div>
+          <div>
+            <span className="font-bold text-[#bfa658] mr-1">Telefon:</span>
+            {edit ? (
+              <input
+                value={form.telefon || ""}
+                onChange={e => setForm(f => ({ ...f, telefon: e.target.value }))}
+                className="border px-2 py-1 rounded"
+              />
+            ) : (
+              user.telefon || "-"
+            )}
+          </div>
+          <div>
+            <span className="font-bold text-[#bfa658] mr-1">Üyelik Tipi:</span>
+            {user.type || "-"}
+          </div>
+          <div>
+            <span className="font-bold text-[#bfa658] mr-1">Şehir:</span>
+            {edit ? (
+              <input
+                value={form.il || ""}
+                onChange={e => setForm(f => ({ ...f, il: e.target.value }))}
+                className="border px-2 py-1 rounded"
+              />
+            ) : (
+              user.il || "-"
+            )}
+          </div>
+
+          <div className="flex gap-3 mt-3">
+            {!edit ? (
+              <button
+                type="button"
+                onClick={() => setEdit(true)}
+                className="px-4 py-1 bg-yellow-400 text-black rounded shadow font-bold"
+              >
+                Düzenle
+              </button>
+            ) : (
+              <>
+                <button
+                  type="submit"
+                  className="px-4 py-1 bg-yellow-400 text-black rounded shadow font-bold"
+                >
+                  Kaydet
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEdit(false);
+                    setForm(user);
+                  }}
+                  className="px-4 py-1 bg-gray-300 text-black rounded shadow font-bold"
+                >
+                  Vazgeç
+                </button>
+              </>
+            )}
+          </div>
+          <div className="text-sm text-[#ffeec2] mt-2">{status}</div>
+        </form>
       </div>
     </main>
   );
