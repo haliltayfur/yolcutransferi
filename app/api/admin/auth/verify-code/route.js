@@ -1,6 +1,6 @@
+//app/api/admin/auth/verify-code/route.js
 import { NextResponse } from "next/server";
 
-// Kodu saklamak için (gerçekte DB/Redis! Şimdi demo RAM)
 global.codes = global.codes || {};
 
 export async function POST(req) {
@@ -19,3 +19,4 @@ export async function POST(req) {
   delete global.codes[email];
   return NextResponse.json({ success: true });
 }
+//app/api/admin/auth/verify-code/route.js
