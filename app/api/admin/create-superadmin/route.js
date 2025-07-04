@@ -7,22 +7,17 @@ import bcrypt from "bcryptjs";
 export async function GET() {
   const db = await connectToDatabase();
 
-  const eposta = "byhaliltayfur@hotmail.com";
+  const email = "byhaliltayfur@hotmail.com";
   const plainPassword = "Marmara1*!";
-  const hashedPassword = await bcrypt.hash(plainPassword, 10);
+  const passwordHash = await bcrypt.hash(plainPassword, 10);
 
-  // Önce aynı email ile tüm adminleri sil
-  await db.collection("uyeler").deleteMany({ eposta, tip: "admin" });
+  // Sil ve yeniden ekle (admin_users tablosunda)
+  await db.collection("admin_users").deleteMany({ email });
 
-  // Sonra yeni admin kaydı ekle
-  const result = await db.collection("uyeler").insertOne({
-    eposta,
-    adsoyad: "Halil Tayfur",
-    tip: "admin",
-    telefon: "",
-    createdAt: new Date().toISOString(),
-    aktif: true,
-    sifre: hashedPassword
+  const result = await db.collection("admin_users").insertOne({
+    email,
+    passwordHash,
+    createdAt: new Date()
   });
 
   return NextResponse.json({ ok: true, id: result.insertedId });
