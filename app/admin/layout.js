@@ -1,20 +1,33 @@
 // PATH: /app/admin/layout.js
 "use client";
-import { useAdminAuth } from "../hooks/useAdminAuth";
 import { useEffect, useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import { usePathname } from "next/navigation";
 import { FaBars } from "react-icons/fa";
 
 export default function AdminLayout({ children }) {
-  const [yetkili, setYetkili] = useState(null);
+  const [isClient, setIsClient] = useState(false);
   const path = usePathname();
 
   useEffect(() => {
-    useAdminAuth(setYetkili);
+    setIsClient(true);
   }, []);
 
-  if (yetkili === false && !path.includes("/admin/login")) {
+  if (!isClient) {
+    // Sadece client'ta render edilsin
+    return null;
+  }
+
+  // ADMIN YETKİ KONTROLÜ (Burası localStorage ile client'ta çalışmalı)
+  const isAdmin =
+    typeof window !== "undefined" &&
+    localStorage.getItem("admin_auth") === "ok";
+
+  // Eğer admin değilse ve login sayfasında değilse login'e yönlendir:
+  if (!isAdmin && !path.includes("/admin/login")) {
+    if (typeof window !== "undefined") {
+      window.location.href = `/admin/login?next=${encodeURIComponent(path)}`;
+    }
     return null;
   }
 
