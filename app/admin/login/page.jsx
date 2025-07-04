@@ -1,134 +1,114 @@
 // app/admin/login/page.jsx
 "use client";
-import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
 
-function LoginInner() {
-  const [email, setEmail] = useState("");
-  const [step, setStep] = useState(1);
-  const [code, setCode] = useState("");
-  const [password, setPassword] = useState("");
+export default function AdminLoginPage() {
+  const [step, setStep] = useState(1); // 1: mail, 2: kod, 3: şifre
+  const [mail, setMail] = useState("");
+  const [kod, setKod] = useState("");
+  const [sifre, setSifre] = useState("");
   const [msg, setMsg] = useState("");
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const inputRef = useRef();
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (localStorage.getItem("admin_auth") === "ok") {
-        router.replace("/admin");
+  useEffect(() => { if (inputRef.current) inputRef.current.focus(); }, [step]);
+
+  // Enter ile ilerleme desteği
+  function handleKey(e) { if (e.key === "Enter") ilerle(); }
+
+  function ilerle() {
+    if (step === 1 && mail.trim()) {
+      // Sadece örnek, API çağrısı ile mail kontrolü burada
+      setStep(2);
+      setKod("");
+      setMsg("");
+    } else if (step === 2 && kod.trim()) {
+      // Sadece örnek, kod kontrolü burada
+      setStep(3);
+      setSifre("");
+      setMsg("");
+    } else if (step === 3 && sifre.trim()) {
+      // Şifreyi burada doğrula, başarılıysa /admin'e yönlendir
+      if (
+        (mail === "info@yolcutransferi.com" || mail === "byhaliltayfur@hotmail.com") &&
+        sifre === "Marmara1*!"
+      ) {
+        window.location.href = "/admin";
+      } else {
+        setMsg("Yetkisiz giriş veya hatalı şifre!");
       }
     }
-  }, [router]);
-
-  async function sendCode() {
-    setMsg("Kod gönderiliyor...");
-    const r = await fetch("/api/admin/auth/request-code", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    const data = await r.json();
-    if (data.success) {
-      setStep(2); setMsg("");
-    } else setMsg(data.error || "Kod gönderilemedi.");
-  }
-
-  async function verifyCode() {
-    setMsg("");
-    const r = await fetch("/api/admin/auth/verify-code", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, code }),
-    });
-    const data = await r.json();
-    if (data.success) {
-      setStep(3); setMsg("");
-    } else setMsg(data.error || "Kod yanlış veya süresi dolmuş.");
-  }
-
-  async function verifyPassword() {
-    setMsg("Doğrulanıyor...");
-    const r = await fetch("/api/admin/auth/verify-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await r.json();
-    if (data.success) {
-      localStorage.setItem("admin_auth", "ok");
-      const next = searchParams.get("next") || "/admin";
-      window.location.href = next;
-    } else setMsg(data.error || "Şifre hatalı.");
-  }
-
-  function handleKey(e, cb) {
-    if (e.key === "Enter") cb();
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-black">
-      <div className="p-8 bg-[#19160a] rounded-2xl shadow-xl border border-[#bfa658] w-full max-w-sm">
-        <h1 className="text-2xl font-bold mb-6 text-[#bfa658] text-center">Admin Giriş</h1>
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="bg-[#19160a] border-2 border-[#bfa658] rounded-2xl shadow-2xl px-10 py-8 w-full max-w-md flex flex-col items-center">
+        <h1 className="text-2xl font-extrabold text-[#bfa658] mb-8">Admin Giriş</h1>
         {step === 1 && (
           <>
-            <label className="block mb-2 text-[#ffeec2]">E-posta</label>
+            <label className="font-semibold text-[#bfa658] mb-2">M</label>
             <input
+              ref={inputRef}
               type="email"
-              className="w-full p-3 rounded border mb-4 bg-black text-[#ffd]"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              onKeyDown={e => handleKey(e, sendCode)}
+              placeholder=""
+              className="w-64 px-4 py-3 border-2 border-[#bfa658] rounded-lg bg-black text-white text-lg mb-4 focus:outline-none focus:ring"
+              value={mail}
+              onChange={e => setMail(e.target.value)}
+              onKeyDown={handleKey}
               autoFocus
             />
-            <button onClick={sendCode}
-              className="w-full bg-[#bfa658] text-black font-bold rounded-xl py-3 hover:bg-yellow-700"
-            >Kodu Gönder</button>
+            <button
+              className="w-64 bg-[#bfa658] text-black font-bold py-3 rounded-lg mt-2 hover:bg-[#ffeec2] transition"
+              onClick={ilerle}
+            >
+              →
+            </button>
           </>
         )}
         {step === 2 && (
           <>
-            <label className="block mb-2 text-[#ffeec2]">Kod</label>
+            <label className="font-semibold text-[#bfa658] mb-2">K</label>
             <input
+              ref={inputRef}
               type="text"
-              className="w-full p-3 rounded border mb-4"
-              value={code}
-              onChange={e => setCode(e.target.value)}
-              onKeyDown={e => handleKey(e, verifyCode)}
+              placeholder=""
+              className="w-64 px-4 py-3 border-2 border-[#bfa658] rounded-lg bg-black text-white text-lg mb-4 focus:outline-none focus:ring"
+              value={kod}
+              onChange={e => setKod(e.target.value)}
+              onKeyDown={handleKey}
               autoFocus
             />
-            <button onClick={verifyCode}
-              className="w-full bg-[#bfa658] text-black font-bold rounded-xl py-3 hover:bg-yellow-700"
-            >Kodu Doğrula</button>
+            <button
+              className="w-64 bg-[#bfa658] text-black font-bold py-3 rounded-lg mt-2 hover:bg-[#ffeec2] transition"
+              onClick={ilerle}
+            >
+              →
+            </button>
           </>
         )}
         {step === 3 && (
           <>
-            <label className="block mb-2 text-[#ffeec2]">Şifre</label>
+            <label className="font-semibold text-[#bfa658] mb-2">P</label>
             <input
+              ref={inputRef}
               type="password"
-              className="w-full p-3 rounded border mb-4"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              onKeyDown={e => handleKey(e, verifyPassword)}
+              placeholder=""
+              className="w-64 px-4 py-3 border-2 border-[#bfa658] rounded-lg bg-black text-white text-lg mb-4 focus:outline-none focus:ring"
+              value={sifre}
+              onChange={e => setSifre(e.target.value)}
+              onKeyDown={handleKey}
               autoFocus
             />
-            <button onClick={verifyPassword}
-              className="w-full bg-[#bfa658] text-black font-bold rounded-xl py-3 hover:bg-yellow-700"
-            >Giriş Yap</button>
+            <button
+              className="w-64 bg-[#bfa658] text-black font-bold py-3 rounded-lg mt-2 hover:bg-[#ffeec2] transition"
+              onClick={ilerle}
+            >
+              →
+            </button>
           </>
         )}
-        <div className="mt-4 text-center text-[#ffeec2]">{msg}</div>
+        {msg && <div className="text-red-400 font-semibold mt-3">{msg}</div>}
       </div>
-    </main>
-  );
-}
-
-export default function AdminLoginPage() {
-  // Suspense ile sarmak artık zorunlu!
-  return (
-    <Suspense fallback={<div>Yükleniyor...</div>}>
-      <LoginInner />
-    </Suspense>
+    </div>
   );
 }
 // app/admin/login/page.jsx
