@@ -1,4 +1,4 @@
-// app/admin/uyelikler/page.jsx
+// PATH: app/admin/uyelikler/page.jsx
 "use client";
 import { useEffect, useState } from "react";
 
@@ -14,7 +14,6 @@ export default function AdminUyelikler() {
   const [uyeler, setUyeler] = useState([]);
   const [tip, setTip] = useState("");
   const [okunan, setOkunan] = useState(null);
-  const [hata, setHata] = useState("");
 
   useEffect(() => {
     fetch(`/api/uye/liste?tip=${tip}`)
@@ -25,6 +24,17 @@ export default function AdminUyelikler() {
       .then(data => setUyeler(data.uyeler || []))
       .catch(() => setUyeler([]));
   }, [tip]);
+
+  // Güvenli tarih gösterme
+  const getKayitTarihi = (uye) => {
+    let t = uye.kayitTarihi || uye.createdAt || "";
+    if (!t) return "-";
+    try {
+      let dt = new Date(t);
+      if (!isNaN(dt)) return dt.toLocaleString("tr-TR");
+      else return "-";
+    } catch { return "-"; }
+  };
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-8">
@@ -92,7 +102,7 @@ export default function AdminUyelikler() {
                 <div><b>Telefon:</b> {okunan.telefon || "-"}</div>
                 <div><b>E-posta:</b> {okunan.eposta || "-"}</div>
                 <div><b>İl:</b> {okunan.il || "-"}</div>
-                <div><b>Kayıt:</b> {okunan.kayitTarihi ? new Date(okunan.kayitTarihi).toLocaleString("tr-TR") : "-"}</div>
+                <div><b>Kayıt:</b> {getKayitTarihi(okunan)}</div>
               </div>
               <div className="flex gap-3 justify-end bg-[#faf8ef] px-6 py-4 border-t border-gray-200">
                 <button className="bg-black text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition" onClick={() => setOkunan(null)}>Kapat</button>
@@ -104,4 +114,4 @@ export default function AdminUyelikler() {
     </main>
   );
 }
-// app/admin/uyelikler/page.jsx
+// PATH: app/admin/uyelikler/page.jsx
