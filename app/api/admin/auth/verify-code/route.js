@@ -1,24 +1,28 @@
-//app/api/admin/auth/verify-code/route.js
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb"; // senin kodun
+import { connectToDatabase } from "@/lib/mongodb";
 
 export async function POST(req) {
   const { email, code } = await req.json();
   const db = await connectToDatabase();
-  const entry = await db.collection("admin_codes").findOne({ email });
 
-  if (!entry) {
-    return NextResponse.json({ success: false, error: "Kod bulunamadı veya süresi dolmuş." }, { status: 400 });
+  const uye = await db.collection("uyeler").findOne({ eposta: email, tip: "admin" });
+  if (!uye || !uye.kod || !uye.kodExpire) {
+    return NextResponse.json({ ok: false, error: "Kod bulunamadı!" }, { status: 401 });
   }
-  if (entry.code !== code) {
-    return NextResponse.json({ success: false, error: "Kod yanlış." }, { status: 401 });
+
+  if (uye.kod !== code) {
+    return NextResponse.json({ ok: false, error: "Kod yanlış!" }, { status: 401 });
   }
-  if (Date.now() > entry.expires) {
-    await db.collection("admin_codes").deleteOne({ email });
-    return NextResponse.json({ success: false, error: "Kodun süresi dolmuş." }, { status: 400 });
+
+  if (Date.now() > uye.kodExpire) {
+    return NextResponse.json({ ok: false, error: "Kodun süresi doldu!" }, { status: 401 });
   }
-  // Kod doğrulandıktan sonra sil
-  await db.collection("admin_codes").deleteOne({ email });
-  return NextResponse.json({ success: true });
+
+  // Kodu doğruladıktan sonra veritabanından silebilirsin:
+  await db.collection("uyeler").updateOne(
+    { _id: uye._id },
+    { $unset: { kod: "", kodExpire: "" } }
+  );
+
+  return NextResponse.json({ ok: true });
 }
-//app/api/admin/auth/verify-code/route.js
