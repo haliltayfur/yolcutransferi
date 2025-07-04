@@ -7,12 +7,10 @@ import bcrypt from "bcryptjs";
 export async function GET() {
   const db = await connectToDatabase();
 
-  // Varsayılan admin
   const email = "byhaliltayfur@hotmail.com";
   const plainPassword = "Marmara1*!";
   const password = await bcrypt.hash(plainPassword, 10);
 
-  // Eskiyi sil, yeni admin ekle (güvenli)
   await db.collection("uyeler").deleteMany({ eposta: email, tip: "admin" });
 
   const result = await db.collection("uyeler").insertOne({
