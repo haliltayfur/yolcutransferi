@@ -2,8 +2,9 @@
 "use client";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function AdminLoginPage() {
+function AdminLoginInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
@@ -18,7 +19,6 @@ export default function AdminLoginPage() {
 
   const handleMail = async () => {
     setMsg("");
-    // Sadece belirli mailler izinli (hardcoded kontrol)
     if (
       !["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"].includes(
         mail.trim().toLowerCase()
@@ -27,13 +27,11 @@ export default function AdminLoginPage() {
       setMsg("Yetkisiz e-posta!");
       return;
     }
-    // Demo: 111111 kodunu her zaman kabul et
     setStep(2);
   };
 
   const handleKod = async () => {
     setMsg("");
-    // Kod kontrolü
     if (code.trim() !== "111111") {
       setMsg("Kod hatalı!");
       return;
@@ -43,14 +41,11 @@ export default function AdminLoginPage() {
 
   const handlePass = async () => {
     setMsg("");
-    // Şifre kontrolü
     if (pass !== "Marmara1*!") {
       setMsg("Şifre hatalı!");
       return;
     }
-    // Başarılı giriş
     localStorage.setItem("admin_auth", "ok");
-    // Next param ile geri dön
     const next = searchParams.get("next") || "/admin";
     router.replace(next);
   };
@@ -122,6 +117,14 @@ export default function AdminLoginPage() {
         {msg && <div className="mt-2 text-red-400 font-bold text-sm text-center">{msg}</div>}
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminLoginInner />
+    </Suspense>
   );
 }
 // PATH: /app/admin/login/page.jsx
