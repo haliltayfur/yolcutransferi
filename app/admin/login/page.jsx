@@ -1,83 +1,138 @@
-// PATH: /app/admin/login/page.jsx
+// PATH: app/admin/login/page.jsx
+
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { Suspense } from "react";
+import { useState } from "react";
 
-function LoginInner() {
-  const [email, setEmail] = useState("");
-  const [pass, setPass] = useState("");
+export default function AdminLogin() {
+  // 1: mail, 2: kod, 3: şifre
+  const [step, setStep] = useState(1);
+  const [mail, setMail] = useState("");
+  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const [loading, setLoading] = useState(false);
 
-  // Giriş yapanı admin paneline at
-  useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("admin_auth") === "ok") {
-      router.replace("/admin");
-    }
-  }, [router]);
-
-  const handleSubmit = async (e) => {
+  // MAIL -> KOD AKTİF
+  const handleMail = async (e) => {
     e.preventDefault();
-    setMsg("Giriş yapılıyor...");
-    // Örneğin admin: admin@yolcutransferi.com / şifre: YOLCU2024!
-    if (email === "admin@yolcutransferi.com" && pass === "YOLCU2024!") {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("admin_auth", "ok");
-      }
-      setMsg("Başarılı, yönlendiriliyor...");
-      setTimeout(() => {
-        // Eğer next param varsa oraya git, yoksa admin ana sayfa
-        const next = searchParams.get("next");
-        router.replace(next && next.startsWith("/admin") ? next : "/admin");
-      }, 900);
+    setLoading(true);
+    setMsg("");
+    // API’ye istek: admin mail ise kod gönder
+    const res = await fetch("/api/admin/auth/request-code", {
+      method: "POST",
+      body: JSON.stringify({ email: mail }),
+      headers: { "Content-Type": "application/json" }
+    });
+    setLoading(false);
+    if (res.ok) {
+      setStep(2);
     } else {
-      setMsg("Hatalı e-posta veya şifre!");
+      setMsg("Yetkili admin maili giriniz.");
+    }
+  };
+
+  // KOD -> ŞİFRE
+  const handleCode = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMsg("");
+    const res = await fetch("/api/admin/auth/verify-code", {
+      method: "POST",
+      body: JSON.stringify({ email: mail, code }),
+      headers: { "Content-Type": "application/json" }
+    });
+    setLoading(false);
+    if (res.ok) {
+      setStep(3);
+    } else {
+      setMsg("Kod yanlış veya süresi doldu.");
+    }
+  };
+
+  // ŞİFRE
+  const handlePassword = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMsg("");
+    const res = await fetch("/api/admin/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email: mail, code, password }),
+      headers: { "Content-Type": "application/json" }
+    });
+    setLoading(false);
+    if (res.ok) {
+      localStorage.setItem("admin_auth", "ok");
+      window.location.href = "/admin";
+    } else {
+      setMsg("Şifre hatalı!");
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-black via-[#19160a] to-[#282314]">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm p-7 rounded-2xl shadow-2xl bg-black/90 border border-[#bfa658] flex flex-col gap-5"
-        style={{ marginTop: 60 }}
-      >
-        <h1 className="text-2xl font-bold text-[#bfa658] text-center">Admin Giriş</h1>
-        <input
-          type="email"
-          className="p-3 rounded-lg bg-[#181818] border border-[#bfa658] text-[#ffeec2] font-semibold focus:outline-none"
-          placeholder="E-posta"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoFocus
-        />
-        <input
-          type="password"
-          className="p-3 rounded-lg bg-[#181818] border border-[#bfa658] text-[#ffeec2] font-semibold focus:outline-none"
-          placeholder="Şifre"
-          value={pass}
-          onChange={(e) => setPass(e.target.value)}
-        />
-        <button
-          type="submit"
-          className="mt-2 py-2 rounded-xl bg-[#bfa658] text-black font-bold text-lg hover:bg-yellow-700 transition"
-        >
-          Giriş Yap
-        </button>
-        <div className="text-center mt-2 text-[#ffeec2] min-h-[24px]">{msg}</div>
-      </form>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-black via-[#19160a] to-[#282314]">
+      <div className="bg-black border-2 border-[#bfa658] rounded-3xl px-10 py-12 w-full max-w-sm shadow-2xl">
+        <div className="text-2xl font-extrabold mb-5 text-[#bfa658] text-center">Admin Giriş</div>
+
+        {step === 1 && (
+          <form onSubmit={handleMail} className="flex flex-col gap-4">
+            <input
+              type="text"
+              placeholder="M"
+              value={mail}
+              onChange={e => setMail(e.target.value)}
+              className="p-3 rounded-lg bg-[#181810] border border-[#bfa658] text-[#ffeec2] font-semibold focus:outline-none"
+              autoFocus
+              autoComplete="off"
+              inputMode="email"
+              required
+            />
+            <button type="submit" disabled={loading} className="bg-[#bfa658] rounded-lg text-black font-bold py-2 mt-2">
+              {loading ? "..." : "Devam"}
+            </button>
+          </form>
+        )}
+
+        {step === 2 && (
+          <form onSubmit={handleCode} className="flex flex-col gap-4">
+            <input
+              type="password"
+              placeholder="K"
+              value={code}
+              onChange={e => setCode(e.target.value)}
+              className="p-3 rounded-lg bg-[#181810] border border-[#bfa658] text-[#ffeec2] font-semibold focus:outline-none"
+              autoFocus
+              autoComplete="off"
+              inputMode="numeric"
+              required
+            />
+            <button type="submit" disabled={loading} className="bg-[#bfa658] rounded-lg text-black font-bold py-2 mt-2">
+              {loading ? "..." : "Devam"}
+            </button>
+          </form>
+        )}
+
+        {step === 3 && (
+          <form onSubmit={handlePassword} className="flex flex-col gap-4">
+            <input
+              type="password"
+              placeholder="P"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="p-3 rounded-lg bg-[#181810] border border-[#bfa658] text-[#ffeec2] font-semibold focus:outline-none"
+              autoFocus
+              autoComplete="off"
+              required
+            />
+            <button type="submit" disabled={loading} className="bg-[#bfa658] rounded-lg text-black font-bold py-2 mt-2">
+              {loading ? "..." : "Giriş Yap"}
+            </button>
+          </form>
+        )}
+
+        {msg && <div className="text-red-500 text-center mt-3">{msg}</div>}
+      </div>
     </div>
   );
 }
 
-// Suspense ile sarmalandı, böylece build hatası gelmez!
-export default function AdminLoginPage() {
-  return (
-    <Suspense fallback={<div className="text-[#ffeec2] p-8 text-center">Yükleniyor...</div>}>
-      <LoginInner />
-    </Suspense>
-  );
-}
-// PATH: /app/admin/login/page.jsx
+// PATH: app/admin/login/page.jsx
