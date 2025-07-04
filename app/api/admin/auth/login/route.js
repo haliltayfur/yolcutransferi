@@ -1,3 +1,5 @@
+// Örnek: app/api/admin/auth/login/route.js
+
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
@@ -6,20 +8,17 @@ export async function POST(req) {
   const { email, password } = await req.json();
   const db = await connectToDatabase();
 
-  const uye = await db.collection("uyeler").findOne({ eposta: email, tip: "admin" });
-  if (!uye) {
+  // DİKKAT! Collection adı ve fieldlar birebir aşağıdaki gibi olmalı!
+  const admin = await db.collection("admin_users").findOne({ email });
+
+  if (!admin) {
     return NextResponse.json({ ok: false, error: "Kullanıcı bulunamadı!" }, { status: 401 });
   }
 
-  // (Opsiyonel: kod onaylandıktan sonra işaret koyup burada kontrol edebilirsin)
-  // Eğer kod onaylama sonrası '2faDone' gibi bir field set ediyorsan onu kontrol et
-
-  const match = await bcrypt.compare(password, uye.sifre);
-
+  const match = await bcrypt.compare(password, admin.passwordHash);
   if (!match) {
     return NextResponse.json({ ok: false, error: "Şifre hatalı!" }, { status: 401 });
   }
 
-  // Giriş başarılı
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, user: { email: admin.email } });
 }
