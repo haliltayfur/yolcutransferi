@@ -1,5 +1,3 @@
-// PATH: app/api/admin/auth/login/route.js
-
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
@@ -7,6 +5,12 @@ import bcrypt from "bcryptjs";
 export async function POST(req) {
   const { email, password } = await req.json();
   const db = await connectToDatabase();
+
+  // BURAYA YAPIŞTIR 👇
+  console.log("TEST EMAIL:", email);
+  const admins = await db.collection("admin_users").find({}).toArray();
+  console.log("ADMINS:", admins);
+  // 👆
 
   // admin_users koleksiyonunda email ile admin ara
   const admin = await db.collection("admin_users").findOne({ email });
