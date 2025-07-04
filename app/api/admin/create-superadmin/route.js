@@ -11,9 +11,10 @@ export async function GET() {
   const plainPassword = "Marmara1*!";
   const passwordHash = await bcrypt.hash(plainPassword, 10);
 
-  // Sil ve yeniden ekle (admin_users tablosunda)
+  // Eski kayıtları sil
   await db.collection("admin_users").deleteMany({ email });
 
+  // Yeni admin oluştur
   const result = await db.collection("admin_users").insertOne({
     email,
     passwordHash,
