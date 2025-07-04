@@ -17,45 +17,60 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     async function fetchData() {
-      const [rez, ziyaretci, uyeler] = await Promise.all([
-        fetch("/api/rezervasyon").then(res => res.json()),
-        fetch("/api/visitors").then(res => res.json()),
-        fetch("/api/uyelikler").then(res => res.json()),
-      ]);
+      try {
+        const [rez, ziyaretci, uyeler] = await Promise.all([
+          fetch("/api/rezervasyon").then(res => res.json()),
+          fetch("/api/visitors").then(res => res.json()),
+          fetch("/api/uyelikler").then(res => res.json()),
+        ]);
+        const now = new Date();
+        const today = now.toISOString().slice(0, 10);
+        const ayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-      const now = new Date();
-      const today = now.toISOString().slice(0, 10);
-      const ayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+        let bugunCiro = 0, buAyCiro = 0, bugunRez = 0;
+        (rez.items || []).forEach(r => {
+          const odendi = r.odemeDurumu === "tamamlandi";
+          let trfTarih = "";
+          try {
+            trfTarih = r.transferTarihi ? new Date(r.transferTarihi).toISOString().slice(0, 10) : "";
+          } catch { trfTarih = ""; }
+          if (odendi && trfTarih === today) {
+            bugunCiro += Number(r.tutar) || 0;
+            bugunRez++;
+          }
+          if (odendi && trfTarih.slice(0, 7) === ayStr) {
+            buAyCiro += Number(r.tutar) || 0;
+          }
+        });
 
-      let bugunCiro = 0, buAyCiro = 0, bugunRez = 0;
-      rez.items.forEach(r => {
-        const odendi = r.odemeDurumu === "tamamlandi";
-        const trfTarih = new Date(r.transferTarihi).toISOString().slice(0, 10);
-        if (odendi && trfTarih === today) {
-          bugunCiro += r.tutar;
-          bugunRez++;
-        }
-        if (odendi && trfTarih.slice(0, 7) === ayStr) {
-          buAyCiro += r.tutar;
-        }
-      });
+        const yeniUyeler = { musteri: 0, sofor: 0, firma: 0, isbirligi: 0 };
+        (uyeler.items || []).forEach(u => {
+          let kayitAy = "";
+          try {
+            kayitAy = u.createdAt ? u.createdAt.slice(0, 7) : "";
+          } catch { kayitAy = ""; }
+          if (kayitAy === ayStr) {
+            yeniUyeler[u.tip] = (yeniUyeler[u.tip] || 0) + 1;
+          }
+        });
 
-      const yeniUyeler = { musteri: 0, sofor: 0, firma: 0, isbirligi: 0 };
-      uyeler.items.forEach(u => {
-        if (u.createdAt && u.createdAt.slice(0, 7) === ayStr) {
-          yeniUyeler[u.tip] = (yeniUyeler[u.tip] || 0) + 1;
-        }
-      });
-
-      setData({
-        bugunCiro,
-        buAyCiro,
-        ziyaretci: ziyaretci.count || 0,
-        rezervasyon: bugunRez,
-        yeniUyeler,
-      });
+        setData({
+          bugunCiro,
+          buAyCiro,
+          ziyaretci: ziyaretci.count || 0,
+          rezervasyon: bugunRez,
+          yeniUyeler,
+        });
+      } catch (err) {
+        setData({
+          bugunCiro: 0,
+          buAyCiro: 0,
+          ziyaretci: 0,
+          rezervasyon: 0,
+          yeniUyeler: { musteri: 0, sofor: 0, firma: 0, isbirligi: 0 },
+        });
+      }
     }
-
     fetchData();
   }, []);
 
@@ -93,7 +108,6 @@ export default function AdminDashboard() {
           <p>Yeni Üye (Bu Ay)</p>
         </div>
       </section>
-
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Link href="/admin/rezervasyonlar" className="bg-[#bfa658] rounded-xl shadow flex items-center gap-2 p-3">
           <FaListAlt size={20} /> Rezervasyonlar
