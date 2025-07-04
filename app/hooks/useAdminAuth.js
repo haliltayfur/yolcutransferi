@@ -3,20 +3,19 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
-export function useAdminAuth() {
+export function useAdminAuth(setYetkili) {
   const router = useRouter();
   const pathname = usePathname();
   const timerRef = useRef();
-  const [state, setState] = useState({ loading: true, isAuth: false });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const auth = localStorage.getItem("admin_auth");
       if (auth !== "ok") {
+        if (setYetkili) setYetkili(false);
         router.replace(`/admin/login?next=${encodeURIComponent(pathname)}`);
-        setState({ loading: false, isAuth: false });
       } else {
-        setState({ loading: false, isAuth: true });
+        if (setYetkili) setYetkili(true);
       }
 
       const resetTimer = () => {
@@ -24,7 +23,7 @@ export function useAdminAuth() {
         timerRef.current = setTimeout(() => {
           localStorage.removeItem("admin_auth");
           router.replace("/admin/login");
-        }, 5 * 60 * 1000);
+        }, 5 * 60 * 1000); // 5 dakika
       };
 
       window.addEventListener("mousemove", resetTimer);
@@ -37,8 +36,5 @@ export function useAdminAuth() {
         clearTimeout(timerRef.current);
       };
     }
-  }, [router, pathname]);
-
-  return state;
+  }, [router, pathname, setYetkili]);
 }
-// PATH: app/hooks/useAdminAuth.js
