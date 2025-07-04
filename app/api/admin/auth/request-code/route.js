@@ -1,41 +1,41 @@
-//app/api/admin/auth/request-code/route.js
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
-import { connectToDatabase } from "@/lib/mongodb"; // senin kodun
-
-const allowedEmails = [
-  "info@yolcutransferi.com",
-  "byhaliltayfur@hotmail.com"
-];
-const CODE_TIMEOUT = 5 * 60 * 1000; // 5 dakika
+import { connectToDatabase } from "@/lib/mongodb";
+import nodemailer from "nodemailer";
 
 export async function POST(req) {
   const { email } = await req.json();
-  if (!allowedEmails.includes(email)) {
-    return NextResponse.json({ success: false, error: "Bu email yetkili değil." }, { status: 403 });
-  }
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-  // Kod veritabanına yazılıyor (patlatmaz, upsert!)
   const db = await connectToDatabase();
-  await db.collection("admin_codes").updateOne(
-    { email },
-    { $set: { code, expires: Date.now() + CODE_TIMEOUT } },
-    { upsert: true }
+
+  const uye = await db.collection("uyeler").findOne({ eposta: email, tip: "admin" });
+  if (!uye) {
+    return NextResponse.json({ ok: false, error: "Yetkili admin değil." }, { status: 403 });
+  }
+
+  // 6 haneli random kod
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  // 5 dakika geçerli
+  const expiresAt = Date.now() + 5 * 60 * 1000;
+
+  await db.collection("uyeler").updateOne(
+    { _id: uye._id },
+    { $set: { kod: code, kodExpire: expiresAt } }
   );
 
-  // Mail gönder
-  const resend = new Resend(process.env.RESEND_API_KEY);
-  await resend.emails.send({
-    from: "YolcuTransferi Admin <info@yolcutransferi.com>",
-    to: [email],
-    subject: "Admin Panel Giriş Kodu",
-    html: `<div style="font-size:18px;font-family:Arial">
-      Admin giriş kodunuz: <b style="font-size:22px">${code}</b>
-      <br><br>Kod <b>5 dakika</b> geçerlidir.
-    </div>`
+  // MAIL GÖNDER (örnek transporter)
+  let transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "seninmail@gmail.com",
+      pass: "app-password"
+    }
   });
 
-  return NextResponse.json({ success: true });
+  await transporter.sendMail({
+    from: '"Admin Güvenlik" <seninmail@gmail.com>',
+    to: email,
+    subject: "YolcuTransferi.com Admin Giriş Kodu",
+    text: `Giriş kodunuz: ${code}\nKod 5 dakika geçerlidir.`
+  });
+
+  return NextResponse.json({ ok: true });
 }
-//app/api/admin/auth/request-code/route.js
