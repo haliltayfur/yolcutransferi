@@ -1,4 +1,4 @@
-// /app/admin/layout.js
+// PATH: /app/admin/layout.js
 "use client";
 import { useAdminAuth } from "../hooks/useAdminAuth";
 import { useEffect, useState } from "react";
@@ -11,14 +11,13 @@ export default function AdminLayout({ children }) {
   const path = usePathname();
 
   useEffect(() => {
-    // useAdminAuth hook: yetkili yoksa login'e yönlendirir, varsa true döner
     useAdminAuth(setYetkili);
   }, []);
 
-  // Sadece giriş yapmışsa render et!
   if (yetkili === false && !path.includes("/admin/login")) {
-    return null; // veya bir loading ekranı!
+    return null;
   }
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-black via-[#19160a] to-[#282314]">
       <aside className="hidden md:flex flex-col w-64 bg-black/95 border-r border-[#bfa658] shadow-2xl fixed inset-y-0 left-0 z-30">
@@ -41,4 +40,4 @@ export default function AdminLayout({ children }) {
     </div>
   );
 }
-// /app/admin/layout.js
+// PATH: /app/admin/layout.js
