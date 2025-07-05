@@ -1,3 +1,4 @@
+// PATH: /app/register/page.js
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -11,6 +12,7 @@ export default function RegisterPage() {
   const [telefon, setTelefon] = useState("");
   const [il, setIl] = useState("");
   const [msg, setMsg] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
   const router = useRouter();
 
   async function handleRegister(e) {
@@ -23,10 +25,13 @@ export default function RegisterPage() {
     });
     const data = await res.json();
     if (data.success) {
-      // Kayıt başarılı ise localStorage'a user'ı yaz (autologin için)
       localStorage.setItem("user", JSON.stringify({ tip, ad, soyad, email, telefon, il }));
-      setMsg("Kayıt başarılı, giriş yapıldı! Anasayfaya yönlendiriliyorsunuz...");
-      setTimeout(() => router.replace("/"), 1600);
+      setMsg("");
+      setShowPopup(true);
+      setTimeout(() => {
+        setShowPopup(false);
+        router.replace("/");
+      }, 2600);
     } else {
       setMsg(data.error || "Kayıt başarısız.");
     }
@@ -48,11 +53,21 @@ export default function RegisterPage() {
         <input type="password" placeholder="Şifre" required className="w-full p-3 border rounded mb-3" value={sifre} onChange={e => setSifre(e.target.value)} />
         <input type="tel" placeholder="Telefon" required className="w-full p-3 border rounded mb-3" value={telefon} onChange={e => setTelefon(e.target.value)} />
         <input type="text" placeholder="İl" required className="w-full p-3 border rounded mb-3" value={il} onChange={e => setIl(e.target.value)} />
-        <button type="submit" className="w-full bg-yellow-400 py-2 rounded font-bold">
+        <button type="submit" className="w-full bg-yellow-400 py-2 rounded font-bold" disabled={!!msg && msg.startsWith("Kayıt")}>
           Üye Ol
         </button>
         {msg && <div className="mt-3 text-red-500">{msg}</div>}
       </form>
+      {showPopup && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+          <div className="bg-white text-black px-8 py-10 rounded-xl shadow-xl flex flex-col items-center gap-2">
+            <div className="text-2xl font-bold text-yellow-600">✔️</div>
+            <div className="font-bold text-lg">Teşekkürler, üyeliğiniz oluşturuldu.</div>
+            <div>Otomatik giriş yapılıyor. Hoş geldiniz!</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+// PATH: /app/register/page.js
