@@ -2,7 +2,23 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
-import { sendWelcomeMail } from "@/lib/mailUtils"; // Bunu ekle!
+import { sendWelcomeMail } from "@/lib/mailUtils";
+
+// Dinamik üye no algoritması
+function generateUyeno(tip, ad = "", firmaAdi = "") {
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  let base = "";
+  if (tip === "musteri") base = `musteri${dd}${mm}${yy}1`;
+  else if (tip === "sofor") base = `sofor${dd}${mm}${yy}69`;
+  else if (tip === "firma") base = (firmaAdi ? firmaAdi.replace(/\s+/g, "").toLowerCase() : "firma") + `${dd}${mm}${yy}5`;
+  else if (tip === "isbirligi") base = `isbirligi${dd}${mm}${yy}31`;
+  else base = `uye${dd}${mm}${yy}`;
+  // Son 4 rakam random
+  return `${base}${Math.floor(1000 + Math.random() * 9000)}`;
+}
 
 export async function GET() {
   const db = await connectToDatabase();
@@ -16,15 +32,16 @@ export async function POST(req) {
   // Email ile kayıt varsa tekrar oluşturma!
   const exists = await db.collection("uyeler").findOne({ email: body.email });
   if (exists) return NextResponse.json({ success: false, error: "Bu e-posta ile üye zaten var!" });
-  const { insertedId } = await db.collection("uyeler").insertOne(body);
+
+  // Üye no üret
+  const uyeno = generateUyeno(body.tip, body.ad, body.firmaAdi);
+  const { insertedId } = await db.collection("uyeler").insertOne({ ...body, uyeno });
   if (insertedId && body.email) {
-    // HOŞ GELDİN MAILİ!
-    await sendWelcomeMail(body.email, body.ad, body.soyad);
+    await sendWelcomeMail(body.email, body.ad, body.soyad, uyeno);
   }
   return NextResponse.json({ success: !!insertedId });
 }
 
-// DELETE: /api/uyelikler?id=xxx
 export async function DELETE(req) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
