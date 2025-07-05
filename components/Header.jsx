@@ -200,8 +200,78 @@ export default function Header() {
           </nav>
         )}
       </div>
-      {/* ...stil kodları aynı */}
+      <style jsx>{`
+        .header-nav-link {
+          color: #fff;
+          font-size: 1.22rem;
+          font-weight: 700;
+          letter-spacing: .025em;
+          padding: 10px 0;
+          border-radius: 10px;
+          transition: color 0.14s, background 0.14s;
+        }
+        .header-nav-link:hover {
+          color: #FFD700;
+          background: #1a1a1a;
+        }
+        .header-btn {
+          background: linear-gradient(90deg, #FFD700 80%, #fffbe6 100%);
+          color: #191919;
+          font-weight: 900;
+          font-size: 1.15rem;
+          border-radius: 15px;
+          border: 2px solid #FFD700;
+          padding: 0.63rem 1.85rem;
+          box-shadow: 0 2px 10px 0 rgba(255,215,0,0.12);
+          transition: all .15s;
+          margin-left: 5px;
+          height: 48px;
+          display: flex; align-items: center;
+        }
+        .header-btn:hover {
+          background: linear-gradient(90deg, #fffbe6 10%, #FFD700 100%);
+          color: #101010;
+          box-shadow: 0 2px 13px 0 rgba(255,215,0,0.17);
+          transform: translateY(-1px) scale(1.07);
+        }
+        .header-btn-outline {
+          background: transparent;
+          color: #FFD700;
+          border: 2px solid #FFD700;
+          font-weight: 900;
+          font-size: 1.15rem;
+          border-radius: 15px;
+          padding: 0.63rem 1.85rem;
+          box-shadow: 0 2px 8px 0 rgba(255,215,0,0.10);
+          margin-left: 3px;
+          transition: all .14s;
+          height: 48px;
+          display: flex; align-items: center;
+        }
+        .header-btn-outline:hover {
+          background: linear-gradient(90deg, #FFD700 85%, #fff8c0 100%);
+          color: #191919;
+          box-shadow: 0 2px 12px 0 rgba(255,215,0,0.16);
+        }
+        .header-social {
+          color: #FFD700;
+          border-radius: 50%;
+          padding: 7px;
+          transition: color 0.15s, box-shadow 0.16s;
+          font-size: 1.7rem;
+          height: 48px; width: 48px;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .header-social:hover {
+          color: #fff8c0;
+          box-shadow: 0 0 10px 2px #FFD70099;
+          background: #161616;
+        }
+        .bg-gold { background: #FFD700; }
+        .border-gold { border-color: #FFD700 !important; }
+        .animate-fade-in { animation: fadeIn .16s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-12px);} to { opacity: 1; transform: translateY(0);} }
+      `}</style>
     </header>
   );
 }
-// components/Header.jsx
