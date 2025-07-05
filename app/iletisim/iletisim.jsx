@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
-// Yardımcı fonksiyonlar...
+// Yardımcı fonksiyonlar
 function isRealEmail(val) {
   if (!val) return false;
   const regex = /^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$/i;
@@ -125,6 +125,7 @@ function formatPhone(val) {
 }
 
 export default function Iletisim() {
+  // KULLANICI BİLGİLERİNİ OTOMATİK ÇEKME BLOĞU ↓↓↓
   const [form, setForm] = useState({
     ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "",
     iletisimTercihi: "", kvkkOnay: false
@@ -133,10 +134,25 @@ export default function Iletisim() {
   const [buttonStatus, setButtonStatus] = useState("normal");
   const [buttonMsg, setButtonMsg] = useState("Mesajı Gönder");
   const [blocked, kaydet, remaining] = useRateLimit();
-
-  // Politika/KVKK popup state'i
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupKvkkConfirmed, setPopupKvkkConfirmed] = useState(false);
+
+  // Kullanıcı girişliyse otomatik doldur!
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const u = localStorage.getItem("user") || localStorage.getItem("uye_bilgi");
+      if (u) {
+        const usr = JSON.parse(u);
+        setForm(f => ({
+          ...f,
+          ad: usr.ad || "",
+          soyad: usr.soyad || "",
+          email: usr.email || "",
+          telefon: usr.telefon || ""
+        }));
+      }
+    }
+  }, []);
 
   // Validasyonlar
   const adValid = isRealName(form.ad);
@@ -155,7 +171,6 @@ export default function Iletisim() {
     setErrors(er => ({ ...er, telefon: undefined }));
   };
 
-  // Tümünü okudum, onaylıyorum popuptan gelirse, kutuyu işaretle
   useEffect(() => {
     if (popupKvkkConfirmed) {
       setForm(f => ({ ...f, kvkkOnay: true }));
@@ -210,14 +225,12 @@ export default function Iletisim() {
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
       <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] mt-16 mb-10">
-        {/* Başlık ve slogan */}
         <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-1 text-center">
           İletişim
         </h1>
         <div className="text-lg text-[#ffeec2] font-semibold text-center mb-8">
           Her türlü soru, öneri veya destek için bizimle hemen iletişime geçin. Tüm başvurulara kısa sürede yanıt veriyoruz.
         </div>
-        
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3 bg-black/70 rounded-2xl p-6 border border-[#bfa658]/60 shadow">
           <div className="flex gap-2">
             <input type="text" name="ad" autoComplete="given-name" placeholder="Ad"
@@ -323,7 +336,6 @@ export default function Iletisim() {
             </div>
           )}
         </form>
-
         {/* Sosyal medya ve iletişim bilgileri */}
         <div className="w-full border-t border-[#bfa658] mt-10 pt-6">
           <div className="flex flex-wrap gap-4 mb-3 justify-center">
