@@ -2,115 +2,115 @@
 "use client";
 import { useEffect, useState } from "react";
 
-const tipler = [
-  { value: "", label: "Hepsi" },
-  { value: "musteri", label: "Müşteri" },
-  { value: "sofor", label: "Şoför" },
-  { value: "firma", label: "Firma" },
-  { value: "isbirligi", label: "İş Birliği" },
-];
-
 export default function AdminUyelikler() {
   const [uyeler, setUyeler] = useState([]);
-  const [tip, setTip] = useState("");
-  const [okunan, setOkunan] = useState(null);
+  const [tipFilter, setTipFilter] = useState("Hepsi");
+  const [msg, setMsg] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Şifre değiştir için email girilirse
+  async function handleChangePassword(email) {
+    setMsg("Şifre değiştiriliyor...");
+    const res = await fetch("/api/uyelikler/sifre-degis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (data.success) setMsg("Yeni şifre e-posta ile gönderildi.");
+    else setMsg(data.error || "Şifre değiştirilemedi!");
+    setTimeout(() => setMsg(""), 3400);
+  }
+
+  // Sil butonu
+  async function handleDelete(id) {
+    if (!window.confirm("Bu üyeyi silmek istediğinize emin misiniz?")) return;
+    setLoading(true);
+    const res = await fetch(`/api/uyelikler?id=${id}`, { method: "DELETE" });
+    const data = await res.json();
+    if (data.success) {
+      setUyeler(u => u.filter(u => u._id !== id));
+      setMsg("Üye başarıyla silindi.");
+    } else {
+      setMsg(data.error || "Silinemedi!");
+    }
+    setLoading(false);
+    setTimeout(() => setMsg(""), 2400);
+  }
 
   useEffect(() => {
-    fetch(`/api/uye/liste?tip=${tip}`)
-      .then(async (res) => {
-        if (!res.ok) throw new Error("API Hatası");
-        return await res.json();
-      })
-      .then(data => setUyeler(data.uyeler || []))
-      .catch(() => setUyeler([]));
-  }, [tip]);
+    async function fetchUyeler() {
+      const res = await fetch("/api/uyelikler");
+      const data = await res.json();
+      setUyeler(data.items || []);
+    }
+    fetchUyeler();
+  }, []);
 
-  // Güvenli tarih gösterme
-  const getKayitTarihi = (uye) => {
-    let t = uye.kayitTarihi || uye.createdAt || "";
-    if (!t) return "-";
-    try {
-      let dt = new Date(t);
-      if (!isNaN(dt)) return dt.toLocaleString("tr-TR");
-      else return "-";
-    } catch { return "-"; }
-  };
+  // Filtrelenmiş üyeler
+  const displayUyeler = uyeler.filter(u => 
+    tipFilter === "Hepsi" || (u.tip || "").toLowerCase() === tipFilter.toLowerCase()
+  );
 
   return (
-    <main className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-[#bfa658] mb-8">Üyelikler</h1>
-      <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
+    <main className="p-8">
+      <h2 className="text-3xl mb-5 font-bold text-[#FFD700]">Üyelikler</h2>
+      <div className="mb-3">
         <select
-          className="border border-[#bfa658] rounded px-3 py-2 bg-black text-[#ffeec2] font-semibold"
-          value={tip}
-          onChange={e => setTip(e.target.value)}
+          value={tipFilter}
+          onChange={e => setTipFilter(e.target.value)}
+          className="p-2 border rounded"
         >
-          {tipler.map(t => (
-            <option value={t.value} key={t.value}>{t.label}</option>
-          ))}
+          <option>Hepsi</option>
+          <option>musteri</option>
+          <option>sofor</option>
+          <option>firma</option>
+          <option>isbirligi</option>
+          <option>admin</option>
         </select>
-        <span className="text-sm text-gray-300">{uyeler.length} üye bulundu.</span>
       </div>
-      <div className="overflow-x-auto bg-black/80 rounded-2xl border-2 border-[#bfa658] min-h-[200px]">
-        <table className="min-w-full text-sm border-separate border-spacing-0">
-          <thead>
-            <tr>
-              <th className="p-2 border-b-2 border-[#bfa658] text-[#ffeec2]">Üye No</th>
-              <th className="p-2 border-b-2 border-[#bfa658] text-[#ffeec2]">Adı / Firma</th>
-              <th className="p-2 border-b-2 border-[#bfa658] text-[#ffeec2]">Tip</th>
-              <th className="p-2 border-b-2 border-[#bfa658] text-[#ffeec2]">E-posta</th>
-              <th className="p-2 border-b-2 border-[#bfa658] text-[#ffeec2]">Telefon</th>
-              <th className="p-2 border-b-2 border-[#bfa658] text-[#ffeec2]">İşlem</th>
+      {msg && <div className="text-green-500 mb-2">{msg}</div>}
+      <table className="w-full border border-[#FFD700] text-[#FFD700] rounded">
+        <thead>
+          <tr className="bg-[#19160a]">
+            <th className="p-2">Üye No</th>
+            <th>Adı / Firma</th>
+            <th>Tip</th>
+            <th>E-posta</th>
+            <th>Telefon</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+          {displayUyeler.map(u => (
+            <tr key={u._id} className="border-b border-[#FFD70022]">
+              <td className="p-2">{u._id?.slice(-4) || "-"}</td>
+              <td>{u.ad && u.soyad ? `${u.ad} ${u.soyad}` : (u.firmaAdi || "-")}</td>
+              <td>{u.tip || "-"}</td>
+              <td>{u.email || "-"}</td>
+              <td>{u.telefon || "-"}</td>
+              <td>
+                <button
+                  className="bg-yellow-600 px-3 py-1 rounded font-bold mr-2"
+                  onClick={() => handleChangePassword(u.email)}
+                  disabled={u.tip === "admin"}
+                >
+                  Şifre Değiştir
+                </button>
+                {u.tip !== "admin" && (
+                  <button
+                    className="bg-red-600 px-3 py-1 rounded font-bold"
+                    onClick={() => handleDelete(u._id)}
+                    disabled={loading}
+                  >
+                    Sil
+                  </button>
+                )}
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {uyeler.length === 0 && (
-              <tr>
-                <td colSpan={6} className="text-center py-10 text-gray-400 text-xl font-semibold">Hiç üye yok.</td>
-              </tr>
-            )}
-            {uyeler.map((uye, i) => (
-              <tr key={uye._id || i} className="hover:bg-[#231d10] transition">
-                <td className="p-2 border-b border-[#bfa658]">{uye.uyeno}</td>
-                <td className="p-2 border-b border-[#bfa658]">{uye.adsoyad || uye.firmaadi || "-"}</td>
-                <td className="p-2 border-b border-[#bfa658]">{uye.tip}</td>
-                <td className="p-2 border-b border-[#bfa658]">{uye.eposta}</td>
-                <td className="p-2 border-b border-[#bfa658]">{uye.telefon}</td>
-                <td className="p-2 border-b border-[#bfa658] text-center">
-                  <button className="bg-[#bfa658] text-black rounded px-3 py-1 mr-2 font-semibold text-xs" onClick={() => setOkunan(uye)}>Oku</button>
-                  <button className="bg-red-700 text-white rounded px-3 py-1 font-semibold text-xs" onClick={() => alert("Silmek için yetkili admin'e kod gönderilecek (TODO)")}>Sil</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {/* Detay modalı */}
-      {okunan && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/80 z-50" onClick={() => setOkunan(null)}>
-          <div className="bg-white text-black rounded-xl max-w-2xl w-full shadow-2xl relative overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200 bg-[#f3ecd1]">
-              <div className="text-xl font-bold text-[#bfa658]">Üye Detayı</div>
-              <button className="text-2xl text-gray-400 hover:text-black" onClick={() => setOkunan(null)} aria-label="Kapat">×</button>
-            </div>
-            <div className="px-6 py-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-[16px] mb-2">
-                <div><b>Üye No:</b> {okunan.uyeno}</div>
-                <div><b>Tip:</b> {okunan.tip}</div>
-                <div><b>Ad Soyad:</b> {okunan.adsoyad || "-"}</div>
-                <div><b>Firma Adı:</b> {okunan.firmaadi || "-"}</div>
-                <div><b>Telefon:</b> {okunan.telefon || "-"}</div>
-                <div><b>E-posta:</b> {okunan.eposta || "-"}</div>
-                <div><b>İl:</b> {okunan.il || "-"}</div>
-                <div><b>Kayıt:</b> {getKayitTarihi(okunan)}</div>
-              </div>
-              <div className="flex gap-3 justify-end bg-[#faf8ef] px-6 py-4 border-t border-gray-200">
-                <button className="bg-black text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition" onClick={() => setOkunan(null)}>Kapat</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+          ))}
+        </tbody>
+      </table>
     </main>
   );
 }
