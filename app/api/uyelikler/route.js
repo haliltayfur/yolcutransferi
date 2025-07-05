@@ -1,5 +1,3 @@
-// PATH: app/api/uyelikler/route.js
-
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
@@ -16,14 +14,14 @@ export async function POST(req) {
   const { tip, ad, soyad, email, sifre, telefon, il } = await req.json();
   const db = await connectToDatabase();
 
-  if (!email || !sifre) {
-    return NextResponse.json({ success: false, error: "E-posta ve şifre zorunlu!" }, { status: 400 });
+  if (!email || !sifre || !ad || !soyad || !telefon || !il || !tip) {
+    return NextResponse.json({ success: false, error: "Tüm alanlar zorunlu!" }, { status: 400 });
   }
 
-  // Daha önce kayıtlı mı?
+  // Önceden kayıtlı mı?
   const exists = await db.collection("uyeler").findOne({ email });
   if (exists) {
-    return NextResponse.json({ success: false, error: "Bu e-posta ile daha önce kayıt olunmuş!" }, { status: 409 });
+    return NextResponse.json({ success: false, error: "Bu e-posta ile zaten kayıt var!" }, { status: 409 });
   }
 
   const passwordHash = await bcrypt.hash(sifre, 10);
