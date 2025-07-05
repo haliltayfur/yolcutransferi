@@ -8,7 +8,6 @@ export async function POST(req) {
   const { email } = await req.json();
   if (!email) return NextResponse.json({ success: false, error: "E-posta zorunlu!" });
   const db = await connectToDatabase();
-  // Random şifre
   const newPass = crypto.randomBytes(4).toString("hex");
   const result = await db.collection("uyeler").updateOne(
     { email },
