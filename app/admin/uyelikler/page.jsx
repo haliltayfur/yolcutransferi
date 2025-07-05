@@ -7,9 +7,24 @@ export default function AdminUyelikler() {
   const [tipFilter, setTipFilter] = useState("Hepsi");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pwModal, setPwModal] = useState({ open: false, email: "", isAdmin: false });
+  const [pwValue, setPwValue] = useState("");
 
-  // Şifre değiştir
-  async function handleChangePassword(email) {
+  useEffect(() => {
+    async function fetchUyeler() {
+      const res = await fetch("/api/uyelikler");
+      const data = await res.json();
+      setUyeler(data.items || []);
+    }
+    fetchUyeler();
+  }, []);
+
+  async function handleChangePassword(email, isAdmin = false) {
+    if (isAdmin) {
+      setPwModal({ open: true, email, isAdmin: true });
+      setPwValue("");
+      return;
+    }
     setMsg("Şifre değiştiriliyor...");
     const res = await fetch("/api/uyelikler/sifre-degis", {
       method: "POST",
@@ -22,7 +37,21 @@ export default function AdminUyelikler() {
     setTimeout(() => setMsg(""), 3400);
   }
 
-  // Sil butonu
+  // Admin için: Şifre modalından post et
+  async function handleModalPwChange() {
+    setMsg("Şifre güncelleniyor...");
+    const res = await fetch("/api/uyelikler/sifre-degis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: pwModal.email, sifre: pwValue }),
+    });
+    const data = await res.json();
+    if (data.success) setMsg("Şifre başarıyla değiştirildi.");
+    else setMsg(data.error || "Şifre değiştirilemedi!");
+    setPwModal({ open: false, email: "", isAdmin: false });
+    setTimeout(() => setMsg(""), 3200);
+  }
+
   async function handleDelete(id) {
     if (!window.confirm("Bu üyeyi silmek istediğinize emin misiniz?")) return;
     setLoading(true);
@@ -37,15 +66,6 @@ export default function AdminUyelikler() {
     setLoading(false);
     setTimeout(() => setMsg(""), 2400);
   }
-
-  useEffect(() => {
-    async function fetchUyeler() {
-      const res = await fetch("/api/uyelikler");
-      const data = await res.json();
-      setUyeler(data.items || []);
-    }
-    fetchUyeler();
-  }, []);
 
   // Filtrelenmiş üyeler
   const displayUyeler = uyeler.filter(u =>
@@ -96,9 +116,8 @@ export default function AdminUyelikler() {
               <td>
                 <button
                   className="bg-yellow-600 px-3 py-1 rounded font-bold mr-2"
-                  onClick={() => handleChangePassword(u.email)}
-                  disabled={u.tip === "admin"}
-                  title="Yeni şifre üretilip e-posta ile gönderilir."
+                  onClick={() => handleChangePassword(u.email, u.tip === "admin")}
+                  title={u.tip === "admin" ? "Admin şifresini elle belirle" : "Yeni şifre üretilip e-posta ile gönderilir."}
                 >
                   Şifre Değiştir
                 </button>
@@ -116,6 +135,30 @@ export default function AdminUyelikler() {
           ))}
         </tbody>
       </table>
+      {/* Şifre Değiştir Modalı */}
+      {pwModal.open && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+          <div className="bg-[#23201a] border-2 border-[#FFD700] p-8 rounded-xl shadow-xl flex flex-col gap-3 min-w-[310px]">
+            <div className="font-bold text-lg mb-2 text-[#FFD700]">Yeni Şifre Giriniz</div>
+            <input
+              type="text"
+              value={pwValue}
+              onChange={e => setPwValue(e.target.value)}
+              className="p-3 rounded border border-[#FFD700] text-black"
+              placeholder="Yeni şifre"
+              autoFocus
+            />
+            <div className="flex gap-4 mt-2">
+              <button
+                className="bg-[#FFD700] text-black font-bold px-5 py-2 rounded"
+                onClick={handleModalPwChange}
+                disabled={!pwValue}
+              >Kaydet</button>
+              <button className="bg-red-600 text-white px-4 py-2 rounded" onClick={() => setPwModal({ open: false, email: "", isAdmin: false })}>Vazgeç</button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
