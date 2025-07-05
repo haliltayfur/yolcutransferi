@@ -1,5 +1,3 @@
-// PATH: app/api/uyelikler/login/route.js
-
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
@@ -15,6 +13,7 @@ export async function POST(req) {
     return NextResponse.json({ error: "Kullanıcı yok" }, { status: 401 });
   }
 
+  // Şifreyi ASLA konsola yazdırma!
   const match = await bcrypt.compare(sifre, uye.sifre);
   if (!match) {
     return NextResponse.json({ error: "Şifre hatalı" }, { status: 401 });
