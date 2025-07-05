@@ -8,7 +8,7 @@ export default function AdminUyelikler() {
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Şifre değiştir için email girilirse
+  // Şifre değiştir
   async function handleChangePassword(email) {
     setMsg("Şifre değiştiriliyor...");
     const res = await fetch("/api/uyelikler/sifre-degis", {
@@ -48,31 +48,35 @@ export default function AdminUyelikler() {
   }, []);
 
   // Filtrelenmiş üyeler
-  const displayUyeler = uyeler.filter(u => 
+  const displayUyeler = uyeler.filter(u =>
     tipFilter === "Hepsi" || (u.tip || "").toLowerCase() === tipFilter.toLowerCase()
   );
 
   return (
-    <main className="p-8">
+    <main className="p-1 md:p-8">
       <h2 className="text-3xl mb-5 font-bold text-[#FFD700]">Üyelikler</h2>
-      <div className="mb-3">
-        <select
-          value={tipFilter}
-          onChange={e => setTipFilter(e.target.value)}
-          className="p-2 border rounded"
-        >
-          <option>Hepsi</option>
-          <option>musteri</option>
-          <option>sofor</option>
-          <option>firma</option>
-          <option>isbirligi</option>
-          <option>admin</option>
-        </select>
+      <div className="mb-3 flex flex-col md:flex-row gap-2 md:items-center">
+        <div>
+          <span className="font-bold mr-2 text-[#FFD700]">Üye Tipi Seç:</span>
+          <select
+            value={tipFilter}
+            onChange={e => setTipFilter(e.target.value)}
+            className="p-2 border rounded"
+          >
+            <option>Hepsi</option>
+            <option>musteri</option>
+            <option>sofor</option>
+            <option>firma</option>
+            <option>isbirligi</option>
+            <option>admin</option>
+          </select>
+        </div>
+        <span className="ml-5 text-gray-300 text-sm">{displayUyeler.length} üye bulundu.</span>
       </div>
       {msg && <div className="text-green-500 mb-2">{msg}</div>}
-      <table className="w-full border border-[#FFD700] text-[#FFD700] rounded">
+      <table className="w-full border border-[#FFD700] text-[#FFD700] rounded text-center bg-black/90">
         <thead>
-          <tr className="bg-[#19160a]">
+          <tr className="bg-[#19160a] text-lg">
             <th className="p-2">Üye No</th>
             <th>Adı / Firma</th>
             <th>Tip</th>
@@ -84,7 +88,7 @@ export default function AdminUyelikler() {
         <tbody>
           {displayUyeler.map(u => (
             <tr key={u._id} className="border-b border-[#FFD70022]">
-              <td className="p-2">{u._id?.slice(-4) || "-"}</td>
+              <td className="p-2 font-mono text-base">{u.uyeno || u._id?.slice(-6) || "-"}</td>
               <td>{u.ad && u.soyad ? `${u.ad} ${u.soyad}` : (u.firmaAdi || "-")}</td>
               <td>{u.tip || "-"}</td>
               <td>{u.email || "-"}</td>
@@ -94,6 +98,7 @@ export default function AdminUyelikler() {
                   className="bg-yellow-600 px-3 py-1 rounded font-bold mr-2"
                   onClick={() => handleChangePassword(u.email)}
                   disabled={u.tip === "admin"}
+                  title="Yeni şifre üretilip e-posta ile gönderilir."
                 >
                   Şifre Değiştir
                 </button>
