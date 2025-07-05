@@ -17,7 +17,9 @@ export default function LoginPage() {
       body: JSON.stringify({ email, sifre }),
     });
     const data = await res.json();
-    if (data.ok) {
+    if (data.ok && data.uye) {
+      // Giriş başarılı ise kullanıcıyı localStorage'a yaz (header için)
+      localStorage.setItem("user", JSON.stringify(data.uye));
       setMsg("Giriş başarılı! Yönlendiriliyorsunuz...");
       setTimeout(() => router.replace("/"), 1000);
     } else {
