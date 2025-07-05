@@ -1,52 +1,36 @@
-// PATH: app/admin/uyelikler/page.jsx
+// PATH: /app/admin/layout.js
 "use client";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { FaBars } from "react-icons/fa";
 
-export default function AdminUyelikler() {
-  const [uyeler, setUyeler] = useState([]);
-  const [tipFilter, setTipFilter] = useState("Hepsi");
-  const [msg, setMsg] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  // Şifre değiştir
-  async function handleChangePassword(email) {
-    setMsg("Şifre değiştiriliyor...");
-    const res = await fetch("/api/uyelikler/sifre-degis", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json();
-    if (data.success) setMsg("Yeni şifre e-posta ile gönderildi.");
-    else setMsg(data.error || "Şifre değiştirilemedi!");
-    setTimeout(() => setMsg(""), 3400);
-  }
-
-  // Sil butonu
-  async function handleDelete(id) {
-    if (!window.confirm("Bu üyeyi silmek istediğinize emin misiniz?")) return;
-    setLoading(true);
-    const res = await fetch(`/api/uyelikler?id=${id}`, { method: "DELETE" });
-    const data = await res.json();
-    if (data.success) {
-      setUyeler(u => u.filter(u => u._id !== id));
-      setMsg("Üye başarıyla silindi.");
-    } else {
-      setMsg(data.error || "Silinemedi!");
-    }
-    setLoading(false);
-    setTimeout(() => setMsg(""), 2400);
-  }
+export default function AdminLayout({ children }) {
+  const [isClient, setIsClient] = useState(false);
+  const path = usePathname();
 
   useEffect(() => {
-    async function fetchUyeler() {
-      const res = await fetch("/api/uyelikler");
-      const data = await res.json();
-      setUyeler(data.items || []);
-    }
-    fetchUyeler();
+    setIsClient(true);
   }, []);
 
-  // Filtrelenmiş üyeler
-  const displayUyeler = uyeler.filter(u =>
-    tipFilter === "Hepsi"
+  if (!isClient) return null;
+
+  // ADMIN YETKİ KONTROLÜ (Burası localStorage ile client'ta çalışmalı)
+  const isAdmin = typeof window !== "undefined" && localStorage.getItem("admin_auth") === "ok";
+  if (!isAdmin && !path.includes("/admin/login")) {
+    if (typeof window !== "undefined") {
+      window.location.href = `/admin/login?next=${encodeURIComponent(path)}`;
+    }
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-black via-[#19160a] to-[#282314]">
+      <header className="w-full py-4 px-6 flex justify-between items-center border-b border-[#bfa658] bg-black/90 shadow z-10 sticky top-0">
+        <span className="text-2xl font-extrabold tracking-wide text-[#bfa658]">YolcuTransferi Admin Panel</span>
+        <span className="text-[#ffeec2] font-semibold text-lg">Admin</span>
+      </header>
+      <main className="flex-1 p-4 md:p-8">{children}</main>
+    </div>
+  );
+}
+// PATH: /app/admin/layout.js
