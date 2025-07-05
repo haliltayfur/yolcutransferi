@@ -1,6 +1,8 @@
+// PATH: /app/login/page.js
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,11 +19,14 @@ export default function LoginPage() {
       body: JSON.stringify({ email, sifre }),
     });
     const data = await res.json();
-    if (data.ok && data.uye) {
-      // Giriş başarılı ise kullanıcıyı localStorage'a yaz (header için)
-      localStorage.setItem("user", JSON.stringify(data.uye));
-      setMsg("Giriş başarılı! Yönlendiriliyorsunuz...");
-      setTimeout(() => router.replace("/"), 1000);
+    if (data.ok) {
+      localStorage.setItem("user", JSON.stringify(data.user));
+      if (data.forceChange) {
+        router.replace("/sifre-degistir");
+      } else {
+        setMsg("Giriş başarılı! Yönlendiriliyorsunuz...");
+        setTimeout(() => router.replace("/"), 1000);
+      }
     } else {
       setMsg(data.error || "Giriş başarısız.");
     }
@@ -52,8 +57,10 @@ export default function LoginPage() {
         <button type="submit" className="w-full bg-yellow-400 py-2 rounded font-bold">
           Giriş Yap
         </button>
+        <Link href="/sifremi-unuttum" className="block text-sm mt-2 text-blue-700 underline">Şifremi Unuttum</Link>
         {msg && <div className="mt-3 text-red-500">{msg}</div>}
       </form>
     </div>
   );
 }
+// PATH: /app/login/page.js
