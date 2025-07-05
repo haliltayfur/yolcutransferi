@@ -12,10 +12,10 @@ export default function Kvkk() {
       if (u) {
         const usr = JSON.parse(u);
         setUye({
-          ad: usr.ad || "",
-          soyad: usr.soyad || "",
+          ad: usr.ad || usr.name || "",
+          soyad: usr.soyad || usr.surname || "",
           email: usr.email || "",
-          telefon: usr.telefon || ""
+          telefon: usr.telefon || usr.phone || ""
         });
       }
     }
