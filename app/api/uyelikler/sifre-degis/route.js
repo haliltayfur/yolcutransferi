@@ -5,16 +5,18 @@ import { sendResetPasswordMail } from "@/lib/mailUtils";
 import crypto from "crypto";
 
 export async function POST(req) {
-  const { email } = await req.json();
+  const { email, sifre } = await req.json();
   if (!email) return NextResponse.json({ success: false, error: "E-posta zorunlu!" });
   const db = await connectToDatabase();
-  const newPass = crypto.randomBytes(4).toString("hex");
+  let newPass = sifre;
+  if (!sifre) newPass = crypto.randomBytes(4).toString("hex");
   const result = await db.collection("uyeler").updateOne(
     { email },
     { $set: { sifre: newPass } }
   );
   if (result.matchedCount > 0) {
-    await sendResetPasswordMail(email, newPass);
+    // Elle girilmiş şifre ise mail gönderme!
+    if (!sifre) await sendResetPasswordMail(email, newPass);
     return NextResponse.json({ success: true });
   }
   return NextResponse.json({ success: false, error: "Kullanıcı bulunamadı" });
