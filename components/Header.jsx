@@ -1,3 +1,4 @@
+// PATH: /components/Header.jsx
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -21,11 +22,20 @@ export default function Header() {
   const menuBoxRef = useRef(null);
 
   useEffect(() => {
-    // Kullanıcı login olduysa localStorage'dan çek
     if (typeof window !== "undefined") {
-      // Hem eski key ("user"), hem yeni key ("uye_bilgi") için kontrol!
-      const u = localStorage.getItem("user") || localStorage.getItem("uye_bilgi");
-      setUser(u ? JSON.parse(u) : null);
+      const admin = localStorage.getItem("admin_auth") === "ok";
+      if (admin) {
+        setUser({
+          ad: "Halil",
+          soyad: "Tayfur",
+          email: "byhaliltayfur@hotmail.com",
+          telefon: "5395267569",
+          tip: "admin",
+        });
+      } else {
+        const u = localStorage.getItem("user") || localStorage.getItem("uye_bilgi");
+        setUser(u ? JSON.parse(u) : null);
+      }
     }
   }, []);
 
@@ -44,10 +54,16 @@ export default function Header() {
     return () => window.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
 
-  // Ad alanını otomatik belirle ("ad", "isim", "name", "adsoyad")
   function getUserName(u) {
     if (!u) return "Üye";
     return u.ad || u.isim || u.name || u.adsoyad || u.soyad || "Üye";
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("uye_bilgi");
+    localStorage.removeItem("admin_auth");
+    window.location.href = "/";
   }
 
   return (
@@ -81,7 +97,6 @@ export default function Header() {
             ))}
           </div>
         </nav>
-        {/* Sağ üstte login kontrolü */}
         <div className="hidden lg:flex items-center gap-3 ml-5">
           {!user ? (
             <>
@@ -107,6 +122,9 @@ export default function Header() {
                   style={{ objectFit: "cover" }}
                 />
               </Link>
+              <button className="header-btn-outline ml-3" onClick={handleLogout}>
+                Çıkış Yap
+              </button>
             </div>
           )}
           <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="header-social ml-2">
@@ -169,21 +187,26 @@ export default function Header() {
                   </Link>
                 </>
               ) : (
-                <Link
-                  href="/profil"
-                  className="header-btn mt-3 flex gap-2 items-center"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <span>Profilim</span>
-                  <Image
-                    src={user.fotoUrl || "/default-user.png"}
-                    alt="Profil"
-                    width={40}
-                    height={40}
-                    className="rounded-full border-2 border-[#FFD700] ml-1"
-                    style={{ objectFit: "cover" }}
-                  />
-                </Link>
+                <>
+                  <Link
+                    href="/profil"
+                    className="header-btn mt-3 flex gap-2 items-center"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <span>Profilim</span>
+                    <Image
+                      src={user.fotoUrl || "/default-user.png"}
+                      alt="Profil"
+                      width={40}
+                      height={40}
+                      className="rounded-full border-2 border-[#FFD700] ml-1"
+                      style={{ objectFit: "cover" }}
+                    />
+                  </Link>
+                  <button className="header-btn-outline mt-3" onClick={() => { setMenuOpen(false); handleLogout(); }}>
+                    Çıkış Yap
+                  </button>
+                </>
               )}
               <div className="flex items-center gap-2 mt-7 justify-center">
                 <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="header-social">
@@ -275,3 +298,4 @@ export default function Header() {
     </header>
   );
 }
+// PATH: /components/Header.jsx
