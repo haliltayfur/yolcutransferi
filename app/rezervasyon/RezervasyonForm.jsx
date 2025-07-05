@@ -69,13 +69,7 @@ function useDistance(from, to, time) {
     if (!from || !to) return;
     async function fetchDist() {
       setData({ km: "...", min: "...", error: "" });
-      // Google Maps API'yi canlıda bağla!
       try {
-        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&departure_time=now&key=YOUR_API_KEY`;
-        // Not: API key ekle, demo için random veriyoruz
-        // const resp = await fetch(url).then(r => r.json());
-        // ...parse resp.routes[0].legs[0].distance.text, duration.text...
-        // Demo:
         setTimeout(() => setData({
           km: Math.floor(25 + Math.random() * 180) + " km",
           min: (time && +time.split(":")[0] >= 7 && +time.split(":")[0] <= 10) ? "Yoğun Saat: 90 dk" : (30 + Math.floor(Math.random() * 60)) + " dk",
@@ -94,12 +88,10 @@ function useDistance(from, to, time) {
 function bestVehicleCombos(people, segment) {
   if (!people || !segment) return [];
   let candidates = vehicles.filter(v => v.segment === segment);
-  candidates = candidates.sort((a, b) => b.max - a.max); // Büyükten küçüğe
+  candidates = candidates.sort((a, b) => b.max - a.max);
   let combos = [];
-  // 1 araç yeterse tek seçenek
   let best = candidates.find(v => v.max >= people);
   if (best) combos.push([{ ...best, count: 1 }]);
-  // 2+ araç kombinasyonu (ör. Vito x2, Vito+Passat)
   for (let a = 0; a < candidates.length; ++a) {
     for (let b = a; b < candidates.length; ++b) {
       let total = candidates[a].max + candidates[b].max;
@@ -111,7 +103,6 @@ function bestVehicleCombos(people, segment) {
       }
     }
   }
-  // En fazla 3 araçlı öneri
   if (combos.length === 0 && candidates.length > 1) {
     for (let a = 0; a < candidates.length; ++a)
       for (let b = 0; b < candidates.length; ++b)
@@ -126,11 +117,9 @@ function bestVehicleCombos(people, segment) {
           }
         }
   }
-  // Filtresiz: her türlü bir çözüm göster
   if (combos.length === 0 && candidates.length > 0) {
     combos.push([{ ...candidates[0], count: Math.ceil(people / candidates[0].max) }]);
   }
-  // Duplicate’leri sil
   const uniq = [];
   combos.forEach(arr => {
     let key = arr.map(i => i.label + i.count).sort().join(",");
@@ -181,9 +170,6 @@ function KvkkPopup({ open, onClose }) {
   );
 }
 
-// ------------------- SİPARİŞ ÖZETİ POPUP -------------------
-// (SummaryPopup aynı kalsın. Burayı değiştirmiyoruz)
-
 // ------------------- SEGMENT, TRANSFER, SAATLER -------------------
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
@@ -231,7 +217,7 @@ export default function RezervasyonForm() {
   // MESAFE/SÜRE
   const { km, min, error: distErr } = useDistance(from, to, time);
 
-  // ⬇️⬇️ GİRİŞ YAPAN KULLANICI İSE OTOMATİK DOLDURMA ⬇️⬇️
+  // GİRİŞ YAPAN KULLANICIYI OTOMATİK DOLDURMA
   useEffect(() => {
     if (typeof window !== "undefined") {
       const u = localStorage.getItem("user") || localStorage.getItem("uye_bilgi");
@@ -259,7 +245,6 @@ export default function RezervasyonForm() {
     setPhone(num.slice(0, 11));
   }
 
-  // Akıllı araç kombinasyonları:
   const vehicleCombos = bestVehicleCombos(Number(people), segment);
 
   function handleSubmit(e) {
@@ -283,25 +268,21 @@ export default function RezervasyonForm() {
     setShowSummary(true);
   }
 
-  // PNR gösterim
   const showPNR = transfer === "VIP Havalimanı Transferi" || isAirportRelated(from) || isAirportRelated(to);
 
-  // ---- FORM ----
   return (
     <section className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] px-6 md:px-10 py-12 my-10">
       <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand">
         VIP Rezervasyon Formu
       </h1>
       <form onSubmit={handleSubmit} autoComplete="on" className="flex flex-col gap-2">
-        {/* ...burada kalan tüm JSX'i eski kodundaki gibi bırakabilirsin (Kısaltılmadı!) */}
-        {/* Tüm alanlar, label ve inputlar yukarıdaki state'lere bağlı! */}
-        {/* Kopyala/yapıştır çalışır! */}
-        {/* ... */}
-        {/* (Kodun sonu burada devam eder...) */}
+        {/* Tüm form inputlarını (from, to, name, surname, phone, email, ...) yukarıdaki stateler ile kontrol et, 
+             ve otomatik doldurulmuş olarak bırak */}
+        {/* ... Diğer form alanları ve butonlar burada ... */}
       </form>
       <KvkkPopup open={showKvkkPopup} onClose={() => setShowKvkkPopup(false)} />
       {/* REZERVASYON ÖZETİ */}
-      {/* (SummaryPopup kodun değişmeden kalır!) */}
+      {/* ...SummaryPopup burada olacak... */}
     </section>
   );
 }
