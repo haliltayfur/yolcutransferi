@@ -68,7 +68,6 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
-// Mesafeli Satış popup - metni dışarıdan fetch eder
 function PolicyPopup({ open, onClose, onConfirm }) {
   const [html, setHtml] = useState("");
   const [loading, setLoading] = useState(true);
@@ -116,7 +115,6 @@ function PolicyPopup({ open, onClose, onConfirm }) {
   );
 }
 
-// Telefonu otomatik sıfırla
 function formatPhone(val) {
   if (!val) return "";
   val = val.trim().replace(/\D/g, "");
@@ -125,7 +123,6 @@ function formatPhone(val) {
 }
 
 export default function Iletisim() {
-  // KULLANICI BİLGİLERİNİ OTOMATİK ÇEKME BLOĞU ↓↓↓
   const [form, setForm] = useState({
     ad: "", soyad: "", telefon: "", email: "", neden: ILETISIM_NEDENLERI[0], mesaj: "",
     iletisimTercihi: "", kvkkOnay: false
@@ -145,23 +142,21 @@ export default function Iletisim() {
         const usr = JSON.parse(u);
         setForm(f => ({
           ...f,
-          ad: usr.ad || "",
-          soyad: usr.soyad || "",
+          ad: usr.ad || usr.name || "",
+          soyad: usr.soyad || usr.surname || "",
           email: usr.email || "",
-          telefon: usr.telefon || ""
+          telefon: usr.telefon || usr.phone || ""
         }));
       }
     }
   }, []);
 
-  // Validasyonlar
   const adValid = isRealName(form.ad);
   const soyadValid = isRealName(form.soyad);
   const phoneValid = isRealPhone(form.telefon);
   const emailValid = isRealEmail(form.email);
   const msgValid = isRealMsg(form.mesaj);
 
-  // Telefon inputunda başa sıfır ekle
   const handlePhoneChange = (e) => {
     let val = e.target.value.replace(/\D/g, "");
     if (val.length > 11) val = val.slice(0, 11);
@@ -336,7 +331,6 @@ export default function Iletisim() {
             </div>
           )}
         </form>
-        {/* Sosyal medya ve iletişim bilgileri */}
         <div className="w-full border-t border-[#bfa658] mt-10 pt-6">
           <div className="flex flex-wrap gap-4 mb-3 justify-center">
             <a href="https://wa.me/905395267569" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full bg-[#23201a] hover:bg-[#bfa658] text-white hover:text-black transition" title="WhatsApp"><FaWhatsapp size={28} /></a>
@@ -349,7 +343,6 @@ export default function Iletisim() {
             <span className="flex items-center gap-2"><FaMapMarkerAlt className="opacity-80" />Ümraniye, İnkılap Mah. Plazalar Bölgesi</span>
           </div>
         </div>
-        {/* Konum haritası */}
         <div className="w-full flex justify-center mt-8">
           <div style={{ width: "100%", maxWidth: "900px", height: "210px" }} className="rounded-xl overflow-hidden border-2 border-[#bfa658] shadow-lg bg-[#23201a]">
             <iframe
@@ -364,7 +357,6 @@ export default function Iletisim() {
           </div>
         </div>
       </section>
-      {/* Politika ve koşullar popup'u */}
       <PolicyPopup
         open={popupOpen}
         onClose={() => setPopupOpen(false)}
