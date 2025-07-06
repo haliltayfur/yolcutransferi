@@ -13,14 +13,8 @@ export default function Home() {
     <main>
       <HeroSlider />
       <section
-        className="
-          w-full max-w-[2000px] mx-auto
-          flex flex-col md:flex-row justify-center items-start
-          px-0 mt-10 md:mt-14 mb-10 md:mb-16
-        "
-        style={{ minHeight: 600 }}
+        className="w-full flex justify-center items-center mt-10 md:mt-14 mb-10 md:mb-16"
       >
-        {/* FORM + VİDEO: Slider ile birebir aynı genişlik! */}
         <div
           className="flex flex-row w-[90vw] max-w-[2000px] min-h-[600px] h-[600px] mx-auto"
           style={{
@@ -30,23 +24,31 @@ export default function Home() {
             height: 600,
           }}
         >
-          <div className="flex flex-col justify-center items-center bg-black/85 border border-[#bfa658] rounded-2xl shadow-2xl"
+          <div
+            className="flex flex-col justify-center items-center"
             style={{
               width: "75%",
-              minHeight: 600,
+              minWidth: 300,
+              maxWidth: "75%",
               height: 600,
-              boxSizing: "border-box"
+              background: "rgba(25, 22, 10, 0.98)",
+              borderRadius: 22,
             }}
           >
             <VipTransferForm />
           </div>
           <div
-            className="hidden md:flex items-center justify-center rounded-2xl overflow-hidden shadow-2xl border border-[#bfa658] bg-black/90"
+            className="hidden md:flex items-center justify-center"
             style={{
               width: "25%",
               minWidth: 200,
-              minHeight: 600,
-              height: 600
+              maxWidth: "25%",
+              height: 600,
+              borderRadius: 22,
+              overflow: "hidden",
+              background: "transparent", // Çerçeve yok!
+              boxShadow: "none",
+              border: "none"
             }}
           >
             {typeof window !== "undefined" && window.innerWidth >= 768 && (
