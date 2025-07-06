@@ -61,7 +61,7 @@ export default function VipTransferForm() {
           <input type="text" value={from} onChange={e => setFrom(e.target.value)}
             placeholder="Nereden? (İl / Havalimanı / Otel)"
             className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
-            style={{ height: 52 }}
+            style={{ height: 62 }}
             autoComplete="address-level2"
           />
         </div>
@@ -70,7 +70,7 @@ export default function VipTransferForm() {
           <input type="text" value={to} onChange={e => setTo(e.target.value)}
             placeholder="Nereye? (İl / İlçe / Otel)"
             className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
-            style={{ height: 52 }}
+            style={{ height: 62 }}
             autoComplete="address-level2"
           />
         </div>
@@ -78,7 +78,7 @@ export default function VipTransferForm() {
           <label className="font-bold text-[#bfa658] mb-1 block">Yolcu Sayısı</label>
           <select value={people} onChange={e => setPeople(e.target.value)}
             className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
-            style={{ height: 52 }}>
+            style={{ height: 62 }}>
             <option value="">Seçiniz</option>
             {Array.from({ length: 24 }, (_, i) => i + 1).map(val =>
               <option key={val} value={val}>{val}</option>
@@ -89,7 +89,7 @@ export default function VipTransferForm() {
           <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
           <select value={segment} onChange={e => setSegment(e.target.value)}
             className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
-            style={{ height: 52 }}>
+            style={{ height: 62 }}>
             <option value="">Seçiniz</option>
             <option value="Ekonomik">Ekonomik</option>
             <option value="Lüks">Lüks</option>
@@ -117,7 +117,7 @@ export default function VipTransferForm() {
             <div
               tabIndex={0}
               className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg cursor-pointer flex items-center"
-              style={{ height: 52 }}
+              style={{ height: 62 }}
               onClick={() => document.getElementById("saat-picker").focus()}
             >
               <select
