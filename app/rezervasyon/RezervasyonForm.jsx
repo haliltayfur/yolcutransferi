@@ -5,7 +5,6 @@ import AdresAutoComplete from "./AdresAutoComplete";
 import { vehicles } from "../../data/vehicleList";
 import { useRouter } from "next/navigation";
 
-// Segment ve transfer tipleri
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
   { key: "Lüks", label: "Lüks" },
@@ -248,6 +247,68 @@ export default function RezervasyonForm() {
             {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
           </select>
           {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Adınız</label>
+          <input
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="Adınız"
+            autoComplete="given-name"
+          />
+          {fieldErrors.name && <div className="text-red-400 text-xs mt-1">{fieldErrors.name}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Soyadınız</label>
+          <input
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={surname}
+            onChange={e => setSurname(e.target.value)}
+            placeholder="Soyadınız"
+            autoComplete="family-name"
+          />
+          {fieldErrors.surname && <div className="text-red-400 text-xs mt-1">{fieldErrors.surname}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">TC Kimlik No</label>
+          <input
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={tc}
+            onChange={e => setTc(e.target.value.replace(/\D/g, "").slice(0, 11))}
+            placeholder="TC Kimlik No"
+            maxLength={11}
+            autoComplete="off"
+          />
+          {fieldErrors.tc && <div className="text-red-400 text-xs mt-1">{fieldErrors.tc}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">Telefon</label>
+          <input
+            type="tel"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={phone}
+            onChange={e => setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
+            placeholder="05xxxxxxxxx"
+            maxLength={11}
+            autoComplete="tel"
+          />
+          {fieldErrors.phone && <div className="text-red-400 text-xs mt-1">{fieldErrors.phone}</div>}
+        </div>
+        <div>
+          <label className="font-bold text-[#bfa658] mb-1 block">E-Posta</label>
+          <input
+            type="email"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="E-posta adresiniz"
+            autoComplete="email"
+          />
+          {fieldErrors.email && <div className="text-red-400 text-xs mt-1">{fieldErrors.email}</div>}
         </div>
         {/* PNR: Yalnızca havalimanı transferlerinde gösterilir */}
         {pnrZorunlu && (
