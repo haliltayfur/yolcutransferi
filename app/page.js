@@ -34,11 +34,11 @@ export default function Home() {
               rounded-l-[32px]
             "
             style={{
-              width: "50%",
+              width: "40%",
               minWidth: 350,
               boxSizing: "border-box",
               height: "100%",
-              paddingLeft: 0,
+              paddingLeft: 10, // Sol iç boşluk
             }}
           >
             <VipTransferForm />
@@ -49,7 +49,7 @@ export default function Home() {
               rounded-r-[32px]
             "
             style={{
-              width: "50%",
+              width: "60%",
               height: "100%",
               background: "transparent",
               overflow: "hidden",
