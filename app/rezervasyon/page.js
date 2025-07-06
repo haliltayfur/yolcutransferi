@@ -1,12 +1,12 @@
-// === Dosya: app/rezervasyon/page.js ===
+// === Dosya: app/rezervasyon/page.jsx ===
 "use client";
-import RezervasyonForm from "./RezervasyonForm.jsx";
+import VipTransferForm from "../../components/VipTransferForm";
 
-export default function Page() {
+export default function RezervasyonPage() {
   return (
-    <div className="w-full min-h-[900px] flex items-center justify-center py-16 px-2">
-      <RezervasyonForm />
+    <div className="w-full min-h-[800px] flex items-center justify-center py-16 px-2">
+      <VipTransferForm />
     </div>
   );
 }
-// === Dosya SONU: app/rezervasyon/page.js ===
+// === Dosya SONU: app/rezervasyon/page.jsx ===
