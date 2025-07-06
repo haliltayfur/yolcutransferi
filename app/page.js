@@ -14,54 +14,45 @@ export default function Home() {
       <HeroSlider />
       <section
         className="
-          flex flex-col md:flex-row justify-center items-start
-          gap-3
           w-full max-w-[2000px] mx-auto
-          px-1 md:px-0
-          mt-10 md:mt-14
-          mb-10 md:mb-16
+          flex flex-col md:flex-row justify-center items-start
+          px-0 mt-10 md:mt-14 mb-10 md:mb-16
         "
-        style={{minHeight: 600}}
+        style={{ minHeight: 600 }}
       >
-        {/* FORM */}
+        {/* FORM + VİDEO: Slider ile birebir aynı genişlik! */}
         <div
-          className="
-            flex flex-col justify-center
-            bg-black/85 border border-[#bfa658]
-            rounded-2xl shadow-2xl
-            p-0
-            w-full
-            md:w-[75%]
-            max-w-[900px]
-            min-w-0
-          "
+          className="flex flex-row w-[90vw] max-w-[2000px] min-h-[600px] h-[600px] mx-auto"
           style={{
-            maxWidth: "75%",
+            width: "90vw",
+            maxWidth: 2000,
             minHeight: 600,
             height: 600,
-            boxSizing: "border-box",
           }}
         >
-          <VipTransferForm />
-        </div>
-        {/* VIDEO: SADECE DESKTOPTA */}
-        <div
-          className="hidden md:flex items-center justify-center
-            rounded-2xl overflow-hidden shadow-2xl border border-[#bfa658]
-            bg-black/90
-            w-[24%] min-w-[240px] max-w-[480px]
-            h-[600px] min-h-[600px] box-border"
-          style={{
-            width: "24%",
-            minWidth: 240,
-            maxWidth: 480,
-            height: 600,
-            minHeight: 600,
-          }}
-        >
-          {typeof window !== "undefined" && window.innerWidth >= 768 && (
-            require("../components/HeroVideo").default()
-          )}
+          <div className="flex flex-col justify-center items-center bg-black/85 border border-[#bfa658] rounded-2xl shadow-2xl"
+            style={{
+              width: "75%",
+              minHeight: 600,
+              height: 600,
+              boxSizing: "border-box"
+            }}
+          >
+            <VipTransferForm />
+          </div>
+          <div
+            className="hidden md:flex items-center justify-center rounded-2xl overflow-hidden shadow-2xl border border-[#bfa658] bg-black/90"
+            style={{
+              width: "25%",
+              minWidth: 200,
+              minHeight: 600,
+              height: 600
+            }}
+          >
+            {typeof window !== "undefined" && window.innerWidth >= 768 && (
+              require("../components/HeroVideo").default()
+            )}
+          </div>
         </div>
       </section>
       <AdvantagesBar />
