@@ -1,4 +1,3 @@
-// === Dosya BAŞI: /components/VipTransferForm.jsx 
 "use client";
 import HeroSlider from "../components/HeroSlider";
 import dynamic from "next/dynamic";
@@ -11,52 +10,55 @@ export default function Home() {
   return (
     <main>
       <HeroSlider />
-      <section className="w-full flex justify-center items-center mt-10 md:mt-14 mb-10 md:mb-16">
+      <section
+        className="w-full flex flex-col items-center justify-center mt-10 md:mt-14 mb-10 md:mb-16"
+        style={{ width: "100%" }}
+      >
         <div
-          className="flex flex-row w-full max-w-[2000px] min-h-[600px] h-[600px] gap-0"
-          style={{
-            minHeight: 600,
-            height: 600,
-            width: "90vw",
-            maxWidth: 2000,
-          }}
+          className="w-full flex flex-col items-center justify-center"
+          style={{ width: "100%" }}
         >
-          {/* FORM */}
+          {/* ANA CONTAINER */}
           <div
-            className="flex flex-col justify-center items-center bg-[rgba(25,22,10,0.98)] rounded-l-[32px]"
+            className="w-full max-w-[1260px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10"
             style={{
-              width: "65%",
-              minWidth: 350,
-              height: "100%",
-              boxSizing: "border-box",
-              paddingLeft: 10,
-              paddingRight: 0,
-              borderTopRightRadius: 0,
-              borderBottomRightRadius: 0,
+              width: "min(100vw, 1260px)",
+              margin: "0 auto",
+              marginTop: 0,
+              alignItems: "stretch",
+              justifyContent: "center",
             }}
           >
-            <VipTransferForm />
-          </div>
-          {/* VIDEO */}
-          <div
-            className="hidden md:flex items-center justify-center rounded-r-[32px]"
-            style={{
-              width: "35%",
-              height: "100%",
-              background: "#111", // Veya transparent
-              overflow: "hidden",
-              borderTopLeftRadius: 0,
-              borderBottomLeftRadius: 0,
-              borderTopRightRadius: 32,
-              borderBottomRightRadius: 32,
-              padding: 0,
-              margin: 0,
-            }}
-          >
-            {/* Burası kritik! */}
-            {typeof window !== "undefined" && window.innerWidth >= 768 && (
-              require("../components/HeroVideo").default()
-            )}
+            {/* FORM */}
+            <div
+              className="flex flex-col justify-center"
+              style={{
+                width: "100%",
+                height: 600,
+                background: "rgba(25,22,10,0.98)",
+                borderRadius: 32,
+                border: "2px solid #bfa658",
+                boxSizing: "border-box",
+              }}
+            >
+              <VipTransferForm />
+            </div>
+            {/* VIDEO */}
+            <div
+              className="hidden md:flex justify-center items-center"
+              style={{
+                width: "100%",
+                height: 600,
+                background: "#171717",
+                borderRadius: 32,
+                overflow: "hidden",
+                boxSizing: "border-box",
+              }}
+            >
+              {typeof window !== "undefined" && window.innerWidth >= 768 && (
+                require("../components/HeroVideo").default()
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -65,5 +67,3 @@ export default function Home() {
     </main>
   );
 }
-
-// === Dosya SONU: /components/VipTransferForm.jsx ===
