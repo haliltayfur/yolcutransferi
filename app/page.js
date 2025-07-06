@@ -1,5 +1,3 @@
-// === Dosya: /app/page.js ===
-
 "use client";
 import HeroSlider from "../components/HeroSlider";
 import dynamic from "next/dynamic";
@@ -14,7 +12,14 @@ export default function Home() {
       <HeroSlider />
       <section className="w-full flex justify-center items-center mt-10 md:mt-14 mb-10 md:mb-16">
         <div
-          className="flex flex-row md:w-[90vw] w-full max-w-[2000px] min-h-[600px] h-[600px]"
+          className="
+            flex flex-row
+            w-full
+            max-w-[2000px]
+            min-h-[600px]
+            h-[600px]
+            px-0
+          "
           style={{
             minHeight: 600,
             height: 600,
@@ -23,28 +28,29 @@ export default function Home() {
           }}
         >
           <div
-            className="flex flex-col justify-center items-center"
+            className="
+              flex flex-col justify-center items-center
+              bg-[rgba(25,22,10,0.98)]
+              rounded-l-[32px]
+            "
             style={{
-              width: "66.6%",
-              height: "100%",
-              background: "rgba(25,22,10,0.98)",
-              borderTopLeftRadius: 32,
-              borderBottomLeftRadius: 32,
-              borderTopRightRadius: 0,
-              borderBottomRightRadius: 0,
+              width: "50%",
+              minWidth: 350,
               boxSizing: "border-box",
+              height: "100%",
+              paddingLeft: 0,
             }}
           >
             <VipTransferForm />
           </div>
           <div
-            className="hidden md:flex items-center justify-center"
+            className="
+              hidden md:flex items-center justify-center
+              rounded-r-[32px]
+            "
             style={{
-              width: "33.4%",
+              width: "50%",
               height: "100%",
-              borderRadius: 0,
-              borderTopRightRadius: 32,
-              borderBottomRightRadius: 32,
               background: "transparent",
               overflow: "hidden",
               boxShadow: "none",
