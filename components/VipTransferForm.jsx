@@ -48,9 +48,8 @@ export default function VipTransferForm() {
     router.push(`/rezervasyon?${params.toString()}`);
   }
 
-  // Responsive style
   const fieldInput =
-    "w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg focus:outline-[#bfa658] transition-all duration-100";
+    "w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-4 text-lg focus:outline-[#bfa658] transition-all duration-100";
 
   return (
     <form
@@ -58,11 +57,11 @@ export default function VipTransferForm() {
       autoComplete="on"
       className="w-full h-full flex flex-col justify-center items-center"
     >
-      <h1 className="font-extrabold text-[#bfa658] tracking-tight text-center font-quicksand text-2xl md:text-3xl mb-6 md:mb-7">
+      <h1 className="font-extrabold text-[#bfa658] tracking-tight text-center font-quicksand text-2xl md:text-3xl mb-6 md:mb-8">
         VIP Rezervasyon Formu
       </h1>
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-4">
-        <div className="col-span-1 md:col-span-1">
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-2">
+        <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
           <input
             type="text"
@@ -74,7 +73,7 @@ export default function VipTransferForm() {
             autoComplete="address-level2"
           />
         </div>
-        <div className="col-span-1 md:col-span-1">
+        <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
           <input
             type="text"
@@ -86,7 +85,7 @@ export default function VipTransferForm() {
             autoComplete="address-level2"
           />
         </div>
-        <div className="col-span-1 md:col-span-1">
+        <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Yolcu Sayısı</label>
           <select
             value={people}
@@ -99,7 +98,7 @@ export default function VipTransferForm() {
             )}
           </select>
         </div>
-        <div className="col-span-1 md:col-span-1">
+        <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
           <select
             value={segment}
@@ -112,8 +111,7 @@ export default function VipTransferForm() {
             <option value="Prime+">Prime+</option>
           </select>
         </div>
-        {/* ---- TARİH/Saat Satırı --- */}
-        <div className="col-span-1 md:col-span-1">
+        <div>
           <label
             className="font-bold text-[#bfa658] mb-1 block cursor-pointer"
             onClick={() => dateRef.current && dateRef.current.showPicker()}
@@ -133,7 +131,7 @@ export default function VipTransferForm() {
             onClick={e => e.target.showPicker && e.target.showPicker()}
           />
         </div>
-        <div className="col-span-1 md:col-span-1">
+        <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
           <select
             value={time}
@@ -144,8 +142,7 @@ export default function VipTransferForm() {
             {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
           </select>
         </div>
-        {/* ---- PNR/Uçuş Kodu Satırı (tarih ile yeri değişti) --- */}
-        <div className="col-span-1 md:col-span-2">
+        <div className="md:col-span-2">
           <label className="font-bold text-[#bfa658] mb-1 block">PNR / Uçuş Kodu</label>
           <input
             type="text"
@@ -161,8 +158,6 @@ export default function VipTransferForm() {
         className="w-full bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 mt-4 rounded-xl text-xl shadow hover:scale-105 transition"
         style={{
           fontSize: "1.3rem",
-          marginTop: 14,
-          marginBottom: 4,
         }}
       >
         Devam Et
