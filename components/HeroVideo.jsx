@@ -7,13 +7,13 @@ export default function HeroVideo() {
   const [isIntersecting, setIsIntersecting] = useState(true);
   const [isPageVisible, setIsPageVisible] = useState(true);
 
-  // Intersection Observer: %25 görünürlükte play/pause
+  // Intersection Observer: %40 görünürlükte play/pause
   useEffect(() => {
     let observer;
     if (videoRef.current) {
       observer = new window.IntersectionObserver(
         ([entry]) => {
-          setIsIntersecting(entry.isIntersecting && entry.intersectionRatio >= 0.25);
+          setIsIntersecting(entry.isIntersecting && entry.intersectionRatio >= 0.40);
         },
         { threshold: [0, 0.25, 0.5, 1] }
       );
