@@ -6,7 +6,7 @@ const VipTransferForm = dynamic(() => import("./VipTransferForm"), { ssr: false 
 export default function RezervasyonHero() {
   return (
     <section
-      className="w-full flex flex-col items-center justify-center mt-8 md:mt-10 mb-10 md:mb-16"
+      className="w-full flex flex-col items-center justify-center mt-12 md:mt-14 mb-8 md:mb-16"
       style={{ width: "100%" }}
     >
       <div
@@ -17,18 +17,17 @@ export default function RezervasyonHero() {
         <div
           className="
             w-full
-            max-w-[1260px]
+            max-w-[1320px]
             mx-auto
             grid
             grid-cols-1
-            md:grid-cols-2
-            gap-y-7
-            md:gap-x-10
+            md:grid-cols-[minmax(420px,580px)_minmax(340px,480px)]
+            gap-y-8
+            md:gap-x-16
             px-2
           "
           style={{
-            width: "min(100vw, 1260px)",
-            alignItems: "stretch",
+            alignItems: "start",
             justifyContent: "center",
           }}
         >
@@ -38,17 +37,18 @@ export default function RezervasyonHero() {
               flex flex-col justify-center
               border-2 border-[#bfa658]
               rounded-3xl
-              bg-[#19160aF5]
+              bg-[#19160ae9]
               shadow-2xl
               w-full
-              px-3 md:px-8
-              py-6 md:py-10
+              px-2 md:px-10
+              py-7 md:py-11
             "
             style={{
               minHeight: 560,
-              maxWidth: 550,
+              maxWidth: 590,
               marginLeft: 0,
               marginRight: "auto",
+              boxSizing: "border-box",
             }}
           >
             <VipTransferForm />
@@ -56,7 +56,7 @@ export default function RezervasyonHero() {
           {/* VIDEO: desktop görünümde sağda */}
           <div
             className="
-              hidden md:flex justify-center items-center
+              hidden md:flex justify-end items-start
               border-2 border-[#bfa658]
               rounded-3xl
               bg-[#171717]
@@ -64,21 +64,16 @@ export default function RezervasyonHero() {
               w-full
               max-w-[440px]
               min-h-[380px]
+              overflow-hidden
             "
-            style={{
-              marginRight: 0,
-              marginLeft: "auto",
-              overflow: "hidden",
-            }}
           >
-            {/* Video burada (örn. public/video.mp4 ya da <img> ile değiştir) */}
             <video
               src="/videolar/vip-musteri.mp4"
               controls
               style={{
                 borderRadius: "26px",
                 width: "100%",
-                maxHeight: 370,
+                maxHeight: 390,
                 objectFit: "cover",
                 background: "#181818",
               }}
