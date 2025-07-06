@@ -15,13 +15,13 @@ export default function Home() {
       <section
         className="
           flex flex-col md:flex-row justify-center items-start
-          gap-[10px]
-          w-full max-w-[1260px] mx-auto
-          px-2 md:px-0
-          mt-12 md:mt-16
+          gap-3
+          w-full max-w-[2000px] mx-auto
+          px-1 md:px-0
+          mt-10 md:mt-14
           mb-10 md:mb-16
-          min-h-[600px]
         "
+        style={{minHeight: 600}}
       >
         {/* FORM */}
         <div
@@ -30,11 +30,15 @@ export default function Home() {
             bg-black/85 border border-[#bfa658]
             rounded-2xl shadow-2xl
             p-0
-            w-full md:w-[800px] min-w-0
+            w-full
+            md:w-[75%]
+            max-w-[900px]
+            min-w-0
           "
           style={{
-            maxWidth: 800,
+            maxWidth: "75%",
             minHeight: 600,
+            height: 600,
             boxSizing: "border-box",
           }}
         >
@@ -45,9 +49,16 @@ export default function Home() {
           className="hidden md:flex items-center justify-center
             rounded-2xl overflow-hidden shadow-2xl border border-[#bfa658]
             bg-black/90
-            w-[400px] min-w-[400px] h-[600px] min-h-[600px] box-border"
+            w-[24%] min-w-[240px] max-w-[480px]
+            h-[600px] min-h-[600px] box-border"
+          style={{
+            width: "24%",
+            minWidth: 240,
+            maxWidth: 480,
+            height: 600,
+            minHeight: 600,
+          }}
         >
-          {/* Mobilde video asla gösterilmeyecek! */}
           {typeof window !== "undefined" && window.innerWidth >= 768 && (
             require("../components/HeroVideo").default()
           )}
@@ -59,5 +70,3 @@ export default function Home() {
   );
 }
 // === Dosya SONU: /app/page.js ===
-
-
