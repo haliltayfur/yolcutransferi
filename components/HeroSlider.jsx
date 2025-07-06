@@ -1,7 +1,7 @@
-// === Dosya: components/HeroSlider.jsx ===
+// === Dosya: /components/HeroSlider.jsx ===
 
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
 const heroImages = [
@@ -12,6 +12,7 @@ const heroImages = [
 export default function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const sliderRef = useRef();
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 900);
@@ -26,7 +27,17 @@ export default function HeroSlider() {
     return () => clearTimeout(timer);
   }, [current, isMobile]);
 
-  // Mobil: değişmiyor
+  // Click ile slide değişimi
+  function handleClick(e) {
+    if (!sliderRef.current) return;
+    const bounds = sliderRef.current.getBoundingClientRect();
+    const x = e.clientX - bounds.left;
+    const w = bounds.width;
+    if (x > w * 0.5) setCurrent((prev) => (prev + 1) % heroImages.length);
+    else setCurrent((prev) => (prev - 1 + heroImages.length) % heroImages.length);
+  }
+
+  // Mobil
   if (isMobile) {
     return (
       <section className="relative w-full select-none">
@@ -40,6 +51,7 @@ export default function HeroSlider() {
             priority
             draggable={false}
             style={{ borderRadius: "11px" }}
+            onClick={handleClick}
           />
         </div>
         <div className="flex justify-center gap-1 mt-3">
@@ -68,20 +80,22 @@ export default function HeroSlider() {
     );
   }
 
-  // Desktopta: Gri zemin ve background KALDIRILDI!
+  // Desktop
   return (
     <section className="relative w-full select-none flex flex-col items-center">
       <div className="w-full h-8 block" />
       <div
-        className="cinema-slider-desktop relative flex items-center justify-center overflow-hidden rounded-3xl"
+        ref={sliderRef}
+        onClick={handleClick}
+        className="cinema-slider-desktop relative flex items-center justify-center overflow-hidden rounded-3xl cursor-pointer"
         style={{
           width: "min(100vw, 2000px)",
           height: "min(78vw, 670px)",
           minHeight: "380px",
           maxHeight: "670px",
           boxShadow: "0 10px 34px #000b, 0 4px 24px #FFD70018",
-          // background: "#181818", // Griyi kaldırdık!
         }}
+        title="İleri/geri gitmek için slayda tıklayın"
       >
         <Image
           src={heroImages[current]}
@@ -103,15 +117,12 @@ export default function HeroSlider() {
             <div
               key={i}
               className={`slider-dot ${i === current ? "active" : ""}`}
-              onClick={() => setCurrent(i)}
+              onClick={e => { e.stopPropagation(); setCurrent(i); }}
             />
           ))}
         </div>
       </div>
       <style jsx>{`
-        .cinema-slider-desktop {
-          /* background: #191919;  Griyi kaldırdık! */
-        }
         .slider-dot {
           background: #FFD70090;
           border-radius: 50%; width: 14px; height: 14px;
@@ -136,4 +147,4 @@ export default function HeroSlider() {
   );
 }
 
-// === Dosya SONU: components/HeroSlider.jsx ===
+// === Dosya SONU: /components/HeroSlider.jsx ===
