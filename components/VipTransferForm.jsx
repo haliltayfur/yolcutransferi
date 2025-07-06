@@ -23,7 +23,7 @@ export default function VipTransferForm() {
   const [pnr, setPnr] = useState("");
   const [errors, setErrors] = useState({});
 
-  // PNR alanı her zaman en altta (ya da sadece transfer havalimanı ise açılır)
+  // PNR alanı (her zaman gösterebiliriz, ya da transfer havalimanı ise zorunlu yaparız)
   const pnrRequired =
     transfer === "VIP Havalimanı Transferi" ||
     isAirport(from) ||
@@ -50,7 +50,7 @@ export default function VipTransferForm() {
     <div
       className="flex flex-col justify-center items-center w-full h-full"
       style={{
-        width: "85%",
+        width: "99%",
         maxWidth: 900,
         minWidth: 320,
         margin: "0 auto",
@@ -89,7 +89,7 @@ export default function VipTransferForm() {
           >
             VIP Rezervasyon Formu
           </h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4 w-full"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-5 w-full"
             style={{
               marginBottom: 10,
               width: "100%",
@@ -103,7 +103,6 @@ export default function VipTransferForm() {
                   fontFamily: "inherit",
                   width: "100%",
                   height: 52,
-                  marginBottom: 0,
                 }}
                 autoComplete="address-level2"
               />
@@ -117,7 +116,6 @@ export default function VipTransferForm() {
                   fontFamily: "inherit",
                   width: "100%",
                   height: 52,
-                  marginBottom: 0,
                 }}
                 autoComplete="address-level2"
               />
@@ -130,7 +128,6 @@ export default function VipTransferForm() {
                   fontFamily: "inherit",
                   width: "100%",
                   height: 52,
-                  marginBottom: 0,
                 }}>
                 <option value="">Seçiniz</option>
                 {Array.from({ length: 24 }, (_, i) => i + 1).map(val =>
@@ -146,7 +143,6 @@ export default function VipTransferForm() {
                   fontFamily: "inherit",
                   width: "100%",
                   height: 52,
-                  marginBottom: 0,
                 }}>
                 <option value="">Seçiniz</option>
                 <option value="Ekonomik">Ekonomik</option>
@@ -162,7 +158,6 @@ export default function VipTransferForm() {
                   fontFamily: "inherit",
                   width: "100%",
                   height: 52,
-                  marginBottom: 0,
                 }}>
                 <option value="">Seçiniz</option>
                 <option value="VIP Havalimanı Transferi">VIP Havalimanı Transferi</option>
@@ -174,72 +169,47 @@ export default function VipTransferForm() {
                 <option value="Düğün vb Organizasyonlar">Düğün vb Organizasyonlar</option>
               </select>
             </div>
-            <div>
-              <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
-              <div
-                tabIndex={0}
-                className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg cursor-pointer flex items-center"
-                onClick={() => { document.getElementById("date-picker").showPicker(); }}
-                style={{
-                  fontFamily: "inherit",
-                  width: "100%",
-                  height: 52,
-                  marginBottom: 0,
-                }}
-              >
+            <div className="flex flex-row gap-x-6">
+              <div className="flex-1">
+                <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
+                <div
+                  tabIndex={0}
+                  className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg cursor-pointer flex items-center"
+                  onClick={() => document.getElementById("saat-picker").focus()}
+                  style={{
+                    fontFamily: "inherit",
+                    width: "100%",
+                    height: 52,
+                  }}
+                >
+                  <select
+                    id="saat-picker"
+                    value={time}
+                    onChange={e => setTime(e.target.value)}
+                    className="bg-transparent border-0 outline-none text-black w-full text-lg"
+                    style={{ padding: 0, height: "1.7em" }}
+                    tabIndex={-1}
+                  >
+                    <option value="">Seçiniz</option>
+                    {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="flex-1">
+                <label className="font-bold text-[#bfa658] mb-1 block">PNR / Uçuş Kodu</label>
                 <input
-                  id="date-picker"
-                  type="date"
-                  value={date}
-                  onChange={e => setDate(e.target.value)}
-                  min={new Date().toISOString().split("T")[0]}
-                  className="bg-transparent border-0 outline-none text-black w-full text-lg"
-                  style={{ padding: 0, height: "1.7em" }}
-                  tabIndex={-1}
+                  type="text"
+                  value={pnr}
+                  onChange={e => setPnr(e.target.value)}
+                  placeholder="Uçuş rezervasyon kodu"
+                  className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
+                  style={{
+                    fontFamily: "inherit",
+                    width: "100%",
+                    height: 52,
+                  }}
                 />
               </div>
-            </div>
-            <div>
-              <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
-              <div
-                tabIndex={0}
-                className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg cursor-pointer flex items-center"
-                onClick={() => document.getElementById("saat-picker").focus()}
-                style={{
-                  fontFamily: "inherit",
-                  width: "100%",
-                  height: 52,
-                  marginBottom: 0,
-                }}
-              >
-                <select
-                  id="saat-picker"
-                  value={time}
-                  onChange={e => setTime(e.target.value)}
-                  className="bg-transparent border-0 outline-none text-black w-full text-lg"
-                  style={{ padding: 0, height: "1.7em" }}
-                  tabIndex={-1}
-                >
-                  <option value="">Seçiniz</option>
-                  {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
-                </select>
-              </div>
-            </div>
-            <div className="md:col-span-2">
-              <label className="font-bold text-[#bfa658] mb-1 block">PNR / Uçuş Kodu</label>
-              <input
-                type="text"
-                value={pnr}
-                onChange={e => setPnr(e.target.value)}
-                placeholder="Uçuş rezervasyon kodu"
-                className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
-                style={{
-                  fontFamily: "inherit",
-                  width: "100%",
-                  height: 52,
-                  marginBottom: 0,
-                }}
-              />
             </div>
           </div>
           <button
@@ -254,19 +224,20 @@ export default function VipTransferForm() {
             Devam Et
           </button>
         </form>
+        <style jsx>{`
+          @media (max-width: 900px) {
+            .border-2 { max-width: 99vw !important; min-width: 0 !important; border-radius: 18px !important; }
+            form { padding: 12px 6px 8px 6px !important; border-radius: 18px !important; }
+          }
+          @media (max-width: 700px) {
+            .border-2 { max-width: 100vw !important; border-radius: 8px !important; }
+            form { padding: 6px 2px 5px 2px !important; border-radius: 8px !important; }
+            input, select { font-size: 1rem !important; height: 46px !important; }
+            h1 { font-size: 1.15rem !important; }
+            .gap-x-20 { column-gap: 8px !important; }
+          }
+        `}</style>
       </div>
-      <style jsx>{`
-        @media (max-width: 900px) {
-          .border-2 { max-width: 99vw !important; min-width: 0 !important; border-radius: 18px !important; }
-          form { padding: 15px 6px 8px 6px !important; border-radius: 18px !important; }
-        }
-        @media (max-width: 700px) {
-          .border-2 { max-width: 100vw !important; border-radius: 8px !important; }
-          form { padding: 8px 2px 5px 2px !important; border-radius: 8px !important; }
-          input, select { font-size: 1rem !important; height: 46px !important; }
-          h1 { font-size: 1.15rem !important; }
-        }
-      `}</style>
     </div>
   );
 }
