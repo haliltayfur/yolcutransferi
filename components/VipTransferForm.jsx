@@ -1,5 +1,3 @@
-// === Dosya: /components/VipTransferForm.jsx ===
-
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -25,6 +23,7 @@ export default function VipTransferForm() {
   const [pnr, setPnr] = useState("");
   const [errors, setErrors] = useState({});
 
+  // PNR alanı her zaman en altta (ya da sadece transfer havalimanı ise açılır)
   const pnrRequired =
     transfer === "VIP Havalimanı Transferi" ||
     isAirport(from) ||
@@ -51,6 +50,10 @@ export default function VipTransferForm() {
     <div
       className="flex flex-col justify-center items-center w-full h-full"
       style={{
+        width: "85%",
+        maxWidth: 900,
+        minWidth: 320,
+        margin: "0 auto",
         height: "100%",
         minHeight: 400,
         boxSizing: "border-box",
@@ -58,11 +61,9 @@ export default function VipTransferForm() {
     >
       <div
         className="border-2 border-[#bfa658] bg-[rgba(25,22,10,0.98)] flex flex-col justify-center items-center
-          rounded-[32px] md:rounded-[32px]"
+          rounded-[32px] w-full"
         style={{
           width: "100%",
-          maxWidth: 680,
-          margin: "0 auto",
           boxSizing: "border-box",
           padding: 0,
         }}
@@ -75,11 +76,11 @@ export default function VipTransferForm() {
             width: "100%",
             height: "100%",
             boxSizing: "border-box",
-            padding: "26px 22px 14px 22px", // desktopta
+            padding: "30px 30px 12px 30px",
           }}
         >
           <h1 className="font-extrabold text-[#bfa658] tracking-tight text-center font-quicksand
-            text-[1.7rem] md:text-3xl mb-5 md:mb-6"
+            text-[2rem] md:text-3xl mb-5 md:mb-6"
             style={{
               marginTop: 2,
               letterSpacing: ".5px",
@@ -88,33 +89,49 @@ export default function VipTransferForm() {
           >
             VIP Rezervasyon Formu
           </h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 w-full"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4 w-full"
             style={{
               marginBottom: 10,
+              width: "100%",
             }}>
             <div>
-              <label className="font-bold text-[#bfa658] mb-1 block text-[1rem] md:text-[1.08rem]">Nereden?</label>
+              <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
               <input type="text" value={from} onChange={e => setFrom(e.target.value)}
                 placeholder="Nereden? (İl / Havalimanı / Otel)"
-                className="input w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-base md:text-lg"
+                className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
+                style={{
+                  fontFamily: "inherit",
+                  width: "100%",
+                  height: 52,
+                  marginBottom: 0,
+                }}
                 autoComplete="address-level2"
-                style={{ fontFamily: "inherit", width: "100%" }}
               />
             </div>
             <div>
-              <label className="font-bold text-[#bfa658] mb-1 block text-[1rem] md:text-[1.08rem]">Nereye?</label>
+              <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
               <input type="text" value={to} onChange={e => setTo(e.target.value)}
                 placeholder="Nereye? (İl / İlçe / Otel)"
-                className="input w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-base md:text-lg"
+                className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
+                style={{
+                  fontFamily: "inherit",
+                  width: "100%",
+                  height: 52,
+                  marginBottom: 0,
+                }}
                 autoComplete="address-level2"
-                style={{ fontFamily: "inherit", width: "100%" }}
               />
             </div>
             <div>
-              <label className="font-bold text-[#bfa658] mb-1 block text-[1rem] md:text-[1.08rem]">Yolcu Sayısı</label>
+              <label className="font-bold text-[#bfa658] mb-1 block">Yolcu Sayısı</label>
               <select value={people} onChange={e => setPeople(e.target.value)}
-                className="input w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-base md:text-lg"
-                style={{ fontFamily: "inherit" }}>
+                className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
+                style={{
+                  fontFamily: "inherit",
+                  width: "100%",
+                  height: 52,
+                  marginBottom: 0,
+                }}>
                 <option value="">Seçiniz</option>
                 {Array.from({ length: 24 }, (_, i) => i + 1).map(val =>
                   <option key={val} value={val}>{val}</option>
@@ -122,10 +139,15 @@ export default function VipTransferForm() {
               </select>
             </div>
             <div>
-              <label className="font-bold text-[#bfa658] mb-1 block text-[1rem] md:text-[1.08rem]">Segment</label>
+              <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
               <select value={segment} onChange={e => setSegment(e.target.value)}
-                className="input w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-base md:text-lg"
-                style={{ fontFamily: "inherit" }}>
+                className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
+                style={{
+                  fontFamily: "inherit",
+                  width: "100%",
+                  height: 52,
+                  marginBottom: 0,
+                }}>
                 <option value="">Seçiniz</option>
                 <option value="Ekonomik">Ekonomik</option>
                 <option value="Lüks">Lüks</option>
@@ -133,10 +155,15 @@ export default function VipTransferForm() {
               </select>
             </div>
             <div>
-              <label className="font-bold text-[#bfa658] mb-1 block text-[1rem] md:text-[1.08rem]">Transfer Türü</label>
+              <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
               <select value={transfer} onChange={e => setTransfer(e.target.value)}
-                className="input w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-base md:text-lg"
-                style={{ fontFamily: "inherit" }}>
+                className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
+                style={{
+                  fontFamily: "inherit",
+                  width: "100%",
+                  height: 52,
+                  marginBottom: 0,
+                }}>
                 <option value="">Seçiniz</option>
                 <option value="VIP Havalimanı Transferi">VIP Havalimanı Transferi</option>
                 <option value="Şehirler Arası Transfer">Şehirler Arası Transfer</option>
@@ -147,13 +174,18 @@ export default function VipTransferForm() {
                 <option value="Düğün vb Organizasyonlar">Düğün vb Organizasyonlar</option>
               </select>
             </div>
-            <div style={{ position: "relative" }}>
-              <label className="font-bold text-[#bfa658] mb-1 block text-[1rem] md:text-[1.08rem]">Tarih</label>
+            <div>
+              <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
               <div
                 tabIndex={0}
-                className="input w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-base md:text-lg cursor-pointer flex items-center"
+                className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg cursor-pointer flex items-center"
                 onClick={() => { document.getElementById("date-picker").showPicker(); }}
-                style={{ fontFamily: "inherit", width: "100%" }}
+                style={{
+                  fontFamily: "inherit",
+                  width: "100%",
+                  height: 52,
+                  marginBottom: 0,
+                }}
               >
                 <input
                   id="date-picker"
@@ -161,25 +193,30 @@ export default function VipTransferForm() {
                   value={date}
                   onChange={e => setDate(e.target.value)}
                   min={new Date().toISOString().split("T")[0]}
-                  className="bg-transparent border-0 outline-none text-black w-full text-base md:text-lg"
+                  className="bg-transparent border-0 outline-none text-black w-full text-lg"
                   style={{ padding: 0, height: "1.7em" }}
                   tabIndex={-1}
                 />
               </div>
             </div>
-            <div style={{ position: "relative" }}>
-              <label className="font-bold text-[#bfa658] mb-1 block text-[1rem] md:text-[1.08rem]">Saat</label>
+            <div>
+              <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
               <div
                 tabIndex={0}
-                className="input w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-base md:text-lg cursor-pointer flex items-center"
+                className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg cursor-pointer flex items-center"
                 onClick={() => document.getElementById("saat-picker").focus()}
-                style={{ fontFamily: "inherit", width: "100%" }}
+                style={{
+                  fontFamily: "inherit",
+                  width: "100%",
+                  height: 52,
+                  marginBottom: 0,
+                }}
               >
                 <select
                   id="saat-picker"
                   value={time}
                   onChange={e => setTime(e.target.value)}
-                  className="bg-transparent border-0 outline-none text-black w-full text-base md:text-lg"
+                  className="bg-transparent border-0 outline-none text-black w-full text-lg"
                   style={{ padding: 0, height: "1.7em" }}
                   tabIndex={-1}
                 >
@@ -188,52 +225,48 @@ export default function VipTransferForm() {
                 </select>
               </div>
             </div>
-            {pnrRequired && (
-              <div className="md:col-span-2">
-                <label className="font-bold text-[#bfa658] mb-1 block text-[1rem] md:text-[1.08rem]">PNR / Uçuş Kodu</label>
-                <input
-                  type="text"
-                  value={pnr}
-                  onChange={e => setPnr(e.target.value)}
-                  placeholder="Uçuş rezervasyon kodu"
-                  className="input w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-base md:text-lg"
-                  style={{ fontFamily: "inherit", width: "100%" }}
-                />
-              </div>
-            )}
+            <div className="md:col-span-2">
+              <label className="font-bold text-[#bfa658] mb-1 block">PNR / Uçuş Kodu</label>
+              <input
+                type="text"
+                value={pnr}
+                onChange={e => setPnr(e.target.value)}
+                placeholder="Uçuş rezervasyon kodu"
+                className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
+                style={{
+                  fontFamily: "inherit",
+                  width: "100%",
+                  height: 52,
+                  marginBottom: 0,
+                }}
+              />
+            </div>
           </div>
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 mt-4 rounded-xl text-lg md:text-xl shadow hover:scale-105 transition"
+            className="w-full bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 mt-4 rounded-xl text-xl shadow hover:scale-105 transition"
             style={{
               fontFamily: "inherit",
+              fontSize: "1.3rem",
               marginBottom: "2px",
             }}
           >
             Devam Et
           </button>
         </form>
-        <style jsx>{`
-          @media (max-width: 640px) {
-            div[class^='border-2'] {
-              max-width: 98vw !important;
-              min-width: 0 !important;
-              padding: 0 !important;
-              border-radius: 20px !important;
-            }
-            form {
-              padding: 14px 6px 8px 6px !important;
-              border-radius: 20px !important;
-            }
-            input, select {
-              font-size: 1rem !important;
-              padding-top: 12px !important;
-              padding-bottom: 12px !important;
-            }
-            h1 { font-size: 1.15rem !important; }
-          }
-        `}</style>
       </div>
+      <style jsx>{`
+        @media (max-width: 900px) {
+          .border-2 { max-width: 99vw !important; min-width: 0 !important; border-radius: 18px !important; }
+          form { padding: 15px 6px 8px 6px !important; border-radius: 18px !important; }
+        }
+        @media (max-width: 700px) {
+          .border-2 { max-width: 100vw !important; border-radius: 8px !important; }
+          form { padding: 8px 2px 5px 2px !important; border-radius: 8px !important; }
+          input, select { font-size: 1rem !important; height: 46px !important; }
+          h1 { font-size: 1.15rem !important; }
+        }
+      `}</style>
     </div>
   );
 }
