@@ -1,28 +1,16 @@
 // === Dosya: /components/VipTransferForm.jsx ===
 
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// Otomatik doldurma için localStorage ve navigator kullanımı
-function getAutoFill(field) {
-  if (typeof window === "undefined") return "";
-  // 1. Kendi localStorage key'in (formdatam vs)
-  try {
-    const v = localStorage.getItem("transferForm_" + field);
-    if (v) return v;
-  } catch {}
-  // 2. Tarayıcıdan çekilebilecek varsa (çok basit)
-  if (field === "name" && window.navigator.userAgentData)
-    return window.navigator.userAgentData.fullName || "";
-  if (field === "email" && window.navigator.userAgentData)
-    return window.navigator.userAgentData.email || "";
-  return "";
-}
+// 15 dakikalık saatler
+const saatler = [];
+for (let h = 0; h < 24; ++h)
+  for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
 export default function VipTransferForm({ user }) {
   const router = useRouter();
-  // USER bilgisi varsa, ön doldur!
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [people, setPeople] = useState("");
@@ -30,67 +18,34 @@ export default function VipTransferForm({ user }) {
   const [transfer, setTransfer] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  // Doldurma kontrolleri
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    setFrom(localStorage.getItem("transferForm_from") || "");
-    setTo(localStorage.getItem("transferForm_to") || "");
-    setPeople(localStorage.getItem("transferForm_people") || "");
-    setSegment(localStorage.getItem("transferForm_segment") || "");
-    setTransfer(localStorage.getItem("transferForm_transfer") || "");
-    setDate(localStorage.getItem("transferForm_date") || "");
-    setTime(localStorage.getItem("transferForm_time") || "");
-  }, []);
-  // Alanlar değiştikçe local'e yaz
-  useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("transferForm_from", from); }, [from]);
-  useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("transferForm_to", to); }, [to]);
-  useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("transferForm_people", people); }, [people]);
-  useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("transferForm_segment", segment); }, [segment]);
-  useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("transferForm_transfer", transfer); }, [transfer]);
-  useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("transferForm_date", date); }, [date]);
-  useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("transferForm_time", time); }, [time]);
+  const [showDate, setShowDate] = useState(false);
+  const [showTime, setShowTime] = useState(false);
 
-  // Üye login ise props'tan veya global'den auto-fill (örnek için hardcode simülasyonu)
-  useEffect(() => {
-    if (!user) return;
-    if (user.from) setFrom(user.from);
-    if (user.to) setTo(user.to);
-    if (user.people) setPeople(user.people);
-    if (user.segment) setSegment(user.segment);
-    if (user.transfer) setTransfer(user.transfer);
-    if (user.date) setDate(user.date);
-    if (user.time) setTime(user.time);
-  }, [user]);
-
-  // Minimum form
   function handleSubmit(e) {
     e.preventDefault();
-    if (!from || !to || !people || !segment || !transfer || !date || !time) return alert("Lütfen tüm alanları doldurun.");
-    // Alanları query ile yeni sayfaya yolla
+    if (!from || !to || !people || !segment || !transfer || !date || !time) return alert("Tüm alanları doldurun.");
     const params = new URLSearchParams({ from, to, people, segment, transfer, date, time });
     router.push(`/rezervasyon?${params.toString()}`);
   }
 
-  // Responsive & dark theme & kutular
+  // Tarih ve saat inputlarını kutuya herhangi bir yere tıklayınca aç
   return (
     <form
       onSubmit={handleSubmit}
       autoComplete="on"
-      className="w-full h-full flex flex-col justify-center items-center px-2"
-      style={{
-        maxWidth: 600,
-        minWidth: 220,
-        margin: "0 auto",
-        height: "100%",
-        minHeight: 400
-      }}
+      className="w-full h-full flex flex-col justify-center items-center"
+      style={{ maxWidth: 600, minWidth: 220, margin: "0 auto", height: "100%", minHeight: 400 }}
     >
-      <div className="w-full max-w-lg mx-auto bg-[#19160a] border border-[#bfa658] rounded-2xl px-3 md:px-6 py-6 md:py-9 shadow-2xl flex flex-col gap-3"
-        style={{ boxSizing: "border-box", background: "#19160a", minWidth: 220 }}>
-        <h1 className="text-xl md:text-2xl font-extrabold text-[#bfa658] tracking-tight mb-5 text-center font-quicksand">
+      <div className="w-full mx-auto px-2 md:px-8 py-8 md:py-12 flex flex-col gap-3"
+        style={{
+          background: "transparent",
+          minWidth: 220,
+          borderRadius: 18,
+        }}>
+        <h1 className="text-2xl md:text-3xl font-extrabold text-[#bfa658] tracking-tight mb-5 text-center font-quicksand">
           VIP Rezervasyon Formu
         </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
             <input type="text" value={from} onChange={e => setFrom(e.target.value)}
@@ -141,37 +96,53 @@ export default function VipTransferForm({ user }) {
               <option value="Düğün vb Organizasyonlar">Düğün vb Organizasyonlar</option>
             </select>
           </div>
-          <div>
+          <div style={{ position: "relative" }}>
             <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
-            <input type="date" value={date} onChange={e => setDate(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-3 py-2"
-            />
+            <div
+              tabIndex={0}
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-3 py-2 cursor-pointer flex items-center"
+              onClick={() => { document.getElementById("date-picker").showPicker(); }}
+            >
+              <input
+                id="date-picker"
+                type="date"
+                value={date}
+                onChange={e => setDate(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+                className="bg-transparent border-0 outline-none text-[#ffeec2] w-full"
+                style={{ padding: 0, height: "1.7em" }}
+                tabIndex={-1}
+              />
+            </div>
           </div>
-          <div>
+          <div style={{ position: "relative" }}>
             <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
-            <input type="time" value={time} onChange={e => setTime(e.target.value)}
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-3 py-2"
-            />
+            <div
+              tabIndex={0}
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-3 py-2 cursor-pointer flex items-center"
+              onClick={() => document.getElementById("saat-picker").focus()}
+            >
+              <select
+                id="saat-picker"
+                value={time}
+                onChange={e => setTime(e.target.value)}
+                className="bg-transparent border-0 outline-none text-[#ffeec2] w-full"
+                style={{ padding: 0, height: "1.7em" }}
+                tabIndex={-1}
+              >
+                <option value="">Seçiniz</option>
+                {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
+              </select>
+            </div>
           </div>
         </div>
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-3 mt-5 rounded-xl text-lg shadow hover:scale-105 transition"
+          className="w-full bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-3 mt-6 rounded-xl text-xl shadow hover:scale-105 transition"
         >
           Devam Et
         </button>
       </div>
-      <style jsx>{`
-        @media (max-width: 800px) {
-          .max-w-lg { max-width: 99vw !important; }
-        }
-        @media (max-width: 600px) {
-          .max-w-lg { max-width: 99vw !important; }
-          .px-3 { padding-left: 8px !important; padding-right: 8px !important; }
-          .py-6 { padding-top: 16px !important; padding-bottom: 16px !important; }
-        }
-      `}</style>
     </form>
   );
 }
