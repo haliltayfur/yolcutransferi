@@ -1,135 +1,92 @@
 // PATH: components/RezervasyonHero.jsx
 "use client";
 import dynamic from "next/dynamic";
-import { useEffect, useRef } from "react";
-
 const VipTransferForm = dynamic(() => import("./VipTransferForm"), { ssr: false });
-const HeroVideo = dynamic(() => import("./HeroVideo"), { ssr: false });
 
 export default function RezervasyonHero() {
-  const containerRef = useRef(null);
-
-  // Scroll sonrası yukarıdan mesafe ayarı (opsiyonel)
-  useEffect(() => {
-    if (!containerRef.current) return;
-    // containerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
-
   return (
     <section
-      ref={containerRef}
-      className="w-full flex justify-center items-start relative"
-      style={{
-        minHeight: "650px",
-        background: "transparent",
-        padding: 0,
-        marginTop: 0,
-        marginBottom: 0,
-      }}
+      className="w-full flex flex-col items-center justify-center mt-8 md:mt-10 mb-10 md:mb-16"
+      style={{ width: "100%" }}
     >
       <div
-        className="
-          w-full max-w-[1260px]
-          flex flex-row
-          items-start
-          justify-between
-          gap-10
-          px-1 md:px-0
-        "
-        style={{
-          marginTop: 0,
-          marginBottom: 0,
-          alignItems: "stretch",
-        }}
+        className="w-full flex flex-col items-center justify-center"
+        style={{ width: "100%" }}
       >
-        {/* FORM */}
+        {/* --- Responsive GRID (Form + Video) --- */}
         <div
           className="
-            flex flex-col justify-center
-            shadow-2xl
+            w-full
+            max-w-[1260px]
+            mx-auto
+            grid
+            grid-cols-1
+            md:grid-cols-2
+            gap-y-7
+            md:gap-x-10
+            px-2
           "
           style={{
-            width: "54%",
-            minWidth: 390,
-            maxWidth: "700px",
-            background: "rgba(25,22,10,0.99)",
-            borderRadius: 34,
-            border: "2px solid #bfa658",
-            boxSizing: "border-box",
-            minHeight: 608,
-            maxHeight: 660,
-            padding: "28px 34px 32px 34px",
-            zIndex: 3,
-            marginLeft: 0,
+            width: "min(100vw, 1260px)",
+            alignItems: "stretch",
+            justifyContent: "center",
           }}
         >
-          <VipTransferForm />
-        </div>
-
-        {/* VIDEO - sadece desktop */}
-        <div
-          className="
-            hidden md:flex flex-col justify-center
-            shadow-2xl
-          "
-          style={{
-            width: "46%",
-            minWidth: 285,
-            maxWidth: "520px",
-            background: "#171717",
-            borderRadius: 34,
-            overflow: "hidden",
-            boxSizing: "border-box",
-            minHeight: 608,
-            maxHeight: 660,
-            zIndex: 3,
-            marginRight: 0,
-          }}
-        >
-          <HeroVideo />
+          {/* FORM */}
+          <div
+            className="
+              flex flex-col justify-center
+              border-2 border-[#bfa658]
+              rounded-3xl
+              bg-[#19160aF5]
+              shadow-2xl
+              w-full
+              px-3 md:px-8
+              py-6 md:py-10
+            "
+            style={{
+              minHeight: 560,
+              maxWidth: 550,
+              marginLeft: 0,
+              marginRight: "auto",
+            }}
+          >
+            <VipTransferForm />
+          </div>
+          {/* VIDEO: desktop görünümde sağda */}
+          <div
+            className="
+              hidden md:flex justify-center items-center
+              border-2 border-[#bfa658]
+              rounded-3xl
+              bg-[#171717]
+              shadow-xl
+              w-full
+              max-w-[440px]
+              min-h-[380px]
+            "
+            style={{
+              marginRight: 0,
+              marginLeft: "auto",
+              overflow: "hidden",
+            }}
+          >
+            {/* Video burada (örn. public/video.mp4 ya da <img> ile değiştir) */}
+            <video
+              src="/videolar/vip-musteri.mp4"
+              controls
+              style={{
+                borderRadius: "26px",
+                width: "100%",
+                maxHeight: 370,
+                objectFit: "cover",
+                background: "#181818",
+              }}
+              preload="metadata"
+            />
+          </div>
         </div>
       </div>
-      <style jsx>{`
-        @media (max-width: 1260px) {
-          .max-w-\[1260px\] {
-            max-width: 98vw !important;
-          }
-        }
-        @media (max-width: 1000px) {
-          .max-w-\[1260px\] {
-            gap: 3vw !important;
-          }
-          div[style*="width: 54%"] { min-width: 260px !important; }
-          div[style*="width: 46%"] { min-width: 170px !important; }
-        }
-        @media (max-width: 800px) {
-          .max-w-\[1260px\] {
-            flex-direction: column !important;
-            gap: 0 !important;
-            padding: 0 2vw !important;
-          }
-          div[style*="width: 54%"] {
-            width: 100% !important;
-            min-width: 0 !important;
-            max-width: 100vw !important;
-            margin: 0 auto 20px auto !important;
-            border-radius: 20px !important;
-            min-height: 520px !important;
-            max-height: none !important;
-          }
-          div[style*="width: 46%"] {
-            display: none !important;
-          }
-        }
-        @media (max-width: 550px) {
-          div[style*="width: 54%"] {
-            padding: 14px 3vw 18px 3vw !important;
-            min-height: 390px !important;
-            border-radius: 12px !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }
-// === DOSYA SONU ===
