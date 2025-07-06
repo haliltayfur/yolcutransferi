@@ -50,7 +50,21 @@ export default function VipTransferForm() {
     <form
       onSubmit={handleSubmit}
       autoComplete="on"
-      className="w-full h-full flex flex-col justify-center items-center px-6 md:px-10 py-6"
+      className={`
+        bg-[#19160a] border border-[#bfa658] rounded-2xl shadow-2xl
+        flex flex-col justify-center items-center
+        py-8 px-4
+        mx-auto
+        ${/* --- responsive genişlik: mobilde tam, tablette/desktopta büyütülmüş --- */""}
+        w-[97vw] max-w-[440px]
+        sm:max-w-[560px] md:max-w-[630px]
+        lg:max-w-[750px] xl:max-w-[900px] 
+        ${/* Desktopta formu %30 büyüt: min-h, p, font, input-height... */""}
+        md:scale-[1.3] md:-translate-y-6
+      `}
+      style={{
+        transition: "all .18s cubic-bezier(.4,0,.2,1)"
+      }}
     >
       <h1 className="font-extrabold text-[#bfa658] tracking-tight text-center font-quicksand text-2xl md:text-3xl mb-5">
         VIP Rezervasyon Formu
@@ -64,6 +78,7 @@ export default function VipTransferForm() {
             style={{ height: 62 }}
             autoComplete="address-level2"
           />
+          {errors.from && <div className="text-red-400 text-xs mt-1">{errors.from}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
@@ -73,6 +88,7 @@ export default function VipTransferForm() {
             style={{ height: 62 }}
             autoComplete="address-level2"
           />
+          {errors.to && <div className="text-red-400 text-xs mt-1">{errors.to}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Yolcu Sayısı</label>
@@ -84,6 +100,7 @@ export default function VipTransferForm() {
               <option key={val} value={val}>{val}</option>
             )}
           </select>
+          {errors.people && <div className="text-red-400 text-xs mt-1">{errors.people}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
@@ -95,6 +112,7 @@ export default function VipTransferForm() {
             <option value="Lüks">Lüks</option>
             <option value="Prime+">Prime+</option>
           </select>
+          {errors.segment && <div className="text-red-400 text-xs mt-1">{errors.segment}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
@@ -110,6 +128,7 @@ export default function VipTransferForm() {
             <option value="Toplu Transfer">Toplu Transfer</option>
             <option value="Düğün vb Organizasyonlar">Düğün vb Organizasyonlar</option>
           </select>
+          {errors.transfer && <div className="text-red-400 text-xs mt-1">{errors.transfer}</div>}
         </div>
         <div className="flex flex-row gap-x-6">
           <div className="flex-1">
@@ -132,6 +151,7 @@ export default function VipTransferForm() {
                 {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
               </select>
             </div>
+            {errors.time && <div className="text-red-400 text-xs mt-1">{errors.time}</div>}
           </div>
           <div className="flex-1">
             <label className="font-bold text-[#bfa658] mb-1 block">PNR / Uçuş Kodu</label>
@@ -143,6 +163,7 @@ export default function VipTransferForm() {
               className="w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
               style={{ height: 52 }}
             />
+            {errors.pnr && <div className="text-red-400 text-xs mt-1">{errors.pnr}</div>}
           </div>
         </div>
       </div>
