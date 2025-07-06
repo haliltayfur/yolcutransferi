@@ -25,13 +25,14 @@ export default function Home() {
           <div
             className="flex flex-col justify-center items-center"
             style={{
-              width: "75%",
+              width: "66.6%",
               height: "100%",
               background: "rgba(25,22,10,0.98)",
-              borderTopLeftRadius: 22,
-              borderBottomLeftRadius: 22,
+              borderTopLeftRadius: 32,
+              borderBottomLeftRadius: 32,
               borderTopRightRadius: 0,
               borderBottomRightRadius: 0,
+              boxSizing: "border-box",
             }}
           >
             <VipTransferForm />
@@ -39,15 +40,17 @@ export default function Home() {
           <div
             className="hidden md:flex items-center justify-center"
             style={{
-              width: "25%",
+              width: "33.4%",
               height: "100%",
               borderRadius: 0,
-              borderTopRightRadius: 22,
-              borderBottomRightRadius: 22,
+              borderTopRightRadius: 32,
+              borderBottomRightRadius: 32,
               background: "transparent",
               overflow: "hidden",
               boxShadow: "none",
               border: "none",
+              padding: 0,
+              margin: 0,
             }}
           >
             {typeof window !== "undefined" && window.innerWidth >= 768 && (
