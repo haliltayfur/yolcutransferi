@@ -1,5 +1,4 @@
 // === Dosya: /components/HeroSlider.jsx ===
-
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -27,66 +26,32 @@ export default function HeroSlider() {
     return () => clearTimeout(timer);
   }, [current, isMobile]);
 
-  // Click ile slide değişimi
+  // Tıklama ile slide değişimi (desktop + mobil)
   function handleClick(e) {
     if (!sliderRef.current) return;
-    const bounds = sliderRef.current.getBoundingClientRect();
-    const x = e.clientX - bounds.left;
-    const w = bounds.width;
+    let x, w;
+    if (e.touches) {
+      // Mobilde dokunmatik
+      const touch = e.touches[0];
+      const bounds = sliderRef.current.getBoundingClientRect();
+      x = touch.clientX - bounds.left;
+      w = bounds.width;
+    } else {
+      const bounds = sliderRef.current.getBoundingClientRect();
+      x = e.clientX - bounds.left;
+      w = bounds.width;
+    }
     if (x > w * 0.5) setCurrent((prev) => (prev + 1) % heroImages.length);
     else setCurrent((prev) => (prev - 1 + heroImages.length) % heroImages.length);
   }
 
-  // Mobil
-  if (isMobile) {
-    return (
-      <section className="relative w-full select-none">
-        <div className="w-full h-3 block" />
-        <div className="relative w-full aspect-[1.78]">
-          <Image
-            src={heroImages[current]}
-            alt=""
-            fill
-            className="object-cover rounded-xl shadow-lg transition-all"
-            priority
-            draggable={false}
-            style={{ borderRadius: "11px" }}
-            onClick={handleClick}
-          />
-        </div>
-        <div className="flex justify-center gap-1 mt-3">
-          {heroImages.map((_, i) => (
-            <div
-              key={i}
-              className={`dot-mob ${i === current ? "active" : ""}`}
-              onClick={() => setCurrent(i)}
-            />
-          ))}
-        </div>
-        <style jsx>{`
-          .dot-mob {
-            width: 10px; height: 10px;
-            border-radius: 50%;
-            background: #FFD70070;
-            margin: 0 2px;
-            cursor: pointer;
-          }
-          .dot-mob.active {
-            background: #FFD700;
-            border: 2px solid #fff9;
-          }
-        `}</style>
-      </section>
-    );
-  }
-
-  // Desktop
   return (
     <section className="relative w-full select-none flex flex-col items-center">
       <div className="w-full h-8 block" />
       <div
         ref={sliderRef}
         onClick={handleClick}
+        onTouchStart={handleClick}
         className="cinema-slider-desktop relative flex items-center justify-center overflow-hidden rounded-3xl cursor-pointer"
         style={{
           width: "min(100vw, 2000px)",
@@ -95,7 +60,6 @@ export default function HeroSlider() {
           maxHeight: "670px",
           boxShadow: "0 10px 34px #000b, 0 4px 24px #FFD70018",
         }}
-        title="İleri/geri gitmek için slayda tıklayın"
       >
         <Image
           src={heroImages[current]}
@@ -117,12 +81,13 @@ export default function HeroSlider() {
             <div
               key={i}
               className={`slider-dot ${i === current ? "active" : ""}`}
-              onClick={e => { e.stopPropagation(); setCurrent(i); }}
+              onClick={() => setCurrent(i)}
             />
           ))}
         </div>
       </div>
       <style jsx>{`
+        .cinema-slider-desktop { }
         .slider-dot {
           background: #FFD70090;
           border-radius: 50%; width: 14px; height: 14px;
@@ -146,5 +111,4 @@ export default function HeroSlider() {
     </section>
   );
 }
-
 // === Dosya SONU: /components/HeroSlider.jsx ===
