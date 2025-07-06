@@ -14,7 +14,7 @@ function isAirport(str) {
   return /havalimanı|airport|uçuş/i.test(str);
 }
 
-export default function VipTransferForm({ user }) {
+export default function VipTransferForm() {
   const router = useRouter();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -126,66 +126,4 @@ export default function VipTransferForm({ user }) {
             <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
             <div
               tabIndex={0}
-              className="input w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg cursor-pointer flex items-center"
-              onClick={() => { document.getElementById("date-picker").showPicker(); }}
-              style={{ fontFamily: "inherit", width: "100%" }}
-            >
-              <input
-                id="date-picker"
-                type="date"
-                value={date}
-                onChange={e => setDate(e.target.value)}
-                min={new Date().toISOString().split("T")[0]}
-                className="bg-transparent border-0 outline-none text-black w-full text-lg"
-                style={{ padding: 0, height: "1.7em" }}
-                tabIndex={-1}
-              />
-            </div>
-          </div>
-          <div style={{ position: "relative" }}>
-            <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
-            <div
-              tabIndex={0}
-              className="input w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg cursor-pointer flex items-center"
-              onClick={() => document.getElementById("saat-picker").focus()}
-              style={{ fontFamily: "inherit", width: "100%" }}
-            >
-              <select
-                id="saat-picker"
-                value={time}
-                onChange={e => setTime(e.target.value)}
-                className="bg-transparent border-0 outline-none text-black w-full text-lg"
-                style={{ padding: 0, height: "1.7em" }}
-                tabIndex={-1}
-              >
-                <option value="">Seçiniz</option>
-                {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
-              </select>
-            </div>
-          </div>
-          {pnrRequired && (
-            <div className="md:col-span-2">
-              <label className="font-bold text-[#bfa658] mb-1 block">PNR / Uçuş Kodu</label>
-              <input
-                type="text"
-                value={pnr}
-                onChange={e => setPnr(e.target.value)}
-                placeholder="Uçuş rezervasyon kodu"
-                className="input w-full bg-[#fff] text-black border border-[#bfa658] rounded-xl px-4 py-3 text-lg"
-                style={{ fontFamily: "inherit", width: "100%" }}
-              />
-            </div>
-          )}
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 mt-6 rounded-xl text-xl shadow hover:scale-105 transition"
-          style={{ fontFamily: "inherit", fontSize: "1.3rem" }}
-        >
-          Devam Et
-        </button>
-      </div>
-    </form>
-  );
-}
-// === Dosya SONU: /components/VipTransferForm.jsx ===
+              className="input w-ful
