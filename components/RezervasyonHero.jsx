@@ -3,50 +3,53 @@ import dynamic from "next/dynamic";
 const VipTransferForm = dynamic(() => import("./VipTransferForm"), { ssr: false });
 
 export default function RezervasyonHero() {
-  // Responsive: Genişliği window'a göre ayarlayalım
-  // (Eğer tailwind yoksa, bu kısmı atlayabilirsin. tailwind ile uyumlu!)
   return (
     <section className="w-full flex flex-col items-center justify-center mt-8 md:mt-14 mb-8 md:mb-14">
       <div
         className={`
           w-full
           mx-auto
-          grid
-          grid-cols-1
-          md:grid-cols-2
+          flex
+          flex-col
+          md:flex-row
+          md:items-start
+          justify-center
           gap-y-8
           md:gap-x-10
           px-1 md:px-0
-          `}
+        `}
         style={{
-          maxWidth: "1300px",  // Masaüstü için genişlik limiti
-          alignItems: "start",
-          justifyContent: "center",
+          maxWidth: "1300px",
+          alignItems: "flex-start", // ÜSTTEN BİREBİR HİZA
         }}
       >
-        {/* FORM alanı */}
+        {/* FORM */}
         <div
           className={`
             flex flex-col justify-center
             w-full
+            md:w-[800px]
+            max-w-[800px]
+            min-w-[320px]
+            h-[600px]
+            md:h-[600px]
             items-center
             md:items-start
-            `}
+          `}
           style={{
-            maxWidth: 800,
-            minWidth: 320,
-            height: 600,
+            boxSizing: "border-box",
             marginLeft: 0,
             marginRight: 0,
-            boxSizing: "border-box",
+            paddingLeft: 0,
+            paddingRight: 0,
           }}
         >
           <div
             className="w-full h-full flex flex-col"
             style={{
-              maxWidth: 800,
               width: "100%",
               height: "100%",
+              maxWidth: 800,
               minHeight: 600,
               justifyContent: "center",
             }}
@@ -54,7 +57,7 @@ export default function RezervasyonHero() {
             <VipTransferForm />
           </div>
         </div>
-        {/* VIDEO alanı (sadece desktop) */}
+        {/* VİDEO */}
         <div
           className={`
             hidden md:flex justify-end items-start
@@ -62,7 +65,7 @@ export default function RezervasyonHero() {
             rounded-3xl
             bg-[#232323e7]
             shadow-xl
-            w-full
+            w-[400px]
             max-w-[400px]
             min-w-[340px]
             min-h-[600px]
@@ -91,20 +94,13 @@ export default function RezervasyonHero() {
           />
         </div>
       </div>
-      {/* MOBİLDE video yok! */}
+      {/* MOBİLDE video yok */}
       <style>{`
         @media (max-width: 900px) {
-          .max-w-[400px] { max-width: 0 !important; }
-          .min-h-[600px], .max-h-[600px] { min-height: 0 !important; max-height: none !important; }
-        }
-        @media (max-width: 900px) {
-          form {
-            width: 95vw !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-            min-width: 0 !important;
-            max-width: 99vw !important;
-          }
+          .md\\:flex-row { flex-direction: column !important; }
+          .w-full.md\\:w-\\[800px\\] { width: 95vw !important; max-width: 99vw !important; min-width: 0 !important;}
+          .hidden.md\\:flex { display: none !important; }
+          form { width: 95vw !important; margin-left: auto !important; margin-right: auto !important; min-width: 0 !important; max-width: 99vw !important; }
         }
       `}</style>
     </section>
