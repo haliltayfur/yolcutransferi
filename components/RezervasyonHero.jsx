@@ -1,3 +1,4 @@
+// PATH: components/RezervasyonHero.jsx
 "use client";
 import dynamic from "next/dynamic";
 const VipTransferForm = dynamic(() => import("./VipTransferForm"), { ssr: false });
@@ -8,56 +9,35 @@ export default function RezervasyonHero() {
       <div
         className={`
           w-full
+          max-w-[1300px]
           mx-auto
-          flex
-          flex-col
-          md:flex-row
-          md:items-start
-          justify-center
+          flex flex-col md:flex-row
+          md:gap-x-8
           gap-y-8
-          md:gap-x-10
-          px-1 md:px-0
+          px-2 md:px-0
+          items-start
+          justify-center
         `}
-        style={{
-          maxWidth: "1300px",
-          alignItems: "flex-start", // ÜSTTEN BİREBİR HİZA
-        }}
       >
-        {/* FORM */}
+        {/* FORM alanı */}
         <div
           className={`
             flex flex-col justify-center
-            w-full
-            md:w-[800px]
-            max-w-[800px]
-            min-w-[320px]
+            border-2 border-[#bfa658]
+            rounded-3xl
+            bg-[#19160ae9]
+            shadow-2xl
+            w-full md:w-[800px]
             h-[600px]
-            md:h-[600px]
-            items-center
-            md:items-start
+            md:mr-auto
+            px-6 md:px-16
+            py-7 md:py-16
+            box-border
           `}
-          style={{
-            boxSizing: "border-box",
-            marginLeft: 0,
-            marginRight: 0,
-            paddingLeft: 0,
-            paddingRight: 0,
-          }}
         >
-          <div
-            className="w-full h-full flex flex-col"
-            style={{
-              width: "100%",
-              height: "100%",
-              maxWidth: 800,
-              minHeight: 600,
-              justifyContent: "center",
-            }}
-          >
-            <VipTransferForm />
-          </div>
+          <VipTransferForm />
         </div>
-        {/* VİDEO */}
+        {/* VIDEO */}
         <div
           className={`
             hidden md:flex justify-end items-start
@@ -66,18 +46,10 @@ export default function RezervasyonHero() {
             bg-[#232323e7]
             shadow-xl
             w-[400px]
-            max-w-[400px]
-            min-w-[340px]
-            min-h-[600px]
-            max-h-[600px]
+            h-[600px]
             overflow-hidden
+            ml-auto
           `}
-          style={{
-            height: 600,
-            marginLeft: "auto",
-            marginRight: 0,
-            boxSizing: "border-box",
-          }}
         >
           <video
             src="/reklam.mp4"
@@ -85,8 +57,7 @@ export default function RezervasyonHero() {
             style={{
               borderRadius: "24px",
               width: "100%",
-              minHeight: "600px",
-              maxHeight: "600px",
+              height: "100%",
               objectFit: "cover",
               background: "#1c1c1c",
             }}
@@ -94,15 +65,6 @@ export default function RezervasyonHero() {
           />
         </div>
       </div>
-      {/* MOBİLDE video yok */}
-      <style>{`
-        @media (max-width: 900px) {
-          .md\\:flex-row { flex-direction: column !important; }
-          .w-full.md\\:w-\\[800px\\] { width: 95vw !important; max-width: 99vw !important; min-width: 0 !important;}
-          .hidden.md\\:flex { display: none !important; }
-          form { width: 95vw !important; margin-left: auto !important; margin-right: auto !important; min-width: 0 !important; max-width: 99vw !important; }
-        }
-      `}</style>
     </section>
   );
 }
