@@ -1,14 +1,16 @@
 "use client";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
-function VipForm() {
+function VipForm({ width }) {
   return (
     <div
       className="bg-[#19160a] border-2 border-[#bfa658] rounded-3xl shadow-2xl p-10 flex flex-col justify-center"
       style={{
-        width: "100%",
+        width: width ? width : 680,
         height: 600,
-        boxSizing: "border-box"
+        minWidth: 320,
+        boxSizing: "border-box",
+        transition: "width 0.2s"
       }}
     >
       <h2 className="text-3xl font-bold text-[#bfa658] mb-6">VIP Transfer Rezervasyonu</h2>
@@ -25,7 +27,7 @@ function VipForm() {
   );
 }
 
-function VipVideo() {
+function VipVideo({ width }) {
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -38,12 +40,9 @@ function VipVideo() {
   const handleVideoClick = () => {
     const video = videoRef.current;
     if (!video) return;
-
-    // Sesi aç ve baştan başlat
     video.muted = false;
     video.currentTime = 0;
     video.play();
-    // Otomatik olarak sesi açmak bazı tarayıcılarda kullanıcı hareketi gerektirir
     video.volume = 1;
   };
 
@@ -51,10 +50,12 @@ function VipVideo() {
     <div
       className="bg-[#232323e7] border-2 border-[#bfa658] rounded-3xl shadow-2xl flex items-center justify-center overflow-hidden"
       style={{
-        width: "100%",
+        width: width ? width : 340,
         height: 600,
+        minWidth: 200,
         boxSizing: "border-box",
-        cursor: "pointer"
+        cursor: "pointer",
+        transition: "width 0.2s"
       }}
       onClick={handleVideoClick}
       tabIndex={0}
@@ -82,57 +83,45 @@ function VipVideo() {
 }
 
 export default function RezervasyonHero() {
-  // Media query: mobilde form tam ortalı, video yok
+  const [sliderWidth, setSliderWidth] = useState(1200);
+  const sliderRef = typeof window !== "undefined" ? document.getElementById("hero-slider-ref") : null;
+
+  // Slider'ın genişliğini al (ve resize olunca güncelle)
+  useEffect(() => {
+    function updateWidth() {
+      const slider = document.getElementById("hero-slider-ref");
+      if (slider) {
+        setSliderWidth(slider.offsetWidth);
+      }
+    }
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
+  // Oranlar
+  const FORM_ORAN = 0.68;
+  const BOSLUK_ORAN = 0.02;
+  const VIDEO_ORAN = 0.30;
+  const formWidth = Math.round(sliderWidth * FORM_ORAN);
+  const boslukWidth = Math.round(sliderWidth * BOSLUK_ORAN);
+  const videoWidth = Math.round(sliderWidth * VIDEO_ORAN);
+
   return (
     <section className="w-full flex flex-col items-center py-12">
       <div
-        className="flex flex-row items-center justify-center w-full"
+        className="flex flex-row items-center justify-center"
         style={{
+          width: sliderWidth,
+          margin: "0 auto",
           minHeight: 600,
+          transition: "width 0.2s"
         }}
       >
-        <div
-          className="hidden lg:block"
-          style={{
-            flex: `0 0 calc((100vw - 70vw)/2)`, // iki tarafı ortala (70vw = %50+%20)
-            minWidth: 0
-          }}
-        />
-        {/* FORM */}
-        <div
-          className="form-area"
-          style={{
-            width: "50vw",
-            maxWidth: 800,
-            minWidth: 320,
-            marginRight: 20,
-            transition: "width 0.2s"
-          }}
-        >
-          <VipForm />
-        </div>
-        {/* VIDEO */}
-        <div
-          className="video-area hidden md:block"
-          style={{
-            width: "20vw",
-            maxWidth: 500,
-            minWidth: 200,
-            transition: "width 0.2s"
-          }}
-        >
-          <VipVideo />
-        </div>
-        <div
-          className="hidden lg:block"
-          style={{
-            flex: `0 0 calc((100vw - 70vw)/2)`,
-            minWidth: 0
-          }}
-        />
+        <VipForm width={formWidth} />
+        <div style={{ width: boslukWidth, minWidth: 20, maxWidth: 50 }} />
+        <VipVideo width={videoWidth} />
       </div>
-
-      {/* MOBİL VERSİYON */}
       <style jsx>{`
         @media (max-width: 900px) {
           .form-area {
