@@ -1,19 +1,25 @@
+// === Dosya: components/VipTransferForm.jsx ===
 "use client";
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
-// --- Havalimanı Algılama ---
-function isAirportRelated(val) {
-  if (!val) return false;
-  const airportKeywords = [
-    "havalimanı", "istanbul havalimanı", "iga", "ist", "sabiha gökçen", "saw", "eskişehir havalimanı",
-    "antalya havalimanı", "ankara esenboğa", "esenboğa", "milas bodrum", "izmir adnan", "trabzon havalimanı"
-  ];
-  const t = val.toLocaleLowerCase("tr-TR");
-  return airportKeywords.some(k => t.includes(k));
-}
+const segmentOptions = [
+  { key: "Ekonomik", label: "Ekonomik" },
+  { key: "Lüks", label: "Lüks" },
+  { key: "Prime+", label: "Prime+" }
+];
+const allTransfers = [
+  "VIP Havalimanı Transferi",
+  "Şehirler Arası Transfer",
+  "Kurumsal Etkinlik",
+  "Özel Etkinlik",
+  "Tur & Gezi",
+  "Toplu Transfer",
+  "Düğün vb Organizasyonlar"
+];
+const saatler = [];
+for (let h = 0; h < 24; ++h)
+  for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
-// --- Adres AutoComplete ---
 function useAddressList() {
   const [addressList, setAddressList] = useState([]);
   useEffect(() => {
@@ -56,14 +62,13 @@ function AutoCompleteInput({ value, onChange, placeholder }) {
         onFocus={() => setShowList(true)}
         onBlur={() => setTimeout(() => setShowList(false), 140)}
         autoComplete="off"
-        style={{ minHeight: 48, fontSize: 16 }}
       />
       {showList && suggestions.length > 0 &&
         <ul className="absolute z-20 bg-[#19160a] border border-[#bfa658] rounded-lg w-full mt-1 text-[#ffeec2] max-h-52 overflow-y-auto shadow-lg">
           {suggestions.map(s => (
             <li key={s}
               className="px-3 py-1 hover:bg-[#bfa658] hover:text-black cursor-pointer"
-              onMouseDown={() => { onChange(s); setShowList(false); }}
+              onClick={() => { onChange(s); setShowList(false); }}
             >{s}</li>
           ))}
         </ul>
@@ -72,27 +77,7 @@ function AutoCompleteInput({ value, onChange, placeholder }) {
   );
 }
 
-// --- Sabit Listeler ---
-const segmentOptions = [
-  { key: "Ekonomik", label: "Ekonomik" },
-  { key: "Lüks", label: "Lüks" },
-  { key: "Prime+", label: "Prime+" }
-];
-const allTransfers = [
-  "VIP Havalimanı Transferi",
-  "Şehirler Arası Transfer",
-  "Kurumsal Etkinlik",
-  "Özel Etkinlik",
-  "Tur & Gezi",
-  "Toplu Transfer",
-  "Düğün vb Organizasyonlar"
-];
-const saatler = [];
-for (let h = 0; h < 24; ++h)
-  for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
-
 export default function VipTransferForm() {
-  const router = useRouter();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [people, setPeople] = useState("");
@@ -101,147 +86,130 @@ export default function VipTransferForm() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [pnr, setPnr] = useState("");
-  const [fieldErrors, setFieldErrors] = useState({});
+  const [errors, setErrors] = useState({});
+
+  // Havalimanı seçimiyle PNR gösterimi
+  const airportKeywords = [
+    "havalimanı", "istanbul havalimanı", "iga", "ist", "sabiha gökçen", "saw", "eskişehir havalimanı",
+    "antalya havalimanı", "ankara esenboğa", "esenboğa", "milas bodrum", "izmir adnan", "trabzon havalimanı"
+  ];
+  function isAirportRelated(val) {
+    if (!val) return false;
+    const t = val.toLocaleLowerCase("tr-TR");
+    return airportKeywords.some(k => t.includes(k));
+  }
+  const showPNR = transfer === "VIP Havalimanı Transferi" || isAirportRelated(from) || isAirportRelated(to);
 
   function handleSubmit(e) {
     e.preventDefault();
-    const err = {};
+    let err = {};
     if (!from) err.from = "Nereden?";
     if (!to) err.to = "Nereye?";
-    if (!people) err.people = "Kişi sayısı?";
+    if (!people) err.people = "Kişi?";
     if (!segment) err.segment = "Segment?";
     if (!transfer) err.transfer = "Transfer türü?";
     if (!date) err.date = "Tarih?";
     if (!time) err.time = "Saat?";
-    setFieldErrors(err);
-    if (Object.keys(err).length > 0) return;
-    const params = new URLSearchParams({
-      from, to, people, segment, transfer, date, time, pnr
-    });
-    router.push(`/rezervasyon?${params.toString()}`);
+    setErrors(err);
+    if (Object.keys(err).length === 0) {
+      // DEVAM ET: Burada routing veya popup açma vs. yapılabilir
+      alert("Form başarıyla iletildi!");
+    }
   }
-  const showPNR = transfer === "VIP Havalimanı Transferi" || isAirportRelated(from) || isAirportRelated(to);
 
   return (
     <form
       onSubmit={handleSubmit}
-      className={`
-        bg-[#19160a] border border-[#bfa658] rounded-3xl shadow-2xl
-        w-full
-        max-w-xl
-        mx-auto
-        flex flex-col
-      `}
-      style={{ minWidth: 0, width: "100%" }}
+      autoComplete="on"
+      className="w-full flex flex-col justify-center items-center gap-2"
     >
-      <div className="mb-8 text-xl sm:text-2xl font-extrabold text-[#bfa658] text-left">
+      <div className="text-xl md:text-2xl font-bold mb-2 text-[#bfa658] text-left w-full" style={{ letterSpacing: ".5px" }}>
         VIP Transfer Rezervasyonu
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-2 mb-2">
+        {/* Nereden/Nereye */}
         <div>
-          <label className="block font-bold text-[#bfa658] mb-1 text-sm sm:text-base">Nereden?</label>
+          <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
           <AutoCompleteInput value={from} onChange={setFrom} placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı" />
-          {fieldErrors.from && <div className="text-red-400 text-xs mt-1">{fieldErrors.from}</div>}
+          {errors.from && <div className="text-red-400 text-xs mt-1">{errors.from}</div>}
         </div>
         <div>
-          <label className="block font-bold text-[#bfa658] mb-1 text-sm sm:text-base">Nereye?</label>
+          <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
           <AutoCompleteInput value={to} onChange={setTo} placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı" />
-          {fieldErrors.to && <div className="text-red-400 text-xs mt-1">{fieldErrors.to}</div>}
+          {errors.to && <div className="text-red-400 text-xs mt-1">{errors.to}</div>}
         </div>
+        {/* Kişi/Segment */}
         <div>
-          <label className="block font-bold text-[#bfa658] mb-1 text-sm sm:text-base">Kişi Sayısı</label>
+          <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
           <select
             className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
             value={people}
             onChange={e => setPeople(e.target.value)}
-            style={{ minHeight: 48, fontSize: 16 }}
           >
             <option value="">Seçiniz</option>
-            {Array.from({ length: 24 }, (_, i) => i + 1).map(val => (
-              <option key={val} value={val}>{val}</option>
-            ))}
+            {Array.from({ length: 24 }, (_, i) => i + 1).map(val => <option key={val} value={val}>{val}</option>)}
           </select>
-          {fieldErrors.people && <div className="text-red-400 text-xs mt-1">{fieldErrors.people}</div>}
+          {errors.people && <div className="text-red-400 text-xs mt-1">{errors.people}</div>}
         </div>
         <div>
-          <label className="block font-bold text-[#bfa658] mb-1 text-sm sm:text-base">Segment</label>
+          <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
           <select
             className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
             value={segment}
             onChange={e => setSegment(e.target.value)}
-            style={{ minHeight: 48, fontSize: 16 }}
           >
             <option value="">Seçiniz</option>
-            {segmentOptions.map(opt => (
-              <option key={opt.key} value={opt.label}>{opt.label}</option>
-            ))}
+            {segmentOptions.map(opt => <option key={opt.key} value={opt.label}>{opt.label}</option>)}
           </select>
-          {fieldErrors.segment && <div className="text-red-400 text-xs mt-1">{fieldErrors.segment}</div>}
+          {errors.segment && <div className="text-red-400 text-xs mt-1">{errors.segment}</div>}
         </div>
+        {/* Transfer Türü / Tarih */}
         <div>
-          <label className="block font-bold text-[#bfa658] mb-1 text-sm sm:text-base">Transfer Türü</label>
+          <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
           <select
             className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
             value={transfer}
             onChange={e => setTransfer(e.target.value)}
-            style={{ minHeight: 48, fontSize: 16 }}
           >
             <option value="">Seçiniz</option>
-            {allTransfers.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
+            {allTransfers.map(opt => <option key={opt} value={opt}>{opt}</option>)}
           </select>
-          {fieldErrors.transfer && <div className="text-red-400 text-xs mt-1">{fieldErrors.transfer}</div>}
+          {errors.transfer && <div className="text-red-400 text-xs mt-1">{errors.transfer}</div>}
         </div>
-        <div className="flex flex-row gap-3 col-span-2">
+        <div className="flex gap-2">
           <div className="flex-1">
-            <label className="block font-bold text-[#bfa658] mb-1 text-sm sm:text-base">Tarih</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
             <input
+              name="date"
               type="date"
               className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
               value={date}
               onChange={e => setDate(e.target.value)}
               min={new Date().toISOString().split("T")[0]}
-              style={{ minHeight: 48, fontSize: 16 }}
+              autoComplete="on"
             />
-            {fieldErrors.date && <div className="text-red-400 text-xs mt-1">{fieldErrors.date}</div>}
+            {errors.date && <div className="text-red-400 text-xs mt-1">{errors.date}</div>}
           </div>
           <div className="flex-1">
-            <label className="block font-bold text-[#bfa658] mb-1 text-sm sm:text-base">Saat</label>
+            <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
             <select
               className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
               value={time}
               onChange={e => setTime(e.target.value)}
-              style={{ minHeight: 48, fontSize: 16 }}
             >
               <option value="">Seçiniz</option>
-              {saatler.map(saat => (
-                <option key={saat} value={saat}>{saat}</option>
-              ))}
+              {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
             </select>
-            {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
+            {errors.time && <div className="text-red-400 text-xs mt-1">{errors.time}</div>}
           </div>
         </div>
-        {showPNR && (
-          <div className="col-span-2">
-            <label className="block font-bold text-[#bfa658] mb-1 text-sm sm:text-base">PNR/Uçuş Kodu</label>
+        {/* PNR */}
+        {showPNR &&
+          <div className="md:col-span-2">
+            <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
             <input
+              name="pnr"
+              type="text"
               className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
               value={pnr}
-              onChange={e => setPnr(e.target.value)}
-              placeholder="Uçuş rezervasyon kodu (varsa)"
-              style={{ minHeight: 48, fontSize: 16 }}
-            />
-          </div>
-        )}
-      </div>
-      <button
-        type="submit"
-        className="w-full mt-8 bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition"
-        style={{ minHeight: 50, fontSize: 20 }}
-      >
-        Devam Et
-      </button>
-    </form>
-  );
-}
+              onChange={e => setPnr(e.target
