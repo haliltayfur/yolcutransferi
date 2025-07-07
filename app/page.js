@@ -1,4 +1,3 @@
-// PATH: app/page.js
 "use client";
 import { useRef, useEffect, useState } from "react";
 import HeroSlider from "../components/HeroSlider";
@@ -7,38 +6,44 @@ import AdvantagesBar from "../components/AdvantagesBar";
 import TestimonialsSlider from "../components/TestimonialsSlider";
 
 export default function Home() {
-  // 1. Slider'ın genişliğini ölç
-  const sliderRef = useRef();
+  // SLIDER genişliğini ölç
+  const sliderOuterRef = useRef();
   const [sliderWidth, setSliderWidth] = useState(1200);
 
   useEffect(() => {
-    function handleResize() {
-      if (sliderRef.current) {
-        setSliderWidth(sliderRef.current.offsetWidth);
+    function updateWidth() {
+      if (sliderOuterRef.current) {
+        setSliderWidth(sliderOuterRef.current.offsetWidth);
       }
     }
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => window.removeEventListener("resize", handleResize);
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
-  // 2. Form ve video oranları (örn: %68 ve %30, %2 aralık)
+  // ORANLAR (68-2-30 gibi)
   const formW = sliderWidth * 0.68;
-  const videoW = sliderWidth * 0.30;
   const gapW = sliderWidth * 0.02;
+  const videoW = sliderWidth * 0.30;
 
   return (
     <main className="w-full flex flex-col items-center">
-      {/* SLIDER */}
-      <div ref={sliderRef} className="w-full flex justify-center">
+      {/* SLIDER tam container! */}
+      <div
+        ref={sliderOuterRef}
+        style={{
+          width: "min(100vw, 2000px)",
+          margin: "0 auto",
+        }}
+      >
         <HeroSlider />
       </div>
-      {/* ALT GRID */}
+      {/* ALT GRID tam slider genişliğiyle aynı, tam altına! */}
       <div
-        className="flex flex-row justify-start items-start mt-8 mb-12"
+        className="flex flex-row justify-between items-start mt-10 mb-12"
         style={{
           width: sliderWidth,
-          maxWidth: "96vw",
+          maxWidth: "2000px",
           margin: "0 auto",
         }}
       >
@@ -47,12 +52,13 @@ export default function Home() {
           style={{
             width: formW,
             minWidth: 300,
-            marginRight: gapW,
             transition: "width 0.3s",
           }}
         >
           <RezervasyonHero />
         </div>
+        {/* BOŞLUK */}
+        <div style={{ width: gapW, minWidth: 10 }} />
         {/* VIDEO */}
         <div
           style={{
@@ -61,12 +67,10 @@ export default function Home() {
             transition: "width 0.3s",
           }}
         >
-          {/* RezervasyonHero içinde video varsa oradan çıkar, dışarıda <video> da koyabilirsin. */}
-          {/* Eğer video burada ise: */}
+          {/* Eğer video dışarıda ise: */}
           {/* <video src="/public/reklam.mp4" controls style={{ width: "100%", borderRadius: 18 }} /> */}
         </div>
       </div>
-      {/* DİĞER BÖLÜMLER */}
       <AdvantagesBar />
       <TestimonialsSlider />
     </main>
