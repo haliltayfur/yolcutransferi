@@ -1,3 +1,4 @@
+// PATH: app/page.js
 "use client";
 import { useRef, useEffect, useState } from "react";
 import HeroSlider from "../components/HeroSlider";
@@ -6,7 +7,7 @@ import AdvantagesBar from "../components/AdvantagesBar";
 import TestimonialsSlider from "../components/TestimonialsSlider";
 
 export default function Home() {
-  // SLIDER genişliğini ölç
+  // Slider genişliği
   const sliderOuterRef = useRef();
   const [sliderWidth, setSliderWidth] = useState(1200);
 
@@ -21,14 +22,14 @@ export default function Home() {
     return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
-  // ORANLAR (68-2-30 gibi)
+  // ORANLAR
   const formW = sliderWidth * 0.68;
   const gapW = sliderWidth * 0.02;
   const videoW = sliderWidth * 0.30;
 
   return (
-    <main className="w-full flex flex-col items-center">
-      {/* SLIDER tam container! */}
+    <main className="w-full flex flex-col items-center bg-black min-h-screen">
+      {/* === SLIDER === */}
       <div
         ref={sliderOuterRef}
         style={{
@@ -38,39 +39,44 @@ export default function Home() {
       >
         <HeroSlider />
       </div>
-      {/* ALT GRID tam slider genişliğiyle aynı, tam altına! */}
+
+      {/* === ALT GRID === */}
       <div
-        className="flex flex-row justify-between items-start mt-10 mb-12"
+        className="flex flex-row items-start"
         style={{
           width: sliderWidth,
           maxWidth: "2000px",
           margin: "0 auto",
+          marginTop: "32px",
         }}
       >
         {/* FORM */}
         <div
           style={{
             width: formW,
-            minWidth: 300,
+            minWidth: 350,
             transition: "width 0.3s",
           }}
         >
           <RezervasyonHero />
         </div>
         {/* BOŞLUK */}
-        <div style={{ width: gapW, minWidth: 10 }} />
+        <div style={{ width: gapW, minWidth: 20 }} />
         {/* VIDEO */}
         <div
           style={{
             width: videoW,
-            minWidth: 180,
+            minWidth: 220,
             transition: "width 0.3s",
+            display: "flex",
+            justifyContent: "flex-end",
           }}
         >
-          {/* Eğer video dışarıda ise: */}
-          {/* <video src="/public/reklam.mp4" controls style={{ width: "100%", borderRadius: 18 }} /> */}
+          {/* Eğer video dışarıdan geldiyse burada import et veya <video ... /> ile göster */}
         </div>
       </div>
+
+      {/* === ALT KISIM === */}
       <AdvantagesBar />
       <TestimonialsSlider />
     </main>
