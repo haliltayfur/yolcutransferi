@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-// --- AutoComplete ve Diğer Kısımlar Aynı ---
+// --- AutoComplete ---
 function useAddressList() {
   const [addressList, setAddressList] = useState([]);
   useEffect(() => {
@@ -60,6 +60,8 @@ function AutoCompleteInput({ value, onChange, placeholder }) {
     </div>
   );
 }
+
+// --- Diğer sabit veriler ---
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
   { key: "Lüks", label: "Lüks" },
@@ -77,7 +79,6 @@ const allTransfers = [
 const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
-
 const airportKeywords = [
   "havalimanı", "istanbul havalimanı", "iga", "ist", "sabiha gökçen", "saw", "eskişehir havalimanı",
   "antalya havalimanı", "ankara esenboğa", "esenboğa", "milas bodrum", "izmir adnan", "trabzon havalimanı"
@@ -123,16 +124,17 @@ export default function VipTransferForm() {
     <form
       onSubmit={handleSubmit}
       className={`
-        bg-[#19160a] border border-[#bfa658] rounded-3xl shadow-2xl mx-auto
+        bg-[#19160a] border border-[#bfa658] rounded-3xl shadow-2xl 
+        mt-10 ml-0 md:ml-14 
         py-8 px-6 md:px-12
-        w-[96vw] max-w-4xl
+        w-[98vw] max-w-4xl
       `}
       style={{ minWidth: 340 }}
     >
       <div className="mb-8 text-2xl font-extrabold text-[#bfa658] text-left">
         VIP Transfer Rezervasyonu
       </div>
-      {/* Satır satır 2'li kolon: Mobilde 1 kolon */}
+      {/* 2 kolon, mobilde 1 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
         <div>
           <label className="block font-bold text-[#bfa658] mb-1">Nereden?</label>
@@ -189,33 +191,37 @@ export default function VipTransferForm() {
           </select>
           {fieldErrors.transfer && <div className="text-red-400 text-xs mt-1">{fieldErrors.transfer}</div>}
         </div>
-        <div>
-          <label className="block font-bold text-[#bfa658] mb-1">Tarih</label>
-          <input
-            type="date"
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-4 px-4 text-base"
-            value={date}
-            onChange={e => setDate(e.target.value)}
-            min={new Date().toISOString().split("T")[0]}
-            style={{ height: 56 }}
-          />
-          {fieldErrors.date && <div className="text-red-400 text-xs mt-1">{fieldErrors.date}</div>}
+        {/* Tarih & Saat yan yana */}
+        <div className="flex flex-row gap-3 col-span-2">
+          <div className="flex-1">
+            <label className="block font-bold text-[#bfa658] mb-1">Tarih</label>
+            <input
+              type="date"
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-4 px-4 text-base"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              min={new Date().toISOString().split("T")[0]}
+              style={{ height: 56 }}
+            />
+            {fieldErrors.date && <div className="text-red-400 text-xs mt-1">{fieldErrors.date}</div>}
+          </div>
+          <div className="flex-1">
+            <label className="block font-bold text-[#bfa658] mb-1">Saat</label>
+            <select
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-4 px-4 text-base"
+              value={time}
+              onChange={e => setTime(e.target.value)}
+              style={{ height: 56 }}
+            >
+              <option value="">Seçiniz</option>
+              {saatler.map(saat => (
+                <option key={saat} value={saat}>{saat}</option>
+              ))}
+            </select>
+            {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
+          </div>
         </div>
-        <div>
-          <label className="block font-bold text-[#bfa658] mb-1">Saat</label>
-          <select
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-4 px-4 text-base"
-            value={time}
-            onChange={e => setTime(e.target.value)}
-            style={{ height: 56 }}
-          >
-            <option value="">Seçiniz</option>
-            {saatler.map(saat => (
-              <option key={saat} value={saat}>{saat}</option>
-            ))}
-          </select>
-          {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
-        </div>
+        {/* PNR kutucuğu full row */}
         {showPNR && (
           <div className="col-span-2">
             <label className="block font-bold text-[#bfa658] mb-1">PNR/Uçuş Kodu</label>
