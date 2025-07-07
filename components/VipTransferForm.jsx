@@ -1,24 +1,19 @@
-// === Dosya: components/VipTransferForm.jsx ===
+// PATH: components/VipTransferForm.jsx
 "use client";
 import { useState, useEffect } from "react";
 
+const allTransfers = [
+  "VIP Havalimanı Transferi", "Şehirler Arası Transfer",
+  "Kurumsal Etkinlik", "Özel Etkinlik", "Tur & Gezi",
+  "Toplu Transfer", "Düğün vb Organizasyonlar"
+];
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
   { key: "Lüks", label: "Lüks" },
   { key: "Prime+", label: "Prime+" }
 ];
-const allTransfers = [
-  "VIP Havalimanı Transferi",
-  "Şehirler Arası Transfer",
-  "Kurumsal Etkinlik",
-  "Özel Etkinlik",
-  "Tur & Gezi",
-  "Toplu Transfer",
-  "Düğün vb Organizasyonlar"
-];
 const saatler = [];
-for (let h = 0; h < 24; ++h)
-  for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
+for (let h = 0; h < 24; ++h) for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
 function useAddressList() {
   const [addressList, setAddressList] = useState([]);
@@ -53,9 +48,9 @@ function AutoCompleteInput({ value, onChange, placeholder }) {
     }
   }, [value, addressList]);
   return (
-    <div className="relative w-full">
+    <div className="relative">
       <input
-        className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
+        className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
         value={value}
         onChange={e => { onChange(e.target.value); setShowList(true); }}
         placeholder={placeholder}
@@ -86,130 +81,100 @@ export default function VipTransferForm() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [pnr, setPnr] = useState("");
-  const [errors, setErrors] = useState({});
 
-  // Havalimanı seçimiyle PNR gösterimi
-  const airportKeywords = [
-    "havalimanı", "istanbul havalimanı", "iga", "ist", "sabiha gökçen", "saw", "eskişehir havalimanı",
-    "antalya havalimanı", "ankara esenboğa", "esenboğa", "milas bodrum", "izmir adnan", "trabzon havalimanı"
-  ];
-  function isAirportRelated(val) {
-    if (!val) return false;
-    const t = val.toLocaleLowerCase("tr-TR");
-    return airportKeywords.some(k => t.includes(k));
-  }
-  const showPNR = transfer === "VIP Havalimanı Transferi" || isAirportRelated(from) || isAirportRelated(to);
+  // Havalimanı/PNR gösterimi (kısa)
+  const showPNR = transfer === "VIP Havalimanı Transferi" || /havalimanı|airport|uçuş/i.test(from) || /havalimanı|airport|uçuş/i.test(to);
 
   function handleSubmit(e) {
     e.preventDefault();
-    let err = {};
-    if (!from) err.from = "Nereden?";
-    if (!to) err.to = "Nereye?";
-    if (!people) err.people = "Kişi?";
-    if (!segment) err.segment = "Segment?";
-    if (!transfer) err.transfer = "Transfer türü?";
-    if (!date) err.date = "Tarih?";
-    if (!time) err.time = "Saat?";
-    setErrors(err);
-    if (Object.keys(err).length === 0) {
-      // DEVAM ET: Burada routing veya popup açma vs. yapılabilir
-      alert("Form başarıyla iletildi!");
-    }
+    // Formdan Rezervasyon sayfasına yönlendirilebilir (isteğe bağlı)
+    alert("Devam ediyor...");
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      autoComplete="on"
-      className="w-full flex flex-col justify-center items-center gap-2"
-    >
-      <div className="text-xl md:text-2xl font-bold mb-2 text-[#bfa658] text-left w-full" style={{ letterSpacing: ".5px" }}>
-        VIP Transfer Rezervasyonu
-      </div>
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-2 mb-2">
-        {/* Nereden/Nereye */}
+    <form onSubmit={handleSubmit} className="w-full h-full flex flex-col justify-center" autoComplete="on">
+      <h2 className="text-2xl md:text-2xl font-extrabold text-[#bfa658] mb-6 text-left font-quicksand">VIP Transfer Rezervasyonu</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
           <AutoCompleteInput value={from} onChange={setFrom} placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı" />
-          {errors.from && <div className="text-red-400 text-xs mt-1">{errors.from}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
           <AutoCompleteInput value={to} onChange={setTo} placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı" />
-          {errors.to && <div className="text-red-400 text-xs mt-1">{errors.to}</div>}
         </div>
-        {/* Kişi/Segment */}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
-          <select
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
-            value={people}
-            onChange={e => setPeople(e.target.value)}
-          >
+          <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
+            value={people} onChange={e => setPeople(e.target.value)}>
             <option value="">Seçiniz</option>
             {Array.from({ length: 24 }, (_, i) => i + 1).map(val => <option key={val} value={val}>{val}</option>)}
           </select>
-          {errors.people && <div className="text-red-400 text-xs mt-1">{errors.people}</div>}
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
-          <select
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
-            value={segment}
-            onChange={e => setSegment(e.target.value)}
-          >
+          <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
+            value={segment} onChange={e => setSegment(e.target.value)}>
             <option value="">Seçiniz</option>
             {segmentOptions.map(opt => <option key={opt.key} value={opt.label}>{opt.label}</option>)}
           </select>
-          {errors.segment && <div className="text-red-400 text-xs mt-1">{errors.segment}</div>}
         </div>
-        {/* Transfer Türü / Tarih */}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
-          <select
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
-            value={transfer}
-            onChange={e => setTransfer(e.target.value)}
-          >
+          <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
+            value={transfer} onChange={e => setTransfer(e.target.value)}>
             <option value="">Seçiniz</option>
             {allTransfers.map(opt => <option key={opt} value={opt}>{opt}</option>)}
           </select>
-          {errors.transfer && <div className="text-red-400 text-xs mt-1">{errors.transfer}</div>}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-4">
           <div className="flex-1">
             <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
             <input
               name="date"
               type="date"
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
               value={date}
               onChange={e => setDate(e.target.value)}
               min={new Date().toISOString().split("T")[0]}
               autoComplete="on"
+              onClick={e => e.target.showPicker && e.target.showPicker()}
             />
-            {errors.date && <div className="text-red-400 text-xs mt-1">{errors.date}</div>}
           </div>
           <div className="flex-1">
             <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
-            <select
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
               value={time}
-              onChange={e => setTime(e.target.value)}
-            >
+              onChange={e => setTime(e.target.value)}>
               <option value="">Seçiniz</option>
               {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
             </select>
-            {errors.time && <div className="text-red-400 text-xs mt-1">{errors.time}</div>}
           </div>
         </div>
-        {/* PNR */}
-        {showPNR &&
-          <div className="md:col-span-2">
-            <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
-            <input
-              name="pnr"
-              type="text"
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl px-4 py-3 text-base"
-              value={pnr}
-              onChange={e => setPnr(e.target
+      </div>
+      {showPNR && (
+        <div className="mb-3">
+          <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
+          <input
+            name="pnr"
+            type="text"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
+            value={pnr}
+            onChange={e => setPnr(e.target.value)}
+            placeholder="Uçuş rezervasyon kodu (varsa)"
+          />
+        </div>
+      )}
+      <button
+        type="submit"
+        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition mt-6 w-full"
+      >
+        Devam Et
+      </button>
+    </form>
+  );
+}
