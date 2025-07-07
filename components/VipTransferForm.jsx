@@ -2,12 +2,12 @@
 
 "use client";
 import React, { useState, useEffect } from "react";
-import EkstralarAccordion from "./EkstralarAccordion";
+import EkstralarAccordion from "../../data/EkstralarAccordion";
 import { vehicles } from "../../data/vehicleList";
 import { extrasListByCategory } from "../../data/extrasByCategory";
 import { useRouter } from "next/navigation";
 
-// --- Adres Otomatik Tamamlama ---
+// === Otomatik Adres ===
 function useAddressList() {
   const [addressList, setAddressList] = useState([]);
   useEffect(() => {
@@ -65,7 +65,7 @@ function AutoCompleteInput({ value, onChange, placeholder }) {
   );
 }
 
-// --- Mesafe ve Süre ---
+// === Mesafe & Süre ===
 function useDistance(from, to, time) {
   const [data, setData] = useState({ km: "", min: "", error: "" });
   useEffect(() => {
@@ -74,7 +74,7 @@ function useDistance(from, to, time) {
       setData({ km: "...", min: "...", error: "" });
       setTimeout(() => setData({
         km: Math.floor(25 + Math.random() * 180) + " km",
-        min: (time && +time.split(":")[0] >= 7 && +time.split(":")[0] <= 10) ? "Yoğun Saat: 90 dk" : (30 + Math.floor(Math.random() * 60)) + " dk",
+        min: (time && +time.split(":")[0] >= 7 && +time.split(":")[0] <= 10) ? "Yoğun Saat: 90 dk" : (30 + Math.random() * 60 | 0) + " dk",
         error: ""
       }), 800);
     }
@@ -83,25 +83,15 @@ function useDistance(from, to, time) {
   return data;
 }
 
-// --- Araç Kombinasyonu Hesaplama ---
+// === Araç Kombinasyonu (Kuralına göre) ===
 function bestVehicleCombos(people, segment) {
   if (!people || !segment) return [];
   people = Number(people);
-
-  // Senin kuralına göre; örnek: Ekonomik 1-4, Lüks 2-5, Prime+ 6+
-  let candidates = vehicles.filter(v =>
-    v.segment === segment && v.max >= people
-  );
-
-  // Küçük gruplarda büyük araç gösterme!
+  let candidates = vehicles.filter(v => v.segment === segment && v.max >= people);
   if (people <= 5) candidates = candidates.filter(v => v.max <= 5);
   else if (people <= 9) candidates = candidates.filter(v => v.max <= 9);
-  // Daha fazlaysa: minibüs/otobüs açılır
-
-  // Yine de uygun yoksa, segmentte en yakın büyük olanı ver
   if (candidates.length === 0)
     candidates = vehicles.filter(v => v.segment === segment && v.max >= people);
-
   if (candidates.length === 0) return [];
   candidates = candidates.sort((a, b) => a.max - b.max);
   let combos = [];
@@ -110,7 +100,7 @@ function bestVehicleCombos(people, segment) {
   return combos;
 }
 
-// --- PNR GÖSTER LOGIC ---
+// === PNR GÖSTER LOGIC ===
 const airportKeywords = [
   "havalimanı", "istanbul havalimanı", "iga", "ist", "sabiha gökçen", "saw", "eskişehir havalimanı",
   "antalya havalimanı", "ankara esenboğa", "esenboğa", "milas bodrum", "izmir adnan", "trabzon havalimanı"
@@ -121,7 +111,7 @@ function isAirportRelated(val) {
   return airportKeywords.some(k => t.includes(k));
 }
 
-// --- KVKK POPUP --- (tek çerçeve, sade)
+// === KVKK POPUP ===
 function KvkkPopup({ open, onClose, onApprove }) {
   const [html, setHtml] = useState("");
   const [loading, setLoading] = useState(true);
@@ -148,9 +138,7 @@ function KvkkPopup({ open, onClose, onApprove }) {
         <button
           className="absolute top-4 right-4 bg-[#bfa658] text-black font-bold rounded-xl px-5 py-2 text-lg shadow hover:bg-yellow-400 transition"
           onClick={onClose}
-        >
-          Kapat
-        </button>
+        >Kapat</button>
         <div className="text-[#ffeec2] space-y-2" dangerouslySetInnerHTML={{ __html: loading ? "Yükleniyor..." : html }} />
         <div className="mt-6 border-t border-[#bfa65866] pt-4">
           <div className="text-sm text-[#FFD700] mb-3">
@@ -168,12 +156,9 @@ function KvkkPopup({ open, onClose, onApprove }) {
   );
 }
 
-// --- SİPARİŞ ÖZETİ POPUP ---
-function SummaryPopup({
-  visible, onClose, form, extras, extrasQty, setExtras, setExtrasQty, combos, kmInfo, minInfo, onPayment
-}) {
+// === SİPARİŞ ÖZETİ POPUP ===
+function SummaryPopup({ visible, onClose, form, extras, extrasQty, setExtras, setExtrasQty, combos, kmInfo, minInfo, onPayment }) {
   if (!visible) return null;
-  // Örnek fiyatlama (canlıda backend'den gelir)
   const basePrice = 4000;
   const KDV_ORAN = 0.20;
   const allExtras = extrasListByCategory.flatMap(cat => cat.items);
@@ -306,7 +291,7 @@ function SummaryPopup({
   );
 }
 
-// --- TEŞEKKÜR POPUP ---
+// === TEŞEKKÜR POPUP ===
 function TesekkurPopup({ open, onClose }) {
   if (!open) return null;
   return (
@@ -326,7 +311,7 @@ function TesekkurPopup({ open, onClose }) {
   );
 }
 
-// --- ANA REZERVASYON FORMU ---
+// === ANA REZERVASYON FORMU ===
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
   { key: "Lüks", label: "Lüks" },
@@ -369,7 +354,6 @@ export default function RezervasyonForm() {
   const [kvkkChecked, setKvkkChecked] = useState(false);
   const [showThanks, setShowThanks] = useState(false);
 
-  // Mesafe/süre
   const { km, min, error: distErr } = useDistance(from, to, time);
 
   const isValidTC = t => /^[1-9]\d{9}[02468]$/.test(t) && t.length === 11;
@@ -407,22 +391,16 @@ export default function RezervasyonForm() {
     setShowSummary(true);
   }
 
-  // Araç seçimi kutusunu sadece kişi & segment seçiliyse göster
   const showVehicleCombos = segment && people;
   const showPNR = transfer === "VIP Havalimanı Transferi" || isAirportRelated(from) || isAirportRelated(to);
 
   function handleKvkkApprove() {
     setKvkkChecked(true);
   }
-
-  // Ödeme (demo)
   function handlePayment() {
     setShowSummary(false);
     setShowThanks(true);
-    // --- Backend ödeme ve mail bildirimi burada yapılır! ---
-    // fetch("/api/payment", {method:"POST",body:...})
-    // fetch("/api/mail", {method:"POST",body:...})
-    // fetch("/api/admin/rezervasyonlar", {method:"POST",body:...})
+    // (Buraya backend ödeme/email entegrasyonunu ekleyebilirsin)
   }
 
   return (
