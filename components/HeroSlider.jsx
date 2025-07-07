@@ -1,4 +1,4 @@
-// === Dosya: /components/HeroSlider.jsx ===
+// === Dosya: components/HeroSlider.jsx ===
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -26,12 +26,10 @@ export default function HeroSlider() {
     return () => clearTimeout(timer);
   }, [current, isMobile]);
 
-  // Tıklama ile slide değişimi (desktop + mobil)
   function handleClick(e) {
     if (!sliderRef.current) return;
     let x, w;
     if (e.touches) {
-      // Mobilde dokunmatik
       const touch = e.touches[0];
       const bounds = sliderRef.current.getBoundingClientRect();
       x = touch.clientX - bounds.left;
@@ -111,4 +109,4 @@ export default function HeroSlider() {
     </section>
   );
 }
-// === Dosya SONU: /components/HeroSlider.jsx ===
+// === Dosya SONU: components/HeroSlider.jsx ===
