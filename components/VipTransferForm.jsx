@@ -2,9 +2,9 @@
 
 "use client";
 import React, { useState, useEffect } from "react";
-import EkstralarAccordion from "../../data/EkstralarAccordion.jsx";
-import { vehicles } from "../../data/vehicleList.js";
-import { extrasListByCategory } from "../../data/extrasByCategory.js";
+import EkstralarAccordion from "../data/EkstralarAccordion.jsx";
+import { vehicles } from "../data/vehicleList.js";
+import { extrasListByCategory } from "../data/extrasByCategory.js";
 import { useRouter } from "next/navigation";
 
 // === Otomatik Adres ===
