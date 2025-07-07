@@ -29,7 +29,7 @@ export default function RezervasyonHero() {
             w-full
             px-3 md:px-9
             py-7 md:py-12
-            min-h-[480px]
+            max-h-[600px]
           "
           style={{
             marginLeft: 0,
@@ -48,8 +48,8 @@ export default function RezervasyonHero() {
             bg-[#232323e7]
             shadow-xl
             w-full
-            max-w-[520px]
-            min-h-[350px]
+            max-w-[400px]
+            min-h-[600px]
             overflow-hidden
           "
           style={{
@@ -59,13 +59,12 @@ export default function RezervasyonHero() {
           }}
         >
           <video
-            src="/videolar/vip-musteri.mp4"
+            src="/public/reklam.mp4"
             controls
             style={{
               borderRadius: "24px",
               width: "100%",
-              minHeight: "320px",
-              maxHeight: "390px",
+                   maxHeight: "600px",
               objectFit: "cover",
               background: "#1c1c1c",
             }}
