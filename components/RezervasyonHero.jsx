@@ -1,14 +1,10 @@
-// PATH: components/RezervasyonHero.jsx
 "use client";
 import dynamic from "next/dynamic";
 const VipTransferForm = dynamic(() => import("./VipTransferForm"), { ssr: false });
 
 export default function RezervasyonHero() {
   return (
-    <section
-      className="w-full flex flex-col items-center justify-center mt-8 md:mt-14 mb-8 md:mb-14"
-    >
-      {/* --- GRID START --- */}
+    <section className="w-full flex flex-col items-center justify-center mt-8 md:mt-14 mb-8 md:mb-14">
       <div
         className="
           w-full
@@ -26,14 +22,10 @@ export default function RezervasyonHero() {
           justifyContent: "center",
         }}
       >
-        {/* FORM */}
+        {/* FORM alanı -- DİKKAT: BURADA ARTIK border YOK! */}
         <div
           className="
             flex flex-col justify-center
-            border-2 border-[#bfa658]
-            rounded-3xl
-            bg-[#19160ae9]
-            shadow-2xl
             w-full
             px-3 md:px-9
             py-7 md:py-12
