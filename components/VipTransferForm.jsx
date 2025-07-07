@@ -1,7 +1,5 @@
-// PATH: components/VipTransferForm.jsx
 "use client";
 import { useState, useEffect } from "react";
-
 const allTransfers = [
   "VIP Havalimanı Transferi", "Şehirler Arası Transfer",
   "Kurumsal Etkinlik", "Özel Etkinlik", "Tur & Gezi",
@@ -50,7 +48,7 @@ function AutoCompleteInput({ value, onChange, placeholder }) {
   return (
     <div className="relative">
       <input
-        className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
+        className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-4 px-4 text-base h-[54px] min-w-[180px]"
         value={value}
         onChange={e => { onChange(e.target.value); setShowList(true); }}
         placeholder={placeholder}
@@ -81,13 +79,10 @@ export default function VipTransferForm() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [pnr, setPnr] = useState("");
-
-  // Havalimanı/PNR gösterimi (kısa)
   const showPNR = transfer === "VIP Havalimanı Transferi" || /havalimanı|airport|uçuş/i.test(from) || /havalimanı|airport|uçuş/i.test(to);
 
   function handleSubmit(e) {
     e.preventDefault();
-    // Formdan Rezervasyon sayfasına yönlendirilebilir (isteğe bağlı)
     alert("Devam ediyor...");
   }
 
@@ -107,7 +102,7 @@ export default function VipTransferForm() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
-          <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
+          <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-4 px-4 text-base h-[54px]"
             value={people} onChange={e => setPeople(e.target.value)}>
             <option value="">Seçiniz</option>
             {Array.from({ length: 24 }, (_, i) => i + 1).map(val => <option key={val} value={val}>{val}</option>)}
@@ -115,7 +110,7 @@ export default function VipTransferForm() {
         </div>
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
-          <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
+          <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-4 px-4 text-base h-[54px]"
             value={segment} onChange={e => setSegment(e.target.value)}>
             <option value="">Seçiniz</option>
             {segmentOptions.map(opt => <option key={opt.key} value={opt.label}>{opt.label}</option>)}
@@ -125,7 +120,7 @@ export default function VipTransferForm() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
         <div>
           <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
-          <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
+          <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-4 px-4 text-base h-[54px]"
             value={transfer} onChange={e => setTransfer(e.target.value)}>
             <option value="">Seçiniz</option>
             {allTransfers.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -137,7 +132,7 @@ export default function VipTransferForm() {
             <input
               name="date"
               type="date"
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-4 px-4 text-base h-[54px]"
               value={date}
               onChange={e => setDate(e.target.value)}
               min={new Date().toISOString().split("T")[0]}
@@ -147,7 +142,7 @@ export default function VipTransferForm() {
           </div>
           <div className="flex-1">
             <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
-            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-4 px-4 text-base h-[54px]"
               value={time}
               onChange={e => setTime(e.target.value)}>
               <option value="">Seçiniz</option>
@@ -162,7 +157,7 @@ export default function VipTransferForm() {
           <input
             name="pnr"
             type="text"
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-3 px-4 text-base"
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl py-4 px-4 text-base h-[54px]"
             value={pnr}
             onChange={e => setPnr(e.target.value)}
             placeholder="Uçuş rezervasyon kodu (varsa)"
@@ -171,7 +166,7 @@ export default function VipTransferForm() {
       )}
       <button
         type="submit"
-        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition mt-6 w-full"
+        className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-4 px-12 rounded-xl text-xl shadow hover:scale-105 transition mt-6 w-full h-[54px]"
       >
         Devam Et
       </button>
