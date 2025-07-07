@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { extrasListByCategory } from "../../data/extrasByCategory";
+
+import { extrasListByCategory } from "./extrasByCategory.js";
 
 export default function EkstralarAccordion({ selectedExtras, setSelectedExtras, extrasQty, setExtrasQty }) {
   const [openIndex, setOpenIndex] = useState(null);
