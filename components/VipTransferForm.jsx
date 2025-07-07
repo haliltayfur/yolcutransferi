@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-// ----------- isAirportRelated FONKSİYONU -----------
+// --- Havalimanı Algılama ---
 function isAirportRelated(val) {
   if (!val) return false;
   const airportKeywords = [
@@ -13,7 +13,7 @@ function isAirportRelated(val) {
   return airportKeywords.some(k => t.includes(k));
 }
 
-// ----------- AUTOCOMPLETE INPUT -----------
+// --- Adres AutoComplete ---
 function useAddressList() {
   const [addressList, setAddressList] = useState([]);
   useEffect(() => {
@@ -72,7 +72,7 @@ function AutoCompleteInput({ value, onChange, placeholder }) {
   );
 }
 
-// ----------- SABİT LİSTELER -----------
+// --- Sabit Listeler ---
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
   { key: "Lüks", label: "Lüks" },
@@ -91,7 +91,6 @@ const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
-// ----------- FORM -----------
 export default function VipTransferForm() {
   const router = useRouter();
   const [from, setFrom] = useState("");
@@ -128,9 +127,9 @@ export default function VipTransferForm() {
       onSubmit={handleSubmit}
       className={`
         bg-[#19160a] border border-[#bfa658] rounded-3xl shadow-2xl
-        mt-8 ml-0 md:ml-14
-        px-3 py-7 sm:px-5 md:px-10 lg:px-14
-        w-full max-w-2xl
+        w-full
+        max-w-xl
+        mx-auto
         flex flex-col
       `}
       style={{ minWidth: 0, width: "100%" }}
@@ -194,7 +193,6 @@ export default function VipTransferForm() {
           </select>
           {fieldErrors.transfer && <div className="text-red-400 text-xs mt-1">{fieldErrors.transfer}</div>}
         </div>
-        {/* Tarih & Saat yan yana */}
         <div className="flex flex-row gap-3 col-span-2">
           <div className="flex-1">
             <label className="block font-bold text-[#bfa658] mb-1 text-sm sm:text-base">Tarih</label>
@@ -224,7 +222,6 @@ export default function VipTransferForm() {
             {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
           </div>
         </div>
-        {/* PNR kutucuğu full row */}
         {showPNR && (
           <div className="col-span-2">
             <label className="block font-bold text-[#bfa658] mb-1 text-sm sm:text-base">PNR/Uçuş Kodu</label>
