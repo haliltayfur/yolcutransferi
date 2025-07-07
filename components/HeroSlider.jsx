@@ -1,4 +1,4 @@
-// === Dosya: components/HeroSlider.jsx ===
+// PATH: components/HeroSlider.jsx
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -73,7 +73,6 @@ export default function HeroSlider() {
             borderRadius: "22px"
           }}
         />
-        {/* Dotlar */}
         <div className="absolute bottom-5 left-0 w-full flex justify-center z-30 gap-2 select-none">
           {heroImages.map((_, i) => (
             <div
@@ -109,4 +108,3 @@ export default function HeroSlider() {
     </section>
   );
 }
-// === Dosya SONU: components/HeroSlider.jsx ===
