@@ -2,11 +2,12 @@
 
 "use client";
 import React, { useState, useEffect } from "react";
-import EkstralarAccordion from "./EkstralarAccordion";
-import { vehicles } from "../../data/vehicleList";
+import EkstralarAccordion from "../../data/EkstralarAccordion.jsx";
+import { vehicles } from "../../data/vehicleList.js";
+import { extrasListByCategory } from "../../data/extrasByCategory.js";
 import { useRouter } from "next/navigation";
 
-// --- Adres Otomatik Tamamlama ---
+// === Adres AutoComplete ===
 function useAddressList() {
   const [addressList, setAddressList] = useState([]);
   useEffect(() => {
@@ -64,7 +65,7 @@ function AutoCompleteInput({ value, onChange, placeholder }) {
   );
 }
 
-// --- Mesafe ve Süre ---
+// === Mesafe & Süre ===
 function useDistance(from, to, time) {
   const [data, setData] = useState({ km: "", min: "", error: "" });
   useEffect(() => {
@@ -73,7 +74,7 @@ function useDistance(from, to, time) {
       setData({ km: "...", min: "...", error: "" });
       setTimeout(() => setData({
         km: Math.floor(25 + Math.random() * 180) + " km",
-        min: (time && +time.split(":")[0] >= 7 && +time.split(":")[0] <= 10) ? "Yoğun Saat: 90 dk" : (30 + Math.floor(Math.random() * 60)) + " dk",
+        min: (time && +time.split(":")[0] >= 7 && +time.split(":")[0] <= 10) ? "Yoğun Saat: 90 dk" : (30 + Math.random() * 60 | 0) + " dk",
         error: ""
       }), 800);
     }
@@ -82,52 +83,24 @@ function useDistance(from, to, time) {
   return data;
 }
 
-// --- Araç Kombinasyonu Hesaplama ---
+// === Araç Kombinasyonu ===
 function bestVehicleCombos(people, segment) {
   if (!people || !segment) return [];
-  let candidates = vehicles.filter(v => v.segment === segment);
-  candidates = candidates.sort((a, b) => b.max - a.max);
+  people = Number(people);
+  let candidates = vehicles.filter(v => v.segment === segment && v.max >= people);
+  if (people <= 5) candidates = candidates.filter(v => v.max <= 5);
+  else if (people <= 9) candidates = candidates.filter(v => v.max <= 9);
+  if (candidates.length === 0)
+    candidates = vehicles.filter(v => v.segment === segment && v.max >= people);
+  if (candidates.length === 0) return [];
+  candidates = candidates.sort((a, b) => a.max - b.max);
   let combos = [];
   let best = candidates.find(v => v.max >= people);
   if (best) combos.push([{ ...best, count: 1 }]);
-  for (let a = 0; a < candidates.length; ++a) {
-    for (let b = a; b < candidates.length; ++b) {
-      let total = candidates[a].max + candidates[b].max;
-      if (total >= people && candidates[a].max < people) {
-        combos.push([
-          { ...candidates[a], count: 1 },
-          { ...candidates[b], count: 1 }
-        ]);
-      }
-    }
-  }
-  if (combos.length === 0 && candidates.length > 1) {
-    for (let a = 0; a < candidates.length; ++a)
-      for (let b = 0; b < candidates.length; ++b)
-        for (let c = 0; c < candidates.length; ++c) {
-          let sum = candidates[a].max + candidates[b].max + candidates[c].max;
-          if (sum >= people) {
-            combos.push([
-              { ...candidates[a], count: 1 },
-              { ...candidates[b], count: 1 },
-              { ...candidates[c], count: 1 }
-            ]);
-          }
-        }
-  }
-  if (combos.length === 0 && candidates.length > 0) {
-    combos.push([{ ...candidates[0], count: Math.ceil(people / candidates[0].max) }]);
-  }
-  // Tekrarlı kombinasyonları kaldır
-  const uniq = [];
-  combos.forEach(arr => {
-    let key = arr.map(i => i.label + i.count).sort().join(",");
-    if (!uniq.some(u => u.map(i => i.label + i.count).sort().join(",") === key)) uniq.push(arr);
-  });
-  return uniq.slice(0, 4);
+  return combos;
 }
 
-// --- PNR GÖSTER LOGIC ---
+// === PNR GÖSTER ===
 const airportKeywords = [
   "havalimanı", "istanbul havalimanı", "iga", "ist", "sabiha gökçen", "saw", "eskişehir havalimanı",
   "antalya havalimanı", "ankara esenboğa", "esenboğa", "milas bodrum", "izmir adnan", "trabzon havalimanı"
@@ -138,11 +111,10 @@ function isAirportRelated(val) {
   return airportKeywords.some(k => t.includes(k));
 }
 
-// --- KVKK POPUP GÜNCEL ---
+// === KVKK POPUP ===
 function KvkkPopup({ open, onClose, onApprove }) {
   const [html, setHtml] = useState("");
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     if (!open) return;
     setLoading(true);
@@ -158,21 +130,20 @@ function KvkkPopup({ open, onClose, onApprove }) {
       .finally(() => setLoading(false));
   }, [open]);
   if (!open) return null;
-
   return (
     <div className="fixed inset-0 z-[99] flex items-center justify-center bg-black/80">
-      <div className="relative bg-[#19160a] border-2 border-[#bfa658] rounded-2xl shadow-2xl w-[90vw] max-w-4xl max-h-[93vh] overflow-y-auto px-8 py-10">
+      <div className="relative bg-[#19160a] border-2 border-[#bfa658] rounded-2xl w-full max-w-2xl max-h-[93vh] overflow-y-auto px-8 py-10">
         <button
-          className="absolute top-5 right-5 bg-[#bfa658] text-black text-3xl font-bold rounded-full px-3 shadow hover:bg-yellow-400"
+          className="absolute top-4 right-4 bg-[#bfa658] text-black font-bold rounded-xl px-5 py-2 text-lg shadow hover:bg-yellow-400 transition"
           onClick={onClose}
-        >×</button>
+        >Kapat</button>
         <div className="text-[#ffeec2] space-y-2" dangerouslySetInnerHTML={{ __html: loading ? "Yükleniyor..." : html }} />
         <div className="mt-6 border-t border-[#bfa65866] pt-4">
           <div className="text-sm text-[#FFD700] mb-3">
             Gizlilik, İptal &amp; İade, Çerez Politikası gibi tüm sözleşme ve formlara web sitemizden ulaşabilirsiniz.
           </div>
           <button
-            className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-3 px-8 rounded-xl text-lg shadow hover:scale-105 transition w-full"
+            className="w-full bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-3 px-8 rounded-xl text-lg shadow hover:scale-105 transition"
             onClick={() => { onApprove(); onClose(); }}
           >
             Okudum, Onaylıyorum
@@ -183,41 +154,131 @@ function KvkkPopup({ open, onClose, onApprove }) {
   );
 }
 
-// --- SİPARİŞ ÖZETİ POPUP (DEMO) ---
-function SummaryPopup({ visible, onClose, form, extras, extrasQty, setExtras, setExtrasQty, combos, kmInfo, minInfo }) {
+// === SİPARİŞ ÖZETİ POPUP ===
+function SummaryPopup({ visible, onClose, form, extras, extrasQty, setExtras, setExtrasQty, combos, kmInfo, minInfo, onPayment }) {
   if (!visible) return null;
+  const basePrice = 4000;
+  const KDV_ORAN = 0.20;
+  const allExtras = extrasListByCategory.flatMap(cat => cat.items);
+  const selectedExtras = allExtras.filter(e => extras.includes(e.key));
+  const extrasTotal = selectedExtras.reduce((sum, e) => sum + (e.price * (extrasQty[e.key] || 1)), 0);
+  const araToplam = basePrice + extrasTotal;
+  const kdv = araToplam * KDV_ORAN;
+  const toplam = araToplam + kdv;
+
+  function changeQty(key, dir) {
+    setExtrasQty(q => ({
+      ...q,
+      [key]: Math.max(1, (q[key] || 1) + dir)
+    }));
+  }
+  function removeExtra(key) {
+    setExtras(es => es.filter(k => k !== key));
+    setExtrasQty(q => {
+      const { [key]: _, ...rest } = q;
+      return rest;
+    });
+  }
+
   return (
-    <div className="fixed inset-0 z-[99] flex items-center justify-center bg-black/85">
-      <div className="relative bg-[#19160a] border-2 border-[#bfa658] rounded-2xl shadow-2xl w-[99vw] max-w-3xl max-h-[95vh] overflow-y-auto px-8 py-12">
+    <div className="fixed inset-0 z-[99] flex items-center justify-center bg-black/80">
+      <div className="relative bg-[#19160a] border-2 border-[#bfa658] rounded-2xl w-full max-w-3xl max-h-[97vh] overflow-y-auto px-8 py-10">
         <button
-          className="absolute top-4 right-4 bg-[#bfa658] text-black text-3xl font-bold rounded-full px-3 shadow hover:bg-yellow-400"
+          className="absolute top-4 right-4 bg-[#bfa658] text-black font-bold rounded-xl px-5 py-2 text-lg shadow hover:bg-yellow-400 transition"
           onClick={onClose}
-        >×</button>
+        >Kapat</button>
         <h2 className="text-2xl md:text-3xl font-extrabold mb-6 text-[#bfa658] text-center font-quicksand">
           Rezervasyon Özeti
         </h2>
-        <div className="flex flex-col gap-2 mb-5 text-[#ffeec2] text-base">
-          <div><b>Nereden:</b> {form.from}</div>
-          <div><b>Nereye:</b> {form.to}</div>
-          <div><b>Mesafe:</b> {kmInfo}   <b>Süre:</b> {minInfo}</div>
-          <div><b>Kişi:</b> {form.people}</div>
-          <div><b>Tarih:</b> {form.date}</div>
-          <div><b>Saat:</b> {form.time}</div>
-          <div><b>Transfer:</b> {form.transfer}</div>
-          <div><b>Segment:</b> {form.segment}</div>
-          <div><b>Ad Soyad:</b> {form.name} {form.surname}</div>
-          <div><b>T.C.:</b> {form.tc}</div>
-          <div><b>Telefon:</b> {form.phone}</div>
-          <div><b>E-posta:</b> {form.email}</div>
-          {form.pnr && <div><b>PNR/Uçuş Kodu:</b> {form.pnr}</div>}
-          <div><b>Ek Not:</b> {form.note}</div>
+        <div className="flex flex-col md:flex-row gap-8 mb-6">
+          <div className="flex-1 space-y-1 text-[#ffeec2] text-base">
+            <div><b>Nereden:</b> {form.from}</div>
+            <div><b>Nereye:</b> {form.to}</div>
+            <div><b>Mesafe:</b> {kmInfo}   <b>Süre:</b> {minInfo}</div>
+            <div><b>Kişi:</b> {form.people}</div>
+            <div><b>Tarih:</b> {form.date}</div>
+            <div><b>Saat:</b> {form.time}</div>
+            <div><b>Transfer:</b> {form.transfer}</div>
+            <div><b>Segment:</b> {form.segment}</div>
+            <div><b>Ad Soyad:</b> {form.name} {form.surname}</div>
+            <div><b>T.C.:</b> {form.tc}</div>
+            <div><b>Telefon:</b> {form.phone}</div>
+            <div><b>E-posta:</b> {form.email}</div>
+            {form.pnr && <div><b>PNR/Uçuş Kodu:</b> {form.pnr}</div>}
+            <div><b>Ek Not:</b> {form.note}</div>
+          </div>
+          <div className="flex-1">
+            <b className="block mb-2 text-[#bfa658] text-lg">Araç Kombinasyonları:</b>
+            {combos.length === 0 && <div className="text-red-400">Uygun araç bulunamadı.</div>}
+            {combos.map((combo, idx) => (
+              <div key={idx} className="border border-[#bfa658] rounded-xl p-2 mb-2 flex flex-row items-center gap-2 bg-black/70">
+                {combo.map((v, i) =>
+                  <span key={v.label + i} className="px-2 py-1 rounded bg-[#bfa65833] text-[#ffeec2] font-semibold text-sm">
+                    {v.label} <span className="text-[#bfa658]">x{v.count}</span>
+                  </span>
+                )}
+              </div>
+            ))}
+            <div className="mt-2 text-sm text-[#ffeec2] opacity-90">
+              Size en uygun ve kurumsal araç kombinasyonlarından biri rezerve edilecektir.
+            </div>
+          </div>
         </div>
-        <div className="mt-7 flex flex-col items-center">
+        <div className="mb-6">
+          <b className="block mb-2 text-[#bfa658] text-lg">Ekstralar:</b>
+          {selectedExtras.length === 0 && <span className="text-gray-400">Ekstra yok</span>}
+          {selectedExtras.length > 0 &&
+            <table className="w-full text-base mb-3">
+              <thead>
+                <tr className="text-[#ffeec2] border-b border-[#bfa658]/40">
+                  <th className="text-left py-1 pl-1">Ürün</th>
+                  <th className="text-center w-20">Adet</th>
+                  <th className="text-right w-28">Birim</th>
+                  <th className="text-right w-28">Toplam</th>
+                  <th className="text-center w-12"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedExtras.map(extra => (
+                  <tr key={extra.key} className="border-b border-[#bfa658]/10">
+                    <td className="py-1 pl-1">{extra.label}</td>
+                    <td className="text-center">
+                      <div className="flex items-center gap-1 justify-center">
+                        <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, -1)}>-</button>
+                        <span className="w-7 text-center">{extrasQty[extra.key] || 1}</span>
+                        <button type="button" className="px-2 text-lg font-bold text-gold" onClick={() => changeQty(extra.key, +1)}>+</button>
+                      </div>
+                    </td>
+                    <td className="text-right">{extra.price.toLocaleString()}₺</td>
+                    <td className="text-right">{((extrasQty[extra.key] || 1) * extra.price).toLocaleString()}₺</td>
+                    <td className="text-center">
+                      <button type="button" onClick={() => removeExtra(extra.key)} className="text-red-400 font-bold hover:scale-125 transition-transform">🗑️</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          }
+        </div>
+        <div className="w-full flex flex-col items-end gap-1 mt-2 text-base">
+          <div>Transfer Bedeli: <b>{basePrice.toLocaleString()} ₺</b></div>
+          <div>Ekstralar: <b>{extrasTotal.toLocaleString()} ₺</b></div>
+          <div>KDV (%20): <b>{kdv.toLocaleString(undefined, { maximumFractionDigits: 2 })} ₺</b></div>
+          <div className="text-xl text-[#bfa658] font-bold">Toplam: {toplam.toLocaleString()} ₺</div>
+        </div>
+        <div className="flex flex-col md:flex-row justify-between gap-4 mt-9">
           <button
-            className="w-full bg-[#bfa658] hover:bg-[#ffeec2] text-black font-bold py-3 px-8 rounded-xl shadow-lg transition-colors"
-            onClick={() => { alert("Ödeme ekranına yönlendirilecektir (demo)"); onClose(); }}
+            className="w-full md:w-auto bg-[#bfa658] hover:bg-[#ffeec2] text-black font-bold py-3 px-8 rounded-xl shadow-lg transition-colors"
+            onClick={onPayment}
           >
             Onayla ve Ödemeye Geç
+          </button>
+          <button
+            className="w-full md:w-auto border border-[#bfa658] hover:bg-[#3b2c10] text-[#bfa658] font-semibold py-3 px-8 rounded-xl shadow-lg transition-colors"
+            onClick={onClose}
+            type="button"
+          >
+            Vazgeç
           </button>
         </div>
       </div>
@@ -225,7 +286,27 @@ function SummaryPopup({ visible, onClose, form, extras, extrasQty, setExtras, se
   );
 }
 
-// --- ANA REZERVASYON FORMU ---
+// === TEŞEKKÜR POPUP ===
+function TesekkurPopup({ open, onClose }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80">
+      <div className="relative bg-[#19160a] border-2 border-[#bfa658] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto px-8 py-12 flex flex-col items-center">
+        <button
+          className="absolute top-4 right-4 bg-[#bfa658] text-black font-bold rounded-xl px-5 py-2 text-lg shadow hover:bg-yellow-400 transition"
+          onClick={onClose}
+        >Kapat</button>
+        <div className="text-[#bfa658] text-2xl font-extrabold mb-6 text-center">Teşekkürler!</div>
+        <div className="text-[#ffeec2] text-base text-center mb-6">
+          Ödemeniz başarıyla alındı. Rezervasyon bilgileriniz mailinize iletilmiştir.<br />
+          En kısa sürede ekibimiz sizinle iletişime geçecektir.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// === FORM SEÇENEKLERİ ===
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
   { key: "Lüks", label: "Lüks" },
@@ -266,8 +347,8 @@ export default function RezervasyonForm() {
   const [showKvkkPopup, setShowKvkkPopup] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [kvkkChecked, setKvkkChecked] = useState(false);
+  const [showThanks, setShowThanks] = useState(false);
 
-  // Mesafe/süre
   const { km, min, error: distErr } = useDistance(from, to, time);
 
   const isValidTC = t => /^[1-9]\d{9}[02468]$/.test(t) && t.length === 11;
@@ -305,12 +386,15 @@ export default function RezervasyonForm() {
     setShowSummary(true);
   }
 
-  // Araç seçimi kutusunu sadece kişi & segment seçiliyse göster
   const showVehicleCombos = segment && people;
   const showPNR = transfer === "VIP Havalimanı Transferi" || isAirportRelated(from) || isAirportRelated(to);
 
   function handleKvkkApprove() {
     setKvkkChecked(true);
+  }
+  function handlePayment() {
+    setShowSummary(false);
+    setShowThanks(true);
   }
 
   return (
@@ -551,9 +635,8 @@ export default function RezervasyonForm() {
           </button>
         </div>
       </form>
-      {/* KVKK POPUP */}
+      {/* POPUP'LAR */}
       <KvkkPopup open={showKvkkPopup} onClose={() => setShowKvkkPopup(false)} onApprove={handleKvkkApprove} />
-      {/* REZERVASYON ÖZETİ */}
       <SummaryPopup
         visible={showSummary}
         onClose={() => setShowSummary(false)}
@@ -565,7 +648,9 @@ export default function RezervasyonForm() {
         combos={vehicleCombos}
         kmInfo={km}
         minInfo={min}
+        onPayment={handlePayment}
       />
+      <TesekkurPopup open={showThanks} onClose={() => setShowThanks(false)} />
     </section>
   );
 }
