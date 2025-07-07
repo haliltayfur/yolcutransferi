@@ -1,14 +1,16 @@
 "use client";
 import HeroSlider from "../components/HeroSlider";
 import dynamic from "next/dynamic";
+import AdvantagesBar from "../components/AdvantagesBar";
+import TestimonialsSlider from "../components/TestimonialsSlider";
 const VipTransferForm = dynamic(() => import("../components/VipTransferForm"), { ssr: false });
 
 export default function Home() {
-  // Responsive width
-  const maxContainer = 1260; // px
+  // Genişlikler
+  const maxContainer = 1260;
   const formWidth = 800;
   const videoWidth = 400;
-  const rowGap = 38; // px
+  const gap = 32;
 
   return (
     <main className="w-full flex flex-col items-center bg-black min-h-screen">
@@ -23,14 +25,13 @@ export default function Home() {
       >
         <HeroSlider />
       </div>
-      {/* --- REZERVASYON: FORM + VIDEO --- */}
+      {/* FORM + VIDEO */}
       <div
-        className="w-full flex flex-row items-start justify-center"
+        className="w-full flex flex-row items-start justify-start"
         style={{
           maxWidth: `${maxContainer}px`,
-          margin: "0 auto",
-          marginTop: `${rowGap}px`,
-          gap: "32px",
+          margin: "38px auto 0 auto",
+          gap: `${gap}px`,
         }}
       >
         {/* FORM */}
@@ -38,6 +39,7 @@ export default function Home() {
           className="border-2 border-[#bfa658] rounded-3xl bg-[#19160ae9] shadow-2xl flex flex-col"
           style={{
             width: `${formWidth}px`,
+            minWidth: `${formWidth}px`,
             minHeight: "600px",
             height: "600px",
             boxSizing: "border-box",
@@ -52,6 +54,7 @@ export default function Home() {
           className="border-2 border-[#bfa658] rounded-3xl bg-[#232323e7] shadow-xl flex justify-end items-start overflow-hidden"
           style={{
             width: `${videoWidth}px`,
+            minWidth: `${videoWidth}px`,
             height: "600px",
             minHeight: "600px",
             boxSizing: "border-box",
@@ -73,24 +76,38 @@ export default function Home() {
           />
         </div>
       </div>
-      {/* --- MOBILE --- */}
+
+      {/* ADVANTAGES BAR + TESTIMONIALS */}
+      <div
+        className="w-full flex flex-col items-center"
+        style={{
+          width: "100%",
+          maxWidth: `${maxContainer}px`,
+          margin: "32px auto 0 auto",
+        }}
+      >
+        <AdvantagesBar />
+        <TestimonialsSlider />
+      </div>
+
+      {/* Responsive style sadece burada */}
       <style jsx>{`
-        @media (max-width: 1200px) {
-          .form-video-row {
-            flex-direction: column !important;
-            gap: 20px !important;
-            align-items: center !important;
+        @media (max-width: 1300px) {
+          .slider-form-row,
+          .adv-row {
+            max-width: 99vw !important;
           }
         }
-        @media (max-width: 900px) {
-          .form-video-row {
+        @media (max-width: 950px) {
+          .slider-form-row {
             flex-direction: column !important;
-            gap: 0 !important;
+            align-items: center !important;
+            gap: 22px !important;
           }
           .mobile-form {
             width: 96vw !important;
             min-width: 0 !important;
-            padding: 15px 4vw !important;
+            padding: 18px 4vw !important;
             margin: 0 auto !important;
             border-radius: 20px !important;
           }
