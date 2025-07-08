@@ -6,19 +6,18 @@ export default function RezervasyonHero({ onlyForm }) {
   const [formData, setFormData] = useState({});
   const videoRef = useRef();
 
-  // Video kontrollerini tam aç!
+  // Video ekranda görünmüyorsa durdur, geri gelince devam et
   useEffect(() => {
-    // Video ekranda görünmüyorsa durdur, geri gelince devam et
     let wasPlaying = false;
     function handleVisibility() {
       const rect = videoRef.current?.getBoundingClientRect();
       const inView = rect &&
         rect.top < window.innerHeight &&
         rect.bottom > 0;
-      if (!inView && !videoRef.current.paused) {
+      if (!inView && videoRef.current && !videoRef.current.paused) {
         wasPlaying = true;
         videoRef.current.pause();
-      } else if (inView && wasPlaying) {
+      } else if (inView && videoRef.current && wasPlaying) {
         videoRef.current.play();
         wasPlaying = false;
       }
@@ -36,7 +35,9 @@ export default function RezervasyonHero({ onlyForm }) {
     }
   };
 
-  // Layout: Form ve video yan yana, aralarında 10px boşluk
+  // --- Responsive width ayarı
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 700;
+
   return (
     <section
       className="w-full flex flex-col items-center justify-center"
@@ -49,51 +50,61 @@ export default function RezervasyonHero({ onlyForm }) {
         padding: 0,
       }}
     >
-      <div className="flex flex-row items-center justify-center">
+      <div
+        className="flex flex-row items-center justify-center"
+        style={{
+          width: "100%",
+          margin: "0 auto",
+        }}
+      >
         {/* FORM */}
         <div
           className="bg-[#19160a] border-2 border-[#bfa658] rounded-3xl shadow-2xl flex flex-col justify-center p-10"
           style={{
             minHeight: "600px",
             height: "600px",
-            width: "550px",
+            width: isMobile ? "98vw" : "1100px", // *** ÇERÇEVE 2 KAT ***
             boxSizing: "border-box",
-            marginRight: "10px",
+            marginRight: onlyForm ? "0px" : "10px",
+            transition: "width 0.3s"
           }}
         >
           <VipTransferForm onComplete={handleFormComplete} />
         </div>
-        {/* VİDEO */}
-        <div
-          style={{
-            height: "600px",
-            width: "340px",
-            borderRadius: "24px",
-            overflow: "hidden",
-            boxShadow: "0 0 12px #0008",
-            border: "2px solid #bfa658",
-            background: "#1c1c1c",
-            display: onlyForm ? "none" : "block"
-          }}
-        >
-          <video
-            ref={videoRef}
-            src="/reklam.mp4"
-            controls
+        {/* VIDEO */}
+        {!onlyForm && (
+          <div
             style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
+              height: "600px",
+              width: isMobile ? 0 : "340px",
+              borderRadius: "24px",
+              overflow: "hidden",
+              boxShadow: "0 0 12px #0008",
+              border: "2px solid #bfa658",
               background: "#1c1c1c",
-              borderRadius: "24px"
+              marginLeft: onlyForm ? "0px" : "0px",
+              display: isMobile ? "none" : "block",
             }}
-            preload="auto"
-            playsInline
-            autoPlay
-            muted
-            loop
-          />
-        </div>
+          >
+            <video
+              ref={videoRef}
+              src="/reklam.mp4"
+              controls // tüm kontroller açık
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                background: "#1c1c1c",
+                borderRadius: "24px"
+              }}
+              preload="auto"
+              playsInline
+              autoPlay
+              muted
+              loop
+            />
+          </div>
+        )}
       </div>
     </section>
   );
