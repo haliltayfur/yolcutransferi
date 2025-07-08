@@ -1,80 +1,62 @@
 "use client";
-import { useRef, useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import HeroSlider from "../components/HeroSlider";
 import RezervasyonHero from "../components/RezervasyonHero";
 import AdvantagesBar from "../components/AdvantagesBar";
 import TestimonialsSlider from "../components/TestimonialsSlider";
 
 export default function Home() {
-  // Slider genişliği takibi
-  const sliderOuterRef = useRef();
-  const [sliderWidth, setSliderWidth] = useState(1200);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    function updateWidth() {
-      if (sliderOuterRef.current) {
-        setSliderWidth(sliderOuterRef.current.offsetWidth);
-      }
-      setIsMobile(window.innerWidth < 900);
-    }
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
+    const onResize = () => setIsMobile(window.innerWidth < 900);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
-
-  // ORANLAR (toplam %100)
-  const formW = sliderWidth * 0.63;
-  const gapW = 1; // px
-  const videoW = sliderWidth * 0.37 - gapW;
 
   return (
     <main className="w-full flex flex-col items-center bg-black min-h-screen">
-      {/* === SLIDER === */}
-      <div
-        ref={sliderOuterRef}
-        style={{
-          width: "min(100vw, 2000px)",
-          margin: "0 auto",
-        }}
-      >
+      {/* SLIDER */}
+      <div style={{ width: "min(100vw, 2000px)", margin: "0 auto" }}>
         <HeroSlider />
       </div>
 
-      {/* === ALT GRID (sadece desktop) === */}
+      {/* ALT GRID */}
       {!isMobile && (
         <div
           className="flex flex-row items-start justify-center"
           style={{
-            width: sliderWidth,
-            maxWidth: "2000px",
-            margin: "0 auto",
-            marginTop: "32px",
+            width: "100%",
+            margin: "32px auto",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            gap: 0, // BOŞLUK YOK
           }}
         >
           {/* FORM */}
           <div
             style={{
-              width: formW,
-              minWidth: 350,
-              maxWidth: "100%",
-              transition: "width 0.3s",
+              width: 600,
+              minWidth: 380,
+              maxWidth: 600,
+              height: 600,
+              display: "flex",
+              alignItems: "center",
             }}
           >
             <RezervasyonHero onlyForm />
           </div>
-          {/* BOŞLUK */}
-          <div style={{ width: gapW, minWidth: 1 }} />
           {/* VIDEO */}
           <div
             style={{
-              width: videoW,
-              minWidth: 240,
+              width: 600,
+              minWidth: 300,
               maxWidth: 600,
-              height: "600px",
+              height: 600,
               display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "flex-end",
+              alignItems: "center",
+              marginLeft: 0, // BOŞLUK YOK
             }}
           >
             <video
@@ -85,7 +67,8 @@ export default function Home() {
                 objectFit: "cover",
                 borderRadius: "22px",
                 background: "#1c1c1c",
-                border: "2px solid #bfa658"
+                border: "2px solid #bfa658",
+                display: "block",
               }}
               controls={false}
               preload="metadata"
@@ -104,7 +87,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* === MOBİLDE SADECE FORM === */}
+      {/* MOBİL SADECE FORM */}
       {isMobile && (
         <div className="w-full flex flex-col items-center">
           <div
@@ -120,7 +103,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* === ALT KISIM === */}
+      {/* ALT KISIM */}
       <AdvantagesBar />
       <TestimonialsSlider />
     </main>
