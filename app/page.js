@@ -6,112 +6,121 @@ import AdvantagesBar from "../components/AdvantagesBar";
 import TestimonialsSlider from "../components/TestimonialsSlider";
 
 export default function Home() {
-  const sliderRef = useRef();
+  // Slider genişliği takibi
+  const sliderOuterRef = useRef();
   const [sliderWidth, setSliderWidth] = useState(1200);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    function handleResize() {
+    function updateWidth() {
+      if (sliderOuterRef.current) {
+        setSliderWidth(sliderOuterRef.current.offsetWidth);
+      }
       setIsMobile(window.innerWidth < 900);
-      if (sliderRef.current) setSliderWidth(sliderRef.current.offsetWidth);
     }
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
-  // Paint'teki oranlar: 63 + 2 + 35 = 100
-  // Form: %63, Gap: %2, Video: %35 (slider ne kadarsa, aynı)
-  const formW = isMobile ? "98vw" : `${(sliderWidth * 0.63)}px`;
-  const gapW = isMobile ? 0 : `${(sliderWidth * 0.02)}px`;
-  const videoW = isMobile ? 0 : `${(sliderWidth * 0.35)}px`;
+  // ORANLAR (toplam %100)
+  const formW = sliderWidth * 0.63;
+  const gapW = 1; // px
+  const videoW = sliderWidth * 0.37 - gapW;
 
   return (
-    <main className="w-full min-h-screen flex flex-col items-center bg-black">
+    <main className="w-full flex flex-col items-center bg-black min-h-screen">
       {/* === SLIDER === */}
-      <div ref={sliderRef}
+      <div
+        ref={sliderOuterRef}
         style={{
           width: "min(100vw, 2000px)",
-          margin: "0 auto"
+          margin: "0 auto",
         }}
       >
         <HeroSlider />
       </div>
 
-      {/* === ALT KISIM: Form + Video === */}
-      <div
-        className="flex flex-col items-center justify-center w-full"
-        style={{ marginTop: 36, marginBottom: 24 }}
-      >
-        {/* Desktop (Slider altına tam hizalı) */}
-        {!isMobile && (
+      {/* === ALT GRID (sadece desktop) === */}
+      {!isMobile && (
+        <div
+          className="flex flex-row items-start justify-center"
+          style={{
+            width: sliderWidth,
+            maxWidth: "2000px",
+            margin: "0 auto",
+            marginTop: "32px",
+          }}
+        >
+          {/* FORM */}
           <div
-            className="flex flex-row items-start justify-center"
             style={{
-              width: sliderWidth,
-              maxWidth: 2000,
-              margin: "0 auto"
+              width: formW,
+              minWidth: 350,
+              maxWidth: "100%",
+              transition: "width 0.3s",
             }}
           >
-            {/* FORM */}
-            <div style={{
-              width: formW,
-              transition: "width 0.3s"
-            }}>
-              <RezervasyonHero />
-            </div>
-            {/* GAP */}
-            <div style={{
-              width: gapW,
-              minWidth: 10,
-              maxWidth: 40
-            }} />
-            {/* VIDEO */}
-            <div style={{
+            <RezervasyonHero onlyForm />
+          </div>
+          {/* BOŞLUK */}
+          <div style={{ width: gapW, minWidth: 1 }} />
+          {/* VIDEO */}
+          <div
+            style={{
               width: videoW,
-              minWidth: 200,
-              maxWidth: 700,
-              height: 600,
-              transition: "width 0.3s",
+              minWidth: 240,
+              maxWidth: 600,
+              height: "600px",
               display: "flex",
-              alignItems: "center"
-            }}>
-              <video
-                src="/reklam.mp4"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: 24,
-                  background: "#19160a",
-                  objectFit: "cover",
-                  border: "2.5px solid #bfa658"
-                }}
-                autoPlay
-                muted
-                loop
-                playsInline
-                onClick={e => { e.currentTarget.muted = false; e.currentTarget.currentTime = 0; e.currentTarget.play(); e.currentTarget.volume = 1; }}
-                title="Tıklayınca sesli başlar"
-              />
-            </div>
+              alignItems: "flex-start",
+              justifyContent: "flex-end",
+            }}
+          >
+            <video
+              src="/reklam.mp4"
+              style={{
+                width: "100%",
+                height: "600px",
+                objectFit: "cover",
+                borderRadius: "22px",
+                background: "#1c1c1c",
+                border: "2px solid #bfa658"
+              }}
+              controls={false}
+              preload="metadata"
+              playsInline
+              autoPlay
+              loop
+              muted
+              onClick={e => {
+                e.target.muted = false;
+                e.target.currentTime = 0;
+                e.target.play();
+                e.target.volume = 1;
+              }}
+            />
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Mobilde: Sadece Form */}
-        {isMobile && (
-          <div className="flex flex-col w-full items-center justify-center">
-            <div style={{
-              width: formW,
-              maxWidth: 480,
-              margin: "0 auto"
-            }}>
-              <RezervasyonHero />
-            </div>
+      {/* === MOBİLDE SADECE FORM === */}
+      {isMobile && (
+        <div className="w-full flex flex-col items-center">
+          <div
+            style={{
+              width: "98vw",
+              minWidth: 200,
+              maxWidth: 420,
+              margin: "32px auto 0 auto",
+            }}
+          >
+            <RezervasyonHero onlyForm />
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Diğer bileşenler */}
+      {/* === ALT KISIM === */}
       <AdvantagesBar />
       <TestimonialsSlider />
     </main>
