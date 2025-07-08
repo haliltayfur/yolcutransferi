@@ -31,7 +31,7 @@ export default function VipTransferForm() {
   return (
     <form className="w-full">
       <h2 className="text-2xl md:text-3xl font-extrabold mb-7 text-[#bfa658] font-quicksand">VIP Transfer Rezervasyonu</h2>
-      <div className="grid grid-cols-2 gap-x-5 gap-y-4 mb-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4 mb-5">
         <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Nereden?</label>
           <input
