@@ -1,21 +1,29 @@
 "use client";
 import VipTransferForm from "./VipTransferForm";
 
-export default function RezervasyonHero() {
+export default function RezervasyonHero({ onlyForm }) {
   return (
-    <div
-      className="bg-[#19160a] border-2 border-[#bfa658] rounded-3xl shadow-2xl px-6 py-8 md:px-12 md:py-14"
+    <section
+      className="w-full flex flex-col items-center justify-center"
       style={{
-        width: "100%",
-        maxWidth: 900,
-        minHeight: 600,
-        boxSizing: "border-box",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center"
+        minHeight: onlyForm ? "600px" : undefined,
+        height: onlyForm ? "600px" : undefined,
+        background: "transparent",
+        border: "none",
+        boxShadow: "none",
+        padding: 0,
       }}
     >
-      <VipTransferForm />
-    </div>
+      <div
+        className="bg-[#19160a] border-2 border-[#bfa658] rounded-3xl shadow-2xl flex flex-col justify-center p-10"
+        style={{
+          minHeight: "600px",
+          height: "600px",
+          boxSizing: "border-box",
+        }}
+      >
+        <VipTransferForm />
+      </div>
+    </section>
   );
 }
