@@ -1,5 +1,24 @@
+// PATH: components/VipTransferForm.jsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
+// Helper: Türkçe karakter normalize
+const fixTr = s =>
+  s?.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/i̇/g, "i")
+    .replace(/ı/g, "ı")
+    .replace(/ş/g, "ş")
+    .replace(/ğ/g, "ğ")
+    .replace(/ü/g, "ü")
+    .replace(/ö/g, "ö")
+    .replace(/ç/g, "ç")
+    .replace(/İ/g, "İ")
+    .replace(/Ş/g, "Ş")
+    .replace(/Ğ/g, "Ğ")
+    .replace(/Ü/g, "Ü")
+    .replace(/Ö/g, "Ö")
+    .replace(/Ç/g, "Ç");
 
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
@@ -19,25 +38,10 @@ const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
-// Türkçe karakter düzeltici
-const fixTurkish = s => s
-  .replace(/i̇/g, "i")
-  .replace(/İ/g, "İ")
-  .replace(/ı/g, "ı")
-  .replace(/ğ/g, "ğ")
-  .replace(/Ğ/g, "Ğ")
-  .replace(/ü/g, "ü")
-  .replace(/Ü/g, "Ü")
-  .replace(/ş/g, "ş")
-  .replace(/Ş/g, "Ş")
-  .replace(/ö/g, "ö")
-  .replace(/Ö/g, "Ö")
-  .replace(/ç/g, "ç")
-  .replace(/Ç/g, "Ç");
-
-// Otomatik doldurma cache işlemleri
+// Otomatik doldurma anahtar
 const LOCAL_KEY = "rezFormData";
 
+// --- Adres autocomplete
 function useAddressList() {
   const [addressList, setAddressList] = useState([]);
   useEffect(() => {
@@ -47,13 +51,13 @@ function useAddressList() {
       try {
         airport = await fetch("/dumps/airports.json").then(r => r.json());
         mahalle = await fetch("/dumps/ililcemahalle.txt").then(r => r.text()).then(txt =>
-          txt.split("\n").map(l => fixTurkish(l.trim())).filter(l => l.length > 3)
+          txt.split("\n").map(l => fixTr(l.trim())).filter(l => l.length > 3)
         );
-      } catch {}
+      } catch { }
       const out = [
         ...mahalle,
-        ...airport.map(a => fixTurkish(a.name || "")),
-        ...airport.map(a => fixTurkish(a.iata || ""))
+        ...airport.map(a => fixTr(a.name || "")),
+        ...airport.map(a => fixTr(a.iata || ""))
       ];
       setAddressList(Array.from(new Set(out)));
     }
@@ -69,17 +73,18 @@ function AutoCompleteInput({ value, onChange, placeholder, required }) {
   useEffect(() => {
     if (!value || value.length < 2) setSuggestions([]);
     else {
-      const val = fixTurkish(value.toLocaleLowerCase("tr-TR"));
+      const val = fixTr(value.toLocaleLowerCase("tr-TR"));
       setSuggestions(addressList.filter(a =>
-        fixTurkish(a.toLocaleLowerCase("tr-TR")).includes(val)
+        fixTr(a.toLocaleLowerCase("tr-TR")).includes(val)
       ).slice(0, 10));
     }
   }, [value, addressList]);
 
+  // Her harfe arama ve tıklayınca value'ya set etme
   return (
     <div className="relative">
       <input
-        className="w-full h-[48px] rounded-xl px-3 text-base bg-white text-black border border-gray-300 focus:ring-2 focus:ring-[#bfa658] transition"
+        className="w-full h-[45px] rounded-xl px-3 text-base bg-white text-black border border-gray-300 focus:ring-2 focus:ring-[#bfa658] transition"
         value={value}
         required={required}
         onChange={e => { onChange(e.target.value); setShowList(true); }}
@@ -102,14 +107,13 @@ function AutoCompleteInput({ value, onChange, placeholder, required }) {
   );
 }
 
-// --- PNR kontrolü
+// --- PNR gösterme
 function isAirport(val) {
   if (!val) return false;
   return /havalimanı|airport|uçuş|saw|ist|iga/i.test(val);
 }
 
 export default function VipTransferForm() {
-  // Otomatik doldurma (cache ve user profile)
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [people, setPeople] = useState("");
@@ -118,7 +122,8 @@ export default function VipTransferForm() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [pnr, setPnr] = useState("");
-  // --- Otomatik doldurma cache'den
+
+  // --- Otomatik doldurma cache ve user profilden
   useEffect(() => {
     if (typeof window === "undefined") return;
     const cache = window.localStorage.getItem(LOCAL_KEY);
@@ -135,8 +140,11 @@ export default function VipTransferForm() {
         setPnr(d.pnr || "");
       } catch { }
     }
+    // Profil datası ile doldurma örneği
+    // TODO: Burada user profile datasını çekerken kullanabilirsiniz
+    // fetch("/api/profile").then(...).then(data => { setName(data.name) ... })
   }, []);
-  // --- Otomatik cache'e yaz
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(LOCAL_KEY, JSON.stringify({ from, to, people, segment, transfer, date, time, pnr }));
@@ -145,37 +153,37 @@ export default function VipTransferForm() {
   // --- PNR açma durumu
   const showPNR = transfer === "VIP Havalimanı Transferi" || isAirport(from) || isAirport(to);
 
-  // --- Tarih/Saat için açılma
+  // --- Tarih/Saat aç
   const dateInputRef = useRef(null);
-  const timeInputRef = useRef(null);
 
-  // --- Form submit
   function handleSubmit(e) {
     e.preventDefault();
-    // Bilgileri cache'le ve /rezervasyon sayfasına yönlendir
     if (typeof window !== "undefined") {
       window.localStorage.setItem(LOCAL_KEY, JSON.stringify({ from, to, people, segment, transfer, date, time, pnr }));
       window.location.href = "/rezervasyon";
     }
   }
 
+  // --- Responsive: Mobilde küçük kutular
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 900;
+
   return (
     <form onSubmit={handleSubmit}
       className="w-full flex flex-col items-center"
       style={{
-        width: "115%",
+        width: isMobile ? "98vw" : "76vw",
         minWidth: 300,
-        maxWidth: 770,
+        maxWidth: isMobile ? "98vw" : "850px",
         margin: "0 auto"
       }}
     >
-      <h2 className="text-3xl font-bold text-[#bfa658] mb-2" style={{ marginTop: "12px" }}>
+      <h2 className="text-3xl font-bold text-[#bfa658] mb-1" style={{ marginTop: "8px" }}>
         VIP Transfer Rezervasyonu
       </h2>
       <div className="w-full border-b-2 mb-5" style={{
         borderColor: "#bfa658", borderWidth: "2px", width: "100%"
       }} />
-      <div className="grid grid-cols-2 gap-x-7 gap-y-4 w-full mb-4">
+      <div className={`grid grid-cols-2 gap-x-8 gap-y-4 w-full mb-4 ${isMobile ? "text-[15px]" : "text-base"}`}>
         <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Nereden?</label>
           <AutoCompleteInput value={from} onChange={setFrom} placeholder="" required />
@@ -186,7 +194,7 @@ export default function VipTransferForm() {
         </div>
         <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Kişi Sayısı</label>
-          <select className="w-full h-[48px] rounded-xl px-3 text-base bg-white text-black border border-gray-300"
+          <select className="w-full h-[45px] rounded-xl px-3 text-base bg-white text-black border border-gray-300"
             value={people} onChange={e => setPeople(e.target.value)} required>
             <option value="">Seçiniz</option>
             {Array.from({ length: 24 }, (_, i) => i + 1).map(val => <option key={val} value={val}>{val}</option>)}
@@ -195,13 +203,13 @@ export default function VipTransferForm() {
         {showPNR && (
           <div>
             <label className="block text-[#bfa658] font-semibold mb-1">PNR/Uçuş Kodu</label>
-            <input className="w-full h-[48px] rounded-xl px-3 text-base bg-white text-black border border-gray-300"
+            <input className="w-full h-[45px] rounded-xl px-3 text-base bg-white text-black border border-gray-300"
               value={pnr} onChange={e => setPnr(e.target.value)} placeholder="Uçuş Kodu" />
           </div>
         )}
         <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Transfer Türü</label>
-          <select className="w-full h-[48px] rounded-xl px-3 text-base bg-white text-black border border-gray-300"
+          <select className="w-full h-[45px] rounded-xl px-3 text-base bg-white text-black border border-gray-300"
             value={transfer} onChange={e => setTransfer(e.target.value)} required>
             <option value="">Seçiniz</option>
             {allTransfers.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -209,7 +217,7 @@ export default function VipTransferForm() {
         </div>
         <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Segment</label>
-          <select className="w-full h-[48px] rounded-xl px-3 text-base bg-white text-black border border-gray-300"
+          <select className="w-full h-[45px] rounded-xl px-3 text-base bg-white text-black border border-gray-300"
             value={segment} onChange={e => setSegment(e.target.value)} required>
             <option value="">Seçiniz</option>
             {segmentOptions.map(opt => <option key={opt.key} value={opt.label}>{opt.label}</option>)}
@@ -221,7 +229,7 @@ export default function VipTransferForm() {
             <input
               ref={dateInputRef}
               type="date"
-              className="w-full h-[48px] rounded-xl px-3 text-base bg-white text-black border border-gray-300"
+              className="w-full h-[45px] rounded-xl px-3 text-base bg-white text-black border border-gray-300"
               value={date}
               required
               min={new Date().toISOString().split("T")[0]}
@@ -233,8 +241,7 @@ export default function VipTransferForm() {
           <div className="flex-1">
             <label className="block text-[#bfa658] font-semibold mb-1">Saat</label>
             <select
-              ref={timeInputRef}
-              className="w-full h-[48px] rounded-xl px-3 text-base bg-white text-black border border-gray-300"
+              className="w-full h-[45px] rounded-xl px-3 text-base bg-white text-black border border-gray-300"
               value={time}
               required
               onChange={e => setTime(e.target.value)}
@@ -247,11 +254,12 @@ export default function VipTransferForm() {
       </div>
       <button
         type="submit"
-        className="w-[140px] h-[48px] mt-8 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-xl shadow hover:scale-105 transition"
-        style={{ marginTop: "24px", alignSelf: "center" }}
+        className="w-[120px] h-[45px] mt-8 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-lg shadow hover:scale-105 transition"
+        style={{ marginTop: "20px", alignSelf: "center" }}
       >
         Devam Et
       </button>
     </form>
   );
 }
+// PATH SONU: components/VipTransferForm.jsx
