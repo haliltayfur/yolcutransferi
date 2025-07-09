@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
@@ -20,6 +20,7 @@ for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
 export default function VipTransferForm({ onComplete }) {
+  // Otomatik doldurma için localStorage'dan oku
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [people, setPeople] = useState("");
@@ -28,6 +29,25 @@ export default function VipTransferForm({ onComplete }) {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
 
+  useEffect(() => {
+    // Eğer localStorage'da veri varsa, doldur
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("rezFormData");
+      if (saved) {
+        try {
+          const obj = JSON.parse(saved);
+          setFrom(obj.from || "");
+          setTo(obj.to || "");
+          setPeople(obj.people || "");
+          setSegment(obj.segment || "");
+          setTransfer(obj.transfer || "");
+          setDate(obj.date || "");
+          setTime(obj.time || "");
+        } catch {}
+      }
+    }
+  }, []);
+
   function handleSubmit(e) {
     e.preventDefault();
     if (onComplete)
@@ -35,8 +55,7 @@ export default function VipTransferForm({ onComplete }) {
   }
 
   return (
-    <form className="w-full" onSubmit={handleSubmit}>
-      <h2 className="text-2xl md:text-3xl font-extrabold mb-7 text-[#bfa658] font-quicksand">VIP Transfer Rezervasyonu</h2>
+    <form className="w-full px-6" onSubmit={handleSubmit}>
       <div className="grid grid-cols-2 gap-x-6 gap-y-5 mb-5">
         <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Nereden?</label>
