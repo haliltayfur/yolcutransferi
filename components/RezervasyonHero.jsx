@@ -1,93 +1,120 @@
+// PATH: components/RezervasyonHero.jsx
 "use client";
+import { useRef, useEffect, useState } from "react";
 import VipTransferForm from "./VipTransferForm";
-import { useRef, useEffect } from "react";
 
-export default function RezervasyonHero({ onlyForm }) {
-  const videoRef = useRef();
+export default function RezervasyonHero() {
+  // Responsive ve video görünürlüğü için
+  const [isMobile, setIsMobile] = useState(false);
+  const videoRef = useRef(null);
 
   useEffect(() => {
-    // Video visibility (görünmezse durdur!)
-    let wasPlaying = false;
-    function handleVisibility() {
-      const rect = videoRef.current?.getBoundingClientRect();
-      const inView = rect && rect.top < window.innerHeight && rect.bottom > 0;
-      if (!inView && !videoRef.current.paused) {
-        wasPlaying = true;
-        videoRef.current.pause();
-      } else if (inView && wasPlaying) {
-        videoRef.current.play();
-        wasPlaying = false;
-      }
+    function handleResize() {
+      setIsMobile(window.innerWidth < 900);
     }
-    window.addEventListener("scroll", handleVisibility);
-    return () => window.removeEventListener("scroll", handleVisibility);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Desktop: Form ve video
+  // Video otomatik oynat & görünürlük, ses kontrolü vs.
+  useEffect(() => {
+    let lastMuted = true, lastTime = 0;
+    function handleScrollOrVis() {
+      if (!videoRef.current) return;
+      const rect = videoRef.current.getBoundingClientRect();
+      const pctVisible = Math.max(0, Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0)) / rect.height;
+      if (pctVisible < 0.2) {
+        lastMuted = !videoRef.current.muted;
+        lastTime = videoRef.current.currentTime;
+        videoRef.current.pause();
+      } else {
+        videoRef.current.currentTime = lastTime;
+        videoRef.current.muted = lastMuted;
+        videoRef.current.play().catch(() => {});
+      }
+    }
+    window.addEventListener("scroll", handleScrollOrVis);
+    document.addEventListener("visibilitychange", handleScrollOrVis);
+    return () => {
+      window.removeEventListener("scroll", handleScrollOrVis);
+      document.removeEventListener("visibilitychange", handleScrollOrVis);
+    };
+  }, []);
+
+  // Video üzerinde tıklayınca sesli ve baştan oynat
+  function handleVideoClick() {
+    if (videoRef.current) {
+      videoRef.current.muted = false;
+      videoRef.current.currentTime = 0;
+      videoRef.current.play();
+    }
+  }
+
+  // Genişlikler
+  const frameW = isMobile ? "98vw" : "43vw";
+  const videoW = isMobile ? 0 : "24vw";
+  const gap = isMobile ? 0 : "3vw";
+
   return (
-    <section className="w-full flex flex-col items-center justify-center" style={{ padding: 0 }}>
-      <div className="hidden md:flex flex-row items-center justify-center w-full" style={{ marginTop: 0 }}>
+    <section className="w-full flex flex-col items-center justify-center my-10">
+      <div
+        className="flex flex-col md:flex-row items-center justify-center"
+        style={{
+          width: isMobile ? "100vw" : "100%",
+          maxWidth: isMobile ? "100vw" : "1650px",
+          minHeight: "600px",
+          margin: "0 auto"
+        }}
+      >
         {/* FORM */}
         <div
-          className="bg-[#19160a] border-2 border-[#bfa658] rounded-3xl shadow-2xl flex flex-col justify-center px-16 py-10"
+          className="bg-[#19160a] border-2 border-[#bfa658] rounded-3xl shadow-2xl flex flex-col justify-center p-8 md:p-12"
           style={{
-            minHeight: "660px",
-            height: "660px",
-            width: "770px", // +%10
+            minHeight: "600px",
+            height: "600px",
+            width: frameW,
             boxSizing: "border-box",
-            marginRight: "66px", // boşluk kadar sola yaslandı
+            marginRight: gap,
             transition: "width 0.3s",
           }}
         >
           <VipTransferForm />
         </div>
-        {/* VİDEO */}
-        <div
-          style={{
-            height: "660px",
-            width: "440px", // +%10 genişletildi
-            borderRadius: "24px",
-            overflow: "hidden",
-            boxShadow: "0 0 16px #0008",
-            border: "2px solid #bfa658",
-            background: "#1c1c1c",
-            display: "block"
-          }}
-        >
-          <video
-            ref={videoRef}
-            src="/reklam.mp4"
-            controls // Youtube gibi tam kontrol
+
+        {/* VIDEO */}
+        {!isMobile && (
+          <div
+            className="bg-[#232323e7] border-2 border-[#bfa658] rounded-3xl shadow-2xl flex items-center justify-center overflow-hidden"
             style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              background: "#1c1c1c",
-              borderRadius: "24px"
+              width: videoW,
+              minWidth: 220,
+              maxWidth: "460px",
+              height: "600px",
+              cursor: "pointer",
+              boxSizing: "border-box"
             }}
-            preload="auto"
-            playsInline
-            autoPlay
-            muted
-            loop
-          />
-        </div>
-      </div>
-      {/* Mobil */}
-      <div className="flex md:hidden flex-col items-center justify-center w-full">
-        <div
-          className="bg-[#19160a] border-2 border-[#bfa658] rounded-3xl shadow-2xl flex flex-col justify-center px-5 py-8"
-          style={{
-            width: "98vw",
-            minWidth: 200,
-            maxWidth: 420,
-            margin: "0 auto",
-            marginBottom: 24,
-            boxSizing: "border-box"
-          }}
-        >
-          <VipTransferForm />
-        </div>
+            onClick={handleVideoClick}
+          >
+            <video
+              ref={videoRef}
+              src="/reklam.mp4"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                borderRadius: "22px",
+                background: "#1c1c1c"
+              }}
+              controls
+              preload="metadata"
+              playsInline
+              autoPlay
+              muted
+              loop
+            />
+          </div>
+        )}
       </div>
     </section>
   );
