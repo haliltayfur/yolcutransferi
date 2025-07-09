@@ -1,7 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 
-const defaultSegments = [
+// ÖRNEK airports.json datası, gerçek dosyanı fetch ile çek!
+const airports = [
+  { name: "İstanbul Havalimanı", iata: "IST" },
+  { name: "Sabiha Gökçen", iata: "SAW" },
+  { name: "Esenboğa", iata: "ESB" },
+  // ...
+];
+const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
   { key: "Lüks", label: "Lüks" },
   { key: "Prime+", label: "Prime+" }
@@ -15,20 +22,34 @@ const allTransfers = [
   "Toplu Transfer",
   "Düğün vb Organizasyonlar"
 ];
-
+const allLocations = [
+  "İstanbul Havalimanı", "Sabiha Gökçen", "Yeşilköy", "Bakırköy", "Ataşehir",
+  "Ümraniye", "Ankara Havalimanı", "Kadıköy", "Beşiktaş", "Bostancı", "Sancaktepe", "Şişli", "Maslak"
+];
 const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
-// Basit autocomplete verisi (mock)
-// Gerçekte bir API'den fetch ile alınacak şekilde yapılmalı!
-const allLocations = [
-  "İstanbul Havalimanı", "Sabiha Gökçen", "Yeşilköy", "Bakırköy", "Ataşehir", "Ümraniye", "Ankara Havalimanı",
-  "Ankara", "Kadıköy", "Beşiktaş", "Bostancı", "Sancaktepe", "Şişli", "Maslak"
-];
+// Bir havalimanı geçti mi? (autocomplete, input veya dropdown'dan)
+function containsAirport(val) {
+  if (!val) return false;
+  const v = val.toLowerCase();
+  return airports.some(a => v.includes(a.name.toLowerCase()) || v.includes(a.iata.toLowerCase()));
+}
+
+// Fake API ile PNR sorgu örneği (gerçekte buraya fetch atanır)
+async function getFlightInfoFromPNR(pnr) {
+  // Normalde buraya bir API çağrısı yapılır.
+  // Örnek response:
+  return {
+    airline: "THY", // veya Pegasus vs
+    arrival: "2024-07-10T19:30:00",
+    status: "planned",
+    flight: "TK1923"
+  };
+}
 
 export default function VipTransferForm({ onComplete, initialData = {} }) {
-  // State'ler
   const [from, setFrom] = useState(initialData.from || "");
   const [to, setTo] = useState(initialData.to || "");
   const [people, setPeople] = useState(initialData.people || "");
@@ -37,11 +58,13 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
   const [date, setDate] = useState(initialData.date || "");
   const [time, setTime] = useState(initialData.time || "");
   const [pnr, setPnr] = useState(initialData.pnr || "");
+  const [showPNR, setShowPNR] = useState(false);
   const [fromSuggestions, setFromSuggestions] = useState([]);
   const [toSuggestions, setToSuggestions] = useState([]);
+  const [pnrInfo, setPnrInfo] = useState(null);
 
-  // Otomatik doldurma için /rezervasyon sayfasında hafızadan çek
   useEffect(() => {
+    // Hafızadan doldur
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("rezFormData");
       if (saved) {
@@ -58,7 +81,25 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
     }
   }, []);
 
-  // Autocomplete basit filtre (gerçekte API)
+  // Dinamik PNR açma
+  useEffect(() => {
+    setShowPNR(
+      transfer === "VIP Havalimanı Transferi"
+      || containsAirport(from)
+      || containsAirport(to)
+    );
+  }, [transfer, from, to]);
+
+  // PNR’dan airline & saat getirme (örnek)
+  useEffect(() => {
+    if (pnr && showPNR) {
+      getFlightInfoFromPNR(pnr).then(info => setPnrInfo(info));
+    } else {
+      setPnrInfo(null);
+    }
+  }, [pnr, showPNR]);
+
+  // Autocomplete
   function handleFromChange(e) {
     const v = e.target.value;
     setFrom(v);
@@ -84,27 +125,25 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
     }
   }
 
-  // Kutucuk yazı rengi siyah
   const inputClass =
-    "w-full h-[48px] rounded-xl px-3 text-base bg-white/95 border border-gray-300 focus:ring-2 focus:ring-[#bfa658] transition text-black";
+    "w-full h-[56px] rounded-xl px-4 text-base bg-white/95 border border-gray-300 focus:ring-2 focus:ring-[#bfa658] transition text-black my-3 mx-1";
 
   return (
     <form className="w-full" onSubmit={handleSubmit} autoComplete="off">
-      <h2 className="text-3xl font-bold text-[#bfa658] mb-1" style={{ marginTop: 0 }}>
+      <h2 className="text-3xl font-bold text-[#bfa658] mb-0 mt-0 text-center" style={{ marginTop: 6 }}>
         VIP Transfer Rezervasyonu
       </h2>
       {/* Altın yaldızlı çizgi */}
       <div
         style={{
-          height: 4,
-          background: "linear-gradient(90deg, #FFD700 0%, #bfa658 100%)",
-          borderRadius: 4,
+          height: 2,
+          background: "#bfa658",
+          borderRadius: 2,
           width: "100%",
-          marginBottom: 18,
-          marginTop: 3,
+          margin: "7px 0 15px 0"
         }}
       />
-      <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-5">
+      <div className="grid grid-cols-2 gap-x-9 gap-y-4 mb-5">
         {/* Nereden */}
         <div className="relative col-span-1">
           <label className="block text-[#bfa658] font-semibold mb-1">Nereden?</label>
@@ -158,15 +197,26 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
           </select>
         </div>
         {/* PNR */}
-        <div>
-          <label className="block text-[#bfa658] font-semibold mb-1">PNR (varsa)</label>
-          <input
-            className={inputClass}
-            placeholder="Uçuş Kodu (varsa)"
-            value={pnr}
-            onChange={e => setPnr(e.target.value)}
-          />
-        </div>
+        {showPNR && (
+          <div>
+            <label className="block text-[#bfa658] font-semibold mb-1">PNR</label>
+            <input
+              className={inputClass}
+              placeholder="Uçuş Kodu"
+              value={pnr}
+              onChange={e => setPnr(e.target.value)}
+            />
+            {/* PNR’dan info varsa gösterebilirsin */}
+            {pnrInfo && (
+              <div className="text-sm text-[#bfa658] mt-1">
+                {pnrInfo.airline && <>Havayolu: <b>{pnrInfo.airline}</b> - </>}
+                {pnrInfo.arrival && <>Varış: <b>{new Date(pnrInfo.arrival).toLocaleString("tr-TR")}</b></>}
+                {pnrInfo.status && <> ({pnrInfo.status})</>}
+                {pnrInfo.flight && <> - Uçuş No: <b>{pnrInfo.flight}</b></>}
+              </div>
+            )}
+          </div>
+        )}
         {/* Transfer Türü */}
         <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Transfer Türü</label>
@@ -180,7 +230,7 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
           <label className="block text-[#bfa658] font-semibold mb-1">Araç Segmenti</label>
           <select className={inputClass} value={segment} onChange={e => setSegment(e.target.value)}>
             <option value="">Seçiniz</option>
-            {defaultSegments.map(opt => <option key={opt.key} value={opt.label}>{opt.label}</option>)}
+            {segmentOptions.map(opt => <option key={opt.key} value={opt.label}>{opt.label}</option>)}
           </select>
         </div>
         {/* Tarih */}
@@ -203,11 +253,10 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
           </select>
         </div>
       </div>
-      {/* Devam Et Butonu */}
       <button
         type="submit"
-        className="w-full h-[48px] rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-xl shadow hover:scale-105 transition mb-2"
-        style={{ marginTop: 16, marginBottom: 0, position: "relative", bottom: 0 }}
+        className="w-full h-[56px] rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-xl shadow hover:scale-105 transition"
+        style={{ marginTop: 24, marginBottom: 2, position: "relative", bottom: 0 }}
       >
         Devam Et
       </button>
