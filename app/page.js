@@ -2,9 +2,11 @@
 import { useRef, useEffect, useState } from "react";
 import HeroSlider from "../components/HeroSlider";
 import VipTransferForm from "../components/VipTransferForm";
+import AdvantagesBar from "../components/AdvantagesBar";
+import TestimonialsSlider from "../components/TestimonialsSlider";
 
 export default function Home() {
-  // Slider genişliği ölçümü için
+  // Slider genişliği için referans ve state
   const sliderOuterRef = useRef();
   const [sliderWidth, setSliderWidth] = useState(1200);
   const [isMobile, setIsMobile] = useState(false);
@@ -22,11 +24,10 @@ export default function Home() {
   }, []);
 
   // Oranlar
-  const formW = isMobile ? "98vw" : sliderWidth * 0.56;  // mevcut genişliğin %56'sı (örneğin 700px)
-  const gapW = isMobile ? 0 : 48;                       // 3cm boşluk desktop, mobilde yok
-  const videoW = isMobile ? 0 : sliderWidth * 0.28;      // video genişliği desktopta %28 (ör: 350px)
+  const formW = isMobile ? "98vw" : sliderWidth * 0.56;
+  const gapW = isMobile ? 0 : 48;
+  const videoW = isMobile ? 0 : sliderWidth * 0.28;
 
-  // Video kontrolleri için fonksiyon (isteğe bağlı ek özellikler için hazır)
   function handleFormComplete(data) {
     if (typeof window !== "undefined") {
       localStorage.setItem("rezFormData", JSON.stringify(data));
@@ -107,6 +108,10 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* === ALT KISIM === */}
+      <AdvantagesBar />
+      <TestimonialsSlider />
     </main>
   );
 }
