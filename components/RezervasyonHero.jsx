@@ -1,112 +1,104 @@
 "use client";
-import { useRef, useEffect, useState } from "react";
-import VipTransferForm from "./VipTransferForm"; // Aşağıda güncel kodu var
+import VipTransferForm from "./VipTransferForm";
+import { useRef, useEffect } from "react";
 
 export default function RezervasyonHero({ onlyForm }) {
-  const [isMobile, setIsMobile] = useState(false);
+  const videoRef = useRef();
 
+  // Video kontrolleri ve visibility (isteğe bağlı gelişmiş)
   useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 700);
-    handler();
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
+    let wasPlaying = false;
+    function handleVisibility() {
+      const rect = videoRef.current?.getBoundingClientRect();
+      const inView = rect &&
+        rect.top < window.innerHeight &&
+        rect.bottom > 0;
+      if (!inView && !videoRef.current.paused) {
+        wasPlaying = true;
+        videoRef.current.pause();
+      } else if (inView && wasPlaying) {
+        videoRef.current.play();
+        wasPlaying = false;
+      }
+    }
+    window.addEventListener("scroll", handleVisibility);
+    return () => window.removeEventListener("scroll", handleVisibility);
   }, []);
 
-  // Formdan gelen verileri localStorage'a kaydet ve yönlendir
-  function handleFormComplete(data) {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("rezFormData", JSON.stringify(data));
-      window.location.href = "/rezervasyon";
-    }
-  }
-
   return (
-    <section className="w-full flex flex-col items-center justify-center">
-      <div
-        className={`flex ${isMobile ? "flex-col" : "flex-row"} items-start justify-center`}
-        style={{
-          width: "100%",
-          maxWidth: "1800px",
-          margin: "0 auto",
-        }}
-      >
-        {/* FORM ALANI */}
+    <section
+      className="w-full flex flex-col items-center justify-center"
+      style={{
+        minHeight: onlyForm ? "600px" : undefined,
+        height: onlyForm ? "600px" : undefined,
+        background: "transparent",
+        border: "none",
+        boxShadow: "none",
+        padding: 0,
+      }}
+    >
+      {/* Desktop */}
+      <div className="hidden md:flex flex-row items-center justify-center w-full" style={{ marginTop: 0 }}>
+        {/* FORM */}
         <div
-          className="bg-[#19160a] border-2 border-[#bfa658] rounded-3xl shadow-2xl flex flex-col justify-start items-center relative transition-all"
+          className="bg-[#19160a] border-2 border-[#bfa658] rounded-3xl shadow-2xl flex flex-col justify-center px-12 py-10"
           style={{
-            minHeight: isMobile ? "auto" : "650px",
-            height: isMobile ? "auto" : "650px",
-            width: isMobile ? "98vw" : "56vw", // mevcut ölçünün %40 fazlası
-            maxWidth: isMobile ? 600 : 900,
-            marginRight: isMobile ? 0 : "3cm",
-            marginBottom: isMobile ? 30 : 0,
+            minHeight: "600px",
+            height: "600px",
+            width: "700px", // %40 daha geniş (ör: 500px ise 700px yapıldı)
             boxSizing: "border-box",
-            padding: isMobile ? "20px 6px" : "44px 48px 22px 48px",
+            marginRight: "48px", // 3cm (yaklaşık 48px)
             transition: "width 0.3s",
           }}
         >
-          <div className="w-full">
-            <h2
-              className="text-2xl md:text-3xl font-extrabold text-[#bfa658] font-quicksand text-center"
-              style={{
-                marginBottom: 4,
-                marginTop: 0,
-                letterSpacing: 1.2,
-                paddingTop: 0,
-              }}
-            >
-              VIP Transfer Rezervasyonu
-            </h2>
-            {/* ALTIN ÇİZGİ */}
-            <div
-              style={{
-                width: "40%",
-                minWidth: 110,
-                height: 4,
-                background: "linear-gradient(90deg, #FFD700, #bfa658)",
-                borderRadius: 8,
-                margin: "0 auto 16px auto",
-              }}
-            />
-          </div>
-          <div className="w-full flex-1 flex flex-col justify-start">
-            {/* Dinamik autocomplete/tahminli form */}
-            <VipTransferForm onComplete={handleFormComplete} isMobile={isMobile} />
-          </div>
+          <VipTransferForm />
         </div>
         {/* VİDEO */}
-        {!isMobile && (
-          <div
+        <div
+          style={{
+            height: "600px",
+            width: "400px",
+            borderRadius: "24px",
+            overflow: "hidden",
+            boxShadow: "0 0 12px #0008",
+            border: "2px solid #bfa658",
+            background: "#1c1c1c",
+          }}
+        >
+          <video
+            ref={videoRef}
+            src="/reklam.mp4"
+            controls
             style={{
-              height: "650px",
-              width: "350px",
-              borderRadius: "24px",
-              overflow: "hidden",
-              boxShadow: "0 0 16px #0008",
-              border: "2px solid #bfa658",
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
               background: "#1c1c1c",
-              marginLeft: "3cm",
-              display: onlyForm ? "none" : "block"
+              borderRadius: "24px"
             }}
-          >
-            <video
-              src="/reklam.mp4"
-              controls
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                background: "#1c1c1c",
-                borderRadius: "24px"
-              }}
-              preload="auto"
-              playsInline
-              autoPlay
-              muted
-              loop
-            />
-          </div>
-        )}
+            preload="auto"
+            playsInline
+            autoPlay
+            muted
+            loop
+          />
+        </div>
+      </div>
+      {/* Mobil */}
+      <div className="flex md:hidden flex-col items-center justify-center w-full">
+        <div
+          className="bg-[#19160a] border-2 border-[#bfa658] rounded-3xl shadow-2xl flex flex-col justify-center px-5 py-8"
+          style={{
+            width: "98vw",
+            minWidth: 200,
+            maxWidth: 420,
+            margin: "0 auto",
+            marginBottom: 24,
+            boxSizing: "border-box"
+          }}
+        >
+          <VipTransferForm />
+        </div>
       </div>
     </section>
   );
