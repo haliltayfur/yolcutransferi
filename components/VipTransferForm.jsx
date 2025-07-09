@@ -1,188 +1,157 @@
+// === PATH: components/VipTransferForm.jsx ===
 "use client";
 import { useState, useEffect } from "react";
 
-// ÖRNEK airports.json datası, gerçek dosyanı fetch ile çek!
-const airports = [
-  { name: "İstanbul Havalimanı", iata: "IST" },
-  { name: "Sabiha Gökçen", iata: "SAW" },
-  { name: "Esenboğa", iata: "ESB" },
-  // ...
-];
-const segmentOptions = [
-  { key: "Ekonomik", label: "Ekonomik" },
-  { key: "Lüks", label: "Lüks" },
-  { key: "Prime+", label: "Prime+" }
-];
-const allTransfers = [
-  "VIP Havalimanı Transferi",
-  "Şehirler Arası Transfer",
-  "Kurumsal Etkinlik",
-  "Özel Etkinlik",
-  "Tur & Gezi",
-  "Toplu Transfer",
-  "Düğün vb Organizasyonlar"
-];
-const allLocations = [
-  "İstanbul Havalimanı", "Sabiha Gökçen", "Yeşilköy", "Bakırköy", "Ataşehir",
-  "Ümraniye", "Ankara Havalimanı", "Kadıköy", "Beşiktaş", "Bostancı", "Sancaktepe", "Şişli", "Maslak"
-];
-const saatler = [];
-for (let h = 0; h < 24; ++h)
-  for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
-
-// Bir havalimanı geçti mi? (autocomplete, input veya dropdown'dan)
-function containsAirport(val) {
-  if (!val) return false;
-  const v = val.toLowerCase();
-  return airports.some(a => v.includes(a.name.toLowerCase()) || v.includes(a.iata.toLowerCase()));
+function fixTurkishChars(str) {
+  // En çok bozuk çıkan karakterleri düzeltir
+  return str
+    .replace(/ý/g, "ı")
+    .replace(/Ý/g, "İ")
+    .replace(/þ/g, "ş")
+    .replace(/Þ/g, "Ş")
+    .replace(/ð/g, "ğ")
+    .replace(/Ð/g, "Ğ")
+    .replace(/æ/g, "ç")
+    .replace(/Æ/g, "Ç");
 }
 
-// Fake API ile PNR sorgu örneği (gerçekte buraya fetch atanır)
-async function getFlightInfoFromPNR(pnr) {
-  // Normalde buraya bir API çağrısı yapılır.
-  // Örnek response:
-  return {
-    airline: "THY", // veya Pegasus vs
-    arrival: "2024-07-10T19:30:00",
-    status: "planned",
-    flight: "TK1923"
-  };
-}
+export default function VipTransferForm({ onComplete }) {
+  // State'ler
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [people, setPeople] = useState("");
+  const [segment, setSegment] = useState("");
+  const [transfer, setTransfer] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [pnr, setPnr] = useState("");
+  const [showPnr, setShowPnr] = useState(false);
+  const [suggestionsFrom, setSuggestionsFrom] = useState([]);
+  const [suggestionsTo, setSuggestionsTo] = useState([]);
+  const [allLocations, setAllLocations] = useState([]);
+  const [airports, setAirports] = useState([]);
 
-export default function VipTransferForm({ onComplete, initialData = {} }) {
-  const [from, setFrom] = useState(initialData.from || "");
-  const [to, setTo] = useState(initialData.to || "");
-  const [people, setPeople] = useState(initialData.people || "");
-  const [segment, setSegment] = useState(initialData.segment || "");
-  const [transfer, setTransfer] = useState(initialData.transfer || "");
-  const [date, setDate] = useState(initialData.date || "");
-  const [time, setTime] = useState(initialData.time || "");
-  const [pnr, setPnr] = useState(initialData.pnr || "");
-  const [showPNR, setShowPNR] = useState(false);
-  const [fromSuggestions, setFromSuggestions] = useState([]);
-  const [toSuggestions, setToSuggestions] = useState([]);
-  const [pnrInfo, setPnrInfo] = useState(null);
-
+  // 1) Mahalle/ilçe/il txt oku
   useEffect(() => {
-    // Hafızadan doldur
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("rezFormData");
-      if (saved) {
-        const d = JSON.parse(saved);
-        setFrom(d.from || "");
-        setTo(d.to || "");
-        setPeople(d.people || "");
-        setSegment(d.segment || "");
-        setTransfer(d.transfer || "");
-        setDate(d.date || "");
-        setTime(d.time || "");
-        setPnr(d.pnr || "");
-      }
-    }
+    fetch("/dumps/il ilçe mahalle köys.txt")
+      .then(r => r.text())
+      .then(txt => txt.split("\n").map(satir => fixTurkishChars(satir.trim())).filter(Boolean))
+      .then(arr => setAllLocations(arr))
+      .catch(() => setAllLocations([]));
+
+    // 2) Airports oku
+    fetch("/dumps/airports.json")
+      .then(r => r.json())
+      .then(arr => setAirports(arr))
+      .catch(() => setAirports([]));
   }, []);
 
-  // Dinamik PNR açma
+  // Autocomplete FROM
   useEffect(() => {
-    setShowPNR(
-      transfer === "VIP Havalimanı Transferi"
-      || containsAirport(from)
-      || containsAirport(to)
-    );
-  }, [transfer, from, to]);
-
-  // PNR’dan airline & saat getirme (örnek)
-  useEffect(() => {
-    if (pnr && showPNR) {
-      getFlightInfoFromPNR(pnr).then(info => setPnrInfo(info));
-    } else {
-      setPnrInfo(null);
+    if (from.length < 2) {
+      setSuggestionsFrom([]);
+      return;
     }
-  }, [pnr, showPNR]);
+    const value = fixTurkishChars(from.toLowerCase());
+    let results = allLocations.filter(l => fixTurkishChars(l.toLowerCase()).includes(value));
+    results = results.concat(
+      airports.filter(a =>
+        fixTurkishChars(a.name.toLowerCase()).includes(value) ||
+        fixTurkishChars(a.iata?.toLowerCase() || "").includes(value)
+      ).map(a => a.name)
+    );
+    setSuggestionsFrom([...new Set(results)].slice(0, 10));
+  }, [from, allLocations, airports]);
 
-  // Autocomplete
-  function handleFromChange(e) {
-    const v = e.target.value;
-    setFrom(v);
-    setFromSuggestions(
-      v.length > 1 ? allLocations.filter(loc => loc.toLowerCase().includes(v.toLowerCase())) : []
+  // Autocomplete TO
+  useEffect(() => {
+    if (to.length < 2) {
+      setSuggestionsTo([]);
+      return;
+    }
+    const value = fixTurkishChars(to.toLowerCase());
+    let results = allLocations.filter(l => fixTurkishChars(l.toLowerCase()).includes(value));
+    results = results.concat(
+      airports.filter(a =>
+        fixTurkishChars(a.name.toLowerCase()).includes(value) ||
+        fixTurkishChars(a.iata?.toLowerCase() || "").includes(value)
+      ).map(a => a.name)
+    );
+    setSuggestionsTo([...new Set(results)].slice(0, 10));
+  }, [to, allLocations, airports]);
+
+  // Havalimanı tespiti (hem ilçe/mahalle hem airports)
+  function isAirport(val) {
+    if (!val) return false;
+    const valFixed = fixTurkishChars(val.toLowerCase());
+    return airports.some(a =>
+      valFixed.includes(fixTurkishChars(a.name.toLowerCase())) ||
+      valFixed.includes(fixTurkishChars(a.iata?.toLowerCase() || ""))
     );
   }
-  function handleToChange(e) {
-    const v = e.target.value;
-    setTo(v);
-    setToSuggestions(
-      v.length > 1 ? allLocations.filter(loc => loc.toLowerCase().includes(v.toLowerCase())) : []
-    );
-  }
 
+  // PNR'ı dinamik aç/kapat
+  useEffect(() => {
+    setShowPnr(isAirport(from) || isAirport(to) || transfer.toLowerCase().includes("havalimanı"));
+  }, [from, to, transfer, airports]);
+
+  // Submit
   function handleSubmit(e) {
     e.preventDefault();
     const data = { from, to, people, segment, transfer, date, time, pnr };
     if (typeof window !== "undefined") {
       localStorage.setItem("rezFormData", JSON.stringify(data));
       if (onComplete) onComplete(data);
-      else window.location.href = "/rezervasyon";
+      window.location.href = "/rezervasyon";
     }
   }
 
-  const inputClass =
-    "w-full h-[56px] rounded-xl px-4 text-base bg-white/95 border border-gray-300 focus:ring-2 focus:ring-[#bfa658] transition text-black my-3 mx-1";
-
   return (
-    <form className="w-full" onSubmit={handleSubmit} autoComplete="off">
-      <h2 className="text-3xl font-bold text-[#bfa658] mb-0 mt-0 text-center" style={{ marginTop: 6 }}>
-        VIP Transfer Rezervasyonu
-      </h2>
-      {/* Altın yaldızlı çizgi */}
-      <div
-        style={{
-          height: 2,
-          background: "#bfa658",
-          borderRadius: 2,
-          width: "100%",
-          margin: "7px 0 15px 0"
-        }}
-      />
-      <div className="grid grid-cols-2 gap-x-9 gap-y-4 mb-5">
+    <form onSubmit={handleSubmit} className="w-full">
+      <h2 className="text-3xl font-bold text-[#bfa658] mb-3 mt-1 text-center">VIP Transfer Rezervasyonu</h2>
+      <div className="w-24 h-1 rounded-full bg-[#bfa658] mx-auto mb-6" />
+      <div className="grid grid-cols-2 gap-x-6 gap-y-5 mb-6">
         {/* Nereden */}
-        <div className="relative col-span-1">
+        <div className="relative">
           <label className="block text-[#bfa658] font-semibold mb-1">Nereden?</label>
           <input
-            className={inputClass}
-            placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
             value={from}
-            onChange={handleFromChange}
+            onChange={e => setFrom(e.target.value)}
+            className="w-full h-[48px] rounded-xl px-3 text-base bg-white border border-gray-300 text-black"
+            placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
             autoComplete="off"
+            onFocus={() => setSuggestionsFrom([])}
           />
-          {fromSuggestions.length > 0 && (
-            <div className="absolute z-40 bg-white border border-gray-200 rounded-xl mt-1 shadow w-full max-h-32 overflow-auto">
-              {fromSuggestions.map((s, i) => (
+          {suggestionsFrom.length > 0 && (
+            <div className="absolute z-10 left-0 right-0 bg-white text-black border border-gray-300 rounded-b-xl shadow-lg max-h-44 overflow-auto">
+              {suggestionsFrom.map((s, i) => (
                 <div
                   key={i}
-                  className="px-3 py-2 hover:bg-yellow-100 cursor-pointer text-black"
-                  onClick={() => { setFrom(s); setFromSuggestions([]); }}
+                  className="px-3 py-2 hover:bg-yellow-100 cursor-pointer"
+                  onMouseDown={() => setFrom(s)}
                 >{s}</div>
               ))}
             </div>
           )}
         </div>
         {/* Nereye */}
-        <div className="relative col-span-1">
+        <div className="relative">
           <label className="block text-[#bfa658] font-semibold mb-1">Nereye?</label>
           <input
-            className={inputClass}
-            placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
             value={to}
-            onChange={handleToChange}
+            onChange={e => setTo(e.target.value)}
+            className="w-full h-[48px] rounded-xl px-3 text-base bg-white border border-gray-300 text-black"
+            placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
             autoComplete="off"
+            onFocus={() => setSuggestionsTo([])}
           />
-          {toSuggestions.length > 0 && (
-            <div className="absolute z-40 bg-white border border-gray-200 rounded-xl mt-1 shadow w-full max-h-32 overflow-auto">
-              {toSuggestions.map((s, i) => (
+          {suggestionsTo.length > 0 && (
+            <div className="absolute z-10 left-0 right-0 bg-white text-black border border-gray-300 rounded-b-xl shadow-lg max-h-44 overflow-auto">
+              {suggestionsTo.map((s, i) => (
                 <div
                   key={i}
-                  className="px-3 py-2 hover:bg-yellow-100 cursor-pointer text-black"
-                  onClick={() => { setTo(s); setToSuggestions([]); }}
+                  className="px-3 py-2 hover:bg-yellow-100 cursor-pointer"
+                  onMouseDown={() => setTo(s)}
                 >{s}</div>
               ))}
             </div>
@@ -191,46 +160,42 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
         {/* Kişi Sayısı */}
         <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Kişi Sayısı</label>
-          <select className={inputClass} value={people} onChange={e => setPeople(e.target.value)}>
+          <select value={people} onChange={e => setPeople(e.target.value)} className="w-full h-[48px] rounded-xl px-3 text-base bg-white border border-gray-300 text-black">
             <option value="">Seçiniz</option>
             {Array.from({ length: 24 }, (_, i) => i + 1).map(val => <option key={val} value={val}>{val}</option>)}
           </select>
         </div>
         {/* PNR */}
-        {showPNR && (
+        {showPnr ? (
           <div>
-            <label className="block text-[#bfa658] font-semibold mb-1">PNR</label>
-            <input
-              className={inputClass}
-              placeholder="Uçuş Kodu"
-              value={pnr}
-              onChange={e => setPnr(e.target.value)}
-            />
-            {/* PNR’dan info varsa gösterebilirsin */}
-            {pnrInfo && (
-              <div className="text-sm text-[#bfa658] mt-1">
-                {pnrInfo.airline && <>Havayolu: <b>{pnrInfo.airline}</b> - </>}
-                {pnrInfo.arrival && <>Varış: <b>{new Date(pnrInfo.arrival).toLocaleString("tr-TR")}</b></>}
-                {pnrInfo.status && <> ({pnrInfo.status})</>}
-                {pnrInfo.flight && <> - Uçuş No: <b>{pnrInfo.flight}</b></>}
-              </div>
-            )}
+            <label className="block text-[#bfa658] font-semibold mb-1">PNR (varsa)</label>
+            <input value={pnr} onChange={e => setPnr(e.target.value)} className="w-full h-[48px] rounded-xl px-3 text-base bg-white border border-gray-300 text-black" placeholder="Uçuş Kodu (varsa)" />
           </div>
+        ) : (
+          <div />
         )}
         {/* Transfer Türü */}
         <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Transfer Türü</label>
-          <select className={inputClass} value={transfer} onChange={e => setTransfer(e.target.value)}>
+          <select value={transfer} onChange={e => setTransfer(e.target.value)} className="w-full h-[48px] rounded-xl px-3 text-base bg-white border border-gray-300 text-black">
             <option value="">Seçiniz</option>
-            {allTransfers.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            <option>VIP Havalimanı Transferi</option>
+            <option>Şehirler Arası Transfer</option>
+            <option>Kurumsal Etkinlik</option>
+            <option>Özel Etkinlik</option>
+            <option>Tur & Gezi</option>
+            <option>Toplu Transfer</option>
+            <option>Düğün vb Organizasyonlar</option>
           </select>
         </div>
-        {/* Araç Segmenti */}
+        {/* Segment */}
         <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Araç Segmenti</label>
-          <select className={inputClass} value={segment} onChange={e => setSegment(e.target.value)}>
+          <select value={segment} onChange={e => setSegment(e.target.value)} className="w-full h-[48px] rounded-xl px-3 text-base bg-white border border-gray-300 text-black">
             <option value="">Seçiniz</option>
-            {segmentOptions.map(opt => <option key={opt.key} value={opt.label}>{opt.label}</option>)}
+            <option>Ekonomik</option>
+            <option>Lüks</option>
+            <option>Prime+</option>
           </select>
         </div>
         {/* Tarih */}
@@ -238,28 +203,30 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
           <label className="block text-[#bfa658] font-semibold mb-1">Tarih</label>
           <input
             type="date"
-            className={inputClass}
             value={date}
             onChange={e => setDate(e.target.value)}
+            className="w-full h-[48px] rounded-xl px-3 text-base bg-white border border-gray-300 text-black"
             min={new Date().toISOString().split("T")[0]}
           />
         </div>
         {/* Saat */}
         <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Saat</label>
-          <select className={inputClass} value={time} onChange={e => setTime(e.target.value)}>
-            <option value="">Seçiniz</option>
-            {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
-          </select>
+          <input
+            type="time"
+            value={time}
+            onChange={e => setTime(e.target.value)}
+            className="w-full h-[48px] rounded-xl px-3 text-base bg-white border border-gray-300 text-black"
+          />
         </div>
       </div>
       <button
         type="submit"
-        className="w-full h-[56px] rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-xl shadow hover:scale-105 transition"
-        style={{ marginTop: 24, marginBottom: 2, position: "relative", bottom: 0 }}
+        className="w-full h-[48px] rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-xl shadow hover:scale-105 transition mt-5"
       >
         Devam Et
       </button>
     </form>
   );
 }
+// === SONU: components/VipTransferForm.jsx ===
