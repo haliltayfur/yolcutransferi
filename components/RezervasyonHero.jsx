@@ -5,14 +5,12 @@ import { useRef, useEffect } from "react";
 export default function RezervasyonHero({ onlyForm }) {
   const videoRef = useRef();
 
-  // Video kontrolleri ve visibility (isteğe bağlı gelişmiş)
   useEffect(() => {
+    // Video visibility (görünmezse durdur!)
     let wasPlaying = false;
     function handleVisibility() {
       const rect = videoRef.current?.getBoundingClientRect();
-      const inView = rect &&
-        rect.top < window.innerHeight &&
-        rect.bottom > 0;
+      const inView = rect && rect.top < window.innerHeight && rect.bottom > 0;
       if (!inView && !videoRef.current.paused) {
         wasPlaying = true;
         videoRef.current.pause();
@@ -25,29 +23,19 @@ export default function RezervasyonHero({ onlyForm }) {
     return () => window.removeEventListener("scroll", handleVisibility);
   }, []);
 
+  // Desktop: Form ve video
   return (
-    <section
-      className="w-full flex flex-col items-center justify-center"
-      style={{
-        minHeight: onlyForm ? "600px" : undefined,
-        height: onlyForm ? "600px" : undefined,
-        background: "transparent",
-        border: "none",
-        boxShadow: "none",
-        padding: 0,
-      }}
-    >
-      {/* Desktop */}
+    <section className="w-full flex flex-col items-center justify-center" style={{ padding: 0 }}>
       <div className="hidden md:flex flex-row items-center justify-center w-full" style={{ marginTop: 0 }}>
         {/* FORM */}
         <div
-          className="bg-[#19160a] border-2 border-[#bfa658] rounded-3xl shadow-2xl flex flex-col justify-center px-12 py-10"
+          className="bg-[#19160a] border-2 border-[#bfa658] rounded-3xl shadow-2xl flex flex-col justify-center px-16 py-10"
           style={{
-            minHeight: "600px",
-            height: "600px",
-            width: "700px", // %40 daha geniş (ör: 500px ise 700px yapıldı)
+            minHeight: "660px",
+            height: "660px",
+            width: "770px", // +%10
             boxSizing: "border-box",
-            marginRight: "48px", // 3cm (yaklaşık 48px)
+            marginRight: "66px", // boşluk kadar sola yaslandı
             transition: "width 0.3s",
           }}
         >
@@ -56,19 +44,20 @@ export default function RezervasyonHero({ onlyForm }) {
         {/* VİDEO */}
         <div
           style={{
-            height: "600px",
-            width: "400px",
+            height: "660px",
+            width: "440px", // +%10 genişletildi
             borderRadius: "24px",
             overflow: "hidden",
-            boxShadow: "0 0 12px #0008",
+            boxShadow: "0 0 16px #0008",
             border: "2px solid #bfa658",
             background: "#1c1c1c",
+            display: "block"
           }}
         >
           <video
             ref={videoRef}
             src="/reklam.mp4"
-            controls
+            controls // Youtube gibi tam kontrol
             style={{
               width: "100%",
               height: "100%",
