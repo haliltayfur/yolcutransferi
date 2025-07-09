@@ -1,22 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-// Simüle autocomplete verisi (bunu bir API'den çekiyorsan orayı bağlayabilirsin)
-const locations = [
-  "Sabiha Gökçen Havalimanı",
-  "İstanbul Havalimanı",
-  "Ankara Esenboğa Havalimanı",
-  "Ümraniye",
-  "Beşiktaş",
-  "Kadıköy",
-  "Bakırköy",
-  "Ataşehir",
-  "Maslak",
-  "Pendik",
-  "Atatürk Havalimanı",
-];
-
-const segmentOptions = [
+const defaultSegments = [
   { key: "Ekonomik", label: "Ekonomik" },
   { key: "Lüks", label: "Lüks" },
   { key: "Prime+", label: "Prime+" }
@@ -30,169 +15,199 @@ const allTransfers = [
   "Toplu Transfer",
   "Düğün vb Organizasyonlar"
 ];
+
 const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
-export default function VipTransferForm({ onComplete, isMobile }) {
-  // AUTOCOMPLETE (tahminli) inputlar
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+// Basit autocomplete verisi (mock)
+// Gerçekte bir API'den fetch ile alınacak şekilde yapılmalı!
+const allLocations = [
+  "İstanbul Havalimanı", "Sabiha Gökçen", "Yeşilköy", "Bakırköy", "Ataşehir", "Ümraniye", "Ankara Havalimanı",
+  "Ankara", "Kadıköy", "Beşiktaş", "Bostancı", "Sancaktepe", "Şişli", "Maslak"
+];
+
+export default function VipTransferForm({ onComplete, initialData = {} }) {
+  // State'ler
+  const [from, setFrom] = useState(initialData.from || "");
+  const [to, setTo] = useState(initialData.to || "");
+  const [people, setPeople] = useState(initialData.people || "");
+  const [segment, setSegment] = useState(initialData.segment || "");
+  const [transfer, setTransfer] = useState(initialData.transfer || "");
+  const [date, setDate] = useState(initialData.date || "");
+  const [time, setTime] = useState(initialData.time || "");
+  const [pnr, setPnr] = useState(initialData.pnr || "");
   const [fromSuggestions, setFromSuggestions] = useState([]);
   const [toSuggestions, setToSuggestions] = useState([]);
-  // Diğer state'ler
-  const [people, setPeople] = useState("");
-  const [pnr, setPnr] = useState("");
-  const [transfer, setTransfer] = useState("");
-  const [segment, setSegment] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
 
-  // AUTOCOMPLETE: filtrele
+  // Otomatik doldurma için /rezervasyon sayfasında hafızadan çek
   useEffect(() => {
-    if (!from) setFromSuggestions([]);
-    else setFromSuggestions(locations.filter(x => x.toLowerCase().includes(from.toLowerCase())));
-  }, [from]);
-  useEffect(() => {
-    if (!to) setToSuggestions([]);
-    else setToSuggestions(locations.filter(x => x.toLowerCase().includes(to.toLowerCase())));
-  }, [to]);
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("rezFormData");
+      if (saved) {
+        const d = JSON.parse(saved);
+        setFrom(d.from || "");
+        setTo(d.to || "");
+        setPeople(d.people || "");
+        setSegment(d.segment || "");
+        setTransfer(d.transfer || "");
+        setDate(d.date || "");
+        setTime(d.time || "");
+        setPnr(d.pnr || "");
+      }
+    }
+  }, []);
 
-  // Devam Et → localStorage ve callback
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (onComplete)
-      onComplete({ from, to, people, pnr, transfer, segment, date, time });
+  // Autocomplete basit filtre (gerçekte API)
+  function handleFromChange(e) {
+    const v = e.target.value;
+    setFrom(v);
+    setFromSuggestions(
+      v.length > 1 ? allLocations.filter(loc => loc.toLowerCase().includes(v.toLowerCase())) : []
+    );
+  }
+  function handleToChange(e) {
+    const v = e.target.value;
+    setTo(v);
+    setToSuggestions(
+      v.length > 1 ? allLocations.filter(loc => loc.toLowerCase().includes(v.toLowerCase())) : []
+    );
   }
 
-  // SIRALAMA (her satır alt alta)
-  // Sıralama: Nereden | Nereye | alt satır Kişi Sayısı | PNR | alt satır Transfer Türü | Segment | alt satır Tarih | Saat
+  function handleSubmit(e) {
+    e.preventDefault();
+    const data = { from, to, people, segment, transfer, date, time, pnr };
+    if (typeof window !== "undefined") {
+      localStorage.setItem("rezFormData", JSON.stringify(data));
+      if (onComplete) onComplete(data);
+      else window.location.href = "/rezervasyon";
+    }
+  }
+
+  // Kutucuk yazı rengi siyah
+  const inputClass =
+    "w-full h-[48px] rounded-xl px-3 text-base bg-white/95 border border-gray-300 focus:ring-2 focus:ring-[#bfa658] transition text-black";
 
   return (
-    <form className="w-full flex flex-col gap-3" onSubmit={handleSubmit} autoComplete="off">
-      {/* Nereden - Nereye */}
-      <div className={`${isMobile ? "flex-col" : "flex-row"} flex gap-2 w-full`}>
+    <form className="w-full" onSubmit={handleSubmit} autoComplete="off">
+      <h2 className="text-3xl font-bold text-[#bfa658] mb-1" style={{ marginTop: 0 }}>
+        VIP Transfer Rezervasyonu
+      </h2>
+      {/* Altın yaldızlı çizgi */}
+      <div
+        style={{
+          height: 4,
+          background: "linear-gradient(90deg, #FFD700 0%, #bfa658 100%)",
+          borderRadius: 4,
+          width: "100%",
+          marginBottom: 18,
+          marginTop: 3,
+        }}
+      />
+      <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-5">
         {/* Nereden */}
-        <div className="flex-1 relative">
+        <div className="relative col-span-1">
           <label className="block text-[#bfa658] font-semibold mb-1">Nereden?</label>
           <input
-            className="w-full h-[48px] rounded-xl px-3 text-base bg-white/95 border border-gray-300 focus:ring-2 focus:ring-[#bfa658] transition text-black placeholder:text-black"
+            className={inputClass}
             placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
             value={from}
-            onChange={e => setFrom(e.target.value)}
-            onFocus={() => from && setFromSuggestions(locations.filter(x => x.toLowerCase().includes(from.toLowerCase())))}
+            onChange={handleFromChange}
+            autoComplete="off"
           />
-          {/* AUTOCOMPLETE */}
           {fromSuggestions.length > 0 && (
-            <div className="absolute left-0 right-0 bg-white border border-[#bfa658] z-10 max-h-44 overflow-auto rounded-b-lg mt-1">
-              {fromSuggestions.map((x, i) => (
+            <div className="absolute z-40 bg-white border border-gray-200 rounded-xl mt-1 shadow w-full max-h-32 overflow-auto">
+              {fromSuggestions.map((s, i) => (
                 <div
                   key={i}
-                  className="px-3 py-2 cursor-pointer hover:bg-[#ffeec2]"
-                  style={{ color: "#222" }}
-                  onClick={() => { setFrom(x); setFromSuggestions([]); }}
-                >
-                  {x}
-                </div>
+                  className="px-3 py-2 hover:bg-yellow-100 cursor-pointer text-black"
+                  onClick={() => { setFrom(s); setFromSuggestions([]); }}
+                >{s}</div>
               ))}
             </div>
           )}
         </div>
         {/* Nereye */}
-        <div className="flex-1 relative">
+        <div className="relative col-span-1">
           <label className="block text-[#bfa658] font-semibold mb-1">Nereye?</label>
           <input
-            className="w-full h-[48px] rounded-xl px-3 text-base bg-white/95 border border-gray-300 focus:ring-2 focus:ring-[#bfa658] transition text-black placeholder:text-black"
+            className={inputClass}
             placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
             value={to}
-            onChange={e => setTo(e.target.value)}
-            onFocus={() => to && setToSuggestions(locations.filter(x => x.toLowerCase().includes(to.toLowerCase())))}
+            onChange={handleToChange}
+            autoComplete="off"
           />
-          {/* AUTOCOMPLETE */}
           {toSuggestions.length > 0 && (
-            <div className="absolute left-0 right-0 bg-white border border-[#bfa658] z-10 max-h-44 overflow-auto rounded-b-lg mt-1">
-              {toSuggestions.map((x, i) => (
+            <div className="absolute z-40 bg-white border border-gray-200 rounded-xl mt-1 shadow w-full max-h-32 overflow-auto">
+              {toSuggestions.map((s, i) => (
                 <div
                   key={i}
-                  className="px-3 py-2 cursor-pointer hover:bg-[#ffeec2]"
-                  style={{ color: "#222" }}
-                  onClick={() => { setTo(x); setToSuggestions([]); }}
-                >
-                  {x}
-                </div>
+                  className="px-3 py-2 hover:bg-yellow-100 cursor-pointer text-black"
+                  onClick={() => { setTo(s); setToSuggestions([]); }}
+                >{s}</div>
               ))}
             </div>
           )}
         </div>
-      </div>
-      {/* Kişi Sayısı - PNR */}
-      <div className={`${isMobile ? "flex-col" : "flex-row"} flex gap-2 w-full`}>
-        <div className="flex-1">
+        {/* Kişi Sayısı */}
+        <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Kişi Sayısı</label>
-          <select className="w-full h-[48px] rounded-xl px-3 text-base bg-white/95 border border-gray-300 text-black" value={people} onChange={e => setPeople(e.target.value)}>
+          <select className={inputClass} value={people} onChange={e => setPeople(e.target.value)}>
             <option value="">Seçiniz</option>
             {Array.from({ length: 24 }, (_, i) => i + 1).map(val => <option key={val} value={val}>{val}</option>)}
           </select>
         </div>
-        <div className="flex-1">
+        {/* PNR */}
+        <div>
           <label className="block text-[#bfa658] font-semibold mb-1">PNR (varsa)</label>
           <input
-            className="w-full h-[48px] rounded-xl px-3 text-base bg-white/95 border border-gray-300 text-black placeholder:text-black"
+            className={inputClass}
             placeholder="Uçuş Kodu (varsa)"
             value={pnr}
             onChange={e => setPnr(e.target.value)}
           />
         </div>
-      </div>
-      {/* Transfer Türü - Segment */}
-      <div className={`${isMobile ? "flex-col" : "flex-row"} flex gap-2 w-full`}>
-        <div className="flex-1">
+        {/* Transfer Türü */}
+        <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Transfer Türü</label>
-          <select className="w-full h-[48px] rounded-xl px-3 text-base bg-white/95 border border-gray-300 text-black" value={transfer} onChange={e => setTransfer(e.target.value)}>
+          <select className={inputClass} value={transfer} onChange={e => setTransfer(e.target.value)}>
             <option value="">Seçiniz</option>
             {allTransfers.map(opt => <option key={opt} value={opt}>{opt}</option>)}
           </select>
         </div>
-        <div className="flex-1">
+        {/* Araç Segmenti */}
+        <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Araç Segmenti</label>
-          <select className="w-full h-[48px] rounded-xl px-3 text-base bg-white/95 border border-gray-300 text-black" value={segment} onChange={e => setSegment(e.target.value)}>
+          <select className={inputClass} value={segment} onChange={e => setSegment(e.target.value)}>
             <option value="">Seçiniz</option>
-            {segmentOptions.map(opt => <option key={opt.key} value={opt.label}>{opt.label}</option>)}
+            {defaultSegments.map(opt => <option key={opt.key} value={opt.label}>{opt.label}</option>)}
           </select>
         </div>
-      </div>
-      {/* Tarih - Saat */}
-      <div className={`${isMobile ? "flex-col" : "flex-row"} flex gap-2 w-full`}>
-        <div className="flex-1">
+        {/* Tarih */}
+        <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Tarih</label>
           <input
             type="date"
-            className="w-full h-[48px] rounded-xl px-3 text-base bg-white/95 border border-gray-300 text-black"
+            className={inputClass}
             value={date}
             onChange={e => setDate(e.target.value)}
             min={new Date().toISOString().split("T")[0]}
           />
         </div>
-        <div className="flex-1">
+        {/* Saat */}
+        <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Saat</label>
-          <select className="w-full h-[48px] rounded-xl px-3 text-base bg-white/95 border border-gray-300 text-black" value={time} onChange={e => setTime(e.target.value)}>
+          <select className={inputClass} value={time} onChange={e => setTime(e.target.value)}>
             <option value="">Seçiniz</option>
             {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
           </select>
         </div>
       </div>
-      {/* DEVAM ET BUTONU */}
+      {/* Devam Et Butonu */}
       <button
         type="submit"
-        className="w-full h-[54px] rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-xl shadow hover:scale-105 transition mt-5"
-        style={{
-          marginTop: isMobile ? 14 : 24,
-          marginBottom: isMobile ? 6 : 0,
-          position: isMobile ? "static" : "absolute",
-          bottom: isMobile ? undefined : 32,
-          left: 0,
-          right: 0
-        }}
+        className="w-full h-[48px] rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-xl shadow hover:scale-105 transition mb-2"
+        style={{ marginTop: 16, marginBottom: 0, position: "relative", bottom: 0 }}
       >
         Devam Et
       </button>
