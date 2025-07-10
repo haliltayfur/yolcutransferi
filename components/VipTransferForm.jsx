@@ -1,18 +1,31 @@
-// components/VipTransferForm.jsx
 "use client";
 import { useState, useEffect } from "react";
-import axios from "axios";
 
-// Türkçe karakter fix fonksiyonu
-function fixTurkishChars(str = "") {
-  return str
-    .replace(/ý/g, "ı").replace(/ð/g, "ğ").replace(/þ/g, "ş")
-    .replace(/Ý/g, "İ").replace(/Ð/g, "Ğ").replace(/Þ/g, "Ş")
-    .replace(/i̇/g, "i").replace(/İ/g, "İ");
-}
+const defaultSegments = [
+  { key: "Ekonomik", label: "Ekonomik" },
+  { key: "Lüks", label: "Lüks" },
+  { key: "Prime+", label: "Prime+" }
+];
+const allTransfers = [
+  "VIP Havalimanı Transferi",
+  "Şehirler Arası Transfer",
+  "Kurumsal Etkinlik",
+  "Özel Etkinlik",
+  "Tur & Gezi",
+  "Toplu Transfer",
+  "Düğün vb Organizasyonlar"
+];
 
-// Gelişmiş autocomplete
-const [allLocations, setAllLocations] = [];
+const saatler = [];
+for (let h = 0; h < 24; ++h)
+  for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
+
+// Basit autocomplete verisi (mock)
+// Gerçekte bir API'den fetch ile alınacak şekilde yapılmalı!
+const allLocations = [
+  "İstanbul Havalimanı", "Sabiha Gökçen", "Yeşilköy", "Bakırköy", "Ataşehir", "Ümraniye", "Ankara Havalimanı",
+  "Ankara", "Kadıköy", "Beşiktaş", "Bostancı", "Sancaktepe", "Şişli", "Maslak"
+];
 
 export default function VipTransferForm({ onComplete, initialData = {} }) {
   // State'ler
@@ -26,31 +39,8 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
   const [pnr, setPnr] = useState(initialData.pnr || "");
   const [fromSuggestions, setFromSuggestions] = useState([]);
   const [toSuggestions, setToSuggestions] = useState([]);
-  const [fiyat, setFiyat] = useState(null);
 
-  // Tüm lokasyon datasını fetchle
-  useEffect(() => {
-    (async () => {
-      try {
-        const [sehir, ilce, mahalle, airport] = await Promise.all([
-          fetch("/dumps/sehirler.json").then(r => r.json()).catch(() => []),
-          fetch("/dumps/ilceler.json").then(r => r.json()).catch(() => []),
-          fetch("/dumps/mahalleler-1.json").then(r => r.json()).catch(() => []),
-          fetch("/dumps/airports.json").then(r => r.json()).catch(() => []),
-        ]);
-        let out = [];
-        sehir.forEach(s => out.push(fixTurkishChars(s.sehir_adi)));
-        ilce.forEach(i => out.push(fixTurkishChars(i.ilce_adi)));
-        mahalle.forEach(m => out.push(fixTurkishChars(m.mahalle_adi)));
-        airport.forEach(a => out.push(fixTurkishChars(a.name)));
-        setAllLocations(Array.from(new Set(out)));
-      } catch (err) {
-        setAllLocations([]);
-      }
-    })();
-  }, []);
-
-  // Hafızadan otomatik doldurma
+  // Otomatik doldurma için /rezervasyon sayfasında hafızadan çek
   useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("rezFormData");
@@ -68,40 +58,21 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
     }
   }, []);
 
-  // Autocomplete gelişmiş filtre (Türkçe)
+  // Autocomplete basit filtre (gerçekte API)
   function handleFromChange(e) {
     const v = e.target.value;
     setFrom(v);
     setFromSuggestions(
-      v.length > 1
-        ? allLocations.filter(loc => fixTurkishChars(loc).toLowerCase().includes(fixTurkishChars(v).toLowerCase()))
-        : []
+      v.length > 1 ? allLocations.filter(loc => loc.toLowerCase().includes(v.toLowerCase())) : []
     );
   }
   function handleToChange(e) {
     const v = e.target.value;
     setTo(v);
     setToSuggestions(
-      v.length > 1
-        ? allLocations.filter(loc => fixTurkishChars(loc).toLowerCase().includes(fixTurkishChars(v).toLowerCase()))
-        : []
+      v.length > 1 ? allLocations.filter(loc => loc.toLowerCase().includes(v.toLowerCase())) : []
     );
   }
-
-  // Otomatik fiyat alma
-  useEffect(() => {
-    async function fiyatAl() {
-      if (from && to) {
-        try {
-          const response = await axios.post("/api/fiyatCek", { from, to });
-          setFiyat(response.data);
-        } catch {
-          setFiyat({ message: "Fiyat alınamadı." });
-        }
-      }
-    }
-    fiyatAl();
-  }, [from, to]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -113,18 +84,20 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
     }
   }
 
+  // Kutucuk yazı rengi siyah
   const inputClass =
     "w-full h-[48px] rounded-xl px-3 text-base bg-white/95 border border-gray-300 focus:ring-2 focus:ring-[#bfa658] transition text-black";
 
   return (
     <form className="w-full" onSubmit={handleSubmit} autoComplete="off">
-      <h2 className="text-3xl font-bold text-[#bfa658] mb-1 text-center" style={{ marginTop: 0 }}>
+      <h2 className="text-3xl font-bold text-[#bfa658] mb-1" style={{ marginTop: 0 }}>
         VIP Transfer Rezervasyonu
       </h2>
+      {/* Altın yaldızlı çizgi */}
       <div
         style={{
           height: 4,
-          background: "#bfa658",
+          background: "linear-gradient(90deg, #FFD700 0%, #bfa658 100%)",
           borderRadius: 4,
           width: "100%",
           marginBottom: 18,
@@ -176,19 +149,61 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
             </div>
           )}
         </div>
-        {/* Kişi Sayısı, PNR, Transfer Türü, Segment, Tarih, Saat - Senin Kodun Değişmeden */}
-        {/* ...Buraları eski kodun ile aynı şekilde devam ettir... */}
-      </div>
-
-      {/* Fiyat Gösterimi */}
-      {from && to && (
-        <div className="text-lg font-bold text-[#bfa658] mb-2">
-          {fiyat?.sonFiyat
-            ? <>Transfer Fiyatı: {fiyat.sonFiyat.toLocaleString()} ₺ (KDV Dahil)</>
-            : fiyat?.message ? fiyat.message : "Fiyat hesaplanıyor..."}
+        {/* Kişi Sayısı */}
+        <div>
+          <label className="block text-[#bfa658] font-semibold mb-1">Kişi Sayısı</label>
+          <select className={inputClass} value={people} onChange={e => setPeople(e.target.value)}>
+            <option value="">Seçiniz</option>
+            {Array.from({ length: 24 }, (_, i) => i + 1).map(val => <option key={val} value={val}>{val}</option>)}
+          </select>
         </div>
-      )}
-
+        {/* PNR */}
+        <div>
+          <label className="block text-[#bfa658] font-semibold mb-1">PNR (varsa)</label>
+          <input
+            className={inputClass}
+            placeholder="Uçuş Kodu (varsa)"
+            value={pnr}
+            onChange={e => setPnr(e.target.value)}
+          />
+        </div>
+        {/* Transfer Türü */}
+        <div>
+          <label className="block text-[#bfa658] font-semibold mb-1">Transfer Türü</label>
+          <select className={inputClass} value={transfer} onChange={e => setTransfer(e.target.value)}>
+            <option value="">Seçiniz</option>
+            {allTransfers.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          </select>
+        </div>
+        {/* Araç Segmenti */}
+        <div>
+          <label className="block text-[#bfa658] font-semibold mb-1">Araç Segmenti</label>
+          <select className={inputClass} value={segment} onChange={e => setSegment(e.target.value)}>
+            <option value="">Seçiniz</option>
+            {defaultSegments.map(opt => <option key={opt.key} value={opt.label}>{opt.label}</option>)}
+          </select>
+        </div>
+        {/* Tarih */}
+        <div>
+          <label className="block text-[#bfa658] font-semibold mb-1">Tarih</label>
+          <input
+            type="date"
+            className={inputClass}
+            value={date}
+            onChange={e => setDate(e.target.value)}
+            min={new Date().toISOString().split("T")[0]}
+          />
+        </div>
+        {/* Saat */}
+        <div>
+          <label className="block text-[#bfa658] font-semibold mb-1">Saat</label>
+          <select className={inputClass} value={time} onChange={e => setTime(e.target.value)}>
+            <option value="">Seçiniz</option>
+            {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
+          </select>
+        </div>
+      </div>
+      {/* Devam Et Butonu */}
       <button
         type="submit"
         className="w-full h-[48px] rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-xl shadow hover:scale-105 transition mb-2"
