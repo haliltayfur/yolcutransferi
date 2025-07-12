@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
+// Segment ve transfer tipleri
 const defaultSegments = [
   { key: "Ekonomik", label: "Ekonomik" },
   { key: "Lüks", label: "Lüks" },
@@ -20,71 +21,89 @@ const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
-// Basit autocomplete verisi (mock)
-// Gerçekte bir API'den fetch ile alınacak şekilde yapılmalı!
-const allLocations = [
-  "İstanbul Havalimanı", "Sabiha Gökçen", "Yeşilköy", "Bakırköy", "Ataşehir", "Ümraniye", "Ankara Havalimanı",
-  "Ankara", "Kadıköy", "Beşiktaş", "Bostancı", "Sancaktepe", "Şişli", "Maslak"
-];
+// Türkçe karakter düzeltme helper
+function fixTurkish(str) {
+  if (!str) return "";
+  return str
+    .replace(/\\u0131/g, "ı").replace(/\\u015f/g, "ş").replace(/\\u011f/g, "ğ").replace(/\\u00fc/g, "ü")
+    .replace(/\\u00f6/g, "ö").replace(/\\u00e7/g, "ç")
+    .replace(/\\u0130/g, "İ").replace(/\\u015e/g, "Ş").replace(/\\u011e/g, "Ğ").replace(/\\u00dc/g, "Ü")
+    .replace(/\\u00d6/g, "Ö").replace(/\\u00c7/g, "Ç");
+}
+
+// Havaalanı ve il/ilçe lokasyonları otomatik fetch & birleştirme
+function useAllLocations() {
+  const [locations, setLocations] = useState([]);
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      fetch("/dumps/airports.json").then(r => r.json()),
+      fetch("https://raw.githubusercontent.com/haliltayfur/yolcutransferi/main/public/dumps/ililce.txt").then(r => r.text())
+    ]).then(([airports, iller]) => {
+      const airportNames = airports.map(a => a.name);
+      const ililceList = iller.split("\n").map(x => fixTurkish(x.trim())).filter(Boolean);
+      const allLocs = Array.from(new Set([...airportNames, ...ililceList]));
+      if (isMounted) setLocations(allLocs);
+    });
+    return () => { isMounted = false };
+  }, []);
+  return locations;
+}
 
 export default function VipTransferForm({ onComplete, initialData = {} }) {
   // State'ler
-  const [from, setFrom] = useState(initialData.from || "");
-  const [to, setTo] = useState(initialData.to || "");
-  const [people, setPeople] = useState(initialData.people || "");
-  const [segment, setSegment] = useState(initialData.segment || "");
-  const [transfer, setTransfer] = useState(initialData.transfer || "");
-  const [date, setDate] = useState(initialData.date || "");
-  const [time, setTime] = useState(initialData.time || "");
-  const [pnr, setPnr] = useState(initialData.pnr || "");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [people, setPeople] = useState("");
+  const [segment, setSegment] = useState("");
+  const [transfer, setTransfer] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [pnr, setPnr] = useState("");
   const [fromSuggestions, setFromSuggestions] = useState([]);
   const [toSuggestions, setToSuggestions] = useState([]);
+  const [averagePrice, setAveragePrice] = useState(null);
+  const allLocations = useAllLocations();
 
-  // Otomatik doldurma için /rezervasyon sayfasında hafızadan çek
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("rezFormData");
-      if (saved) {
-        const d = JSON.parse(saved);
-        setFrom(d.from || "");
-        setTo(d.to || "");
-        setPeople(d.people || "");
-        setSegment(d.segment || "");
-        setTransfer(d.transfer || "");
-        setDate(d.date || "");
-        setTime(d.time || "");
-        setPnr(d.pnr || "");
-      }
-    }
-  }, []);
-
-  // Autocomplete basit filtre (gerçekte API)
+  // Autocomplete filtre (dinamik dosya içeriği ile)
   function handleFromChange(e) {
     const v = e.target.value;
     setFrom(v);
     setFromSuggestions(
-      v.length > 1 ? allLocations.filter(loc => loc.toLowerCase().includes(v.toLowerCase())) : []
+      v.length > 1
+        ? allLocations.filter(loc => loc.toLocaleLowerCase("tr").includes(v.toLocaleLowerCase("tr")))
+        : []
     );
   }
   function handleToChange(e) {
     const v = e.target.value;
     setTo(v);
     setToSuggestions(
-      v.length > 1 ? allLocations.filter(loc => loc.toLowerCase().includes(v.toLowerCase())) : []
+      v.length > 1
+        ? allLocations.filter(loc => loc.toLocaleLowerCase("tr").includes(v.toLocaleLowerCase("tr")))
+        : []
     );
   }
 
-  function handleSubmit(e) {
+  // Form submitte fiyat çekme (simülasyon, gerçek scraping için server API gerektirir)
+  async function handleSubmit(e) {
     e.preventDefault();
-    const data = { from, to, people, segment, transfer, date, time, pnr };
-    if (typeof window !== "undefined") {
-      localStorage.setItem("rezFormData", JSON.stringify(data));
-      if (onComplete) onComplete(data);
-      else window.location.href = "/rezervasyon";
-    }
+    // localStorage kaldırıldı, sayfa yenilenince sıfırlanır.
+    setAveragePrice(null);
+
+    // Şimdilik örnek: (backendde gerçek scraping gerekir)
+    // Sadece demo için random fiyat
+    setTimeout(() => {
+      // Normalde fetch("/api/get-vipturkiye-quote", {...}) ile istek atılır
+      const fake = 800 + Math.floor(Math.random() * 1200);
+      setAveragePrice(fake);
+    }, 1200);
+
+    // Sonuç başka yere de gönderilecekse burada ekleyebilirsin.
+    if (onComplete) onComplete({ from, to, people, segment, transfer, date, time, pnr });
   }
 
-  // Kutucuk yazı rengi siyah
+  // Stil: Çizgi çerçeveyle uyumlu ve daha ince
   const inputClass =
     "w-full h-[48px] rounded-xl px-3 text-base bg-white/95 border border-gray-300 focus:ring-2 focus:ring-[#bfa658] transition text-black";
 
@@ -93,12 +112,12 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
       <h2 className="text-3xl font-bold text-[#bfa658] mb-1" style={{ marginTop: 0 }}>
         VIP Transfer Rezervasyonu
       </h2>
-      {/* Altın yaldızlı çizgi */}
+      {/* İnce altın çizgi */}
       <div
         style={{
-          height: 4,
-          background: "linear-gradient(90deg, #FFD700 0%, #bfa658 100%)",
-          borderRadius: 4,
+          height: 2,
+          background: "#bfa658",
+          borderRadius: 2,
           width: "100%",
           marginBottom: 18,
           marginTop: 3,
@@ -110,7 +129,7 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
           <label className="block text-[#bfa658] font-semibold mb-1">Nereden?</label>
           <input
             className={inputClass}
-            placeholder="Nereden? İl / İlçe / Mahalle / Havalimanı"
+            placeholder="Nereden? İl / İlçe / Havalimanı"
             value={from}
             onChange={handleFromChange}
             autoComplete="off"
@@ -132,7 +151,7 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
           <label className="block text-[#bfa658] font-semibold mb-1">Nereye?</label>
           <input
             className={inputClass}
-            placeholder="Nereye? İl / İlçe / Mahalle / Havalimanı"
+            placeholder="Nereye? İl / İlçe / Havalimanı"
             value={to}
             onChange={handleToChange}
             autoComplete="off"
@@ -203,7 +222,6 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
           </select>
         </div>
       </div>
-      {/* Devam Et Butonu */}
       <button
         type="submit"
         className="w-full h-[48px] rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold text-xl shadow hover:scale-105 transition mb-2"
@@ -211,6 +229,13 @@ export default function VipTransferForm({ onComplete, initialData = {} }) {
       >
         Devam Et
       </button>
+      {averagePrice && (
+        <div className="mt-4 text-xl text-center text-[#bfa658] font-bold">
+          Ortalama Transfer Tutarı: <span className="text-[#ffeec2]">{averagePrice} TL</span>
+        </div>
+      )}
     </form>
   );
 }
+
+// app/components/VipTransferForm.jsx
