@@ -1,16 +1,16 @@
 "use client";
 import { vehicles } from "../../data/vehicleList";
 
-const SEGMENT_ORDER = ["Prime+", "Lüks", "Ekonomik & Konforlu"];
+const SEGMENT_ORDER = ["Prime+", "Lüks", "Ekonomik"];
 const SEGMENT_TITLES = {
   "Prime+": "PRIME+",
   "Lüks": "LÜKS VIP",
-  "Ekonomik & Konforlu": "EKONOMİK & KONFORLU"
+  "Ekonomik": "EKONOMİK"
 };
 const SEGMENT_DESC = {
   "Prime+": "Ultra lüks ve maksimum konforlu VIP seçenekler.",
   "Lüks": "Prestijli ve konforlu transferler için VIP araçlar.",
-  "Ekonomik & Konforlu": "Uygun bütçeli, modern ve güvenli yolculuk."
+  "Ekonomik": "Uygun bütçeli, modern ve güvenli yolculuk."
 };
 
 export default function Araclar() {
@@ -20,8 +20,8 @@ export default function Araclar() {
   }));
 
   return (
-    <main className="max-w-6xl mx-auto px-2 sm:px-6 py-10 md:py-16">
-      <div className="bg-gradient-to-br from-black via-[#19160a] to-[#232118] border border-[#bfa658] rounded-3xl shadow-2xl px-2 sm:px-8 md:px-14 py-10 md:py-16">
+    <main className="max-w-5xl mx-auto px-2 sm:px-6 py-10 md:py-16">
+      <div className="bg-gradient-to-br from-black via-[#19160a] to-[#232118] border border-[#bfa658] rounded-3xl shadow-2xl px-2 sm:px-10 md:px-14 py-10 md:py-16">
         <h1 className="text-4xl md:text-5xl font-extrabold text-[#bfa658] mb-6 text-center tracking-tight">
           Araç Seçenekleri
         </h1>
@@ -37,19 +37,19 @@ export default function Araclar() {
                   <div className="flex-1 h-px bg-gradient-to-r from-[#bfa658]/50 to-transparent" />
                 </div>
                 <div className="text-[#ffeec2] mb-6 text-base">{SEGMENT_DESC[segment]}</div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-7">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-7">
                   {vehicles.map(arac => (
                     <div
-                      key={arac.key}
+                      key={arac.value}
                       className="flex flex-col bg-[#181612] rounded-xl border border-[#bfa658]/30 p-4 min-h-[110px] shadow-md hover:shadow-lg group hover:scale-[1.025] transition-all relative"
                     >
                       <div className="font-bold text-base md:text-lg text-[#bfa658] mb-2">{arac.label}</div>
                       <div className="flex gap-2 mb-2 text-xs font-semibold text-[#ffeec2]">
                         <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/30 rounded-lg px-2 py-1">
-                          Max {arac.capacity} yolcu
+                          {arac.max} Kişi
                         </span>
                         <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/30 rounded-lg px-2 py-1">
-                          Max {arac.luggage} valiz
+                          {arac.luggage} Valiz
                         </span>
                       </div>
                       <div className="text-xs text-[#e3dca4]">{arac.description}</div>
