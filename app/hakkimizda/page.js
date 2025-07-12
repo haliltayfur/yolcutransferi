@@ -9,51 +9,65 @@ export default function Hakkimizda() {
         <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-2 text-center">
           Hakkımızda
         </h1>
-        <div className="text-lg text-[#ffeec2] font-semibold text-center mb-8">
-          VIP transferde yeni nesil, güvenli ve kusursuz deneyim: YolcuTransferi.com
+        <div className="text-lg text-[#ffeec2] font-semibold text-center mb-7">
+          VIP transferde ayrıcalık ve teknoloji: YolcuTransferi.com
         </div>
 
         <div className="text-base md:text-lg text-[#ecd9aa] leading-relaxed font-normal space-y-7">
-          <p>
-            <span className="font-semibold text-[#ffeec2]">YolcuTransferi.com</span>, sektördeki onlarca yıllık tecrübenin ve yenilikçi yaklaşımın birleşimiyle kuruldu. Kendi aracımız olmadan, Türkiye genelinde <b>VIP havalimanı transferi</b>, <b>şehirler arası transfer</b>, <b>kurumsal & toplu taşımacılık</b>, <b>özel etkinlik ve tekne transferleri</b> gibi birçok hizmeti, seçkin çözüm ortaklarımız ve profesyonel sürücülerimizle buluşturuyoruz.
+          <p className="mb-5">
+            <span className="font-semibold text-[#ffeec2]">YolcuTransferi.com</span> olarak, Türkiye genelinde VIP ulaşım, havalimanı transferi, şehirler arası taşımacılık ve özel etkinliklerde kusursuz hizmet anlayışıyla faaliyet gösteriyoruz. Gücümüzü; alanında deneyimli şoförler ve güvenilir transfer firmalarıyla kurduğumuz güçlü iş birliklerinden alıyoruz.
           </p>
-          <p>
-            <b>Yapay zeka destekli rezervasyon ve atama sistemimiz</b> sayesinde, müşterilerimiz birkaç adımda tüm süreçlerini dijital ortamda, güvenle ve zahmetsizce yönetebilir. Yolculuk planınız için ayrı ayrı teklif toplamadan, en uygun fiyatı, güvenilir şoförü ve yasal hizmeti sizin adınıza biz seçiyoruz.
-          </p>
-          <ul className="pl-6 mt-2 space-y-2">
-            <li className="flex items-start gap-3">
-              <span className="inline-block w-3 h-3 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
-              <span className="text-[#ffeec2]">Her yolculukta özel ihtiyaç ve beklentilere göre <b>kişiye özel program ve VIP hizmet</b> sağlanır.</span>
+
+          <ul className="pl-6 space-y-4 mb-2">
+            <li className="flex items-start gap-2">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
+              <span>
+                <span className="text-[#ffeec2] font-semibold">VIP Standartlarda Transfer:</span>{" "}
+                Mercedes Vito, Maybach, lüks minivanlar ve kişiye özel araç seçenekleriyle her yolculukta konfor.
+              </span>
             </li>
-            <li className="flex items-start gap-3">
-              <span className="inline-block w-3 h-3 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
-              <span className="text-[#ffeec2]">Yalnızca <b>sektörde deneyimli firmalar ve profesyonel sürücüler</b> ile çalışılır; başvurular özenle incelenir, iş birliği ağı kalite ve güven odaklı yönetilir.</span>
+            <li className="flex items-start gap-2">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
+              <span>
+                <span className="text-[#ffeec2] font-semibold">Yapay Zeka Destekli Rezervasyon:</span>{" "}
+                Talebiniz sisteme düştüğü anda, en uygun araç ve sürücü otomatik olarak atanır. Teklif toplama veya bekleme yok.
+              </span>
             </li>
-            <li className="flex items-start gap-3">
-              <span className="inline-block w-3 h-3 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
-              <span className="text-[#ffeec2]"><b>Sigortalı ve tamamen yasal</b> transfer süreçleri, isteğe bağlı ek güvenceyle, müşteri haklarını ve konforunu en üst düzeyde korur.</span>
+            <li className="flex items-start gap-2">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
+              <span>
+                <span className="text-[#ffeec2] font-semibold">Seçkin İş Birlikleri:</span>{" "}
+                Her iş ortağımız sektörün tecrübeli firmalarından ve lisanslı, profesyonel şoförlerden oluşur. Tüm iş birlikleri özenle seçilir ve sürekli denetlenir.
+              </span>
             </li>
-            <li className="flex items-start gap-3">
-              <span className="inline-block w-3 h-3 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
-              <span className="text-[#ffeec2]"><b>Online ödeme</b>, şeffaf fiyatlandırma, ek ücret sürprizi olmadan, %100 güvenli işlem ve <b>kesintisiz destek</b> sunulur.</span>
+            <li className="flex items-start gap-2">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
+              <span>
+                <span className="text-[#ffeec2] font-semibold">Sigortalı & Yasal Güvence:</span>{" "}
+                Tüm transferler yasal zeminde ve sigortalı olarak gerçekleştirilir. Müşteri memnuniyeti ve güvenliği daima önceliğimizdir.
+              </span>
             </li>
-            <li className="flex items-start gap-3">
-              <span className="inline-block w-3 h-3 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
-              <span className="text-[#ffeec2]"><b>7/24 ulaşılabilir uzman destek ekibi</b> ve yolculuk öncesi/sonrası danışmanlık hizmetiyle her an yanınızdayız.</span>
+            <li className="flex items-start gap-2">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
+              <span>
+                <span className="text-[#ffeec2] font-semibold">Şeffaf & Sabit Fiyatlar:</span>{" "}
+                Online ödeme altyapısı ve vergiye tabi faturalandırma ile sonradan ekstra ücret sürprizi yaşanmaz.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
+              <span>
+                <span className="text-[#ffeec2] font-semibold">7/24 VIP Destek:</span>{" "}
+                Tüm transfer sürecinde, rezervasyon öncesi ve sonrası kesintisiz destek ekibimiz yanınızda.
+              </span>
             </li>
           </ul>
+
           <p>
-            <b>“Neden bizi tercih etmelisiniz?”</b> Çünkü YolcuTransferi.com’da; onlarca firma ve şoförle birebir görüşmek, fiyat pazarlığı yapmak ya da hizmetin yasal olup olmadığını sorgulamak zorunda değilsiniz. <span className="font-semibold text-[#ffeec2]">Tüm süreç tek noktadan, güvenle ve otomasyonla yönetilir.</span> Size en uygun araç ve sürücü, sistemimiz tarafından atanır; isterseniz ekstra hizmetler (ikram, çocuk koltuğu, özel karşılama vb.) ile yolculuğunuz tamamen kişiselleştirilir.
+            Yolculuğunuzun her aşamasında tek muhatabınız <b>YolcuTransferi.com</b> olur. Tüm talepleriniz teknolojik altyapımızla güvenle ve hızla karşılanır. İster bireysel ister kurumsal olun; VIP havalimanı, şehirler arası, toplu organizasyon, özel tur veya tekne transferi gibi tüm ayrıcalıklar sadece birkaç tık uzağınızda.
           </p>
           <p>
-            Hem bireysel hem kurumsal kullanıcılar için, <b>en lüks araçlardan ekonomik transfer seçeneklerine</b> kadar her ihtiyaca çözüm sunuyoruz. 
-            Sitemizde gördüğünüz tüm hizmetler ve avantajlar, uzun yılların birikimiyle oluşturulan kalite standartlarımızın sonucudur.
-          </p>
-          <p>
-            <b>YolcuTransferi.com</b> ile tanışan firmalar ve profesyonel şoförler de, platformumuza üye olarak kendi müşteri ağını büyütebilir, iş hacmini güvenli ve kurumsal bir çatı altında artırabilir.
-          </p>
-          <p>
-            Her transferde, güvenli, konforlu ve özel bir deneyim yaşamanız için çalışıyoruz. Sektörde edindiğimiz bilgi, güçlü iş birliği ağı ve ileri teknoloji ile yolculuğunuzu daha keyifli ve ayrıcalıklı hale getiriyoruz.
+            Deneyimli transfer firmaları ve lisanslı şoförlerle kurduğumuz sürdürülebilir iş birlikleri, platformumuzun kalite standartlarını yükseltir. Sunduğumuz hizmet ağında siz de iş ortağımız olmak istiyorsanız, bize ulaşarak <b>iş birliği başvurusu</b> yapabilirsiniz.
           </p>
         </div>
 
