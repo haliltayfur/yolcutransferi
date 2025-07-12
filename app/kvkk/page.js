@@ -1,134 +1,96 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
-
-// === Popup Bileşeni (iletişim sayfasındakiyle aynı) ===
-function PolicyPopup({ open, onClose, onConfirm, url = "/kvkk-aydinlatma" }) {
-  const [html, setHtml] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [showScroll, setShowScroll] = useState(false);
-  const scrollRef = useRef(null);
-
-  useEffect(() => {
-    if (!open) return;
-    setLoading(true);
-    fetch(url)
-      .then(res => res.text())
-      .then(htmlStr => {
-        const div = document.createElement("div");
-        div.innerHTML = htmlStr;
-        let content = div.querySelector("main") || div.querySelector("section") || div;
-        Array.from(content.querySelectorAll("a")).forEach(a => {
-          a.setAttribute("target", "_blank");
-          a.setAttribute("rel", "noopener noreferrer");
-          a.classList.add("underline", "hover:text-[#FFD700]", "transition", "font-semibold");
-        });
-        setHtml(content.innerHTML);
-        setLoading(false);
-      });
-  }, [open, url]);
-
-  useEffect(() => {
-    if (!open || !scrollRef.current) return;
-    const el = scrollRef.current;
-    function onScroll() {
-      setShowScroll(true);
-      clearTimeout(el._scrollTimeout);
-      el._scrollTimeout = setTimeout(() => setShowScroll(false), 1000);
-    }
-    el.addEventListener("scroll", onScroll);
-    return () => {
-      el.removeEventListener("scroll", onScroll);
-    };
-  }, [open]);
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-[1.5px]">
-      <div className="relative w-[98vw] md:w-[900px] max-w-3xl bg-[#171204] rounded-[24px] border-[3px] border-[#bfa658] px-0 pt-14 shadow-2xl flex flex-col overflow-hidden">
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-7 text-[#FFD700] hover:text-white text-lg font-bold w-28 h-11 flex items-center justify-center rounded-full bg-black/40 border-[2px] border-[#bfa658] hover:bg-[#ffd70022] transition"
-          aria-label="Kapat"
-        >Kapat</button>
-        <h2 className="text-2xl font-extrabold text-[#bfa658] mb-4 text-center tracking-tight">
-          KVKK Aydınlatma Metni
-        </h2>
-        <div className="relative flex-1">
-          <div
-            ref={scrollRef}
-            className="text-[1rem] text-[#ecd9aa] max-h-[57vh] overflow-y-auto px-7 pb-2 policy-popup-scrollbar transition-all"
-            style={{ scrollbarWidth: "none" }}
-          >
-            {loading
-              ? <div className="text-center py-10 text-lg text-[#ffeec2]/70">Yükleniyor...</div>
-              : <div dangerouslySetInnerHTML={{ __html: html }} />
-            }
-          </div>
-          <div className={`pointer-events-none absolute top-0 right-2 h-full w-1.5 rounded-full bg-gradient-to-b from-[#bfa65899] to-[#bfa65800] shadow-lg transition-opacity duration-500 ${showScroll ? "opacity-70" : "opacity-0"}`} />
-        </div>
-        <button
-          onClick={() => { onConfirm && onConfirm(); onClose(); }}
-          className="mt-3 w-[90%] mx-auto py-3 rounded-2xl bg-gradient-to-tr from-[#FFD700] to-[#bfa658] text-black font-extrabold text-lg shadow-md border-2 border-[#bfa658] hover:scale-105 transition mb-4"
-        >
-          Tümünü okudum, onaylıyorum
-        </button>
-      </div>
-    </div>
-  );
-}
-// ==== Popup Sonu ====
+import { useState } from "react";
 
 export default function Kvkk() {
-  const [kvkkOnay, setKvkkOnay] = useState(false);
-  const [popupOpen, setPopupOpen] = useState(false);
-
-  // Popup'ta onay tıklanınca checkbox otomatik işaretlensin
-  const handleKvkkConfirm = () => setKvkkOnay(true);
+  const [onay, setOnay] = useState(false);
 
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
       <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] mt-16 mb-10">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-1 text-center">
-          KVKK Politikası
+        <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-3 text-center">
+          KİŞİSEL VERİLERİN KORUNMASI KANUNU <br /> AYDINLATMA METNİ
         </h1>
-        <div className="text-lg text-[#ffeec2] font-semibold text-center mb-8">
-          Kişisel Verileriniz Güvende, Tüm Haklarınız Bizimle Güvende!
-        </div>
-        <div className="text-base md:text-lg text-[#ecd9aa] leading-relaxed font-normal space-y-6">
+        <div className="text-base md:text-lg text-[#ecd9aa] leading-relaxed font-normal space-y-7">
+
           <p>
-            YolcuTransferi.com olarak, kişisel verilerinizi yalnızca transfer işlemlerinizin güvenle yürütülmesi amacıyla işleriz. KVKK Aydınlatma Metni'ni mutlaka inceleyiniz.
+            <b>YolcuTransferi.com</b> olarak kişisel verilerinizin güvenliğine büyük önem veriyoruz. Bu aydınlatma metni, 6698 Sayılı <b>Kişisel Verilerin Korunması Kanunu</b> (“KVKK”) kapsamında, kişisel verilerinizin işlenmesine ilişkin amaç, kapsam, saklama süresi ve haklarınız hakkında sizi bilgilendirmek amacıyla hazırlanmıştır.
           </p>
-          {/* ... diğer metinler ... */}
+
+          <p>
+            <b>Kişisel Verilerinizi Kim İşleyecek?</b><br />
+            Kişisel verileriniz, veri sorumlusu sıfatıyla <b>YolcuTransferi.com</b> tarafından ve ilgili mevzuata uygun şekilde, gerekli güvenlik önlemleri alınarak işlenmektedir. Hizmet süreçlerinde gerekli olduğu ölçüde, iş ortaklarımız ve yetkilendirilmiş veri işleyenler ile de paylaşılabilir.
+          </p>
+
+          <p>
+            <b>Hangi Kişisel Veriler Ne Amaçla İşlenir ve Kimlerle Paylaşılır?</b><br />
+            Transfer ve rezervasyon hizmetlerimizin sunulabilmesi, müşteri ilişkilerinin yönetimi, yasal yükümlülüklerin yerine getirilmesi, pazarlama ve memnuniyet çalışmaları kapsamında;<br />
+            <ul className="list-disc ml-6">
+              <li>Ad, soyad, e-posta adresi, telefon numarası, rezervasyon ve transfer bilgileri,</li>
+              <li>IP adresi, işlem geçmişi ve iletişim kayıtlarınız</li>
+            </ul>
+            Şirketimiz ve yurt içi/yurt dışındaki iş ortaklarımız ile yalnızca yukarıda belirtilen amaçlarla paylaşılır.
+          </p>
+
+          <p>
+            <b>Kişisel Verileriniz Hangi Yöntemlerle Toplanır?</b><br />
+            Kişisel verileriniz; www.yolcutransferi.com web sitesi, mobil uygulamalarımız, çağrı merkezi, WhatsApp, sosyal medya kanalları, rezervasyon ve iletişim formları gibi dijital veya fiziksel ortamlarda; sözlü, yazılı ya da elektronik olarak toplanabilmektedir.
+          </p>
+
+          <p>
+            <b>Kişisel Verilerinizin Toplanmasının Hukuki Sebebi Nedir?</b><br />
+            KVKK'nın 5. ve 6. maddeleri uyarınca;
+            <ul className="list-disc ml-6">
+              <li>Kanunlarda açıkça öngörülmesi,</li>
+              <li>Sözleşmenin kurulması/ifası,</li>
+              <li>Hukuki yükümlülüklerimizin yerine getirilmesi,</li>
+              <li>Bir hakkın tesisi, kullanılması veya korunması,</li>
+              <li>Meşru menfaatlerimizin gerektirmesi,</li>
+              <li>ve açık rızanızın bulunması</li>
+            </ul>
+            gibi yasal sebeplerle işlenmektedir.
+          </p>
+
+          <p>
+            <b>Kişisel Verileriniz Ne Kadar Süreyle Saklanır?</b><br />
+            Kişisel verileriniz, mevzuatta belirtilen süreler ve/veya işleme amaçlarımız doğrultusunda gerektirdiği kadar saklanır. Yasal saklama süresi sona erdiğinde, verileriniz KVKK'nın 7. maddesi kapsamında silinir, yok edilir veya anonimleştirilir.
+          </p>
+
+          <p>
+            <b>Haklarınız Nelerdir?</b><br />
+            KVKK’nın 11. maddesi gereğince, şirketimize başvurarak:
+            <ul className="list-disc ml-6">
+              <li>Kişisel verinizin işlenip işlenmediğini öğrenme,</li>
+              <li>İşlenmişse buna ilişkin bilgi talep etme,</li>
+              <li>Amacına uygun kullanılıp kullanılmadığını öğrenme,</li>
+              <li>Yurtiçinde/yurtdışında aktarıldığı 3. kişileri bilme,</li>
+              <li>Eksik/yanlış işlenmişse düzeltilmesini isteme,</li>
+              <li>Yasal şartlar kapsamında silinmesini/yok edilmesini isteme,</li>
+              <li>Bu işlemlerin aktarıldığı 3. kişilere bildirilmesini isteme,</li>
+              <li>Otomatik sistemlerle analiz sonucu aleyhinize bir sonucun çıkmasına itiraz etme,</li>
+              <li>Zarar oluşursa giderilmesini talep etme</li>
+            </ul>
+            haklarına sahipsiniz. Taleplerinizi <a href="https://www.yolcutransferi.com/iletisim" target="_blank" rel="noopener noreferrer" className="underline text-[#FFD700]">buradan</a> veya info@yolcutransferi.com adresine iletebilirsiniz. Talepleriniz en geç 30 gün içinde ücretsiz olarak sonuçlandırılır.
+          </p>
+
+          <p>
+            <b>Kişisel Verilerimin İşlenmesine Açıkça Rıza Gösteriyorum</b><br />
+            Yukarıdaki açıklamaları okudum, anladım ve kişisel verilerimin işlenmesine rıza gösterdiğimi kabul ediyorum.
+          </p>
         </div>
-        {/* KVKK Onay checkbox ve popup trigger */}
+
+        {/* Onay Kutusu - opsiyonel */}
         <div className="flex items-center gap-2 mt-8">
           <input
             type="checkbox"
-            checked={kvkkOnay}
-            onChange={e => setKvkkOnay(e.target.checked)}
-            required
+            checked={onay}
+            onChange={e => setOnay(e.target.checked)}
             className="accent-[#FFD700] w-4 h-4"
             id="kvkkonay"
           />
           <label htmlFor="kvkkonay" className="text-xs text-gray-200 select-none">
-            <button
-              type="button"
-              onClick={() => setPopupOpen(true)}
-              className="underline text-[#FFD700] hover:text-[#bfa658] cursor-pointer outline-none"
-              style={{ padding: 0, border: "none", background: "transparent" }}
-            >
-              KVKK Aydınlatma Metni’ni
-            </button>{" "}
-            okudum, onaylıyorum.
+            KVKK Aydınlatma Metni’ni okudum, kabul ediyorum.
           </label>
         </div>
-        <PolicyPopup
-          open={popupOpen}
-          onClose={() => setPopupOpen(false)}
-          onConfirm={handleKvkkConfirm}
-          url="/kvkk-aydinlatma" // veya kendi endpoint'in
-        />
       </section>
     </main>
   );
