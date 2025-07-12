@@ -3,8 +3,10 @@ export const vehicles = [
   {
     value: "ford_tourneo_courier",
     label: "Ford Tourneo Courier",
-    max: 3, // sedan hatchback küçük araçlarda 3 yetişkin arka, 1 öne gerekirse
+    max: 3,
+    luggage: 2,
     segment: "Ekonomik",
+    description: "Ekonomik minivan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -14,7 +16,9 @@ export const vehicles = [
     value: "vw_caddy",
     label: "VW Caddy",
     max: 3,
+    luggage: 2,
     segment: "Ekonomik",
+    description: "Şehir içi ekonomik araç",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -23,8 +27,10 @@ export const vehicles = [
   {
     value: "skoda_superb",
     label: "Skoda Superb",
-    max: 3, // sedan, lüks değilse 3 yetişkin rahat
+    max: 3,
+    luggage: 2,
     segment: "Ekonomik",
+    description: "Modern sedan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -33,8 +39,10 @@ export const vehicles = [
   {
     value: "vw_transporter",
     label: "VW Transporter",
-    max: 6, // van tipi araçlar 6 yetişkin (lüks değil)
+    max: 6,
+    luggage: 4,
     segment: "Ekonomik",
+    description: "Ekonomik minivan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -44,7 +52,9 @@ export const vehicles = [
     value: "ford_tourneo_custom",
     label: "Ford Tourneo Custom",
     max: 6,
+    luggage: 3,
     segment: "Ekonomik",
+    description: "Ekonomik ve geniş minivan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -53,8 +63,10 @@ export const vehicles = [
   {
     value: "renault_trafic",
     label: "Renault Trafic",
-    max: 6,
+    max: 7,
+    luggage: 4,
     segment: "Ekonomik",
+    description: "Ekonomik minivan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -63,8 +75,10 @@ export const vehicles = [
   {
     value: "ford_transit_minibus",
     label: "Ford Transit Minibus",
-    max: 15,
+    max: 12,
+    luggage: 6,
     segment: "Ekonomik",
+    description: "Grup transferi minibus",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -73,8 +87,10 @@ export const vehicles = [
   {
     value: "iveco_daily_minibus",
     label: "Iveco Daily Minibus",
-    max: 16,
+    max: 15,
+    luggage: 9,
     segment: "Ekonomik",
+    description: "Uzun mesafe grup transferi",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -83,8 +99,10 @@ export const vehicles = [
   {
     value: "temsa_prestij_vip",
     label: "Temsa Prestij VIP",
-    max: 24,
+    max: 25,
+    luggage: 15,
     segment: "Ekonomik",
+    description: "VIP midibüs",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -93,20 +111,24 @@ export const vehicles = [
   {
     value: "isuzu_novo_ultra_vip",
     label: "Isuzu Novo Ultra VIP",
-    max: 24,
+    max: 25,
+    luggage: 15,
     segment: "Ekonomik",
+    description: "Ultra VIP minibus",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
     ]
   },
 
-  // LÜKS SEGMENT (konfor için kapasite 1 eksik)
+  // LÜKS SEGMENT
   {
     value: "mercedes_eclass",
     label: "Mercedes E-Class",
-    max: 3, // lüks sedan, öne 1 arkaya 2
+    max: 3,
+    luggage: 3,
     segment: "Lüks",
+    description: "Lüks sedan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -115,8 +137,10 @@ export const vehicles = [
   {
     value: "mercedes_vito",
     label: "Mercedes Vito",
-    max: 5, // lüks van, rahat oturum için 1 azalt
+    max: 5,
+    luggage: 4,
     segment: "Lüks",
+    description: "Konforlu VIP minivan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -126,7 +150,9 @@ export const vehicles = [
     value: "mercedes_vclass",
     label: "Mercedes V-Class",
     max: 5,
+    luggage: 4,
     segment: "Lüks",
+    description: "Lüks minivan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -136,7 +162,9 @@ export const vehicles = [
     value: "mercedes_sprinter",
     label: "Mercedes Sprinter",
     max: 12,
+    luggage: 5,
     segment: "Lüks",
+    description: "VIP minibüs",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -146,19 +174,23 @@ export const vehicles = [
     value: "vw_crafter",
     label: "VW Crafter",
     max: 12,
+    luggage: 5,
     segment: "Lüks",
+    description: "Minibüs",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
     ]
   },
 
-  // PRIME+ SEGMENT (premium, ultra rahat)
+  // PRIME+ SEGMENT
   {
     value: "mercedes_sclass",
     label: "Mercedes S-Class",
-    max: 2, // ultra lüks sedan, arka tam lounge, 2 yetişkin rahat
+    max: 2,
+    luggage: 2,
     segment: "Prime+",
+    description: "Ultra VIP sedan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -168,7 +200,9 @@ export const vehicles = [
     value: "bmw_7_serisi",
     label: "BMW 7 Serisi",
     max: 2,
+    luggage: 2,
     segment: "Prime+",
+    description: "Premium lüks sedan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -178,7 +212,9 @@ export const vehicles = [
     value: "tesla_suv",
     label: "Tesla SUV",
     max: 3,
+    luggage: 2,
     segment: "Prime+",
+    description: "Elektrikli ultra lüks SUV",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -188,7 +224,9 @@ export const vehicles = [
     value: "dron_taksi",
     label: "Dron Taksi (konsept)",
     max: 2,
+    luggage: 1,
     segment: "Prime+",
+    description: "Hava transfer konsepti",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -197,8 +235,10 @@ export const vehicles = [
   {
     value: "mercedes_vito_vip",
     label: "Mercedes Vito VIP",
-    max: 4, // ultra lounge
+    max: 4,
+    luggage: 4,
     segment: "Prime+",
+    description: "VIP minivan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -208,7 +248,9 @@ export const vehicles = [
     value: "mercedes_vclass_exclusive",
     label: "Mercedes V-Class Exclusive",
     max: 4,
+    luggage: 4,
     segment: "Prime+",
+    description: "Lüks minivan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -217,8 +259,10 @@ export const vehicles = [
   {
     value: "cadillac_escalade",
     label: "Cadillac Escalade",
-    max: 5, // SUV, ultra rahat
+    max: 5,
+    luggage: 3,
     segment: "Prime+",
+    description: "Premium SUV",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -227,8 +271,10 @@ export const vehicles = [
   {
     value: "mercedes_maybach",
     label: "Mercedes Maybach",
-    max: 2, // ultra lüks sedan lounge
+    max: 2,
+    luggage: 3,
     segment: "Prime+",
+    description: "Lüksün zirvesi sedan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -238,7 +284,9 @@ export const vehicles = [
     value: "vw_crafter_vip",
     label: "VW Crafter VIP",
     max: 6,
+    luggage: 5,
     segment: "Prime+",
+    description: "VIP minibüs",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -248,7 +296,9 @@ export const vehicles = [
     value: "chrysler_300c_limo",
     label: "Chrysler 300C Limo",
     max: 6,
+    luggage: 2,
     segment: "Prime+",
+    description: "Limuzin sedan, bagaj kısıtlı",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -258,7 +308,9 @@ export const vehicles = [
     value: "hummer_limousine",
     label: "Hummer Limousine",
     max: 6,
+    luggage: 3,
     segment: "Prime+",
+    description: "Büyük limuzin, bagaj kısıtlı",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -267,8 +319,10 @@ export const vehicles = [
   {
     value: "mercedes_sprinter_vip",
     label: "Mercedes Sprinter VIP",
-    max: 10, // büyük minibüs lounge
+    max: 10,
+    luggage: 6,
     segment: "Prime+",
+    description: "VIP minibüs",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -278,7 +332,9 @@ export const vehicles = [
     value: "mercedes_sprinter_ultra_vip",
     label: "Mercedes Sprinter Ultra VIP",
     max: 10,
+    luggage: 5,
     segment: "Prime+",
+    description: "Ultra VIP minibüs",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
