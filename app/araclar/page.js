@@ -41,18 +41,25 @@ export default function Araclar() {
                   {vehicles.map(arac => (
                     <div
                       key={arac.value}
-                      className="flex flex-col bg-[#181612] rounded-xl border border-[#bfa658]/30 p-4 min-h-[110px] shadow-md hover:shadow-lg group hover:scale-[1.025] transition-all relative"
+                      className="flex flex-col items-start justify-between h-full bg-[#181612] rounded-xl border border-[#bfa658]/30 p-4 shadow-md hover:shadow-lg group hover:scale-[1.025] transition-all min-h-[134px]"
                     >
-                      <div className="font-bold text-base md:text-lg text-[#bfa658] mb-2">{arac.label}</div>
-                      <div className="flex gap-2 mb-2 text-xs font-semibold text-[#ffeec2]">
-                        <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/30 rounded-lg px-2 py-1">
-                          {arac.max} Kişi
+                      {/* Araç Adı */}
+                      <div className="font-bold text-base md:text-lg text-[#bfa658] mb-2 leading-tight">
+                        {arac.label}
+                      </div>
+                      {/* Badge Row - Kişi & Valiz */}
+                      <div className="flex gap-2 mb-2">
+                        <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/30 rounded-lg px-2 py-1 text-xs font-semibold text-[#ffeec2] whitespace-nowrap">
+                          Max. {arac.max} Kişi
                         </span>
-                        <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/30 rounded-lg px-2 py-1">
-                          {arac.luggage} Valiz
+                        <span className="inline-flex items-center gap-1 bg-gold/10 border border-gold/30 rounded-lg px-2 py-1 text-xs font-semibold text-[#ffeec2] whitespace-nowrap">
+                          Max. {arac.luggage} Valiz
                         </span>
                       </div>
-                      <div className="text-xs text-[#e3dca4]">{arac.description}</div>
+                      {/* Açıklama */}
+                      <div className="text-xs text-[#e3dca4] leading-snug min-h-[18px]">
+                        {arac.description}
+                      </div>
                     </div>
                   ))}
                 </div>
