@@ -350,7 +350,7 @@ export default function Iletisim() {
             disabled={blocked}
           >
             {blocked
-              ? `Çok hızlı gönderdiniz. ${formatDuration(remaining)} sonra tekrar deneyin.`
+              ? `İletişim formunuz Uzman Ekiplerimize İletiliyor ${formatDuration(remaining)} `
               : buttonMsg}
           </button>
           {Object.keys(errors).length > 0 && (
