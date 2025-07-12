@@ -1,41 +1,90 @@
 "use client";
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useState, useRef } from "react";
 
-export default function Kvkk() {
-  // Üye bilgisini localStorage'dan oku
-  const [uye, setUye] = useState({
-    ad: "",
-    soyad: "",
-    email: "",
-    telefon: ""
-  });
+// === Popup Bileşeni (iletişim sayfasındakiyle aynı) ===
+function PolicyPopup({ open, onClose, onConfirm, url = "/kvkk-aydinlatma" }) {
+  const [html, setHtml] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [showScroll, setShowScroll] = useState(false);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
-    // localStorage sadece client'ta çalışır
-    if (typeof window !== "undefined") {
-      const u = localStorage.getItem("user") || localStorage.getItem("uye_bilgi");
-      if (u) {
-        try {
-          const usr = JSON.parse(u);
-          setUye({
-            ad: usr.ad || usr.name || "",
-            soyad: usr.soyad || usr.surname || "",
-            email: usr.email || "",
-            telefon: usr.telefon || usr.phone || ""
-          });
-        } catch (e) {
-          // JSON parse hatası olursa ignore
-          setUye({
-            ad: "",
-            soyad: "",
-            email: "",
-            telefon: ""
-          });
-        }
-      }
+    if (!open) return;
+    setLoading(true);
+    fetch(url)
+      .then(res => res.text())
+      .then(htmlStr => {
+        const div = document.createElement("div");
+        div.innerHTML = htmlStr;
+        let content = div.querySelector("main") || div.querySelector("section") || div;
+        Array.from(content.querySelectorAll("a")).forEach(a => {
+          a.setAttribute("target", "_blank");
+          a.setAttribute("rel", "noopener noreferrer");
+          a.classList.add("underline", "hover:text-[#FFD700]", "transition", "font-semibold");
+        });
+        setHtml(content.innerHTML);
+        setLoading(false);
+      });
+  }, [open, url]);
+
+  useEffect(() => {
+    if (!open || !scrollRef.current) return;
+    const el = scrollRef.current;
+    function onScroll() {
+      setShowScroll(true);
+      clearTimeout(el._scrollTimeout);
+      el._scrollTimeout = setTimeout(() => setShowScroll(false), 1000);
     }
-  }, []);
+    el.addEventListener("scroll", onScroll);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-[1.5px]">
+      <div className="relative w-[98vw] md:w-[900px] max-w-3xl bg-[#171204] rounded-[24px] border-[3px] border-[#bfa658] px-0 pt-14 shadow-2xl flex flex-col overflow-hidden">
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-7 text-[#FFD700] hover:text-white text-lg font-bold w-28 h-11 flex items-center justify-center rounded-full bg-black/40 border-[2px] border-[#bfa658] hover:bg-[#ffd70022] transition"
+          aria-label="Kapat"
+        >Kapat</button>
+        <h2 className="text-2xl font-extrabold text-[#bfa658] mb-4 text-center tracking-tight">
+          KVKK Aydınlatma Metni
+        </h2>
+        <div className="relative flex-1">
+          <div
+            ref={scrollRef}
+            className="text-[1rem] text-[#ecd9aa] max-h-[57vh] overflow-y-auto px-7 pb-2 policy-popup-scrollbar transition-all"
+            style={{ scrollbarWidth: "none" }}
+          >
+            {loading
+              ? <div className="text-center py-10 text-lg text-[#ffeec2]/70">Yükleniyor...</div>
+              : <div dangerouslySetInnerHTML={{ __html: html }} />
+            }
+          </div>
+          <div className={`pointer-events-none absolute top-0 right-2 h-full w-1.5 rounded-full bg-gradient-to-b from-[#bfa65899] to-[#bfa65800] shadow-lg transition-opacity duration-500 ${showScroll ? "opacity-70" : "opacity-0"}`} />
+        </div>
+        <button
+          onClick={() => { onConfirm && onConfirm(); onClose(); }}
+          className="mt-3 w-[90%] mx-auto py-3 rounded-2xl bg-gradient-to-tr from-[#FFD700] to-[#bfa658] text-black font-extrabold text-lg shadow-md border-2 border-[#bfa658] hover:scale-105 transition mb-4"
+        >
+          Tümünü okudum, onaylıyorum
+        </button>
+      </div>
+    </div>
+  );
+}
+// ==== Popup Sonu ====
+
+export default function Kvkk() {
+  const [kvkkOnay, setKvkkOnay] = useState(false);
+  const [popupOpen, setPopupOpen] = useState(false);
+
+  // Popup'ta onay tıklanınca checkbox otomatik işaretlensin
+  const handleKvkkConfirm = () => setKvkkOnay(true);
 
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
@@ -47,41 +96,39 @@ export default function Kvkk() {
           Kişisel Verileriniz Güvende, Tüm Haklarınız Bizimle Güvende!
         </div>
         <div className="text-base md:text-lg text-[#ecd9aa] leading-relaxed font-normal space-y-6">
-          {/* KVKK içerikleri buraya */}
           <p>
-            YolcuTransferi.com olarak, kişisel verilerinizi sadece transfer işlemlerinizin gerçekleştirilmesi ve yasal yükümlülüklerimizin yerine getirilmesi amacıyla işleriz.
-            Hiçbir şekilde 3. şahıs veya kurumlarla izniniz olmadan paylaşmayız. Verilerinizin güvenliği için uluslararası standartlara uygun şekilde koruma sağlanır.
+            YolcuTransferi.com olarak, kişisel verilerinizi yalnızca transfer işlemlerinizin güvenle yürütülmesi amacıyla işleriz. KVKK Aydınlatma Metni'ni mutlaka inceleyiniz.
           </p>
-          <p>
-            Dilediğiniz zaman bize başvurarak kişisel verilerinizin silinmesini, düzeltilmesini veya işlenmesinin kısıtlanmasını talep edebilirsiniz.
-          </p>
-          <ul className="list-disc ml-6">
-            <li>İşlenen veriler: Ad, soyad, e-posta, telefon, transfer bilgileri</li>
-            <li>Veri saklama süresi: Yasal süreler ile sınırlı</li>
-            <li>Veri güvenliği: 256 bit SSL, şifreli veri depolama</li>
-            <li>Başvuru ve detaylı bilgi için bizimle iletişime geçebilirsiniz.</li>
-          </ul>
-          <p>
-            Detaylı KVKK metni ve başvuru haklarınız için <b>Başvuru Formu</b> kullanabilirsiniz.
-          </p>
+          {/* ... diğer metinler ... */}
         </div>
-        {/* KVKK Başvuru Butonu */}
-        <div className="flex justify-start mt-8">
-          <Link
-            href={{
-              pathname: "/kvkk/form",
-              query: {
-                ad: uye.ad || "",
-                soyad: uye.soyad || "",
-                email: uye.email || "",
-                telefon: uye.telefon || ""
-              }
-            }}
-            className="bg-gradient-to-tr from-[#cbb26a] to-[#bfa658] text-black font-bold text-lg px-7 py-3 rounded-xl shadow-md transition hover:scale-105 hover:from-[#e6d199] hover:to-[#c4ad5f] border border-[#fff6ce] focus:outline-none"
-          >
-            Başvuru Formu Doldur
-          </Link>
+        {/* KVKK Onay checkbox ve popup trigger */}
+        <div className="flex items-center gap-2 mt-8">
+          <input
+            type="checkbox"
+            checked={kvkkOnay}
+            onChange={e => setKvkkOnay(e.target.checked)}
+            required
+            className="accent-[#FFD700] w-4 h-4"
+            id="kvkkonay"
+          />
+          <label htmlFor="kvkkonay" className="text-xs text-gray-200 select-none">
+            <button
+              type="button"
+              onClick={() => setPopupOpen(true)}
+              className="underline text-[#FFD700] hover:text-[#bfa658] cursor-pointer outline-none"
+              style={{ padding: 0, border: "none", background: "transparent" }}
+            >
+              KVKK Aydınlatma Metni’ni
+            </button>{" "}
+            okudum, onaylıyorum.
+          </label>
         </div>
+        <PolicyPopup
+          open={popupOpen}
+          onClose={() => setPopupOpen(false)}
+          onConfirm={handleKvkkConfirm}
+          url="/kvkk-aydinlatma" // veya kendi endpoint'in
+        />
       </section>
     </main>
   );
