@@ -298,7 +298,7 @@ export const vehicles = [
     max: 6,
     luggage: 2,
     segment: "Prime+",
-    description: "Limuzin sedan, bagaj kısıtlı",
+    description: "Prestij Limuzin sedan",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
@@ -310,7 +310,7 @@ export const vehicles = [
     max: 6,
     luggage: 3,
     segment: "Prime+",
-    description: "Büyük limuzin, bagaj kısıtlı",
+    description: "Büyük limuzin",
     transferTypes: [
       "VIP Havalimanı Transferi", "Şehirler Arası Transfer", "Özel Etkinlik", "Kurumsal Etkinlik",
       "Tur & Gezi", "Toplu Transfer", "Düğün vb Organizasyonlar"
