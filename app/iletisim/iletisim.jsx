@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaWhatsapp, FaInstagram, FaPhone, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { SiX } from "react-icons/si";
 
@@ -68,9 +68,13 @@ const ILETISIM_TERCIHLERI = [
   { label: "E-posta", value: "E-posta", icon: <FaEnvelope className="text-[#FFA500] mr-1" size={16} /> }
 ];
 
+// ----------- PolicyPopup Start -----------
 function PolicyPopup({ open, onClose, onConfirm }) {
   const [html, setHtml] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showScroll, setShowScroll] = useState(false);
+  const scrollRef = useRef(null);
+
   useEffect(() => {
     if (!open) return;
     setLoading(true);
@@ -80,33 +84,60 @@ function PolicyPopup({ open, onClose, onConfirm }) {
         const div = document.createElement("div");
         div.innerHTML = htmlStr;
         let content = div.querySelector("main") || div.querySelector("section") || div;
+        // Tüm <a> linklerine target="_blank" ve rel ekle
+        Array.from(content.querySelectorAll("a")).forEach(a => {
+          a.setAttribute("target", "_blank");
+          a.setAttribute("rel", "noopener noreferrer");
+          a.classList.add("underline", "hover:text-[#FFD700]", "transition", "font-semibold");
+        });
         setHtml(content.innerHTML);
         setLoading(false);
       });
   }, [open]);
 
+  // Scroll göstergesini yalnızca kaydırma olunca ve animasyonla kısa süreli göster
+  useEffect(() => {
+    if (!open || !scrollRef.current) return;
+    const el = scrollRef.current;
+    function onScroll() {
+      setShowScroll(true);
+      clearTimeout(el._scrollTimeout);
+      el._scrollTimeout = setTimeout(() => setShowScroll(false), 1000);
+    }
+    el.addEventListener("scroll", onScroll);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+    };
+  }, [open]);
+
   if (!open) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="relative w-[97vw] md:w-[80vw] max-w-4xl bg-[#181405] rounded-2xl border-4 border-[#FFD700] px-0 pt-14 shadow-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-[1.5px]">
+      <div className="relative w-[98vw] md:w-[850px] max-w-3xl bg-[#171204] rounded-[24px] border-[3px] border-[#bfa658] px-0 pt-14 shadow-2xl flex flex-col overflow-hidden">
         <button
           onClick={onClose}
-          className="absolute top-3 right-5 text-[#FFD700] hover:text-[#fff9e3] text-base font-bold w-32 h-12 flex items-center justify-center rounded-full bg-black/40 border-2 border-[#FFD700] hover:bg-[#ffd70022] transition"
+          className="absolute top-5 right-7 text-[#FFD700] hover:text-white text-lg font-bold w-28 h-11 flex items-center justify-center rounded-full bg-black/40 border-[2px] border-[#bfa658] hover:bg-[#ffd70022] transition"
           aria-label="Kapat"
-          style={{ top: 10, right: 16 }}
-        >
-          Kapat
-        </button>
-        <h2 className="text-2xl font-bold text-[#FFD700] mb-4 text-center">Politika ve Koşullar</h2>
-        <div className="text-sm text-[#ecd9aa] mb-8 max-h-[55vh] overflow-y-auto px-6">
-          {loading
-            ? <div className="text-center py-10 text-lg text-[#ffeec2]/70">Yükleniyor...</div>
-            : <div dangerouslySetInnerHTML={{ __html: html }} />
-          }
+        >Kapat</button>
+        <h2 className="text-2xl font-extrabold text-[#bfa658] mb-4 text-center tracking-tight">Politika ve Koşullar</h2>
+        <div className="relative flex-1">
+          <div
+            ref={scrollRef}
+            className="text-[1rem] text-[#ecd9aa] max-h-[57vh] overflow-y-auto px-7 pb-2 policy-popup-scrollbar transition-all"
+            style={{ scrollbarWidth: "none" }}
+          >
+            {loading
+              ? <div className="text-center py-10 text-lg text-[#ffeec2]/70">Yükleniyor...</div>
+              : <div dangerouslySetInnerHTML={{ __html: html }} />
+            }
+          </div>
+          {/* Akıllı scroll indicator: sadece scroll varsa ve kaydırınca kısa süreli görünüyor */}
+          <div className={`pointer-events-none absolute top-0 right-2 h-full w-1.5 rounded-full bg-gradient-to-b from-[#bfa65899] to-[#bfa65800] shadow-lg transition-opacity duration-500 ${showScroll ? "opacity-70" : "opacity-0"}`} />
         </div>
         <button
           onClick={() => { onConfirm && onConfirm(); onClose(); }}
-          className="mt-2 w-full py-3 rounded-xl bg-gradient-to-tr from-[#FFD700] to-[#BFA658] text-black font-bold text-lg shadow hover:scale-105 transition"
+          className="mt-3 w-[90%] mx-auto py-3 rounded-2xl bg-gradient-to-tr from-[#FFD700] to-[#bfa658] text-black font-extrabold text-lg shadow-md border-2 border-[#bfa658] hover:scale-105 transition mb-4"
         >
           Tümünü okudum, onaylıyorum
         </button>
@@ -114,6 +145,7 @@ function PolicyPopup({ open, onClose, onConfirm }) {
     </div>
   );
 }
+// ----------- PolicyPopup End -----------
 
 function formatPhone(val) {
   if (!val) return "";
@@ -220,12 +252,10 @@ export default function Iletisim() {
   return (
     <main className="flex justify-center items-center min-h-[90vh] bg-black">
       <section className="w-full max-w-4xl mx-auto border border-[#bfa658] rounded-3xl shadow-2xl px-6 md:px-12 py-14 bg-gradient-to-br from-black via-[#19160a] to-[#302811] mt-16 mb-10">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-1 text-center">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-3 text-center">
           İletişim
         </h1>
-        <div className="text-lg text-[#ffeec2] font-semibold text-center mb-8">
-          Her türlü soru, öneri veya destek için bizimle hemen iletişime geçin. Tüm başvurulara kısa sürede yanıt veriyoruz.
-        </div>
+        {/* KURUMSAL: Başlık altında metin yok */}
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3 bg-black/70 rounded-2xl p-6 border border-[#bfa658]/60 shadow">
           <div className="flex gap-2">
             <input type="text" name="ad" autoComplete="given-name" placeholder="Ad"
