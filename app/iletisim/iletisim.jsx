@@ -114,7 +114,7 @@ function PolicyPopup({ open, onClose, onConfirm }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-[1.5px]">
-      <div className="relative w-[98vw] md:w-[850px] max-w-3xl bg-[#171204] rounded-[24px] border-[3px] border-[#bfa658] px-0 pt-14 shadow-2xl flex flex-col overflow-hidden">
+      <div className="relative w-[98vw] md:w-[1150px] max-w-5xl bg-[#171204] rounded-[24px] border-[3px] border-[#bfa658] px-0 pt-14 shadow-2xl flex flex-col overflow-hidden">
         <button
           onClick={onClose}
           className="absolute top-5 right-7 text-[#FFD700] hover:text-white text-lg font-bold w-28 h-11 flex items-center justify-center rounded-full bg-black/40 border-[2px] border-[#bfa658] hover:bg-[#ffd70022] transition"
@@ -222,12 +222,12 @@ export default function Iletisim() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     let newErrors = {};
-    if (blocked) newErrors.global = "Çok hızlı gönderdiniz, lütfen biraz bekleyin.";
+    if (blocked) newErrors.global = "Mesajınız Uzman Ekiplerimize İletildi";
     if (!adValid) newErrors.ad = "Adınız en az 3 harf olmalı.";
     if (!soyadValid) newErrors.soyad = "Soyadınız en az 3 harf olmalı.";
     if (!phoneValid) newErrors.telefon = "Telefon hatalı. 05xx xxx xx xx";
     if (!emailValid) newErrors.email = "Geçersiz e-posta.";
-    if (!msgValid) newErrors.mesaj = "Mesaj en az 15 karakter, 3 kelime olmalı.";
+    if (!msgValid) newErrors.mesaj = "Mesaj en az 25 karakter, 3 kelime olmalı.";
     if (!form.iletisimTercihi) newErrors.iletisimTercihi = "İletişim tercihi zorunlu.";
     if (!form.kvkkOnay) newErrors.kvkkOnay = "Koşulları kabul etmelisiniz.";
     setErrors(newErrors);
