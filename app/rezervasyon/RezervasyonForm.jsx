@@ -7,37 +7,54 @@ import { vehicles } from "../../data/vehicleList.js";
 import { extrasListByCategory } from "../../data/extrasByCategory.js";
 import { useRouter } from "next/navigation";
 
-// === Adres AutoComplete ===
-function useAddressList() {
+// ==== Türkçe karakter düzeltme & Özel isim formatı ====
+function fixTurkish(str) {
+  if (!str) return "";
+  return str
+    .replace(/\\u0131/g, "ı").replace(/\\u015f/g, "ş").replace(/\\u011f/g, "ğ").replace(/\\u00fc/g, "ü")
+    .replace(/\\u00f6/g, "ö").replace(/\\u00e7/g, "ç")
+    .replace(/\\u0130/g, "İ").replace(/\\u015e/g, "Ş").replace(/\\u011e/g, "Ğ").replace(/\\u00dc/g, "Ü")
+    .replace(/\\u00d6/g, "Ö").replace(/\\u00c7/g, "Ç");
+}
+function titleCase(str) {
+  if (!str) return "";
+  return str
+    .split(" ")
+    .map(w => w[0] ? w[0].toLocaleUpperCase("tr-TR") + w.slice(1).toLocaleLowerCase("tr-TR") : "")
+    .join(" ");
+}
+
+// ==== Adres AutoComplete (il/ilçe/havalimanı) ====
+function useFullLocationList() {
   const [addressList, setAddressList] = useState([]);
   useEffect(() => {
-    async function fetchAll() {
-      let [sehir, ilce, mahalle, airport] = await Promise.all([
-        fetch("/dumps/sehirler.json").then(r => r.json()).catch(() => []),
-        fetch("/dumps/ilceler.json").then(r => r.json()).catch(() => []),
-        fetch("/dumps/mahalleler-1.json").then(r => r.json()).catch(() => []),
-        fetch("/dumps/airports.json").then(r => r.json()).catch(() => []),
-      ]);
-      let out = [];
-      sehir.forEach(s => out.push(`${s.sehir_adi}`));
-      ilce.forEach(i => out.push(`${i.ilce_adi}`));
-      mahalle.forEach(m => out.push(`${m.mahalle_adi}`));
-      airport.forEach(a => out.push(`${a.name}`));
-      setAddressList(Array.from(new Set(out)));
-    }
-    fetchAll();
+    let mounted = true;
+    Promise.all([
+      fetch("/dumps/airports.json").then(r => r.json()).catch(() => []),
+      fetch("https://raw.githubusercontent.com/haliltayfur/yolcutransferi/main/public/dumps/ililce.txt").then(r => r.text()).catch(() => "")
+    ]).then(([airport, ililce]) => {
+      const airports = (airport || []).map(a => a.name);
+      const ililceList = ililce.split("\n")
+        .map(x => fixTurkish(x.trim()))
+        .filter(Boolean);
+      // Baş harfleri büyüt, özel isim formatında
+      const all = Array.from(new Set([...airports, ...ililceList]))
+        .map(titleCase);
+      if (mounted) setAddressList(all);
+    });
+    return () => { mounted = false; }
   }, []);
   return addressList;
 }
 function AutoCompleteInput({ value, onChange, placeholder }) {
-  const addressList = useAddressList();
+  const addressList = useFullLocationList();
   const [suggestions, setSuggestions] = useState([]);
   const [showList, setShowList] = useState(false);
   useEffect(() => {
     if (!value || value.length < 2) setSuggestions([]);
     else {
       const val = value.toLocaleLowerCase("tr-TR");
-      setSuggestions(addressList.filter(a => a.toLocaleLowerCase("tr-TR").includes(val)).slice(0, 12));
+      setSuggestions(addressList.filter(a => a.toLocaleLowerCase("tr-TR").includes(val)).slice(0, 15));
     }
   }, [value, addressList]);
   return (
@@ -45,7 +62,7 @@ function AutoCompleteInput({ value, onChange, placeholder }) {
       <input
         className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
         value={value}
-        onChange={e => { onChange(e.target.value); setShowList(true); }}
+        onChange={e => { onChange(titleCase(e.target.value)); setShowList(true); }}
         placeholder={placeholder}
         onFocus={() => setShowList(true)}
         onBlur={() => setTimeout(() => setShowList(false), 140)}
@@ -121,9 +138,9 @@ function KvkkPopup({ open, onClose, onApprove }) {
     fetch("/mesafeli-satis")
       .then(r => r.text())
       .then(txt => {
-        let mainContent = txt.match(/<main[^>]*>([\s\S]*?)<\/main>/i)?.[1] || "İçerik yüklenemedi.";
-        mainContent = mainContent.replace(/<a([^>]+)href="([^"]+)"([^>]*)>/gi,
-          '<a$1href="$2"$3 target="_blank" rel="noopener noreferrer" style="color:#FFD700;text-decoration:underline;">');
+        let mainContent = txt.match(/<main[^>]*>([\\s\\S]*?)<\\/main>/i)?.[1] || "İçerik yüklenemedi.";
+        mainContent = mainContent.replace(/<a([^>]+)href=\"([^\"]+)\"([^>]*)>/gi,
+          '<a$1href=\"$2\"$3 target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#FFD700;text-decoration:underline;\">');
         setHtml(mainContent);
       })
       .catch(() => setHtml("İçerik alınamadı."))
@@ -351,15 +368,15 @@ export default function RezervasyonForm() {
 
   const { km, min, error: distErr } = useDistance(from, to, time);
 
-  const isValidTC = t => /^[1-9]\d{9}[02468]$/.test(t) && t.length === 11;
-  const isValidPhone = t => /^05\d{9}$/.test(t) && t.length === 11;
-  const isValidEmail = t => /^\S+@\S+\.\S+$/.test(t);
+  const isValidTC = t => /^[1-9]\\d{9}[02468]$/.test(t) && t.length === 11;
+  const isValidPhone = t => /^05\\d{9}$/.test(t) && t.length === 11;
+  const isValidEmail = t => /^\\S+@\\S+\\.\\S+$/.test(t);
 
   function handleTcChange(val) {
-    setTc(val.replace(/\D/g, "").slice(0, 11));
+    setTc(val.replace(/\\D/g, "").slice(0, 11));
   }
   function handlePhoneChange(val) {
-    let num = val.replace(/\D/g, "");
+    let num = val.replace(/\\D/g, "");
     if (num.length > 0 && num[0] !== "0") num = "0" + num;
     setPhone(num.slice(0, 11));
   }
@@ -654,3 +671,5 @@ export default function RezervasyonForm() {
     </section>
   );
 }
+
+// PATH: /app/rezervasyon/RezervasyonForm.jsx
