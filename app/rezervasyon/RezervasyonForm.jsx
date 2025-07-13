@@ -138,9 +138,10 @@ function KvkkPopup({ open, onClose, onApprove }) {
     fetch("/mesafeli-satis")
       .then(r => r.text())
       .then(txt => {
-        let mainContent = txt.match(/<main[^>]*>([\s\S]*?)<\\/main>/i)?.[1] || "İçerik yüklenemedi.";
-        mainContent = mainContent.replace(/<a([^>]+)href=\"([^\"]+)\"([^>]*)>/gi,
-          '<a$1href=\"$2\"$3 target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#FFD700;text-decoration:underline;\">');
+        // 👇 Regexp bug'ına özel düzeltme
+        let mainContent = (txt.match(/<main[^>]*>([\s\S]*?)<\/main>/i) || [])[1] || "İçerik yüklenemedi.";
+        mainContent = mainContent.replace(/<a([^>]+)href="([^"]+)"([^>]*)>/gi,
+          '<a$1href="$2"$3 target="_blank" rel="noopener noreferrer" style="color:#FFD700;text-decoration:underline;">');
         setHtml(mainContent);
       })
       .catch(() => setHtml("İçerik alınamadı."))
@@ -344,6 +345,7 @@ for (let h = 0; h < 24; ++h)
 
 export default function RezervasyonForm() {
   const router = useRouter();
+  // Otomatik doldurma için localStorage
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [people, setPeople] = useState("");
@@ -366,17 +368,37 @@ export default function RezervasyonForm() {
   const [kvkkChecked, setKvkkChecked] = useState(false);
   const [showThanks, setShowThanks] = useState(false);
 
+  // 🚩 Otomatik doldurma
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("rezFormData");
+      if (saved) {
+        try {
+          const d = JSON.parse(saved);
+          setFrom(d.from || "");
+          setTo(d.to || "");
+          setPeople(d.people || "");
+          setSegment(d.segment || "");
+          setTransfer(d.transfer || "");
+          setDate(d.date || "");
+          setTime(d.time || "");
+          setPnr(d.pnr || "");
+        } catch {}
+      }
+    }
+  }, []);
+
   const { km, min, error: distErr } = useDistance(from, to, time);
 
-  const isValidTC = t => /^[1-9]\\d{9}[02468]$/.test(t) && t.length === 11;
-  const isValidPhone = t => /^05\\d{9}$/.test(t) && t.length === 11;
-  const isValidEmail = t => /^\\S+@\\S+\\.\\S+$/.test(t);
+  const isValidTC = t => /^[1-9]\d{9}[02468]$/.test(t) && t.length === 11;
+  const isValidPhone = t => /^05\d{9}$/.test(t) && t.length === 11;
+  const isValidEmail = t => /^\S+@\S+\.\S+$/.test(t);
 
   function handleTcChange(val) {
-    setTc(val.replace(/\\D/g, "").slice(0, 11));
+    setTc(val.replace(/\D/g, "").slice(0, 11));
   }
   function handlePhoneChange(val) {
-    let num = val.replace(/\\D/g, "");
+    let num = val.replace(/\D/g, "");
     if (num.length > 0 && num[0] !== "0") num = "0" + num;
     setPhone(num.slice(0, 11));
   }
