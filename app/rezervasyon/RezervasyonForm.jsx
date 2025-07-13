@@ -138,7 +138,7 @@ function KvkkPopup({ open, onClose, onApprove }) {
     fetch("/mesafeli-satis")
       .then(r => r.text())
       .then(txt => {
-        let mainContent = txt.match(/<main[^>]*>([\\s\\S]*?)<\\/main>/i)?.[1] || "İçerik yüklenemedi.";
+        let mainContent = txt.match(/<main[^>]*>([\s\S]*?)<\\/main>/i)?.[1] || "İçerik yüklenemedi.";
         mainContent = mainContent.replace(/<a([^>]+)href=\"([^\"]+)\"([^>]*)>/gi,
           '<a$1href=\"$2\"$3 target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#FFD700;text-decoration:underline;\">');
         setHtml(mainContent);
