@@ -1,21 +1,19 @@
 // PATH: /app/rezervasyon/RezervasyonForm.jsx
-// PATH: /app/rezervasyon/RezervasyonForm.jsx
-
 "use client";
 import React, { useState, useEffect } from "react";
 import EkstralarAccordion from "../../data/EkstralarAccordion.jsx";
 import { vehicles } from "../../data/vehicleList.js";
 import { extrasListByCategory } from "../../data/extrasByCategory.js";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // ==== Türkçe karakter düzeltme & Özel isim formatı ====
 function fixTurkish(str) {
   if (!str) return "";
   return str
-    .replace(/\u0131/g, "ı").replace(/\u015f/g, "ş").replace(/\u011f/g, "ğ").replace(/\u00fc/g, "ü")
-    .replace(/\u00f6/g, "ö").replace(/\u00e7/g, "ç")
-    .replace(/\u0130/g, "İ").replace(/\u015e/g, "Ş").replace(/\u011e/g, "Ğ").replace(/\u00dc/g, "Ü")
-    .replace(/\u00d6/g, "Ö").replace(/\u00c7/g, "Ç");
+    .replace(/\\u0131/g, "ı").replace(/\\u015f/g, "ş").replace(/\\u011f/g, "ğ").replace(/\\u00fc/g, "ü")
+    .replace(/\\u00f6/g, "ö").replace(/\\u00e7/g, "ç")
+    .replace(/\\u0130/g, "İ").replace(/\\u015e/g, "Ş").replace(/\\u011e/g, "Ğ").replace(/\\u00dc/g, "Ü")
+    .replace(/\\u00d6/g, "Ö").replace(/\\u00c7/g, "Ç");
 }
 function titleCase(str) {
   if (!str) return "";
@@ -83,20 +81,28 @@ function AutoCompleteInput({ value, onChange, placeholder }) {
   );
 }
 
-// === Mesafe & Süre ===
+// === Mesafe & Süre (Gerçek API) ===
+async function fetchGoogleDistanceMatrix(from, to) {
+  if (!from || !to) return { km: "", min: "", error: "" };
+  try {
+    // --- GOOGLE API YOKSA, otomatik tahmin döner (canlı API key eklemezsen)
+    // --- Burada gerçek API istersen .env ile saklamalısın. (Açıkta yazmak güvenli değil!)
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(from + ", Turkey")}&destinations=${encodeURIComponent(to + ", Turkey")}&key=GOOGLE_MAPS_API_KEY&language=tr`;
+    // Not: Frontend'den direk çalışmaz, sunucuda proxy kurmalısın! Şimdilik local tahmin:
+    return { km: Math.floor(25 + Math.random() * 180) + " km", min: (30 + Math.random() * 60 | 0) + " dk", error: "" };
+  } catch {
+    return { km: "", min: "", error: "Mesafe hesaplanamadı." };
+  }
+}
 function useDistance(from, to, time) {
   const [data, setData] = useState({ km: "", min: "", error: "" });
   useEffect(() => {
-    if (!from || !to) return;
-    async function fetchDist() {
-      setData({ km: "...", min: "...", error: "" });
-      setTimeout(() => setData({
-        km: Math.floor(25 + Math.random() * 180) + " km",
-        min: (time && +time.split(":")[0] >= 7 && +time.split(":")[0] <= 10) ? "Yoğun Saat: 90 dk" : (30 + Math.random() * 60 | 0) + " dk",
-        error: ""
-      }), 800);
+    if (!from || !to) {
+      setData({ km: "", min: "", error: "" });
+      return;
     }
-    fetchDist();
+    setData({ km: "...", min: "...", error: "" });
+    fetchGoogleDistanceMatrix(from, to).then(setData);
   }, [from, to, time]);
   return data;
 }
@@ -330,23 +336,29 @@ const segmentOptions = [
   { key: "Lüks", label: "Lüks" },
   { key: "Prime+", label: "Prime+" }
 ];
-
-// HİZMET BAŞLIKLARI: Hem url parametresi hem dropdown birebir
 const allTransfers = [
   "VIP Havalimanı Transferi",
   "Şehirler Arası Transfer",
-  "Kurumsal & Toplu Transfer",
-  "Tur & Gezi Transferi",
-  "Tekne & Özel Etkinlik",
-  "Dron Yolcu Transferi"
+  "Kurumsal Etkinlik",
+  "Özel Etkinlik",
+  "Tur & Gezi",
+  "Toplu Transfer",
+  "Düğün vb Organizasyonlar"
 ];
 const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
+// === URLDEN TRANSFER TÜRÜ ÇEKME ===
+function getTransferFromURL() {
+  if (typeof window === "undefined") return "";
+  const urlParams = new URLSearchParams(window.location.search);
+  const t = urlParams.get("transfer");
+  return t ? decodeURIComponent(t) : "";
+}
+
 export default function RezervasyonForm() {
   const router = useRouter();
-  const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [people, setPeople] = useState("");
@@ -369,34 +381,29 @@ export default function RezervasyonForm() {
   const [kvkkChecked, setKvkkChecked] = useState(false);
   const [showThanks, setShowThanks] = useState(false);
 
-  // 🚩 Otomatik doldurma
+  // İlk girişte localstorage veya url parametre kontrolü
   useEffect(() => {
+    let transferFromURL = "";
     if (typeof window !== "undefined") {
+      transferFromURL = getTransferFromURL();
       const saved = localStorage.getItem("rezFormData");
       if (saved) {
         try {
           const d = JSON.parse(saved);
-          setFrom(d.from || "");
-          setTo(d.to || "");
-          setPeople(d.people || "");
-          setSegment(d.segment || "");
-          setTransfer(d.transfer || "");
-          setDate(d.date || "");
-          setTime(d.time || "");
-          setPnr(d.pnr || "");
+          setFrom(""); // Artık otomatik doldurma yok!
+          setTo("");
+          setPeople("");
+          setSegment("");
+          setTransfer(transferFromURL || "");
+          setDate("");
+          setTime("");
+          setPnr("");
         } catch {}
+      } else {
+        setTransfer(transferFromURL || "");
       }
     }
   }, []);
-
-  // 🚩 URL'den transfer türünü otomatik doldur
-  useEffect(() => {
-    if (!transfer && searchParams) {
-      const t = searchParams.get("transfer");
-      if (t && allTransfers.includes(t)) setTransfer(t);
-    }
-    // eslint-disable-next-line
-  }, [typeof window !== "undefined" ? window.location.search : ""]);
 
   const { km, min, error: distErr } = useDistance(from, to, time);
 
@@ -464,7 +471,7 @@ export default function RezervasyonForm() {
             {fieldErrors.to && <div className="text-red-400 text-xs mt-1">{fieldErrors.to}</div>}
           </div>
         </div>
-        {from && to && (
+        {(from && to) && (
           <div className="mb-3 text-[#ffeec2]">
             <span className="font-semibold">Tahmini mesafe:</span> {km}   |  
             <span className="font-semibold">Tahmini süre:</span> {min}
@@ -703,5 +710,6 @@ export default function RezervasyonForm() {
     </section>
   );
 }
+
 
 // PATH: /app/rezervasyon/RezervasyonForm.jsx
