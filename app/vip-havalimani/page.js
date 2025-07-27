@@ -37,11 +37,12 @@ export default function VIPHavalimani() {
           </p>
         </div>
 
-        <Link href="/rezervasyon" className="block">
-          <button className="bg-gradient-to-tr from-[#cbb26a] to-[#bfa658] text-black font-bold text-lg px-7 py-3 rounded-xl mt-10 w-full shadow-md border border-[#fff6ce] hover:scale-105 hover:from-[#e6d199] hover:to-[#c4ad5f] transition">
-            Rezervasyon Yap
-          </button>
-        </Link>
+<Link href="/rezervasyon?transfer=VIP Havalimanı Transferi" className="block">
+  <button className="bg-gradient-to-tr from-[#cbb26a] to-[#bfa658] text-black font-bold text-lg px-7 py-3 rounded-xl mt-10 w-full shadow-md border border-[#fff6ce] hover:scale-105 hover:from-[#e6d199] hover:to-[#c4ad5f] transition">
+    Rezervasyon Yap
+  </button>
+</Link>
+
       </section>
     </main>
   );
