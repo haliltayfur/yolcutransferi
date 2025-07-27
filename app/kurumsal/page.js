@@ -25,7 +25,13 @@ export default function KurumsalTransfer() {
             Tüm transfer süreçleri, sektörde deneyimli iş ortaklarımız tarafından yasal mevzuata uygun, sigortalı ve gizlilik esaslı şekilde organize edilir. Zamanında ulaşım, rezervasyon sırasında seçilebilen ek hizmetler ve 7/24 destek ile, kurumsal ihtiyaçlarınıza en uygun çözümü üretiyoruz.
           </p>
         </div>
-        <Link href="/rezervasyon" className="block">
+        <Link
+          href={{
+            pathname: "/rezervasyon",
+            query: { transfer: "Kurumsal Etkinlik" },
+          }}
+          className="block"
+        >
           <button className="bg-gradient-to-tr from-[#cbb26a] to-[#bfa658] text-black font-bold text-lg px-7 py-3 rounded-xl mt-10 w-full shadow-md border border-[#fff6ce] hover:scale-105 hover:from-[#e6d199] hover:to-[#c4ad5f] transition">
             Rezervasyon Yap
           </button>
