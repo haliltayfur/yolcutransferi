@@ -1,20 +1,21 @@
 // PATH: /app/rezervasyon/RezervasyonForm.jsx
+// PATH: /app/rezervasyon/RezervasyonForm.jsx
 
 "use client";
 import React, { useState, useEffect } from "react";
 import EkstralarAccordion from "../../data/EkstralarAccordion.jsx";
 import { vehicles } from "../../data/vehicleList.js";
 import { extrasListByCategory } from "../../data/extrasByCategory.js";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // ==== Türkçe karakter düzeltme & Özel isim formatı ====
 function fixTurkish(str) {
   if (!str) return "";
   return str
-    .replace(/\\u0131/g, "ı").replace(/\\u015f/g, "ş").replace(/\\u011f/g, "ğ").replace(/\\u00fc/g, "ü")
-    .replace(/\\u00f6/g, "ö").replace(/\\u00e7/g, "ç")
-    .replace(/\\u0130/g, "İ").replace(/\\u015e/g, "Ş").replace(/\\u011e/g, "Ğ").replace(/\\u00dc/g, "Ü")
-    .replace(/\\u00d6/g, "Ö").replace(/\\u00c7/g, "Ç");
+    .replace(/\u0131/g, "ı").replace(/\u015f/g, "ş").replace(/\u011f/g, "ğ").replace(/\u00fc/g, "ü")
+    .replace(/\u00f6/g, "ö").replace(/\u00e7/g, "ç")
+    .replace(/\u0130/g, "İ").replace(/\u015e/g, "Ş").replace(/\u011e/g, "Ğ").replace(/\u00dc/g, "Ü")
+    .replace(/\u00d6/g, "Ö").replace(/\u00c7/g, "Ç");
 }
 function titleCase(str) {
   if (!str) return "";
@@ -138,7 +139,6 @@ function KvkkPopup({ open, onClose, onApprove }) {
     fetch("/mesafeli-satis")
       .then(r => r.text())
       .then(txt => {
-        // 👇 Regexp bug'ına özel düzeltme
         let mainContent = (txt.match(/<main[^>]*>([\s\S]*?)<\/main>/i) || [])[1] || "İçerik yüklenemedi.";
         mainContent = mainContent.replace(/<a([^>]+)href="([^"]+)"([^>]*)>/gi,
           '<a$1href="$2"$3 target="_blank" rel="noopener noreferrer" style="color:#FFD700;text-decoration:underline;">');
@@ -330,14 +330,15 @@ const segmentOptions = [
   { key: "Lüks", label: "Lüks" },
   { key: "Prime+", label: "Prime+" }
 ];
+
+// HİZMET BAŞLIKLARI: Hem url parametresi hem dropdown birebir
 const allTransfers = [
   "VIP Havalimanı Transferi",
   "Şehirler Arası Transfer",
-  "Kurumsal Etkinlik",
-  "Özel Etkinlik",
-  "Tur & Gezi",
-  "Toplu Transfer",
-  "Düğün vb Organizasyonlar"
+  "Kurumsal & Toplu Transfer",
+  "Tur & Gezi Transferi",
+  "Tekne & Özel Etkinlik",
+  "Dron Yolcu Transferi"
 ];
 const saatler = [];
 for (let h = 0; h < 24; ++h)
@@ -345,7 +346,7 @@ for (let h = 0; h < 24; ++h)
 
 export default function RezervasyonForm() {
   const router = useRouter();
-  // Otomatik doldurma için localStorage
+  const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [people, setPeople] = useState("");
@@ -387,6 +388,15 @@ export default function RezervasyonForm() {
       }
     }
   }, []);
+
+  // 🚩 URL'den transfer türünü otomatik doldur
+  useEffect(() => {
+    if (!transfer && searchParams) {
+      const t = searchParams.get("transfer");
+      if (t && allTransfers.includes(t)) setTransfer(t);
+    }
+    // eslint-disable-next-line
+  }, [typeof window !== "undefined" ? window.location.search : ""]);
 
   const { km, min, error: distErr } = useDistance(from, to, time);
 
