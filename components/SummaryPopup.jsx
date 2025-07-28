@@ -1,76 +1,77 @@
-// === Dosya: components/SummaryPopup.jsx ===
-import React from "react";
+import React, { useState } from "react";
 
 export default function SummaryPopup({
-  from, to, km, duration, people, segment, transfer, date, time,
-  name, surname, tc, phone, email, pnr, note, extras, extrasQty, sigorta, sigortaTutar, transferPrice,
-  onClose, onPayment
+  open, onClose, from, to, date, time, people, segment, transfer,
+  name, surname, tc, phone, email, pnr, note,
+  extras, sigorta, sigortaTutar, transferUcreti, vehicleText, onNext
 }) {
-  // Ekstralar formatı
-  const formatExtras = () => {
-    if (!extras || !Array.isArray(extras)) return "Yok";
-    return extras.map(e =>
-      <li key={e}>{e} {extrasQty && extrasQty[e] ? `(${extrasQty[e]} adet)` : ""}</li>
-    );
-  };
-
+  const [extrasQty, setExtrasQty] = useState(() =>
+    Object.fromEntries((extras || []).map(x => [x, 1]))
+  );
+  function changeQty(key, diff) {
+    setExtrasQty(q => {
+      const newQ = { ...q, [key]: Math.max(1, (q[key] || 1) + diff) };
+      return newQ;
+    });
+  }
+  function removeExtra(key) {
+    setExtrasQty(q => {
+      const n = { ...q };
+      delete n[key];
+      return n;
+    });
+  }
+  if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[9999] bg-[#00000088] flex items-center justify-center">
-      <div className="bg-[#19160a] border border-[#bfa658] rounded-2xl p-8 w-full max-w-2xl shadow-lg relative">
-        <button
-          className="absolute right-5 top-5 text-[#bfa658] text-lg font-bold hover:scale-110"
-          onClick={onClose}
-        >
-          Kapat ✖
-        </button>
-        <h2 className="text-2xl font-bold mb-4 text-[#bfa658] text-center">Sipariş Özeti</h2>
-        <div className="flex flex-col gap-2 text-[#ffeec2]">
-          <div><b>Nereden:</b> {from}</div>
-          <div><b>Nereye:</b> {to}</div>
-          {km && duration && (
-            <div>
-              <b>Mesafe:</b> {km.toFixed(1)} km, <b>Süre:</b> {duration}
-            </div>
-          )}
-          <div><b>Tarih:</b> {date} &nbsp; <b>Saat:</b> {time}</div>
-          <div><b>Kişi Sayısı:</b> {people}</div>
-          <div><b>Segment:</b> {segment}</div>
-          <div><b>Transfer Türü:</b> {transfer}</div>
-          <div><b>Ad Soyad:</b> {name} {surname}</div>
-          <div><b>TC Kimlik No:</b> {tc}</div>
-          <div><b>Telefon:</b> {phone}</div>
-          <div><b>E-posta:</b> {email}</div>
-          {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
-          {note && <div><b>Ek Not:</b> {note}</div>}
-          <div><b>Ekstralar:</b> <ul className="ml-3 list-disc">{formatExtras()}</ul></div>
+    <div className="fixed inset-0 bg-[#18140dcc] z-[1000] flex items-center justify-center">
+      <div className="relative w-[95vw] max-w-2xl bg-[#231d0f] border border-[#bfa658] rounded-2xl p-8">
+        <button className="absolute top-4 right-6 text-2xl text-[#bfa658] font-bold" onClick={onClose}>×</button>
+        <h2 className="text-2xl font-bold mb-2 text-[#bfa658] text-center">Sipariş Özeti</h2>
+        <div className="flex flex-col gap-1 text-[#ffeec2]">
+          <b>Nereden:</b> {from} <b>Nereye:</b> {to}
+          <b>Tarih:</b> {date} <b>Saat:</b> {time}
+          <b>Kişi sayısı:</b> {people}
+          <b>Segment:</b> {segment}
+          <b>Transfer Türü:</b> {transfer}
+          {vehicleText && (<div className="mt-1 text-[#ffeec2]"><b>Araç:</b> {vehicleText}</div>)}
+          <b>Ad Soyad:</b> {name} {surname}
+          <b>TC Kimlik:</b> {tc}
+          <b>Telefon:</b> {phone}
+          <b>E-posta:</b> {email}
+          {pnr && <><b>PNR/Uçuş Kodu:</b> {pnr}</>}
+          {note && <><b>Ek Not:</b> {note}</>}
+          <div className="mt-2 mb-1">
+            <b>Ekstralar:</b>
+            <ul>
+              {Object.entries(extrasQty).length === 0 && <li className="ml-4 italic text-[#bfa658]">Ekstra seçilmedi</li>}
+              {Object.entries(extrasQty).map(([key, val]) => (
+                <li key={key} className="flex items-center ml-2 my-1">
+                  <button onClick={() => changeQty(key, -1)} className="w-6 h-6 bg-[#c4b07c] rounded-full text-black mr-1">-</button>
+                  <span className="font-bold text-[#ffeec2]">{val}x</span>
+                  <button onClick={() => changeQty(key, +1)} className="w-6 h-6 bg-[#c4b07c] rounded-full text-black ml-1">+</button>
+                  <span className="ml-2">{key}</span>
+                  <button onClick={() => removeExtra(key)} className="ml-2 text-red-500">🗑️</button>
+                </li>
+              ))}
+            </ul>
+          </div>
           {sigorta && (
-            <div className="text-[#FFD700]">
-              <b>Ekstra YolcuTransferi Sigortası:</b> {sigortaTutar ? `${sigortaTutar.toLocaleString()}₺` : "Fiyatı transfer ücretiyle birlikte hesaplanır."}
+            <div className="mt-1 text-[#ffeec2]">
+              <b>YolcuTransferi Sigortası:</b> EKLENDİ {sigortaTutar ? `(₺${sigortaTutar})` : ""}
             </div>
           )}
-          <div className="text-xl mt-3">
-            <b>Transfer Ücreti:</b>
-            &nbsp;
-            <span className="text-[#FFD700]">
-              {transferPrice !== null
-                ? `${transferPrice.toLocaleString()} ₺`
-                : "Transfer ücreti hesaplanamadı, yetkililerimiz size özel teklif sunacak."}
-            </span>
+          <div className="mt-4 text-lg font-bold">
+            {transferUcreti
+              ? <>
+                  Transfer Ücreti: <span className="text-[#ffd700]">₺{transferUcreti.toLocaleString("tr-TR")}</span>
+                  {sigorta && sigortaTutar && <> + Sigorta: <span className="text-[#ffd700]">₺{sigortaTutar}</span></>}
+                </>
+              : <span className="text-[#ffd700]">Transfer ücreti hesaplanamadı, yetkililerimiz size özel teklif sunacak.</span>}
           </div>
         </div>
-        <div className="flex justify-end gap-4 mt-8">
-          <button
-            className="bg-gray-600 text-white font-bold px-6 py-3 rounded-xl hover:bg-gray-700"
-            onClick={onClose}
-          >
-            Vazgeç
-          </button>
-          <button
-            className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-3 px-8 rounded-xl text-xl shadow hover:scale-105 transition"
-            onClick={onPayment}
-          >
-            Ödemeye Geç
-          </button>
+        <div className="flex gap-2 mt-6">
+          <button onClick={onClose} className="flex-1 btn bg-[#222] text-white py-2 rounded-lg">Vazgeç</button>
+          <button onClick={onNext} className="flex-1 btn bg-gradient-to-r from-[#bfa658] to-[#ffeec2] text-black font-bold py-2 rounded-lg">Ödemeye Geç</button>
         </div>
       </div>
     </div>
