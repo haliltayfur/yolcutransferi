@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-
 import { extrasList } from "../data/extras";
 
 // Kategorilere eşleştirme anahtarı
@@ -22,8 +21,8 @@ function getKategori(key) {
   return "Diğer";
 }
 
-export default function EkstralarAccordion({ selectedExtras, setSelectedExtras }) {
-  // Kategorilere göre grupla
+export default function EkstralarAccordion({ value = [], onChange, onlyCheck = false }) {
+  // Ekstraları kategorilere göre grupla
   const gruplu = extrasList.reduce((obj, extra) => {
     const kategori = getKategori(extra.key);
     if (!obj[kategori]) obj[kategori] = [];
@@ -33,9 +32,9 @@ export default function EkstralarAccordion({ selectedExtras, setSelectedExtras }
   const [open, setOpen] = useState(""); // hangi kategori açık
 
   function handleCheck(e) {
-    const { value, checked } = e.target;
-    if (checked) setSelectedExtras([...selectedExtras, value]);
-    else setSelectedExtras(selectedExtras.filter(x => x !== value));
+    const { value: v, checked } = e.target;
+    if (checked) onChange([...value, v]);
+    else onChange(value.filter(x => x !== v));
   }
 
   return (
@@ -50,16 +49,17 @@ export default function EkstralarAccordion({ selectedExtras, setSelectedExtras }
             {kategori}
           </button>
           {open === kategori && (
-            <div className="pl-4 pr-2 py-2 flex flex-col gap-1 bg-black/80 rounded-b-xl border-l-4 border-[#bfa658] mt-1">
+            <div className="pl-2 pr-2 py-2 flex flex-col gap-1 bg-black/80 rounded-b-xl border-l-4 border-[#bfa658] mt-1 overflow-x-auto">
               {gruplu[kategori].map(extra => (
                 <label
                   key={extra.key}
-                  className="flex items-center gap-2 cursor-pointer text-[#ffeec2] select-none"
+                  className="flex items-center gap-2 cursor-pointer text-[#ffeec2] select-none py-1"
+                  style={{ wordBreak: "break-word", fontSize: 15 }}
                 >
                   <input
                     type="checkbox"
                     value={extra.key}
-                    checked={selectedExtras.includes(extra.key)}
+                    checked={value.includes(extra.key)}
                     onChange={handleCheck}
                     className="accent-[#bfa658] scale-125"
                   />
