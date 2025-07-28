@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 export default function SigortaPopup({ open, onClose }) {
   if (!open) return null;
