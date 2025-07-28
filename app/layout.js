@@ -1,8 +1,7 @@
-// app/layout.js
-
 import "./globals.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Script from "next/script"; // <-- Bunu ekle
 
 export const metadata = {
   title: "YolcuTransferi.com",
@@ -12,6 +11,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="tr">
+      <head>
+        <Script
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
+          strategy="beforeInteractive"
+        />
+      </head>
       <body className="bg-black text-white min-h-screen flex flex-col font-poppins overflow-x-hidden">
         <Header />
         <main className="flex-grow">{children}</main>
