@@ -60,14 +60,13 @@ export default function RezervasyonForm() {
   const [fieldErrors, setFieldErrors] = useState({});
   const dateInputRef = useRef();
 
-  // --- Dinamik KVKK ---
   useEffect(() => {
     if (showKvkkPopup && !kvkkText) {
       fetchKvkk().then(setKvkkText);
     }
   }, [showKvkkPopup]);
 
-  // --- MESAFE OTOMATİK ÇEK ---
+  // Mesafe hesapla (otomatik, patlak çözüm!)
   useEffect(() => {
     setKm(""); setMin(""); setDistErr("");
     if (!from || !to || !date || !time) return;
@@ -82,7 +81,6 @@ export default function RezervasyonForm() {
     });
   }, [from, to, date, time, transfer]);
 
-  // Araç önerisi
   function getBestVehicleText(people, segment) {
     people = Number(people);
     if (!people || !segment) return "";
@@ -101,7 +99,6 @@ export default function RezervasyonForm() {
   }
   const vehicleText = getBestVehicleText(Number(people), segment);
 
-  // Sigorta tutarı
   const kmSayisi = km ? parseFloat(km.replace(/[^\d.]/g, "")) : null;
   const transferUcreti = (from && to && segment && people && kmSayisi)
     ? (transfer === "Dron Transferi" ? 5000 * 32 : Math.max(Math.round(kmSayisi * 30 * (segment === "Prime+" ? 2.5 : segment === "Lüks" ? 1.7 : 1) * (people > 2 ? 1 + (people - 2) * 0.12 : 1)), 1000))
@@ -115,7 +112,6 @@ export default function RezervasyonForm() {
   const isValidPhone = t => /^05\d{9}$/.test(t) && t.length === 11;
   const isValidEmail = t => /^\S+@\S+\.\S+$/.test(t);
 
-  // Submit
   function handleSubmit(e) {
     e.preventDefault();
     const err = {};
@@ -141,8 +137,9 @@ export default function RezervasyonForm() {
   useEffect(() => {
     if (!dateInputRef.current) return;
     const el = dateInputRef.current;
-    el.addEventListener("click", () => el.showPicker && el.showPicker());
-    return () => el.removeEventListener("click", () => el.showPicker && el.showPicker());
+    const openPicker = () => el.showPicker && el.showPicker();
+    el.addEventListener("click", openPicker);
+    return () => el.removeEventListener("click", openPicker);
   }, []);
 
   return (
@@ -270,148 +267,148 @@ export default function RezervasyonForm() {
             {fieldErrors.email && <div className="text-red-400 text-xs mt-1">{fieldErrors.email}</div>}
           </div>
         </div>
-                {/* PNR */}
-          <div className="mb-3">
-            <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
-            <input
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={pnr}
-              onChange={e => setPnr(e.target.value)}
-              placeholder="Uçuş rezervasyon kodu (varsa)"
-              autoComplete="off"
-            />
-          </div>
-          {/* Not */}
-          <div className="mb-3">
-            <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
-            <textarea
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl min-h-[60px]"
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              placeholder="Eklemek istediğiniz bir not var mı?"
-            />
-          </div>
-          {/* Ekstralar */}
-          <EkstralarAccordion value={extras} onChange={setExtras} onlyCheck={true} />
-          {/* Sigorta kutusu */}
-          <div className="flex items-center mt-3 mb-2">
-            <input
-              type="checkbox"
-              checked={sigorta}
-              onChange={() => setSigorta(v => !v)}
-              id="sigorta"
-              className="mr-2"
-            />
-            <label
-              htmlFor="sigorta"
-              className="cursor-pointer text-[#ffeec2] underline hover:text-[#bfa658]"
+        {/* PNR */}
+        <div className="mb-3">
+          <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
+          <input
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={pnr}
+            onChange={e => setPnr(e.target.value)}
+            placeholder="Uçuş rezervasyon kodu (varsa)"
+            autoComplete="off"
+          />
+        </div>
+        {/* Not */}
+        <div className="mb-3">
+          <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
+          <textarea
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl min-h-[60px]"
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Eklemek istediğiniz bir not var mı?"
+          />
+        </div>
+        {/* Ekstralar */}
+        <EkstralarAccordion value={extras} onChange={setExtras} onlyCheck={true} />
+        {/* Sigorta kutusu */}
+        <div className="flex items-center mt-3 mb-2">
+          <input
+            type="checkbox"
+            checked={sigorta}
+            onChange={() => setSigorta(v => !v)}
+            id="sigorta"
+            className="mr-2"
+          />
+          <label
+            htmlFor="sigorta"
+            className="cursor-pointer text-[#ffeec2] underline hover:text-[#bfa658]"
+            onClick={e => {
+              e.preventDefault();
+              setShowSigortaPopup(true);
+            }}
+          >
+            Bu seyahatim için ekstra YolcuTransferi Sigortası istiyorum.
+          </label>
+          {sigorta && (
+            <span className="ml-2 text-[#bfa658] text-xs font-semibold">
+              (Seçiminize göre ekstra {sigortaTutar.toLocaleString()} TL eklenir.)
+            </span>
+          )}
+          <SigortaPopup
+            open={showSigortaPopup}
+            onClose={() => setShowSigortaPopup(false)}
+          />
+        </div>
+        {/* KVKK ve onay */}
+        <div className="flex items-center mt-3 mb-4">
+          <input
+            type="checkbox"
+            checked={kvkkChecked}
+            onChange={e => setKvkkChecked(e.target.checked)}
+            className="mr-2"
+            id="kvkkonay"
+          />
+          <span>
+            <span
               onClick={e => {
                 e.preventDefault();
-                setShowSigortaPopup(true);
+                setShowKvkkPopup(true);
               }}
+              className="cursor-pointer underline text-[#ffeec2] hover:text-[#bfa658]"
+              tabIndex={0}
+              style={{ outline: "none" }}
             >
-              Bu seyahatim için ekstra YolcuTransferi Sigortası istiyorum.
-            </label>
-            {sigorta && (
-              <span className="ml-2 text-[#bfa658] text-xs font-semibold">
-                (Seçiminize göre ekstra {sigortaTutar.toLocaleString()} TL eklenir.)
-              </span>
-            )}
-            <SigortaPopup
-              open={showSigortaPopup}
-              onClose={() => setShowSigortaPopup(false)}
-            />
-          </div>
-          {/* KVKK ve onay */}
-          <div className="flex items-center mt-3 mb-4">
-            <input
-              type="checkbox"
-              checked={kvkkChecked}
-              onChange={e => setKvkkChecked(e.target.checked)}
-              className="mr-2"
-              id="kvkkonay"
-            />
-            <span>
-              <span
-                onClick={e => {
-                  e.preventDefault();
-                  setShowKvkkPopup(true);
-                }}
-                className="cursor-pointer underline text-[#ffeec2] hover:text-[#bfa658]"
-                tabIndex={0}
-                style={{ outline: "none" }}
-              >
-                KVKK, Satış ve Diğer Politikaları
-              </span>{" "}
-              okudum, onaylıyorum.
-            </span>
-            <KvkkPopup
-              open={showKvkkPopup}
-              onClose={() => setShowKvkkPopup(false)}
-              text={kvkkText}
-              onConfirm={() => setKvkkChecked(true)}
-            />
-          </div>
-          {/* Hata */}
-          {fieldErrors.kvkk && (
-            <div className="text-red-400 text-xs mt-1">{fieldErrors.kvkk}</div>
-          )}
-          {/* Rezervasyon Tamamla */}
-          <button
-            type="submit"
-            className="btn btn-primary w-full text-xl py-3 mt-2"
-          >
-            Rezervasyonu Tamamla
-          </button>
-        </form>
-        {/* POPUP COMPONENTS */}
-        <SummaryPopup
-          open={showSummary}
-          onClose={() => setShowSummary(false)}
-          {...{
-            from,
-            to,
-            date,
-            time,
-            people,
-            segment,
-            transfer,
-            name,
-            surname,
-            tc,
-            phone,
-            email,
-            pnr,
-            note,
-            extras,
-            sigorta,
-            sigortaTutar,
-            transferUcreti,
-            vehicleText,
-            onNext: () => {
-              setShowSummary(false);
-              setShowPayment(true);
-            },
-          }}
-        />
-        <PaymentPopup
-          open={showPayment}
-          onClose={() => setShowPayment(false)}
-          {...{
-            transferUcreti,
-            sigortaTutar,
-            extras,
-            onNext: () => {
-              setShowPayment(false);
-              setShowThanks(true);
-            },
-          }}
-        />
-        <TesekkurPopup
-          open={showThanks}
-          onClose={() => setShowThanks(false)}
-          {...{ name, email }}
-        />
-      </section>
-    );
+              KVKK, Satış ve Diğer Politikaları
+            </span>{" "}
+            okudum, onaylıyorum.
+          </span>
+          <KvkkPopup
+            open={showKvkkPopup}
+            onClose={() => setShowKvkkPopup(false)}
+            text={kvkkText}
+            onConfirm={() => setKvkkChecked(true)}
+          />
+        </div>
+        {/* Hata */}
+        {fieldErrors.kvkk && (
+          <div className="text-red-400 text-xs mt-1">{fieldErrors.kvkk}</div>
+        )}
+        {/* Rezervasyon Tamamla */}
+        <button
+          type="submit"
+          className="btn btn-primary w-full text-xl py-3 mt-2"
+        >
+          Rezervasyonu Tamamla
+        </button>
+      </form>
+      {/* POPUP COMPONENTS */}
+      <SummaryPopup
+        open={showSummary}
+        onClose={() => setShowSummary(false)}
+        {...{
+          from,
+          to,
+          date,
+          time,
+          people,
+          segment,
+          transfer,
+          name,
+          surname,
+          tc,
+          phone,
+          email,
+          pnr,
+          note,
+          extras,
+          sigorta,
+          sigortaTutar,
+          transferUcreti,
+          vehicleText,
+          onNext: () => {
+            setShowSummary(false);
+            setShowPayment(true);
+          },
+        }}
+      />
+      <PaymentPopup
+        open={showPayment}
+        onClose={() => setShowPayment(false)}
+        {...{
+          transferUcreti,
+          sigortaTutar,
+          extras,
+          onNext: () => {
+            setShowPayment(false);
+            setShowThanks(true);
+          },
+        }}
+      />
+      <TesekkurPopup
+        open={showThanks}
+        onClose={() => setShowThanks(false)}
+        {...{ name, email }}
+      />
+    </section>
+  );
 }
