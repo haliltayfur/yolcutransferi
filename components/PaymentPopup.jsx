@@ -1,58 +1,37 @@
-// === Dosya: components/PaymentPopup.jsx ===
 import React, { useState } from "react";
 
-export default function PaymentPopup({
-  from, to, km, duration, people, segment, transfer, date, time,
-  name, surname, tc, phone, email, pnr, note, extras, extrasQty, sigorta, sigortaTutar, transferPrice,
-  onComplete
-}) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-
-  async function handlePay() {
-    setLoading(true);
-    setError("");
-    try {
-      // DB ve mail gönderme
-      await fetch("/api/rezervasyon", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          from, to, km, duration, people, segment, transfer, date, time,
-          name, surname, tc, phone, email, pnr, note, extras, extrasQty, sigorta, sigortaTutar, transferPrice,
-        }),
-      });
-      setSuccess(true);
-      setTimeout(onComplete, 1200);
-    } catch (err) {
-      setError("Ödeme/Gönderim sırasında hata oluştu, lütfen tekrar deneyin.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
+export default function PaymentPopup({ open, onClose, transferUcreti, sigortaTutar, extras, onNext }) {
+  const [cardNo, setCardNo] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [cardDate, setCardDate] = useState("");
+  const [cvv, setCvv] = useState("");
+  if (!open) return null;
+  const KDV = ((transferUcreti || 0) + (sigortaTutar || 0)) * 0.2;
+  const total = (transferUcreti || 0) + (sigortaTutar || 0) + KDV;
   return (
-    <div className="fixed inset-0 z-[9999] bg-[#00000088] flex items-center justify-center">
-      <div className="bg-[#19160a] border border-[#bfa658] rounded-2xl p-8 w-full max-w-xl shadow-lg relative">
-        <h2 className="text-2xl font-bold mb-4 text-[#bfa658] text-center">Ödeme ve Onay</h2>
-        <div className="mb-6 text-[#ffeec2] text-lg">
-          <b>Toplam Ödenecek Tutar:</b> <span className="text-[#FFD700]">{transferPrice ? `${transferPrice.toLocaleString()} ₺` : "Bilinmiyor"}</span>
+    <div className="fixed inset-0 bg-[#18140dcc] z-[1000] flex items-center justify-center">
+      <div className="relative w-[95vw] max-w-xl bg-[#231d0f] border border-[#bfa658] rounded-2xl p-8">
+        <button className="absolute top-4 right-6 text-2xl text-[#bfa658] font-bold" onClick={onClose}>×</button>
+        <h2 className="text-2xl font-bold mb-2 text-[#bfa658] text-center">Ödeme ve Onay</h2>
+        <div className="mb-2 text-[#ffeec2]">
+          {transferUcreti && <div>Transfer Ücreti: ₺{transferUcreti.toLocaleString("tr-TR")}</div>}
+          {sigortaTutar ? <div>Sigorta: ₺{sigortaTutar.toLocaleString("tr-TR")}</div> : null}
+          <div>KDV (%20): ₺{KDV.toLocaleString("tr-TR")}</div>
+          <div className="font-bold text-lg mt-2">Toplam Ödenecek Tutar: <span className="text-[#ffd700]">₺{total.toLocaleString("tr-TR")}</span></div>
         </div>
-        <div className="mb-2 text-[#bfa658] text-center">
-          Kredi kartı/iyzico altyapısı ile güvenli ödeme (DEMO). Rezervasyonunuz ve ödemeniz kayıt altına alınacaktır.
+        <div className="bg-[#ffeec299] p-3 rounded-lg text-black font-semibold mb-2 text-center">
+          Kredi kartı bilgileriniz demo olarak alınacaktır. Gerçek ödeme burada gerçekleşmez.
         </div>
-        {error && <div className="text-red-400 font-bold mb-3">{error}</div>}
-        {success && <div className="text-green-400 font-bold mb-3">Başarılı! Yönlendiriliyorsunuz...</div>}
-        <div className="flex justify-center gap-4 mt-6">
-          <button
-            className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-black font-bold py-3 px-10 rounded-xl text-xl shadow hover:scale-105 transition"
-            disabled={loading}
-            onClick={handlePay}
-          >
-            {loading ? "İşlem Yapılıyor..." : "Ödemeyi Tamamla"}
-          </button>
+        <div className="grid grid-cols-1 gap-2">
+          <input className="input" placeholder="Kart Numarası" maxLength={19} value={cardNo} onChange={e => setCardNo(e.target.value)} />
+          <input className="input" placeholder="Kart Üzerindeki İsim" value={cardName} onChange={e => setCardName(e.target.value)} />
+          <div className="flex gap-2">
+            <input className="input flex-1" placeholder="AA/YY" value={cardDate} onChange={e => setCardDate(e.target.value)} />
+            <input className="input flex-1" placeholder="CVV" maxLength={4} value={cvv} onChange={e => setCvv(e.target.value)} />
+          </div>
         </div>
+        <button className="w-full btn bg-gradient-to-r from-[#bfa658] to-[#ffeec2] text-black text-lg font-bold py-3 mt-4 rounded-lg"
+          onClick={onNext}>Öde ve VIP hizmetin keyfini çıkar</button>
       </div>
     </div>
   );
