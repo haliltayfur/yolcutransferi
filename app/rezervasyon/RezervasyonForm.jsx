@@ -31,7 +31,7 @@ const allTransfers = [
   "Dron Transferi"
 ];
 
-// --- Araç önerisini segment ve kişi sayısına göre verir
+// -- Araç önerisini segment ve kişi sayısına göre verir
 function getBestVehicleText(people, segment) {
   people = Number(people);
   if (!people || !segment) return "";
@@ -46,7 +46,7 @@ function getBestVehicleText(people, segment) {
 }
 
 export default function RezervasyonForm() {
-  // State'ler
+  // State
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [km, setKm] = useState("");
@@ -76,19 +76,20 @@ export default function RezervasyonForm() {
   const [fieldErrors, setFieldErrors] = useState({});
   const dateInputRef = useRef();
 
-  // --- Dinamik KVKK --- (alt alta düzgün gelecek şekilde)
+  // --- Dinamik KVKK (tüm metin alt alta düzgün gelsin)
   useEffect(() => {
     if (showKvkkPopup && !kvkkText) {
       fetchKvkk().then(txt => setKvkkText(txt.replace(/<br\s*\/?>/gi, "\n")));
     }
   }, [showKvkkPopup]);
 
-  // --- MESAFE OTOMATİK ÇEK ---
+  // --- MESAFE OTOMATİK ÇEK
   useEffect(() => {
     setKm(""); setMin(""); setDistErr("");
-    if (!from || !to || !date || !time) return;
-    if (transfer === "Dron Transferi") {
-      setKm("50"); setMin("60 dk"); setDistErr(""); // Dron sabit
+    if (!from || !to || !date || !time || !transfer || transfer === "Dron Transferi") {
+      if (transfer === "Dron Transferi") {
+        setKm("50"); setMin("60 dk"); setDistErr(""); // Dron sabit
+      }
       return;
     }
     getDistance(from, to).then(res => {
@@ -98,10 +99,33 @@ export default function RezervasyonForm() {
     });
   }, [from, to, date, time, transfer]);
 
-  // Sigorta tutarı (her zaman 400-4000 arası yazı göster)
-  const sigortaBilgiYazisi = "Seçiminize göre ekstra **400-4000 TL arası** YolcuTransferi Sigortası ücreti eklenir.";
+  // --- Sigorta bilgi yazısı sadece seçiliyse göster
+  const sigortaBilgiYazisi = sigorta ? "Seçiminize göre ekstra **400-4000 TL arası** YolcuTransferi Sigortası ücreti eklenir." : "";
 
-  // Submit
+  // --- FORM AUTOCOMPLETE (browser autofill değil: kendi localStorage ile getir)
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        setName(localStorage.getItem("name") || "");
+        setSurname(localStorage.getItem("surname") || "");
+        setPhone(localStorage.getItem("phone") || "");
+        setTc(localStorage.getItem("tc") || "");
+        setEmail(localStorage.getItem("email") || "");
+      }
+    } catch (e) {}
+  }, []);
+  function saveToCache(field, value) {
+    try {
+      if (typeof window !== "undefined") localStorage.setItem(field, value);
+    } catch (e) {}
+  }
+
+  // --- T.C. Kimlik No kontolü (daha rahat, 11 rakam ve ilk rakam 0 değil)
+  function isValidTC(t) {
+    return /^\d{11}$/.test(t) && t[0] !== "0";
+  }
+
+  // --- Submit
   function handleSubmit(e) {
     e.preventDefault();
     const err = {};
@@ -114,13 +138,22 @@ export default function RezervasyonForm() {
     if (!time) err.time = "Saat zorunlu.";
     if (!name) err.name = "Ad zorunlu.";
     if (!surname) err.surname = "Soyad zorunlu.";
-    if (!/^[1-9]\d{9}[02468]$/.test(tc) || tc.length !== 11) err.tc = "Geçerli bir TC Kimlik No giriniz.";
+    if (!isValidTC(tc)) err.tc = "11 haneli geçerli TC giriniz (ilk rakam 0 olamaz).";
     let cleanedPhone = phone.replace(/\D/g, "");
-    if (!/^05\d{9}$/.test(cleanedPhone) || cleanedPhone.length !== 11) err.phone = "Geçerli bir 05xx ile başlayan telefon giriniz.";
+    if (cleanedPhone.length === 10) cleanedPhone = "0" + cleanedPhone; // 10 rakam yazarsa başa 0 koy
+    if (!/^05\d{9}$/.test(cleanedPhone)) err.phone = "Geçerli bir 05xx ile başlayan telefon giriniz.";
     if (!/^\S+@\S+\.\S+$/.test(email)) err.email = "Geçerli e-posta adresi giriniz.";
     if (!kvkkChecked) err.kvkk = "KVKK onayı zorunludur.";
     setFieldErrors(err);
     if (Object.keys(err).length > 0) return;
+
+    // Otomatik kaydet
+    saveToCache("name", name);
+    saveToCache("surname", surname);
+    saveToCache("tc", tc);
+    saveToCache("phone", cleanedPhone);
+    saveToCache("email", email);
+
     setShowSummary(true);
   }
 
@@ -151,13 +184,17 @@ export default function RezervasyonForm() {
             {fieldErrors.to && <div className="text-red-400 text-xs mt-1">{fieldErrors.to}</div>}
           </div>
         </div>
-        {(from && to && date && time) && (
+        {(from && to && date && time && transfer !== "Dron Transferi") && (
           <div className="mb-3 text-[#ffeec2]">
-            {distErr ? <span className="text-red-400 font-bold">Mesafe/süre hesaplanamadı</span> : <span>
-              <span className="font-semibold">Tahmini mesafe:</span> {km ? `${km} km` : "..."}   |  
-              <span className="font-semibold">Tahmini süre:</span> {min || "..."}
-              <span className="text-[#bfa658] ml-3 text-sm">(Trafik yoğunluğu ve saat bilgisine göre değişebilir)</span>
-            </span>}
+            {distErr
+              ? <span className="text-red-400 font-bold">Mesafe/süre hesaplanamadı</span>
+              : (km || min)
+                ? <span>
+                    <span className="font-semibold">Tahmini mesafe:</span> {km ? `${km} km` : "..."}   |  
+                    <span className="font-semibold">Tahmini süre:</span> {min || "..."}
+                    <span className="text-[#bfa658] ml-3 text-sm">(Trafik yoğunluğu ve saat bilgisine göre değişebilir)</span>
+                  </span>
+                : null}
           </div>
         )}
         {/* Tarih Saat */}
@@ -241,7 +278,7 @@ export default function RezervasyonForm() {
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">T.C. Kimlik No</label>
             <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={tc} onChange={e => setTc(e.target.value)} autoComplete="off" />
+              value={tc} onChange={e => setTc(e.target.value.replace(/\D/g, "").slice(0,11))} autoComplete="off" />
             {fieldErrors.tc && <div className="text-red-400 text-xs mt-1">{fieldErrors.tc}</div>}
           </div>
           <div>
@@ -289,7 +326,7 @@ export default function RezervasyonForm() {
         </div>
         {/* Ekstralar */}
         <EkstralarAccordion selectedExtras={extras} setSelectedExtras={setExtras} />
-        {/* Sigorta kutusu */}
+        {/* Sigorta kutusu sadece tıklandıysa bilgi metni gelsin */}
         <div className="flex items-center mt-3 mb-2">
           <input
             type="checkbox"
@@ -308,7 +345,9 @@ export default function RezervasyonForm() {
           >
             Bu seyahatim için ekstra YolcuTransferi Sigortası istiyorum.
           </label>
-          <span className="ml-2 text-[#bfa658] text-xs font-semibold">{sigortaBilgiYazisi}</span>
+          {sigorta && (
+            <span className="ml-2 text-[#bfa658] text-xs font-semibold">{sigortaBilgiYazisi}</span>
+          )}
           <SigortaPopup
             open={showSigortaPopup}
             onClose={() => setShowSigortaPopup(false)}
