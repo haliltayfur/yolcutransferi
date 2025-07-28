@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 
-// Helper: Basit KDV oranı, ekstra toplamı
+// Basit KDV oranı, ekstra toplamı
 const calcExtrasTotal = (extras) =>
   (extras || []).reduce((sum, x) => sum + (x.price || 0) * (x.qty || 1), 0);
 
@@ -28,7 +28,6 @@ export default function PaymentPopup({
   const kdv = Math.round(araToplam * 0.20);
   const total = araToplam + kdv;
 
-  // Demo fake validation
   function handlePay(e) {
     e.preventDefault();
     setError("");
@@ -82,7 +81,7 @@ export default function PaymentPopup({
               </ul>
             </div>
           )}
-          <div>KDV (%20): <b>₺{kdv.toLocaleString("tr-TR")}</b></div>
+          <div>KDV: <b>₺{kdv.toLocaleString("tr-TR")}</b></div>
           <div className="font-bold text-lg mt-2">
             Toplam Ödenecek Tutar:{" "}
             <span className="text-[#ffd700]">
