@@ -12,7 +12,8 @@ import SigortaPopup from "../../components/SigortaPopup";
 import { vehicles } from "../../data/vehicleList";
 
 const saatler = [];
-for (let h = 0; h < 24; ++h) for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
+for (let h = 0; h < 24; ++h)
+  for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
 
 const segmentOptions = [
   { key: "Ekonomik", label: "Ekonomik" },
@@ -30,7 +31,22 @@ const allTransfers = [
   "Dron Transferi"
 ];
 
+// --- Araç önerisini segment ve kişi sayısına göre verir
+function getBestVehicleText(people, segment) {
+  people = Number(people);
+  if (!people || !segment) return "";
+  if (people <= 6) {
+    if (segment === "Prime+") return "Maybach veya benzeri (6 kişiye kadar).";
+    if (segment === "Lüks") return "Vito veya benzeri (6 kişiye kadar).";
+    return "Transporter veya benzeri (6 kişiye kadar).";
+  }
+  if (people >= 7 && people <= 8) return "Mercedes Vito veya Transporter önerilir (7-8 kişi).";
+  if (people >= 9) return "Mercedes Sprinter veya benzeri (9-16 kişi).";
+  return "";
+}
+
 export default function RezervasyonForm() {
+  // State'ler
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [km, setKm] = useState("");
@@ -60,13 +76,14 @@ export default function RezervasyonForm() {
   const [fieldErrors, setFieldErrors] = useState({});
   const dateInputRef = useRef();
 
+  // --- Dinamik KVKK --- (alt alta düzgün gelecek şekilde)
   useEffect(() => {
     if (showKvkkPopup && !kvkkText) {
-      fetchKvkk().then(setKvkkText);
+      fetchKvkk().then(txt => setKvkkText(txt.replace(/<br\s*\/?>/gi, "\n")));
     }
   }, [showKvkkPopup]);
 
-  // Mesafe hesapla (otomatik, patlak çözüm!)
+  // --- MESAFE OTOMATİK ÇEK ---
   useEffect(() => {
     setKm(""); setMin(""); setDistErr("");
     if (!from || !to || !date || !time) return;
@@ -81,37 +98,10 @@ export default function RezervasyonForm() {
     });
   }, [from, to, date, time, transfer]);
 
-  function getBestVehicleText(people, segment) {
-    people = Number(people);
-    if (!people || !segment) return "";
-    if (transfer === "Dron Transferi") {
-      return "Sizin için Dron Transferi seçildi! Tuzla - Tuzla Terminal arası 1 saat, 5000 USD.";
-    }
-    if (people >= 9) {
-      if (segment === "Prime+") return "Maybach veya Mercedes Sprinter önerilir (10+ kişi).";
-      return "Mercedes Vito veya Transporter önerilir (9-12 kişi).";
-    }
-    let candidates = vehicles.filter(v => v.segment === segment && v.max >= people);
-    candidates = candidates.sort((a, b) => a.max - b.max);
-    let best = candidates[0];
-    if (!best) return "";
-    return `${best.label} veya benzeri (${best.max} kişi kapasiteli) aracımızı sizin için hazırlıyoruz.`;
-  }
-  const vehicleText = getBestVehicleText(Number(people), segment);
+  // Sigorta tutarı (her zaman 400-4000 arası yazı göster)
+  const sigortaBilgiYazisi = "Seçiminize göre ekstra **400-4000 TL arası** YolcuTransferi Sigortası ücreti eklenir.";
 
-  const kmSayisi = km ? parseFloat(km.replace(/[^\d.]/g, "")) : null;
-  const transferUcreti = (from && to && segment && people && kmSayisi)
-    ? (transfer === "Dron Transferi" ? 5000 * 32 : Math.max(Math.round(kmSayisi * 30 * (segment === "Prime+" ? 2.5 : segment === "Lüks" ? 1.7 : 1) * (people > 2 ? 1 + (people - 2) * 0.12 : 1)), 1000))
-    : null;
-  const sigortaTutar = sigorta && transferUcreti
-    ? Math.round(transferUcreti * 0.4 * (1 + Math.max(Number(people) - 1, 0) * 0.1))
-    : 0;
-
-  // Validasyonlar
-  const isValidTC = t => /^[1-9]\d{9}[02468]$/.test(t) && t.length === 11;
-  const isValidPhone = t => /^05\d{9}$/.test(t) && t.length === 11;
-  const isValidEmail = t => /^\S+@\S+\.\S+$/.test(t);
-
+  // Submit
   function handleSubmit(e) {
     e.preventDefault();
     const err = {};
@@ -124,9 +114,10 @@ export default function RezervasyonForm() {
     if (!time) err.time = "Saat zorunlu.";
     if (!name) err.name = "Ad zorunlu.";
     if (!surname) err.surname = "Soyad zorunlu.";
-    if (!isValidTC(tc)) err.tc = "Geçerli bir TC Kimlik No giriniz.";
-    if (!isValidPhone(phone)) err.phone = "Geçerli bir 05xx ile başlayan telefon giriniz.";
-    if (!isValidEmail(email)) err.email = "Geçerli e-posta adresi giriniz.";
+    if (!/^[1-9]\d{9}[02468]$/.test(tc) || tc.length !== 11) err.tc = "Geçerli bir TC Kimlik No giriniz.";
+    let cleanedPhone = phone.replace(/\D/g, "");
+    if (!/^05\d{9}$/.test(cleanedPhone) || cleanedPhone.length !== 11) err.phone = "Geçerli bir 05xx ile başlayan telefon giriniz.";
+    if (!/^\S+@\S+\.\S+$/.test(email)) err.email = "Geçerli e-posta adresi giriniz.";
     if (!kvkkChecked) err.kvkk = "KVKK onayı zorunludur.";
     setFieldErrors(err);
     if (Object.keys(err).length > 0) return;
@@ -137,9 +128,8 @@ export default function RezervasyonForm() {
   useEffect(() => {
     if (!dateInputRef.current) return;
     const el = dateInputRef.current;
-    const openPicker = () => el.showPicker && el.showPicker();
-    el.addEventListener("click", openPicker);
-    return () => el.removeEventListener("click", openPicker);
+    el.addEventListener("click", () => el.showPicker && el.showPicker());
+    return () => el.removeEventListener("click", () => el.showPicker && el.showPicker());
   }, []);
 
   return (
@@ -147,7 +137,7 @@ export default function RezervasyonForm() {
       <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-8 text-center font-quicksand">
         VIP Rezervasyon Formu
       </h1>
-      <form onSubmit={handleSubmit} autoComplete="on" className="flex flex-col gap-2">
+      <form onSubmit={handleSubmit} autoComplete="off" className="flex flex-col gap-2">
         {/* Nereden Nereye */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div>
@@ -182,7 +172,7 @@ export default function RezervasyonForm() {
               value={date}
               onChange={e => setDate(e.target.value)}
               min={new Date().toISOString().split("T")[0]}
-              autoComplete="on"
+              autoComplete="off"
               style={{ cursor: "pointer" }}
             />
             {fieldErrors.date && <div className="text-red-400 text-xs mt-1">{fieldErrors.date}</div>}
@@ -204,7 +194,7 @@ export default function RezervasyonForm() {
             <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               value={people} onChange={e => setPeople(e.target.value)}>
               <option value="">Seçiniz</option>
-              {Array.from({ length: 24 }, (_, i) => i + 1).map(val => <option key={val} value={val}>{val}</option>)}
+              {Array.from({ length: 16 }, (_, i) => i + 1).map(val => <option key={val} value={val}>{val}</option>)}
             </select>
             {fieldErrors.people && <div className="text-red-400 text-xs mt-1">{fieldErrors.people}</div>}
           </div>
@@ -228,21 +218,21 @@ export default function RezervasyonForm() {
           </div>
         </div>
         {/* Araç önerisi */}
-        {vehicleText && (
-          <div className="my-2 font-semibold text-[#ffeec2] text-base">{vehicleText}</div>
+        {people && segment && (
+          <div className="my-2 font-semibold text-[#ffeec2] text-base">{getBestVehicleText(Number(people), segment)}</div>
         )}
         {/* Kişisel Bilgi */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Ad</label>
             <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={name} onChange={e => setName(e.target.value)} autoComplete="given-name" />
+              value={name} onChange={e => setName(e.target.value)} autoComplete="off" />
             {fieldErrors.name && <div className="text-red-400 text-xs mt-1">{fieldErrors.name}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Soyad</label>
             <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={surname} onChange={e => setSurname(e.target.value)} autoComplete="family-name" />
+              value={surname} onChange={e => setSurname(e.target.value)} autoComplete="off" />
             {fieldErrors.surname && <div className="text-red-400 text-xs mt-1">{fieldErrors.surname}</div>}
           </div>
         </div>
@@ -257,13 +247,22 @@ export default function RezervasyonForm() {
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Telefon</label>
             <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={phone} onChange={e => setPhone(e.target.value)} autoComplete="tel" />
+              value={phone}
+              onChange={e => {
+                let val = e.target.value.replace(/\D/g, "");
+                if (val.length > 11) val = val.slice(0, 11);
+                if (val && val[0] !== "0") val = "0" + val.slice(0, 10);
+                setPhone(val);
+              }}
+              autoComplete="off"
+              maxLength={11}
+            />
             {fieldErrors.phone && <div className="text-red-400 text-xs mt-1">{fieldErrors.phone}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">E-posta</label>
             <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
+              value={email} onChange={e => setEmail(e.target.value)} autoComplete="off" />
             {fieldErrors.email && <div className="text-red-400 text-xs mt-1">{fieldErrors.email}</div>}
           </div>
         </div>
@@ -289,7 +288,7 @@ export default function RezervasyonForm() {
           />
         </div>
         {/* Ekstralar */}
-        <EkstralarAccordion value={extras} onChange={setExtras} onlyCheck={true} />
+        <EkstralarAccordion selectedExtras={extras} setSelectedExtras={setExtras} />
         {/* Sigorta kutusu */}
         <div className="flex items-center mt-3 mb-2">
           <input
@@ -309,11 +308,7 @@ export default function RezervasyonForm() {
           >
             Bu seyahatim için ekstra YolcuTransferi Sigortası istiyorum.
           </label>
-          {sigorta && (
-            <span className="ml-2 text-[#bfa658] text-xs font-semibold">
-              (Seçiminize göre ekstra {sigortaTutar.toLocaleString()} TL eklenir.)
-            </span>
-          )}
+          <span className="ml-2 text-[#bfa658] text-xs font-semibold">{sigortaBilgiYazisi}</span>
           <SigortaPopup
             open={showSigortaPopup}
             onClose={() => setShowSigortaPopup(false)}
@@ -356,7 +351,8 @@ export default function RezervasyonForm() {
         {/* Rezervasyon Tamamla */}
         <button
           type="submit"
-          className="btn btn-primary w-full text-xl py-3 mt-2"
+          className="w-full text-xl py-3 mt-2 rounded-lg font-bold bg-gradient-to-r from-[#bfa658] to-[#ffeec2] text-black shadow-lg hover:scale-105 transition-all"
+          style={{ letterSpacing: ".02em" }}
         >
           Rezervasyonu Tamamla
         </button>
@@ -382,9 +378,9 @@ export default function RezervasyonForm() {
           note,
           extras,
           sigorta,
-          sigortaTutar,
-          transferUcreti,
-          vehicleText,
+          sigortaTutar: null,
+          transferUcreti: null,
+          vehicleText: getBestVehicleText(Number(people), segment),
           onNext: () => {
             setShowSummary(false);
             setShowPayment(true);
@@ -395,8 +391,8 @@ export default function RezervasyonForm() {
         open={showPayment}
         onClose={() => setShowPayment(false)}
         {...{
-          transferUcreti,
-          sigortaTutar,
+          transferUcreti: null,
+          sigortaTutar: null,
           extras,
           onNext: () => {
             setShowPayment(false);
