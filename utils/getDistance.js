@@ -1,4 +1,4 @@
-// Client-side, directions servisi ile
+// utils/getDistance.js
 export default async function getDistance(from, to) {
   if (typeof window === "undefined" || !window.google || !window.google.maps) {
     return { km: "", min: "", error: "Google Maps yüklenemedi" };
