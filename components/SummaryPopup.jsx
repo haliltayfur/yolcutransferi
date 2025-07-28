@@ -1,24 +1,20 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { extrasList } from "../data/extras"; // Doğru path'e göre güncelle
+import { extrasList } from "../data/extras";
 
 export default function SummaryPopup({
   open, onClose, from, to, date, time, people, segment, transfer,
   name, surname, tc, phone, email, pnr, note,
   extras, sigorta, sigortaTutar, transferUcreti, vehicleText, onNext
 }) {
-  // Ekstraların label karşılığı
   function getLabel(key) {
     const found = extrasList.find(e => e.key === key);
     return found ? found.label : key;
   }
-
-  // Özet popup'ında adet yönetimi
   const [extrasQty, setExtrasQty] = useState(() =>
     Object.fromEntries((extras || []).map(x => [x, 1]))
   );
 
-  // Parent ile sync, onClose olursa ana forma güncellenmiş extrasQty yolla istersen
   useEffect(() => {
     setExtrasQty(Object.fromEntries((extras || []).map(x => [x, 1])));
   }, [extras, open]);
@@ -29,7 +25,6 @@ export default function SummaryPopup({
       return next;
     });
   }
-
   function removeExtra(key) {
     setExtrasQty(q => {
       const next = { ...q };
@@ -38,19 +33,14 @@ export default function SummaryPopup({
     });
   }
 
-  // Ekstra fiyatı (isteğe bağlı: extrasList içinde price alanı varsa fiyatı çekecek, yoksa 0)
   function getExtraPrice(key) {
     const found = extrasList.find(e => e.key === key);
     return found && found.price ? found.price : 0;
   }
-
-  // Ekstralar toplamı
   const extrasToplam = Object.entries(extrasQty).reduce(
     (sum, [key, val]) => sum + getExtraPrice(key) * val,
     0
   );
-
-  // Ara Toplam (transfer + sigorta + ekstralar)
   const araToplam = (Number(transferUcreti || 0) + Number(sigortaTutar || 0) + Number(extrasToplam));
   const kdv = Math.round(araToplam * 0.2);
   const toplam = araToplam + kdv;
@@ -75,6 +65,11 @@ export default function SummaryPopup({
           {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
           {note && <div><b>Ek Not:</b> {note}</div>}
         </div>
+        {sigorta && (
+          <div className="mt-3 text-[#ffeec2] font-bold">
+            <b>YolcuTransferi Sigortası:</b> EKLENDİ {sigortaTutar ? `(₺${sigortaTutar})` : ""}
+          </div>
+        )}
         <div className="mt-4 mb-2">
           <b className="text-[#bfa658]">Ekstralar:</b>
           <ul className="mt-1">
@@ -95,11 +90,6 @@ export default function SummaryPopup({
             ))}
           </ul>
         </div>
-        {sigorta && (
-          <div className="mt-1 text-[#ffeec2]">
-            <b>YolcuTransferi Sigortası:</b> EKLENDİ {sigortaTutar ? `(₺${sigortaTutar})` : ""}
-          </div>
-        )}
         <div className="mt-6 flex flex-col gap-1 text-[#ffeec2] text-lg">
           <div>Transfer Ücreti: <b className="text-[#ffd700]">{transferUcreti ? `₺${transferUcreti.toLocaleString("tr-TR")}` : "Hesaplanamadı"}</b></div>
           {extrasToplam > 0 && <div>Ekstralar Toplamı: <b className="text-[#bfa658]">₺{extrasToplam}</b></div>}
