@@ -1,22 +1,40 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useEffect } from "react";
 
 export default function AutocompleteInput({ value, onChange, placeholder, name }) {
   const inputRef = useRef();
 
+  // Autocomplete’i sadece bir kere kur
   useEffect(() => {
     if (!window.google || !window.google.maps) return;
-    const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+    if (!inputRef.current) return;
+
+    let autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
       types: ["geocode", "establishment"],
-      componentRestrictions: { country: "tr" },
+      componentRestrictions: { country: "tr" }
     });
-    autocomplete.addListener("place_changed", () => {
+
+    // Place seçilince
+    const handlePlaceChanged = () => {
       const place = autocomplete.getPlace();
-      if (place.formatted_address) onChange(place.formatted_address);
-      else if (place.name) onChange(place.name);
-    });
-    // Value dışarıdan değişirse inputa bas
-    inputRef.current.value = value || "";
+      if (place && place.formatted_address) onChange(place.formatted_address);
+      else if (place && place.name) onChange(place.name);
+      else if (inputRef.current) onChange(inputRef.current.value);
+    };
+
+    autocomplete.addListener("place_changed", handlePlaceChanged);
+
+    return () => {
+      // Temizle
+      window.google.maps.event.clearInstanceListeners(autocomplete);
+    };
+  }, []);
+
+  // Değer dışarıdan güncellenirse inputa yansıt
+  useEffect(() => {
+    if (inputRef.current && inputRef.current.value !== value) {
+      inputRef.current.value = value || "";
+    }
   }, [value]);
 
   return (
@@ -26,8 +44,9 @@ export default function AutocompleteInput({ value, onChange, placeholder, name }
       defaultValue={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
-      autoComplete="on"
+      autoComplete="off"
       className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+      spellCheck={false}
     />
   );
 }
