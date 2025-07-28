@@ -1,7 +1,7 @@
 import "./globals.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import Script from "next/script"; // <-- Bunu ekle
+import Script from "next/script"; // Mutlaka ekle
 
 export const metadata = {
   title: "YolcuTransferi.com",
@@ -12,6 +12,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="tr">
       <head>
+        {/* Google Maps API (Next.js Script ile) */}
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
           strategy="beforeInteractive"
