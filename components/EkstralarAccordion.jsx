@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { extrasList } from "../data/extras";
 
-// Kategorilere eşleştirme anahtarı
 const extraKategori = {
   Yiyecek: ["sandvic", "kuruyemis", "cikolata", "kahvalti", "ogle_yemegi", "aksam_yemegi", "glutensiz_menü"],
   İçecek: ["su", "kola", "kola_zero", "soda", "meyve_suyu", "cay_kahve"],
@@ -13,7 +12,6 @@ const extraKategori = {
   ],
 };
 
-// Otomatik kategori eşlemesi
 function getKategori(key) {
   for (const [cat, list] of Object.entries(extraKategori)) {
     if (list.includes(key)) return cat;
@@ -21,15 +19,14 @@ function getKategori(key) {
   return "Diğer";
 }
 
-export default function EkstralarAccordion({ value = [], onChange, onlyCheck = false }) {
-  // Ekstraları kategorilere göre grupla
+export default function EkstralarAccordion({ value = [], onChange }) {
   const gruplu = extrasList.reduce((obj, extra) => {
     const kategori = getKategori(extra.key);
     if (!obj[kategori]) obj[kategori] = [];
     obj[kategori].push(extra);
     return obj;
   }, {});
-  const [open, setOpen] = useState(""); // hangi kategori açık
+  const [open, setOpen] = useState("");
 
   function handleCheck(e) {
     const { value: v, checked } = e.target;
