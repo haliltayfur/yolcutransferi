@@ -1,3 +1,4 @@
+// PATH: app/rezervasyon/RezervasyonForm.jsx
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import AutocompleteInput from "../../components/AutocompleteInput";
@@ -9,7 +10,7 @@ import PaymentPopup from "../../components/PaymentPopup";
 import TesekkurPopup from "../../components/TesekkurPopup";
 import KvkkPopup from "../../components/KvkkPopup";
 import SigortaPopup from "../../components/SigortaPopup";
-import calcTransferPrice from "../../utils/calcTransferPrice"; // <-- yeni ekle
+import calcTransferPrice from "../../utils/calcTransferPrice";
 
 const saatler = [];
 for (let h = 0; h < 24; ++h)
@@ -44,24 +45,40 @@ function getBestVehicleText(people, segment) {
   return "";
 }
 
+// LOCALSTORAGE'DAN FORMU OTOMATİK DOLDUR
+function getFormCache() {
+  if (typeof window === "undefined" || !window.localStorage) return {};
+  return {
+    from: window.localStorage.getItem("yt_from") || "",
+    to: window.localStorage.getItem("yt_to") || "",
+    people: window.localStorage.getItem("yt_people") || "",
+    segment: window.localStorage.getItem("yt_segment") || "",
+    transfer: window.localStorage.getItem("yt_transfer") || "",
+    date: window.localStorage.getItem("yt_date") || "",
+    time: window.localStorage.getItem("yt_time") || "",
+    pnr: window.localStorage.getItem("yt_pnr") || "",
+  };
+}
+
 export default function RezervasyonForm() {
+  const initial = getFormCache();
   // State'ler
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [from, setFrom] = useState(initial.from);
+  const [to, setTo] = useState(initial.to);
   const [km, setKm] = useState("");
   const [min, setMin] = useState("");
   const [distErr, setDistErr] = useState("");
-  const [people, setPeople] = useState("");
-  const [segment, setSegment] = useState("");
-  const [transfer, setTransfer] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [people, setPeople] = useState(initial.people);
+  const [segment, setSegment] = useState(initial.segment);
+  const [transfer, setTransfer] = useState(initial.transfer);
+  const [date, setDate] = useState(initial.date);
+  const [time, setTime] = useState(initial.time);
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [tc, setTc] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [pnr, setPnr] = useState("");
+  const [pnr, setPnr] = useState(initial.pnr || "");
   const [note, setNote] = useState("");
   const [extras, setExtras] = useState([]);
   const [sigorta, setSigorta] = useState(false);
@@ -74,64 +91,44 @@ export default function RezervasyonForm() {
   const [showThanks, setShowThanks] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const dateInputRef = useRef();
-
   const [transferUcreti, setTransferUcreti] = useState(null);
 
-  useEffect(() => {
-    ["name", "surname", "phone", "email", "tc"].forEach((f) => {
-      if (typeof window !== "undefined" && window.localStorage) {
-        const v = window.localStorage.getItem("yt_" + f);
-        if (v) {
-          if (f === "name") setName(v);
-          if (f === "surname") setSurname(v);
-          if (f === "phone") setPhone(v);
-          if (f === "email") setEmail(v);
-          if (f === "tc") setTc(v);
-        }
-      }
-    });
-  }, []);
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.localStorage) return;
-    window.localStorage.setItem("yt_name", name || "");
-    window.localStorage.setItem("yt_surname", surname || "");
-    window.localStorage.setItem("yt_phone", phone || "");
-    window.localStorage.setItem("yt_email", email || "");
-    window.localStorage.setItem("yt_tc", tc || "");
-  }, [name, surname, phone, email, tc]);
-
+  // Dinamik KVKK yükle
   useEffect(() => {
     if (showKvkkPopup && !kvkkText) {
-      fetchKvkk().then(txt => setKvkkText(txt.replace(/<br\s*\/?>/gi, "\n")));
+      fetchKvkk().then(txt => setKvkkText(txt));
     }
   }, [showKvkkPopup]);
 
-  // MESAFE OTOMATİK ÇEK
+  // MESAFE & FİYAT OTOMATİK ÇEK
   useEffect(() => {
     setKm(""); setMin(""); setDistErr("");
     if (!from || !to || !date || !time) return;
     if (transfer === "Dron Transferi") {
       setKm("50"); setMin("60 dk"); setDistErr(""); // Dron sabit
+      setTransferUcreti(calcTransferPrice(50, segment, people, time));
       return;
     }
     getDistance(from, to).then(res => {
       setKm(res.km);
       setMin(res.min);
       setDistErr(res.error);
+      if (res.km) {
+        setTransferUcreti(calcTransferPrice(res.km, segment, people, time));
+      } else {
+        setTransferUcreti(null);
+      }
     });
-  }, [from, to, date, time, transfer]);
+  }, [from, to, date, time, transfer, segment, people]);
 
-  // Transfer Ücretini Hesapla (her km/segment/kişi/saat değişiminde otomatik)
+  // Hata bekletme için (adres yazarken hatayı hemen basma, 10s bekle)
   useEffect(() => {
-    if (!km || !segment || !people || !time) { setTransferUcreti(null); return; }
-    if (distErr) { setTransferUcreti(null); return; }
-    setTransferUcreti(calcTransferPrice(Number(km), segment, Number(people), time));
-  }, [km, segment, people, time, distErr]);
-
-  // Sigorta tutarı info
-  const sigortaBilgiYazisi = sigorta
-    ? "Seçiminize göre ekstra 400-4000 TL arası YolcuTransferi Sigortası ücreti eklenir."
-    : "";
+    let timeout;
+    if (distErr) {
+      timeout = setTimeout(() => setDistErr("Mesafe/süre hesaplanamadı"), 10000);
+    }
+    return () => clearTimeout(timeout);
+  }, [distErr]);
 
   // Submit
   function handleSubmit(e) {
@@ -156,6 +153,7 @@ export default function RezervasyonForm() {
     setShowSummary(true);
   }
 
+  // Tarih kutusu click = takvim aç
   useEffect(() => {
     if (!dateInputRef.current) return;
     const el = dateInputRef.current;
@@ -163,8 +161,10 @@ export default function RezervasyonForm() {
     return () => el.removeEventListener("click", () => el.showPicker && el.showPicker());
   }, []);
 
-  // Sigorta Tutarı (örnek: 1/10 fiyatı gibi demo)
-  const sigortaTutar = sigorta && transferUcreti ? Math.round(Number(transferUcreti) / 10) : 0;
+  // Sigorta açıklama
+  const sigortaBilgiYazisi = sigorta
+    ? "Seçiminize göre ekstra 400-4000 TL arası YolcuTransferi Sigortası ücreti eklenir."
+    : "";
 
   return (
     <section className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] px-6 md:px-10 py-12 my-10">
@@ -172,20 +172,242 @@ export default function RezervasyonForm() {
         VIP Rezervasyon Formu
       </h1>
       <form onSubmit={handleSubmit} autoComplete="off" className="flex flex-col gap-2">
-        {/* ... aynı inputlar ... */}
-        {/* Yukarıdaki kodun tamamını KESİNLİKLE aynen bırak, sadece aşağıdaki popupları GÜNCELLE */}
+        {/* Nereden Nereye */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Nereden?</label>
+            <AutocompleteInput value={from} onChange={setFrom} placeholder="Nereden? İlçe/Mahalle/Havalimanı" name="from" />
+            {fieldErrors.from && <div className="text-red-400 text-xs mt-1">{fieldErrors.from}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Nereye?</label>
+            <AutocompleteInput value={to} onChange={setTo} placeholder="Nereye? İlçe/Mahalle/Havalimanı" name="to" />
+            {fieldErrors.to && <div className="text-red-400 text-xs mt-1">{fieldErrors.to}</div>}
+          </div>
+        </div>
+        {(from && to && date && time) && (
+          <div className="mb-3 text-[#ffeec2]">
+            {distErr ? <span className="text-red-400 font-bold">{distErr}</span> : <span>
+              <span className="font-semibold">Tahmini mesafe:</span> {km ? `${km} km` : "..."}   |  
+              <span className="font-semibold">Tahmini süre:</span> {min || "..."}
+              <span className="text-[#bfa658] ml-3 text-sm">(Trafik yoğunluğu ve saat bilgisine göre değişebilir)</span>
+            </span>}
+          </div>
+        )}
+        {/* Tarih Saat */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Tarih</label>
+            <input
+              name="date"
+              type="date"
+              ref={dateInputRef}
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              min={new Date().toISOString().split("T")[0]}
+              autoComplete="off"
+              style={{ cursor: "pointer" }}
+            />
+            {fieldErrors.date && <div className="text-red-400 text-xs mt-1">{fieldErrors.date}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={time} onChange={e => setTime(e.target.value)}>
+              <option value="">Seçiniz</option>
+              {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
+            </select>
+            {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
+          </div>
+        </div>
+        {/* Kişi, segment, tür */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={people} onChange={e => setPeople(e.target.value)}>
+              <option value="">Seçiniz</option>
+              {Array.from({ length: 16 }, (_, i) => i + 1).map(val => <option key={val} value={val}>{val}</option>)}
+            </select>
+            {fieldErrors.people && <div className="text-red-400 text-xs mt-1">{fieldErrors.people}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={segment} onChange={e => setSegment(e.target.value)}>
+              <option value="">Seçiniz</option>
+              {segmentOptions.map(opt => <option key={opt.key} value={opt.label}>{opt.label}</option>)}
+            </select>
+            {fieldErrors.segment && <div className="text-red-400 text-xs mt-1">{fieldErrors.segment}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={transfer} onChange={e => setTransfer(e.target.value)}>
+              <option value="">Seçiniz</option>
+              {allTransfers.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+            {fieldErrors.transfer && <div className="text-red-400 text-xs mt-1">{fieldErrors.transfer}</div>}
+          </div>
+        </div>
+        {/* Araç önerisi */}
+        {people && segment && (
+          <div className="my-2 font-semibold text-[#ffeec2] text-base">{getBestVehicleText(Number(people), segment)}</div>
+        )}
+        {/* Kişisel Bilgi */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Ad</label>
+            <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={name} onChange={e => setName(e.target.value)} autoComplete="off" />
+            {fieldErrors.name && <div className="text-red-400 text-xs mt-1">{fieldErrors.name}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Soyad</label>
+            <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={surname} onChange={e => setSurname(e.target.value)} autoComplete="off" />
+            {fieldErrors.surname && <div className="text-red-400 text-xs mt-1">{fieldErrors.surname}</div>}
+          </div>
+        </div>
+        {/* Diğer Kişisel Bilgi */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">T.C. Kimlik No</label>
+            <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={tc} onChange={e => setTc(e.target.value)} autoComplete="off" />
+            {fieldErrors.tc && <div className="text-red-400 text-xs mt-1">{fieldErrors.tc}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">Telefon</label>
+            <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={phone}
+              onChange={e => {
+                let val = e.target.value.replace(/\D/g, "");
+                if (val.length > 11) val = val.slice(0, 11);
+                if (val && val[0] !== "0") val = "0" + val.slice(0, 10);
+                setPhone(val);
+              }}
+              autoComplete="off"
+              maxLength={11}
+            />
+            {fieldErrors.phone && <div className="text-red-400 text-xs mt-1">{fieldErrors.phone}</div>}
+          </div>
+          <div>
+            <label className="font-bold text-[#bfa658] mb-1 block">E-posta</label>
+            <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={email} onChange={e => setEmail(e.target.value)} autoComplete="off" />
+            {fieldErrors.email && <div className="text-red-400 text-xs mt-1">{fieldErrors.email}</div>}
+          </div>
+        </div>
+        {/* PNR */}
+        <div className="mb-3">
+          <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
+          <input
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            value={pnr}
+            onChange={e => setPnr(e.target.value)}
+            placeholder="Uçuş rezervasyon kodu (varsa)"
+            autoComplete="off"
+          />
+        </div>
+        {/* Not */}
+        <div className="mb-3">
+          <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
+          <textarea
+            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl min-h-[60px]"
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Eklemek istediğiniz bir not var mı?"
+          />
+        </div>
+        {/* Ekstralar */}
+        <EkstralarAccordion value={extras} onChange={setExtras} />
+        {/* Sigorta kutusu */}
+        <div className="flex items-center mt-3 mb-2">
+          <input
+            type="checkbox"
+            checked={sigorta}
+            onChange={() => setSigorta(v => !v)}
+            id="sigorta"
+            className="mr-2"
+          />
+          <label
+            htmlFor="sigorta"
+            className="cursor-pointer text-[#ffeec2] underline hover:text-[#bfa658]"
+            onClick={e => { e.preventDefault(); setShowSigortaPopup(true); }}
+          >
+            Bu seyahatim için ekstra YolcuTransferi Sigortası istiyorum.
+          </label>
+          <span className="ml-2 text-[#bfa658] text-xs font-semibold">{sigortaBilgiYazisi}</span>
+          <SigortaPopup
+            open={showSigortaPopup}
+            onClose={() => setShowSigortaPopup(false)}
+          />
+        </div>
+        {/* KVKK ve onay */}
+        <div className="flex items-center mt-3 mb-4">
+          <input
+            type="checkbox"
+            checked={kvkkChecked}
+            onChange={e => setKvkkChecked(e.target.checked)}
+            className="mr-2"
+            id="kvkkonay"
+          />
+          <span>
+            <span
+              onClick={e => { e.preventDefault(); setShowKvkkPopup(true); }}
+              className="cursor-pointer underline text-[#ffeec2] hover:text-[#bfa658]"
+              tabIndex={0}
+              style={{ outline: "none" }}
+            >
+              KVKK, Satış ve Diğer Politikaları
+            </span>{" "}
+            okudum, onaylıyorum.
+          </span>
+          <KvkkPopup
+            open={showKvkkPopup}
+            onClose={() => setShowKvkkPopup(false)}
+            text={kvkkText}
+            onConfirm={() => setKvkkChecked(true)}
+          />
+        </div>
+        {/* Hata */}
+        {fieldErrors.kvkk && (
+          <div className="text-red-400 text-xs mt-1">{fieldErrors.kvkk}</div>
+        )}
+        {/* Rezervasyon Tamamla */}
+        <button
+          type="submit"
+          className="w-full text-xl py-3 mt-2 rounded-lg font-bold bg-gradient-to-r from-[#bfa658] to-[#ffeec2] text-black shadow-lg hover:scale-105 transition-all"
+          style={{ letterSpacing: ".02em" }}
+        >
+          Rezervasyonu Tamamla
+        </button>
       </form>
       {/* POPUP COMPONENTS */}
       <SummaryPopup
         open={showSummary}
         onClose={() => setShowSummary(false)}
         {...{
-          from, to, date, time, people, segment, transfer,
-          name, surname, tc, phone, email, pnr, note,
+          from,
+          to,
+          date,
+          time,
+          people,
+          segment,
+          transfer,
+          name,
+          surname,
+          tc,
+          phone,
+          email,
+          pnr,
+          note,
           extras,
           sigorta,
-          sigortaTutar,
-          transferUcreti,
+          sigortaTutar: sigorta ? 1000 : 0, // örnek!
+          transferUcreti: transferUcreti,
           vehicleText: getBestVehicleText(Number(people), segment),
           onNext: () => {
             setShowSummary(false);
@@ -197,9 +419,9 @@ export default function RezervasyonForm() {
         open={showPayment}
         onClose={() => setShowPayment(false)}
         {...{
-          transferUcreti: transferUcreti || 0,
-          sigortaTutar: sigortaTutar || 0,
-          extras: [], // Eğer extras objeleri {key, label, price, qty} ise buraya extras geç!
+          transferUcreti: transferUcreti,
+          sigortaTutar: sigorta ? 1000 : 0, // örnek!
+          extras: [],
           onNext: () => {
             setShowPayment(false);
             setShowThanks(true);
