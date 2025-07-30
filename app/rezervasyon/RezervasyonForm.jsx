@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+// Burada kendi projenin AutocompleteInput, EkstralarAccordion, fetchKvkk, vb. componentlarını import etmelisin
 import AutocompleteInput from "../../components/AutocompleteInput";
 import fetchKvkk from "../../utils/fetchKvkk";
 import getDistance from "../../utils/getDistance";
@@ -11,7 +12,6 @@ import KvkkPopup from "../../components/KvkkPopup";
 import SigortaPopup from "../../components/SigortaPopup";
 import calcTransferPrice from "../../utils/calcTransferPrice";
 
-// Zaman slotları
 const saatler = [];
 for (let h = 0; h < 24; ++h)
   for (let m of [0, 15, 30, 45]) saatler.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
@@ -32,21 +32,7 @@ const allTransfers = [
   "Dron Transferi"
 ];
 
-// Kullanıcı hafızasından öneri çek (ad/soyad/mail/telefon)
-function getAutoSuggest(key) {
-  if (typeof window === "undefined" || !window.localStorage) return [];
-  const data = JSON.parse(window.localStorage.getItem("yt_autosuggest") || "{}");
-  return data[key] || [];
-}
-function saveAutoSuggest(key, value) {
-  if (typeof window === "undefined" || !window.localStorage || !value) return;
-  let data = {};
-  try { data = JSON.parse(window.localStorage.getItem("yt_autosuggest")) || {}; } catch {}
-  data[key] = Array.from(new Set([...(data[key] || []), value])).slice(-5);
-  window.localStorage.setItem("yt_autosuggest", JSON.stringify(data));
-}
-
-// LocalStorage ile son form verilerini hatırla
+// Hafızadan okuma
 function getFormCache() {
   if (typeof window === "undefined" || !window.localStorage) return {};
   return {
@@ -61,7 +47,12 @@ function getFormCache() {
   };
 }
 
-// Araç ve valiz kapasitesi metni
+function isHavalimani(val) {
+  if (!val) return false;
+  return /(havaalanı|havalimanı|airport)/i.test(val);
+}
+
+// Dinamik Araç ve Valiz metni
 function getBestVehicleText(people, segment) {
   people = Number(people);
   let valiz = 0, txt = "";
@@ -71,18 +62,11 @@ function getBestVehicleText(people, segment) {
     if (segment === "Prime+") txt = "Maybach veya benzeri";
     else if (segment === "Lüks") txt = "Vito veya benzeri";
     else txt = "Transporter veya benzeri";
-    return (
-      <span>
-        <span className="font-bold text-[#bfa658]">Araç Seçimi:</span> {txt} <span className="text-[#ffeec2]">(max 6 kişi, max {valiz} valiz)</span>
-      </span>
-    );
+    return `Araç Seçimi: ${txt} (max 6 kişi, max ${valiz} valiz)`;
   }
-  if (people >= 7 && people <= 8)
-    return <span><span className="font-bold text-[#bfa658]">Araç Seçimi:</span> Mercedes Vito veya Transporter <span className="text-[#ffeec2]">(max 8 kişi, max 6 valiz)</span></span>;
-  if (people >= 9 && people <= 12)
-    return <span><span className="font-bold text-[#bfa658]">Araç Seçimi:</span> Mercedes Sprinter veya benzeri <span className="text-[#ffeec2]">(max 12 kişi, max 9 valiz)</span></span>;
-  if (people > 12 && people <= 16)
-    return <span><span className="font-bold text-[#bfa658]">Araç Seçimi:</span> Büyük Minibüs <span className="text-[#ffeec2]">(max {people} kişi, max {people - 3} valiz)</span></span>;
+  if (people >= 7 && people <= 8) return "Araç Seçimi: Mercedes Vito veya Transporter (max 8 kişi, max 6 valiz)";
+  if (people >= 9 && people <= 12) return "Araç Seçimi: Mercedes Sprinter veya benzeri (max 12 kişi, max 9 valiz)";
+  if (people > 12 && people <= 16) return `Araç Seçimi: Büyük Minibüs (max ${people} kişi, max ${people - 3} valiz)`;
   return "";
 }
 
@@ -106,7 +90,7 @@ export default function RezervasyonForm() {
   const [pnr, setPnr] = useState(initial.pnr || "");
   const [note, setNote] = useState("");
   const [extras, setExtras] = useState([]);
-  const [sigorta, setSigorta] = useState(true);
+  const [sigorta, setSigorta] = useState(true); // Default seçili
   const [showSigortaPopup, setShowSigortaPopup] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showKvkkPopup, setShowKvkkPopup] = useState(false);
@@ -118,12 +102,14 @@ export default function RezervasyonForm() {
   const dateInputRef = useRef();
   const [transferUcreti, setTransferUcreti] = useState(null);
 
-  // KVKK popup içeriği yükle
+  // KVKK içeriği yükle
   useEffect(() => {
-    if (showKvkkPopup && !kvkkText) fetchKvkk().then(txt => setKvkkText(txt));
+    if (showKvkkPopup && !kvkkText) {
+      fetchKvkk().then(txt => setKvkkText(txt));
+    }
   }, [showKvkkPopup]);
 
-  // MESAFE, SÜRE, FİYAT (+ trafik ek süre)
+  // Mesafe & fiyat & trafik
   useEffect(() => {
     setKm(""); setMin(""); setDistErr("");
     if (!from || !to || !date || !time) return;
@@ -136,7 +122,7 @@ export default function RezervasyonForm() {
       let extra = 0;
       if (["istanbul", "ankara", "izmir", "antalya"].some(s => [from, to].join(" ").toLowerCase().includes(s))) {
         const hour = Number(time.split(":")[0]);
-        if ((hour >= 7 && hour <= 10) || (hour >= 16 && hour <= 21)) extra = 0.3;
+        if ((hour >= 7 && hour <= 10) || (hour >= 16 && hour <= 21)) extra = 0.25;
       }
       let realMin = res.min && !isNaN(Number(res.min)) ? Math.round(Number(res.min) * (1 + extra)) : res.min;
       setKm(res.km);
@@ -147,42 +133,10 @@ export default function RezervasyonForm() {
     });
   }, [from, to, date, time, transfer, segment, people]);
 
-  // Tarih inputunu her yere tıklayınca aç
-  useEffect(() => {
-    if (!dateInputRef.current) return;
-    const el = dateInputRef.current;
-    const openPicker = () => el.showPicker && el.showPicker();
-    el.addEventListener("click", openPicker);
-    el.addEventListener("focus", openPicker);
-    return () => {
-      el.removeEventListener("click", openPicker);
-      el.removeEventListener("focus", openPicker);
-    };
-  }, []);
+  // PNR zorunlu mu? (Dinamik)
+  const showPnr = isHavalimani(from) || isHavalimani(to) || isHavalimani(transfer);
 
-  // Hafıza autocomplete + kaydet
-  function handleAutoSuggestChange(setter, key, val) {
-    setter(val);
-    saveAutoSuggest(key, val);
-  }
-  const adOneri = getAutoSuggest("ad");
-  const soyadOneri = getAutoSuggest("soyad");
-  const telOneri = getAutoSuggest("telefon");
-  const mailOneri = getAutoSuggest("mail");
-
-  // Su ekstrası adedi
-  const suAdedi = extras.filter(x => x === "su").length;
-
-  // Sigorta ücreti
-  const sigortaTutar = sigorta && transferUcreti ? Math.round(Number(transferUcreti) * 0.2) : 0;
-
-  // Sigorta info
-  const sigortaInfo = sigorta ? "Ekstra sigorta için ekstra ücret yansıtılır." : "";
-
-  // Havalimanı kontrolü (PNR)
-  const havalimaniSecildi = /havalimanı|airport/i.test(from) || /havalimanı|airport/i.test(to) || transfer === "VIP Havalimanı Transferi";
-
-  // Form validasyon ve özet pop-up aç
+  // Form Submit
   function handleSubmit(e) {
     e.preventDefault();
     const err = {};
@@ -199,16 +153,36 @@ export default function RezervasyonForm() {
     let cleanedPhone = phone.replace(/\D/g, "");
     if (!/^05\d{9}$/.test(cleanedPhone) || cleanedPhone.length !== 11) err.phone = "Geçerli bir 05xx ile başlayan telefon giriniz.";
     if (!/^\S+@\S+\.\S+$/.test(email)) err.email = "Geçerli e-posta adresi giriniz.";
-    if (havalimaniSecildi && !pnr) err.pnr = "Havalimanı transferlerinde PNR/Uçuş Kodu zorunludur.";
+    if (showPnr && !pnr) err.pnr = "Havalimanı transferlerinde PNR/Uçuş Kodu zorunludur.";
     if (!kvkkChecked) err.kvkk = "KVKK onayı zorunludur.";
     setFieldErrors(err);
     if (Object.keys(err).length > 0) return;
     setShowSummary(true);
   }
 
-  // Rezervasyon kaydı ve mail gönderimi (örnek backend)
+  // Tarih inputu tıklanabilir/focuslanabilir
+  useEffect(() => {
+    if (!dateInputRef.current) return;
+    const el = dateInputRef.current;
+    const openPicker = () => el.showPicker && el.showPicker();
+    el.addEventListener("click", openPicker);
+    el.addEventListener("focus", openPicker);
+    return () => {
+      el.removeEventListener("click", openPicker);
+      el.removeEventListener("focus", openPicker);
+    };
+  }, []);
+
+  // Su ekstrası için x kişiye x adet su ücretsiz, fazlası ücretli
+  const suAdedi = extras.filter(x => x === "su").length;
+  const freeSu = segment === "Prime+" ? suAdedi : Math.min(Number(people) || 0, suAdedi);
+  const paidSu = segment === "Prime+" ? 0 : Math.max(0, suAdedi - (Number(people) || 0));
+
+  // Sigorta ücreti
+  const sigortaTutar = sigorta && transferUcreti ? Math.round(Number(transferUcreti) * 0.2) : 0;
+
+  // Rezervasyon kaydı, mail gönderimi (örnek, kendi API'ne göre uyarlayabilirsin)
   async function handlePaymentSuccess() {
-    // Backend'e kayıt ve mail
     await fetch("/api/rezervasyon/kaydet", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -266,16 +240,11 @@ export default function RezervasyonForm() {
             {fieldErrors.date && <div className="text-red-400 text-xs mt-1">{fieldErrors.date}</div>}
           </div>
           <div>
-                <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
-            <select
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={time}
-              onChange={e => setTime(e.target.value)}
-            >
+            <label className="font-bold text-[#bfa658] mb-1 block">Saat</label>
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={time} onChange={e => setTime(e.target.value)}>
               <option value="">Seçiniz</option>
-              {saatler.map(saat => (
-                <option key={saat} value={saat}>{saat}</option>
-              ))}
+              {saatler.map(saat => <option key={saat} value={saat}>{saat}</option>)}
             </select>
             {fieldErrors.time && <div className="text-red-400 text-xs mt-1">{fieldErrors.time}</div>}
           </div>
@@ -284,83 +253,48 @@ export default function RezervasyonForm() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Kişi Sayısı</label>
-            <select
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={people}
-              onChange={e => setPeople(e.target.value)}
-            >
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={people} onChange={e => setPeople(e.target.value)}>
               <option value="">Seçiniz</option>
-              {Array.from({ length: 16 }, (_, i) => i + 1).map(val => (
-                <option key={val} value={val}>{val}</option>
-              ))}
+              {Array.from({ length: 16 }, (_, i) => i + 1).map(val => <option key={val} value={val}>{val}</option>)}
             </select>
             {fieldErrors.people && <div className="text-red-400 text-xs mt-1">{fieldErrors.people}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Segment</label>
-            <select
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={segment}
-              onChange={e => setSegment(e.target.value)}
-            >
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={segment} onChange={e => setSegment(e.target.value)}>
               <option value="">Seçiniz</option>
-              {segmentOptions.map(opt => (
-                <option key={opt.key} value={opt.label}>{opt.label}</option>
-              ))}
+              {segmentOptions.map(opt => <option key={opt.key} value={opt.label}>{opt.label}</option>)}
             </select>
             {fieldErrors.segment && <div className="text-red-400 text-xs mt-1">{fieldErrors.segment}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Transfer Türü</label>
-            <select
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={transfer}
-              onChange={e => setTransfer(e.target.value)}
-            >
+            <select className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={transfer} onChange={e => setTransfer(e.target.value)}>
               <option value="">Seçiniz</option>
-              {allTransfers.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
+              {allTransfers.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
             {fieldErrors.transfer && <div className="text-red-400 text-xs mt-1">{fieldErrors.transfer}</div>}
           </div>
         </div>
-
         {/* Araç önerisi */}
         {people && segment && (
-          <div className="my-2 font-semibold text-[#ffeec2] text-base">
-            {getBestVehicleText(Number(people), segment)}
-          </div>
+          <div className="my-2 font-semibold text-[#ffeec2] text-base">{getBestVehicleText(Number(people), segment)}</div>
         )}
-
         {/* Kişisel Bilgi */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Ad</label>
-            <input
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={name}
-              onChange={e => handleAutoSuggestChange(setName, "ad", e.target.value)}
-              autoComplete="off"
-              list="ad-onesi"
-            />
-            <datalist id="ad-onesi">
-              {adOneri.map((ad, i) => <option key={i} value={ad} />)}
-            </datalist>
+            <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={name} onChange={e => setName(e.target.value)} autoComplete="off" />
             {fieldErrors.name && <div className="text-red-400 text-xs mt-1">{fieldErrors.name}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Soyad</label>
-            <input
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={surname}
-              onChange={e => handleAutoSuggestChange(setSurname, "soyad", e.target.value)}
-              autoComplete="off"
-              list="soyad-onesi"
-            />
-            <datalist id="soyad-onesi">
-              {soyadOneri.map((ad, i) => <option key={i} value={ad} />)}
-            </datalist>
+            <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={surname} onChange={e => setSurname(e.target.value)} autoComplete="off" />
             {fieldErrors.surname && <div className="text-red-400 text-xs mt-1">{fieldErrors.surname}</div>}
           </div>
         </div>
@@ -368,47 +302,34 @@ export default function RezervasyonForm() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">T.C. Kimlik No</label>
-            <input
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={tc}
-              onChange={e => setTc(e.target.value)}
-              autoComplete="off"
-            />
+            <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={tc} onChange={e => setTc(e.target.value)} autoComplete="off" />
             {fieldErrors.tc && <div className="text-red-400 text-xs mt-1">{fieldErrors.tc}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">Telefon</label>
-            <input
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+            <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
               value={phone}
-              onChange={e => handleAutoSuggestChange(setPhone, "telefon", e.target.value.replace(/\D/g, "").slice(0, 11))}
+              onChange={e => {
+                let val = e.target.value.replace(/\D/g, "");
+                if (val.length > 11) val = val.slice(0, 11);
+                if (val && val[0] !== "0") val = "0" + val.slice(0, 10);
+                setPhone(val);
+              }}
               autoComplete="off"
               maxLength={11}
-              list="telefon-onesi"
             />
-            <datalist id="telefon-onesi">
-              {telOneri.map((tel, i) => <option key={i} value={tel} />)}
-            </datalist>
             {fieldErrors.phone && <div className="text-red-400 text-xs mt-1">{fieldErrors.phone}</div>}
           </div>
           <div>
             <label className="font-bold text-[#bfa658] mb-1 block">E-posta</label>
-            <input
-              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-              value={email}
-              onChange={e => handleAutoSuggestChange(setEmail, "mail", e.target.value)}
-              autoComplete="off"
-              list="mail-onesi"
-            />
-            <datalist id="mail-onesi">
-              {mailOneri.map((mail, i) => <option key={i} value={mail} />)}
-            </datalist>
+            <input className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={email} onChange={e => setEmail(e.target.value)} autoComplete="off" />
             {fieldErrors.email && <div className="text-red-400 text-xs mt-1">{fieldErrors.email}</div>}
           </div>
         </div>
-
-        {/* PNR - sadece havalimanı varsa zorunlu */}
-        {havalimaniSecildi && (
+        {/* PNR sadece havalimanı varsa zorunlu */}
+        {showPnr && (
           <div className="mb-3">
             <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
             <input
@@ -421,7 +342,6 @@ export default function RezervasyonForm() {
             {fieldErrors.pnr && <div className="text-red-400 text-xs mt-1">{fieldErrors.pnr}</div>}
           </div>
         )}
-
         {/* Not */}
         <div className="mb-3">
           <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
@@ -450,7 +370,7 @@ export default function RezervasyonForm() {
           >
             Bu seyahatim için ekstra YolcuTransferi Sigortası istiyorum.
           </label>
-          <span className="ml-2 text-[#bfa658] text-xs font-semibold">{sigortaInfo}</span>
+          <span className="ml-2 text-[#bfa658] text-xs font-semibold">{sigorta ? "Ekstra sigorta için ekstra ücret yansıtılır." : ""}</span>
           <SigortaPopup
             open={showSigortaPopup}
             onClose={() => setShowSigortaPopup(false)}
@@ -547,4 +467,3 @@ export default function RezervasyonForm() {
     </section>
   );
 }
-
