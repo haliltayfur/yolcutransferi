@@ -22,9 +22,10 @@ export default function PaymentPopup({
 
   if (!open) return null;
 
-  // Ekstralar toplamı (ekstralar objelerinde price ve qty olmalı)
-  const extrasTotal = calcExtrasTotal(extras);
-  const araToplam = transferUcreti + (sigortaTutar || 0) + (extrasTotal || 0);
+  const extrasTotal = Number(calcExtrasTotal(extras)) || 0;
+  const transferUcretiSafe = Number(transferUcreti) || 0;
+  const sigortaTutarSafe = Number(sigortaTutar) || 0;
+  const araToplam = transferUcretiSafe + sigortaTutarSafe + extrasTotal;
   const kdv = Math.round(araToplam * 0.20);
   const total = araToplam + kdv;
 
@@ -60,9 +61,9 @@ export default function PaymentPopup({
           Ödeme ve Onay
         </h2>
         <div className="mb-2 text-[#ffeec2]">
-          <div>Transfer Ücreti: <b>₺{transferUcreti.toLocaleString("tr-TR")}</b></div>
-          {sigortaTutar > 0 && (
-            <div>Sigorta: <b>₺{sigortaTutar.toLocaleString("tr-TR")}</b></div>
+          <div>Transfer Ücreti: <b>₺{transferUcretiSafe.toLocaleString("tr-TR")}</b></div>
+          {sigortaTutarSafe > 0 && (
+            <div>Sigorta: <b>₺{sigortaTutarSafe.toLocaleString("tr-TR")}</b></div>
           )}
           {extrasTotal > 0 && (
             <div>
