@@ -17,19 +17,15 @@ function getSegmentKey(segment) {
 }
 
 export default function calcTransferPrice(kmStr, segment, peopleCount, hour) {
-  // kmStr ondalıklı olabilir
   const km = Number(kmStr || 0);
   if (!km || !segment) return 0;
-  // En yakın km değerini tablodan bul
   let row = kmTable.reduce((prev, curr) =>
     Math.abs(curr.km - km) < Math.abs(prev.km - km) ? curr : prev
   );
   let key = getSegmentKey(segment);
   let price = row[key] || row["vip"];
-  // Kişi başı ek ücret
   let extra = 1 + (Math.max(peopleCount - 1, 0) * 0.05);
   price = price * extra;
-  // Gece ücreti
   let hourNum = Number((hour || "00:00").split(":")[0]);
   if (hourNum >= 22 || hourNum < 7) price = price * 1.10;
   return Math.round(price);
