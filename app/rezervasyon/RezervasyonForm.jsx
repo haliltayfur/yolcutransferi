@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-// Burada kendi projenin AutocompleteInput, EkstralarAccordion, fetchKvkk, vb. componentlarını import etmelisin
 import AutocompleteInput from "../../components/AutocompleteInput";
 import fetchKvkk from "../../utils/fetchKvkk";
 import getDistance from "../../utils/getDistance";
@@ -44,7 +43,19 @@ function getFormCache() {
     date: window.localStorage.getItem("yt_date") || "",
     time: window.localStorage.getItem("yt_time") || "",
     pnr: window.localStorage.getItem("yt_pnr") || "",
+    name: window.localStorage.getItem("yt_name") || "",
+    surname: window.localStorage.getItem("yt_surname") || "",
+    tc: window.localStorage.getItem("yt_tc") || "",
+    phone: window.localStorage.getItem("yt_phone") || "",
+    email: window.localStorage.getItem("yt_email") || "",
   };
+}
+
+function setFormCache(obj) {
+  if (typeof window === "undefined" || !window.localStorage) return;
+  Object.entries(obj).forEach(([k, v]) => {
+    window.localStorage.setItem("yt_" + k, v ?? "");
+  });
 }
 
 function isHavalimani(val) {
@@ -59,10 +70,10 @@ function getBestVehicleText(people, segment) {
   if (!people || !segment) return "";
   if (people <= 6) {
     valiz = segment === "Prime+" ? 3 : 2;
-    if (segment === "Prime+") txt = "Maybach veya benzeri";
-    else if (segment === "Lüks") txt = "Vito veya benzeri";
-    else txt = "Transporter veya benzeri";
-    return `Araç Seçimi: ${txt} (max 6 kişi, max ${valiz} valiz)`;
+    if (segment === "Prime+") txt = "Araç Seçimi: Maybach veya benzeri (max 6 kişi, max 3 valiz)";
+    else if (segment === "Lüks") txt = "Araç Seçimi: Vito veya benzeri (max 6 kişi, max 2 valiz)";
+    else txt = "Araç Seçimi: Transporter veya benzeri (max 6 kişi, max 2 valiz)";
+    return txt;
   }
   if (people >= 7 && people <= 8) return "Araç Seçimi: Mercedes Vito veya Transporter (max 8 kişi, max 6 valiz)";
   if (people >= 9 && people <= 12) return "Araç Seçimi: Mercedes Sprinter veya benzeri (max 12 kişi, max 9 valiz)";
@@ -82,11 +93,11 @@ export default function RezervasyonForm() {
   const [transfer, setTransfer] = useState(initial.transfer);
   const [date, setDate] = useState(initial.date);
   const [time, setTime] = useState(initial.time);
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
-  const [tc, setTc] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState(initial.name);
+  const [surname, setSurname] = useState(initial.surname);
+  const [tc, setTc] = useState(initial.tc);
+  const [phone, setPhone] = useState(initial.phone);
+  const [email, setEmail] = useState(initial.email);
   const [pnr, setPnr] = useState(initial.pnr || "");
   const [note, setNote] = useState("");
   const [extras, setExtras] = useState([]);
@@ -158,6 +169,9 @@ export default function RezervasyonForm() {
     setFieldErrors(err);
     if (Object.keys(err).length > 0) return;
     setShowSummary(true);
+
+    // Tüm alanları cachele
+    setFormCache({ from, to, people, segment, transfer, date, time, pnr, name, surname, tc, phone, email });
   }
 
   // Tarih inputu tıklanabilir/focuslanabilir
@@ -174,23 +188,26 @@ export default function RezervasyonForm() {
   }, []);
 
   // Su ekstrası için x kişiye x adet su ücretsiz, fazlası ücretli
-  const suAdedi = extras.filter(x => x === "su").length;
+  const suAdedi = extras.filter(x => x === "su" || x.key === "su").length;
   const freeSu = segment === "Prime+" ? suAdedi : Math.min(Number(people) || 0, suAdedi);
   const paidSu = segment === "Prime+" ? 0 : Math.max(0, suAdedi - (Number(people) || 0));
 
   // Sigorta ücreti
   const sigortaTutar = sigorta && transferUcreti ? Math.round(Number(transferUcreti) * 0.2) : 0;
 
-  // Rezervasyon kaydı, mail gönderimi (örnek, kendi API'ne göre uyarlayabilirsin)
+  // Ödeme sonrası: db + mail + teşekkür popup
   async function handlePaymentSuccess() {
-    await fetch("/api/rezervasyon/kaydet", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from, to, date, time, people, segment, transfer, name, surname, tc, phone, email, pnr, note,
-        extras, sigorta, sigortaTutar, transferUcreti, km, min
-      })
-    });
+    // API'yi sen backendine göre ayarla!
+    try {
+      await fetch("/api/rezervasyon/kaydet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from, to, date, time, people, segment, transfer, name, surname, tc, phone, email, pnr, note,
+          extras, sigorta, sigortaTutar, transferUcreti, km, min
+        })
+      });
+    } catch (e) {}
     setShowThanks(true);
   }
 
@@ -381,7 +398,9 @@ export default function RezervasyonForm() {
           <input
             type="checkbox"
             checked={kvkkChecked}
-            onChange={e => setKvkkChecked(e.target.checked)}
+            onChange={e => {
+              if (!kvkkChecked) setShowKvkkPopup(true);
+            }}
             className="mr-2"
             id="kvkkonay"
           />
@@ -444,7 +463,6 @@ export default function RezervasyonForm() {
             setShowPayment(true);
           },
           onRemoveSigorta: () => setSigorta(false),
-          people: Number(people) || 1,
         }}
       />
       <PaymentPopup
