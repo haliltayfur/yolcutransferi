@@ -1,57 +1,78 @@
-// PATH: utils/calcTransferPrice.js
+// PATH: app/utils/calcTransferPrice.js
 
-const priceTable = [
-  { km: 5,    eko: 1100, vip: 1500, prime: 9000, "8": 2500, "9+": 12000 },
-  { km: 33,   eko: 1500, vip: 2500, prime: 17000, "8": 3400, "9+": 12000 },
-  { km: 85,   eko: 3000, vip: 4000, prime: 20000, "8": 7000, "9+": 12000 },
-  { km: 142,  eko: 6500, vip: 8000, prime: 40000, "8": 20000, "9+": 35000 },
-];
+// Şoförün sana verdiği tablodan türetilmiş km başı fiyat algoritması
+export default function calcTransferPrice(km, segment, people, saat) {
+  if (!km || !segment) return 0;
 
-function getSegmentKey(segment) {
-  if (!segment) return "vip";
-  const lower = segment.toLowerCase();
-  if (lower.includes("eko")) return "eko";
-  if (lower.includes("prime")) return "prime";
-  if (lower.includes("lüks") || lower.includes("vip")) return "vip";
-  if (segment.includes("8")) return "8";
-  if (segment.includes("9") || lower.includes("plus") || lower.includes("+")) return "9+";
-  return "vip";
-}
+  // Tabloyu algoritmaya çeviriyoruz (senin fiyatlarından türetildi):
+  let fiyat = 0;
+  km = Number(km);
+  people = Number(people);
 
-function interpolate(km, seg) {
-  priceTable.sort((a, b) => a.km - b.km);
-  if (km <= priceTable[0].km) return priceTable[0][seg] || priceTable[0]["vip"];
-  if (km >= priceTable[priceTable.length-1].km) return priceTable[priceTable.length-1][seg] || priceTable[priceTable.length-1]["vip"];
-  for (let i = 0; i < priceTable.length - 1; i++) {
-    let curr = priceTable[i];
-    let next = priceTable[i + 1];
-    if (km >= curr.km && km <= next.km) {
-      const ratio = (km - curr.km) / (next.km - curr.km);
-      const priceCurr = curr[seg] || curr["vip"];
-      const priceNext = next[seg] || next["vip"];
-      return Math.round(priceCurr + (priceNext - priceCurr) * ratio);
-    }
+  // Temel km başı fiyatlar (örnekleme):
+  let baseFiyat = 0;
+
+  if (segment === "Ekonomik") {
+    if (km <= 10) baseFiyat = 1100;
+    else if (km <= 33) baseFiyat = 1500;
+    else if (km <= 85) baseFiyat = 3000;
+    else if (km <= 142) baseFiyat = 6500;
+    else baseFiyat = Math.round(km * 45); // örnek: 45 TL/km üstü
   }
-  return priceTable[0][seg] || priceTable[0]["vip"];
-}
-
-export default function calcTransferPrice(km, segment, people, hour) {
-  km = Number(km || 0);
-  people = Number(people || 1);
-  const seg = getSegmentKey(segment);
-
-  let price = interpolate(km, seg);
-
-  if (people > 1) {
-    price *= 1 + ((people - 1) * 0.05);
+  else if (segment === "Lüks") {
+    if (km <= 10) baseFiyat = 1500;
+    else if (km <= 33) baseFiyat = 2500;
+    else if (km <= 85) baseFiyat = 4000;
+    else if (km <= 142) baseFiyat = 8000;
+    else baseFiyat = Math.round(km * 60);
+  }
+  else if (segment === "Prime+") {
+    if (km <= 10) baseFiyat = 9000;
+    else if (km <= 33) baseFiyat = 17000;
+    else if (km <= 85) baseFiyat = 20000;
+    else if (km <= 142) baseFiyat = 40000;
+    else baseFiyat = Math.round(km * 270);
+  }
+  else if (people >= 9) { // 9 ve üstü yolcu için (minibüs, sprinter, büyük araçlar)
+    if (km <= 10) baseFiyat = 12000;
+    else if (km <= 33) baseFiyat = 12000;
+    else if (km <= 85) baseFiyat = 12000;
+    else if (km <= 142) baseFiyat = 35000;
+    else baseFiyat = Math.round(km * 280);
+  } else if (people >= 7) {
+    // 7-8 kişilik fiyatlar
+    if (km <= 10) baseFiyat = 2500;
+    else if (km <= 33) baseFiyat = 3400;
+    else if (km <= 85) baseFiyat = 7000;
+    else if (km <= 142) baseFiyat = 20000;
+    else baseFiyat = Math.round(km * 100);
   }
 
-  let hourNum = 12;
-  if (typeof hour === "string" && hour.length >= 2) {
-    hourNum = Number(hour.split(":")[0]);
+  // Kişi başı +%5 ekle (1'den fazla ise)
+  let extraPeopleRatio = people > 1 ? 1 + (people - 1) * 0.05 : 1;
+  let fiyatWithPeople = baseFiyat * extraPeopleRatio;
+
+  // Gece zammı (22:00 - 07:00 arası ise +%10 ekle)
+  let saatNum = 12;
+  if (typeof saat === "string" && saat.length >= 2) {
+    saatNum = parseInt(saat.split(":")[0], 10);
   }
-  if ((hourNum >= 22 || hourNum < 7)) {
-    price *= 1.10;
-  }
-  return Math.round(price);
+  let geceZammi = (saatNum >= 22 || saatNum < 7) ? 1.10 : 1;
+
+  // Şoförün sana verdiği fiyat, gece ve kişi başı ile:
+  let toplam = fiyatWithPeople * geceZammi;
+
+  // Şirket kârı ekle (%20)
+  toplam = toplam * 1.20;
+
+  // Sanal pos/ödeme platformu masrafı ekle (%2.5)
+  toplam = toplam * 1.025;
+
+  // KDV (%20) ekle
+  const kdv = toplam * 0.20;
+
+  // KDV dahil toplamı tam sayıya yuvarla (TL)
+  const sonFiyat = Math.round(toplam + kdv);
+
+  return sonFiyat;
 }
