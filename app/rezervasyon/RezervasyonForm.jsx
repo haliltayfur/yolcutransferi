@@ -32,20 +32,7 @@ const allTransfers = [
   "Dron Transferi"
 ];
 
-function getBestVehicleText(people, segment) {
-  people = Number(people);
-  if (!people || !segment) return "";
-  if (people <= 6) {
-    if (segment === "Prime+") return "Maybach veya benzeri (6 kişiye kadar).";
-    if (segment === "Lüks") return "Vito veya benzeri (6 kişiye kadar).";
-    return "Transporter veya benzeri (6 kişiye kadar).";
-  }
-  if (people >= 7 && people <= 8) return "Mercedes Vito veya Transporter önerilir (7-8 kişi).";
-  if (people >= 9) return "Mercedes Sprinter veya benzeri (9-16 kişi).";
-  return "";
-}
-
-// LOCALSTORAGE'DAN FORMU OTOMATİK DOLDUR
+// LocalStorage için otomatik öneri
 function getFormCache() {
   if (typeof window === "undefined" || !window.localStorage) return {};
   return {
@@ -60,9 +47,38 @@ function getFormCache() {
   };
 }
 
+// Araç ve valiz kapasitesi
+function getBestVehicleText(people, segment) {
+  people = Number(people);
+  let valiz = 0, txt = "";
+  if (!people || !segment) return "";
+  if (people <= 6) {
+    valiz = segment === "Prime+" ? 3 : 2;
+    if (segment === "Prime+") txt = "Maybach veya benzeri";
+    else if (segment === "Lüks") txt = "Vito veya benzeri";
+    else txt = "Transporter veya benzeri";
+    return `Araç Seçimi: ${txt} (max 6 kişi, max ${valiz} valiz)`;
+  }
+  if (people >= 7 && people <= 8) return "Araç Seçimi: Mercedes Vito veya Transporter (max 8 kişi, max 6 valiz)";
+  if (people >= 9 && people <= 12) return "Araç Seçimi: Mercedes Sprinter veya benzeri (max 12 kişi, max 9 valiz)";
+  if (people > 12 && people <= 16) return `Araç Seçimi: Büyük Minibüs (max ${people} kişi, max ${people - 3} valiz)`;
+  return "";
+}
+
+// Su ekstrası - ücretsiz su hesabı (prime+ segmentte ücret yok)
+function getWaterInfo(segment, people, suSayisi) {
+  people = Number(people) || 0;
+  suSayisi = Number(suSayisi) || 0;
+  if (segment === "Prime+") return { bedava: suSayisi, ucretli: 0 };
+  if (!people) return { bedava: 0, ucretli: suSayisi };
+  return {
+    bedava: Math.min(suSayisi, people),
+    ucretli: Math.max(0, suSayisi - people),
+  };
+}
+
 export default function RezervasyonForm() {
   const initial = getFormCache();
-  // State'ler
   const [from, setFrom] = useState(initial.from);
   const [to, setTo] = useState(initial.to);
   const [km, setKm] = useState("");
@@ -81,7 +97,7 @@ export default function RezervasyonForm() {
   const [pnr, setPnr] = useState(initial.pnr || "");
   const [note, setNote] = useState("");
   const [extras, setExtras] = useState([]);
-  const [sigorta, setSigorta] = useState(false);
+  const [sigorta, setSigorta] = useState(true); // Default: seçili gelsin
   const [showSigortaPopup, setShowSigortaPopup] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showKvkkPopup, setShowKvkkPopup] = useState(false);
@@ -93,44 +109,39 @@ export default function RezervasyonForm() {
   const dateInputRef = useRef();
   const [transferUcreti, setTransferUcreti] = useState(null);
 
-  // Dinamik KVKK yükle
+  // KVKK/Politika popup genişlik ayarı + içerik
   useEffect(() => {
     if (showKvkkPopup && !kvkkText) {
       fetchKvkk().then(txt => setKvkkText(txt));
     }
   }, [showKvkkPopup]);
 
-  // MESAFE & FİYAT OTOMATİK ÇEK
+  // MESAFE & FİYAT OTOMATİK ÇEK (+ yoğ. saat hes.)
   useEffect(() => {
     setKm(""); setMin(""); setDistErr("");
     if (!from || !to || !date || !time) return;
     if (transfer === "Dron Transferi") {
-      setKm("50"); setMin("60 dk"); setDistErr(""); // Dron sabit
+      setKm("50"); setMin("60 dk"); setDistErr("");
       setTransferUcreti(calcTransferPrice(50, segment, people, time));
       return;
     }
     getDistance(from, to).then(res => {
-      setKm(res.km);
-      setMin(res.min);
-      setDistErr(res.error);
-      if (res.km) {
-        setTransferUcreti(calcTransferPrice(res.km, segment, people, time));
-      } else {
-        setTransferUcreti(null);
+      // Trafik saatleri için ek süre ekle
+      let extra = 0;
+      if (["istanbul", "ankara", "izmir", "antalya"].some(s => [from, to].join(" ").toLowerCase().includes(s))) {
+        const hour = Number(time.split(":")[0]);
+        if ((hour >= 7 && hour <= 10) || (hour >= 16 && hour <= 21)) extra = 0.25; // %25 daha fazla süre
       }
+      let realMin = res.min && !isNaN(Number(res.min)) ? Math.round(Number(res.min) * (1 + extra)) : res.min;
+      setKm(res.km);
+      setMin(realMin ? `${realMin} dk` : res.min);
+      setDistErr(res.error);
+      if (res.km) setTransferUcreti(calcTransferPrice(res.km, segment, people, time));
+      else setTransferUcreti(null);
     });
   }, [from, to, date, time, transfer, segment, people]);
 
-  // Hata bekletme için (adres yazarken hatayı hemen basma, 10s bekle)
-  useEffect(() => {
-    let timeout;
-    if (distErr) {
-      timeout = setTimeout(() => setDistErr("Mesafe/süre hesaplanamadı"), 10000);
-    }
-    return () => clearTimeout(timeout);
-  }, [distErr]);
-
-  // Submit
+  // Submit validasyon
   function handleSubmit(e) {
     e.preventDefault();
     const err = {};
@@ -147,24 +158,53 @@ export default function RezervasyonForm() {
     let cleanedPhone = phone.replace(/\D/g, "");
     if (!/^05\d{9}$/.test(cleanedPhone) || cleanedPhone.length !== 11) err.phone = "Geçerli bir 05xx ile başlayan telefon giriniz.";
     if (!/^\S+@\S+\.\S+$/.test(email)) err.email = "Geçerli e-posta adresi giriniz.";
+    // Havalimanı varsa PNR zorunlu
+    const havalimanı = /havalimanı|airport/i;
+    if ((havalimanı.test(from) || havalimanı.test(to) || transfer === "VIP Havalimanı Transferi") && !pnr)
+      err.pnr = "Havalimanı transferlerinde PNR/Uçuş Kodu zorunludur.";
     if (!kvkkChecked) err.kvkk = "KVKK onayı zorunludur.";
     setFieldErrors(err);
     if (Object.keys(err).length > 0) return;
     setShowSummary(true);
   }
 
-  // Tarih kutusu click = takvim aç
+  // Tarih inputunu her yere tıklayınca aç
   useEffect(() => {
     if (!dateInputRef.current) return;
     const el = dateInputRef.current;
-    el.addEventListener("click", () => el.showPicker && el.showPicker());
-    return () => el.removeEventListener("click", () => el.showPicker && el.showPicker());
+    const openPicker = () => el.showPicker && el.showPicker();
+    el.addEventListener("click", openPicker);
+    el.addEventListener("focus", openPicker);
+    return () => {
+      el.removeEventListener("click", openPicker);
+      el.removeEventListener("focus", openPicker);
+    };
   }, []);
 
-  // Sigorta açıklama
-  const sigortaBilgiYazisi = sigorta
-    ? "Seçiminize göre ekstra 400-4000 TL arası YolcuTransferi Sigortası ücreti eklenir."
+  // Su ekstrası için hesap (x kişi, segment, toplam su)
+  const suAdedi = extras.filter(x => x === "su").length;
+
+  // Sigorta ücreti
+  const sigortaTutar = sigorta && transferUcreti ? Math.round(Number(transferUcreti) * 0.2) : 0;
+
+  // Ekstra info
+  const sigortaInfo = sigorta
+    ? "Ekstra sigorta için ekstra ücret yansıtılır."
     : "";
+
+  // Rezervasyon kaydı, mail gönderimi (API)
+  async function handlePaymentSuccess() {
+    // Kayıt ve maili backend API ile yap (örnek)
+    await fetch("/api/rezervasyon/kaydet", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from, to, date, time, people, segment, transfer, name, surname, tc, phone, email, pnr, note,
+        extras, sigorta, sigortaTutar, transferUcreti, km, min
+      })
+    });
+    setShowThanks(true);
+  }
 
   return (
     <section className="w-full max-w-3xl mx-auto rounded-3xl shadow-2xl bg-[#19160a] border border-[#bfa658] px-6 md:px-10 py-12 my-10">
@@ -300,17 +340,20 @@ export default function RezervasyonForm() {
             {fieldErrors.email && <div className="text-red-400 text-xs mt-1">{fieldErrors.email}</div>}
           </div>
         </div>
-        {/* PNR */}
-        <div className="mb-3">
-          <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
-          <input
-            className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
-            value={pnr}
-            onChange={e => setPnr(e.target.value)}
-            placeholder="Uçuş rezervasyon kodu (varsa)"
-            autoComplete="off"
-          />
-        </div>
+        {/* PNR - sadece havalimanı varsa zorunlu */}
+        {(/havalimanı|airport/i.test(from) || /havalimanı|airport/i.test(to) || transfer === "VIP Havalimanı Transferi") && (
+          <div className="mb-3">
+            <label className="font-bold text-[#bfa658] mb-1 block">PNR/Uçuş Kodu</label>
+            <input
+              className="input w-full bg-[#19160a] text-[#ffeec2] border border-[#bfa658] rounded-xl"
+              value={pnr}
+              onChange={e => setPnr(e.target.value)}
+              placeholder="Uçuş rezervasyon kodu (zorunlu)"
+              autoComplete="off"
+            />
+            {fieldErrors.pnr && <div className="text-red-400 text-xs mt-1">{fieldErrors.pnr}</div>}
+          </div>
+        )}
         {/* Not */}
         <div className="mb-3">
           <label className="font-bold text-[#bfa658] mb-1 block">Ek Not</label>
@@ -322,7 +365,7 @@ export default function RezervasyonForm() {
           />
         </div>
         {/* Ekstralar */}
-        <EkstralarAccordion value={extras} onChange={setExtras} />
+        <EkstralarAccordion value={extras} onChange={setExtras} people={people} segment={segment} />
         {/* Sigorta kutusu */}
         <div className="flex items-center mt-3 mb-2">
           <input
@@ -339,7 +382,7 @@ export default function RezervasyonForm() {
           >
             Bu seyahatim için ekstra YolcuTransferi Sigortası istiyorum.
           </label>
-          <span className="ml-2 text-[#bfa658] text-xs font-semibold">{sigortaBilgiYazisi}</span>
+          <span className="ml-2 text-[#bfa658] text-xs font-semibold">{sigortaInfo}</span>
           <SigortaPopup
             open={showSigortaPopup}
             onClose={() => setShowSigortaPopup(false)}
@@ -361,7 +404,7 @@ export default function RezervasyonForm() {
               tabIndex={0}
               style={{ outline: "none" }}
             >
-              KVKK, Satış ve Diğer Politikaları
+              KVKK, Mesafeli Satış ve Tüm Politikalar
             </span>{" "}
             okudum, onaylıyorum.
           </span>
@@ -372,7 +415,6 @@ export default function RezervasyonForm() {
             onConfirm={() => setKvkkChecked(true)}
           />
         </div>
-        {/* Hata */}
         {fieldErrors.kvkk && (
           <div className="text-red-400 text-xs mt-1">{fieldErrors.kvkk}</div>
         )}
@@ -406,13 +448,15 @@ export default function RezervasyonForm() {
           note,
           extras,
           sigorta,
-          sigortaTutar: sigorta ? 1000 : 0, // örnek!
-          transferUcreti: transferUcreti,
+          sigortaTutar,
+          transferUcreti,
           vehicleText: getBestVehicleText(Number(people), segment),
           onNext: () => {
             setShowSummary(false);
             setShowPayment(true);
           },
+          onRemoveSigorta: () => setSigorta(false), // Çöp kutusu ile kaldırmak için
+          people: Number(people) || 1,
         }}
       />
       <PaymentPopup
@@ -420,12 +464,11 @@ export default function RezervasyonForm() {
         onClose={() => setShowPayment(false)}
         {...{
           transferUcreti: transferUcreti,
-          sigortaTutar: sigorta ? 1000 : 0, // örnek!
-          extras: [],
-          onNext: () => {
-            setShowPayment(false);
-            setShowThanks(true);
-          },
+          sigortaTutar: sigortaTutar,
+          extras,
+          segment,
+          people: Number(people) || 1,
+          onNext: handlePaymentSuccess
         }}
       />
       <TesekkurPopup
