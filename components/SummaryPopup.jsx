@@ -1,156 +1,67 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 
-// Basit KDV oranı, ekstra toplamı
-const calcExtrasTotal = (extras) =>
-  (extras || []).reduce((sum, x) => sum + (x.price || 0) * (x.qty || 1), 0);
-
-export default function PaymentPopup({
-  open,
-  onClose,
-  transferUcreti = 0,
-  sigortaTutar = 0,
-  extras = [],
-  onNext,
+export default function SummaryPopup({
+  open, onClose, onNext,
+  from, to, date, time, people, segment, transfer,
+  name, surname, tc, phone, email, pnr, note, extras,
+  sigorta, sigortaTutar, transferUcreti, vehicleText,
+  onRemoveSigorta,
+  peopleCount
 }) {
-  const [cardNo, setCardNo] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [cardDate, setCardDate] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
   if (!open) return null;
 
-  // Ekstralar toplamı (ekstralar objelerinde price ve qty olmalı)
-  const extrasTotal = calcExtrasTotal(extras);
-  const araToplam = transferUcreti + (sigortaTutar || 0) + (extrasTotal || 0);
-  const kdv = Math.round(araToplam * 0.20);
-  const total = araToplam + kdv;
-
-  function handlePay(e) {
-    e.preventDefault();
-    setError("");
-    if (
-      cardNo.replace(/\s/g, "").length < 16 ||
-      !cardName ||
-      !/^([0-1]\d)\/\d{2}$/.test(cardDate) ||
-      cvv.length < 3
-    ) {
-      setError("Lütfen tüm kart bilgilerini doğru ve eksiksiz girin.");
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onNext();
-    }, 1300);
+  // Su ekstrası
+  const suSayisi = extras?.filter(x => x === "su").length || 0;
+  let suUcretsiz = 0, suUcretli = 0;
+  if (segment === "Prime+") suUcretsiz = suSayisi;
+  else {
+    suUcretsiz = Math.min(Number(peopleCount), suSayisi);
+    suUcretli = Math.max(0, suSayisi - Number(peopleCount));
   }
 
   return (
-    <div className="fixed inset-0 bg-[#18140dcc] z-[1000] flex items-center justify-center">
-      <div className="relative w-[95vw] max-w-xl bg-[#231d0f] border border-[#bfa658] rounded-2xl p-8 shadow-xl">
-        <button
-          className="absolute top-4 right-6 text-2xl text-[#bfa658] font-bold"
-          onClick={onClose}
-        >
-          ×
-        </button>
-        <h2 className="text-2xl font-bold mb-3 text-[#bfa658] text-center">
-          Ödeme ve Onay
-        </h2>
-        <div className="mb-2 text-[#ffeec2]">
-          <div>Transfer Ücreti: <b>₺{transferUcreti.toLocaleString("tr-TR")}</b></div>
-          {sigortaTutar > 0 && (
-            <div>Sigorta: <b>₺{sigortaTutar.toLocaleString("tr-TR")}</b></div>
+    <div className="popup-overlay">
+      <div className="popup-inner">
+        <h2 className="text-2xl font-bold text-[#bfa658] mb-2">Rezervasyon Özeti</h2>
+        <ul className="mb-3">
+          <li><b>Nereden:</b> {from}</li>
+          <li><b>Nereye:</b> {to}</li>
+          <li><b>Tarih:</b> {date}</li>
+          <li><b>Saat:</b> {time}</li>
+          <li><b>Kişi:</b> {people}</li>
+          <li><b>Segment:</b> {segment}</li>
+          <li><b>Transfer Türü:</b> {transfer}</li>
+          {vehicleText && <li><b style={{color:'#bfa658'}}>Araç Seçimi:</b> {vehicleText}</li>}
+          {pnr && <li><b>PNR:</b> {pnr}</li>}
+          {sigorta && (
+            <li style={{display:'flex',alignItems:'center'}}>
+              <span><b>YolcuTransferi Özel Sigorta:</b> {sigortaTutar} TL <span style={{fontSize:12,color:'#777'}}>(transfer bedelinin %20'si)</span></span>
+              <button className="ml-2 text-red-500" onClick={onRemoveSigorta} title="Sigortayı kaldır">🗑️</button>
+            </li>
           )}
-          {extrasTotal > 0 && (
-            <div>
-              Ekstralar: <b>₺{extrasTotal.toLocaleString("tr-TR")}</b>
-              <ul className="ml-4 list-disc text-sm">
-                {extras.map(
-                  (x) =>
-                    x.price && (
-                      <li key={x.key}>
-                        {x.label} {x.qty > 1 ? `x${x.qty}` : ""}
-                        {": "}
-                        ₺{(x.price * (x.qty || 1)).toLocaleString("tr-TR")}
-                      </li>
-                    )
-                )}
-              </ul>
-            </div>
+          {suSayisi > 0 && (
+            <li>
+              <b>Su:</b> {suSayisi} adet
+              {suUcretsiz > 0 && <span style={{color:'#4caf50'}}> (ilk {suUcretsiz} adet su ikram)</span>}
+              {suUcretli > 0 && <span style={{color:'#d32f2f'}}> ({suUcretli} adet ücretli)</span>}
+            </li>
           )}
-          <div>KDV: <b>₺{kdv.toLocaleString("tr-TR")}</b></div>
-          <div className="font-bold text-lg mt-2">
-            Toplam Ödenecek Tutar:{" "}
-            <span className="text-[#ffd700]">
-              ₺{total.toLocaleString("tr-TR")}
-            </span>
-          </div>
+        </ul>
+        <div className="mb-4">
+          <b>Ekstralar:</b> {extras.filter(x=>x!=="su").length === 0 ? "Yok" : extras.filter(x=>x!=="su").join(", ")}
         </div>
-        <div className="bg-[#ffeec299] p-3 rounded-lg text-black font-semibold mb-2 text-center">
-          Kredi kartı bilgileriniz demo olarak alınacaktır. <br />
-          Gerçek ödeme burada gerçekleşmez. (Sahte bilgiler girebilirsiniz)
+        <div className="flex gap-2">
+          <button className="btn-cancel" onClick={onClose}>Vazgeç</button>
+          <button className="btn-main" onClick={onNext}>Devam Et & Ödeme</button>
         </div>
-        <form className="grid grid-cols-1 gap-2" onSubmit={handlePay} autoComplete="off">
-          <input
-            className="input"
-            placeholder="Kart Numarası (16 hane)"
-            maxLength={19}
-            value={cardNo}
-            onChange={(e) =>
-              setCardNo(
-                e.target.value
-                  .replace(/\D/g, "")
-                  .replace(/(.{4})/g, "$1 ")
-                  .trim()
-                  .slice(0, 19)
-              )
-            }
-            inputMode="numeric"
-          />
-          <input
-            className="input"
-            placeholder="Kart Üzerindeki İsim"
-            value={cardName}
-            onChange={(e) => setCardName(e.target.value)}
-            autoComplete="cc-name"
-          />
-          <div className="flex gap-2">
-            <input
-              className="input flex-1"
-              placeholder="AA/YY"
-              value={cardDate}
-              onChange={(e) => setCardDate(e.target.value)}
-              maxLength={5}
-              inputMode="text"
-              autoComplete="cc-exp"
-            />
-            <input
-              className="input flex-1"
-              placeholder="CVV"
-              maxLength={4}
-              value={cvv}
-              onChange={(e) => setCvv(e.target.value.replace(/\D/g, ""))}
-              inputMode="numeric"
-              autoComplete="cc-csc"
-            />
-          </div>
-          {error && <div className="text-red-400 text-xs mt-2">{error}</div>}
-          <button
-            type="submit"
-            className="w-full btn bg-gradient-to-r from-[#bfa658] to-[#ffeec2] text-black text-lg font-bold py-3 mt-4 rounded-lg flex items-center justify-center"
-            disabled={loading}
-          >
-            {loading ? (
-              <span className="animate-spin h-6 w-6 border-2 border-[#bfa658] border-t-transparent rounded-full"></span>
-            ) : (
-              "Öde ve VIP hizmetin keyfini çıkar"
-            )}
-          </button>
-        </form>
       </div>
+      <style>{`
+        .popup-overlay {position:fixed;z-index:9999;top:0;left:0;width:100vw;height:100vh;background:rgba(30,20,0,0.82);display:flex;align-items:center;justify-content:center;}
+        .popup-inner {background:#23200e;padding:34px 30px;border-radius:18px;max-width:430px;width:96vw;box-shadow:0 12px 48px 0 #bfa65860;}
+        .btn-main {background:linear-gradient(90deg,#bfa658,#ffeec2);font-weight:600;padding:10px 24px;border-radius:8px;}
+        .btn-cancel {background:#222;border:1px solid #bfa658;font-weight:500;padding:10px 18px;border-radius:8px;color:#fff;}
+      `}</style>
     </div>
   );
 }
