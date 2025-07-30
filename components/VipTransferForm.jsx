@@ -36,8 +36,12 @@ function getFormCache() {
     transfer: window.localStorage.getItem("yt_transfer") || "",
     date: window.localStorage.getItem("yt_date") || "",
     time: window.localStorage.getItem("yt_time") || "",
-    // pnr default görünmesin
   };
+}
+
+function isHavalimani(str) {
+  if (!str) return false;
+  return /havalimanı|airport/i.test(str.toLowerCase());
 }
 
 export default function VipTransferForm() {
@@ -83,11 +87,8 @@ export default function VipTransferForm() {
     };
   }, []);
 
-  // HavaliManı kontrolü (her yazışta anında kontrol!)
+  // Havalimanı kontrolü
   useEffect(() => {
-    const isHavalimani = (str) =>
-      str?.toLowerCase().includes("havalimanı") ||
-      str?.toLowerCase().includes("airport");
     if (isHavalimani(from) || isHavalimani(to)) setShowPnr(true);
     else {
       setShowPnr(false);
@@ -95,7 +96,7 @@ export default function VipTransferForm() {
     }
   }, [from, to]);
 
-  // Tarih inputuna tıklayınca her yerine tıklanabilme desteği
+  // Tarih inputuna tıklayınca/odaklanınca takvim aç (readOnly KALKSIN)
   useEffect(() => {
     if (!dateInputRef.current) return;
     const el = dateInputRef.current;
@@ -202,7 +203,7 @@ export default function VipTransferForm() {
             onChange={e => setDate(e.target.value)}
             min={new Date().toISOString().split("T")[0]}
             style={{ cursor: "pointer" }}
-            readOnly // Takvimle açmayı zorlamak için, elle yazmayı da engeller
+            // readOnly **KULLANMA!**
           />
         </div>
         {/* Saat */}
