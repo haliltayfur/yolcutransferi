@@ -1,106 +1,155 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { extrasList } from "../data/extras";
+import React, { useState } from "react";
 
-export default function SummaryPopup({
-  open, onClose, from, to, date, time, people, segment, transfer,
-  name, surname, tc, phone, email, pnr, note,
-  extras, sigorta, sigortaTutar, transferUcreti, vehicleText, onNext
+// Basit KDV oranı, ekstra toplamı
+const calcExtrasTotal = (extras) =>
+  (extras || []).reduce((sum, x) => sum + (x.price || 0) * (x.qty || 1), 0);
+
+export default function PaymentPopup({
+  open,
+  onClose,
+  transferUcreti = 0,
+  sigortaTutar = 0,
+  extras = [],
+  onNext,
 }) {
-  function getLabel(key) {
-    const found = extrasList.find(e => e.key === key);
-    return found ? found.label : key;
-  }
-  const [extrasQty, setExtrasQty] = useState(() =>
-    Object.fromEntries((extras || []).map(x => [x, 1]))
-  );
-
-  useEffect(() => {
-    setExtrasQty(Object.fromEntries((extras || []).map(x => [x, 1])));
-  }, [extras, open]);
-
-  function changeQty(key, diff) {
-    setExtrasQty(q => {
-      const next = { ...q, [key]: Math.max(1, (q[key] || 1) + diff) };
-      return next;
-    });
-  }
-  function removeExtra(key) {
-    setExtrasQty(q => {
-      const next = { ...q };
-      delete next[key];
-      return next;
-    });
-  }
-
-  function getExtraPrice(key) {
-    const found = extrasList.find(e => e.key === key);
-    return found && found.price ? found.price : 0;
-  }
-  const extrasToplam = Object.entries(extrasQty).reduce(
-    (sum, [key, val]) => sum + getExtraPrice(key) * val,
-    0
-  );
-  const araToplam = (Number(transferUcreti || 0) + Number(sigortaTutar || 0) + Number(extrasToplam));
-  const kdv = Math.round(araToplam * 0.2);
-  const toplam = araToplam + kdv;
+  const [cardNo, setCardNo] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [cardDate, setCardDate] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   if (!open) return null;
 
+  // Ekstralar toplamı (ekstralar objelerinde price ve qty olmalı)
+  const extrasTotal = calcExtrasTotal(extras);
+  const araToplam = transferUcreti + (sigortaTutar || 0) + (extrasTotal || 0);
+  const kdv = Math.round(araToplam * 0.20);
+  const total = araToplam + kdv;
+
+  function handlePay(e) {
+    e.preventDefault();
+    setError("");
+    if (
+      cardNo.replace(/\s/g, "").length < 16 ||
+      !cardName ||
+      !/^([0-1]\d)\/\d{2}$/.test(cardDate) ||
+      cvv.length < 3
+    ) {
+      setError("Lütfen tüm kart bilgilerini doğru ve eksiksiz girin.");
+      return;
+    }
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      onNext();
+    }, 1300);
+  }
+
   return (
     <div className="fixed inset-0 bg-[#18140dcc] z-[1000] flex items-center justify-center">
-      <div className="relative w-full max-w-2xl mx-auto bg-[#231d0f] border border-[#bfa658] rounded-2xl p-6 md:p-8 shadow-xl">
-        <button className="absolute top-4 right-6 text-2xl text-[#bfa658] font-bold" onClick={onClose}>×</button>
-        <h2 className="text-2xl font-bold mb-2 text-[#bfa658] text-center">Sipariş Özeti</h2>
-        <div className="flex flex-col gap-1 text-[#ffeec2] text-base">
-          <div><b>Nereden:</b> {from} <b>Nereye:</b> {to}</div>
-          <div><b>Tarih:</b> {date} <b>Saat:</b> {time}</div>
-          <div><b>Kişi sayısı:</b> {people} <b>Segment:</b> {segment}</div>
-          <div><b>Transfer Türü:</b> {transfer}</div>
-          {vehicleText && (<div className="mt-1"><b>Araç:</b> {vehicleText}</div>)}
-          <div><b>Ad Soyad:</b> {name} {surname}</div>
-          <div><b>TC Kimlik:</b> {tc}</div>
-          <div><b>Telefon:</b> {phone}</div>
-          <div><b>E-posta:</b> {email}</div>
-          {pnr && <div><b>PNR/Uçuş Kodu:</b> {pnr}</div>}
-          {note && <div><b>Ek Not:</b> {note}</div>}
-        </div>
-        {sigorta && (
-          <div className="mt-3 text-[#ffeec2] font-bold">
-            <b>YolcuTransferi Sigortası:</b> EKLENDİ {sigortaTutar ? `(₺${sigortaTutar})` : ""}
-          </div>
-        )}
-        <div className="mt-4 mb-2">
-          <b className="text-[#bfa658]">Ekstralar:</b>
-          <ul className="mt-1">
-            {Object.entries(extrasQty).length === 0 && (
-              <li className="ml-4 italic text-[#bfa658]">Ekstra seçilmedi</li>
-            )}
-            {Object.entries(extrasQty).map(([key, val]) => (
-              <li key={key} className="flex items-center ml-2 my-1">
-                <button onClick={() => changeQty(key, -1)} className="w-6 h-6 bg-[#c4b07c] rounded-full text-black mr-1 font-bold">-</button>
-                <span className="font-bold text-[#ffeec2]">{val}x</span>
-                <button onClick={() => changeQty(key, +1)} className="w-6 h-6 bg-[#c4b07c] rounded-full text-black ml-1 font-bold">+</button>
-                <span className="ml-2">{getLabel(key)}</span>
-                <button onClick={() => removeExtra(key)} className="ml-2 text-red-500 text-xl">🗑️</button>
-                {getExtraPrice(key) > 0 && (
-                  <span className="ml-2 text-[#bfa658] font-medium">₺{getExtraPrice(key) * val}</span>
+      <div className="relative w-[95vw] max-w-xl bg-[#231d0f] border border-[#bfa658] rounded-2xl p-8 shadow-xl">
+        <button
+          className="absolute top-4 right-6 text-2xl text-[#bfa658] font-bold"
+          onClick={onClose}
+        >
+          ×
+        </button>
+        <h2 className="text-2xl font-bold mb-3 text-[#bfa658] text-center">
+          Ödeme ve Onay
+        </h2>
+        <div className="mb-2 text-[#ffeec2]">
+          <div>Transfer Ücreti: <b>₺{transferUcreti.toLocaleString("tr-TR")}</b></div>
+          {sigortaTutar > 0 && (
+            <div>Sigorta: <b>₺{sigortaTutar.toLocaleString("tr-TR")}</b></div>
+          )}
+          {extrasTotal > 0 && (
+            <div>
+              Ekstralar: <b>₺{extrasTotal.toLocaleString("tr-TR")}</b>
+              <ul className="ml-4 list-disc text-sm">
+                {extras.map(
+                  (x) =>
+                    x.price && (
+                      <li key={x.key}>
+                        {x.label} {x.qty > 1 ? `x${x.qty}` : ""}
+                        {": "}
+                        ₺{(x.price * (x.qty || 1)).toLocaleString("tr-TR")}
+                      </li>
+                    )
                 )}
-              </li>
-            ))}
-          </ul>
+              </ul>
+            </div>
+          )}
+          <div>KDV: <b>₺{kdv.toLocaleString("tr-TR")}</b></div>
+          <div className="font-bold text-lg mt-2">
+            Toplam Ödenecek Tutar:{" "}
+            <span className="text-[#ffd700]">
+              ₺{total.toLocaleString("tr-TR")}
+            </span>
+          </div>
         </div>
-        <div className="mt-6 flex flex-col gap-1 text-[#ffeec2] text-lg">
-          <div>Transfer Ücreti: <b className="text-[#ffd700]">{transferUcreti ? `₺${transferUcreti.toLocaleString("tr-TR")}` : "Hesaplanamadı"}</b></div>
-          {extrasToplam > 0 && <div>Ekstralar Toplamı: <b className="text-[#bfa658]">₺{extrasToplam}</b></div>}
-          {sigorta && sigortaTutar > 0 && <div>Sigorta: <b className="text-[#bfa658]">₺{sigortaTutar}</b></div>}
-          <div>KDV (%20): <b className="text-[#bfa658]">₺{kdv}</b></div>
-          <div className="mt-1 text-xl">Toplam: <span className="text-[#ffd700] font-extrabold">₺{toplam.toLocaleString("tr-TR")}</span></div>
+        <div className="bg-[#ffeec299] p-3 rounded-lg text-black font-semibold mb-2 text-center">
+          Kredi kartı bilgileriniz demo olarak alınacaktır. <br />
+          Gerçek ödeme burada gerçekleşmez. (Sahte bilgiler girebilirsiniz)
         </div>
-        <div className="flex gap-2 mt-8">
-          <button onClick={onClose} className="flex-1 btn bg-[#222] text-white py-2 rounded-lg border border-[#bfa658] hover:bg-[#2c2a20]">Vazgeç</button>
-          <button onClick={() => onNext(extrasQty)} className="flex-1 btn bg-gradient-to-r from-[#bfa658] to-[#ffeec2] text-black font-bold py-2 rounded-lg hover:scale-105 transition">Ödemeye Geç</button>
-        </div>
+        <form className="grid grid-cols-1 gap-2" onSubmit={handlePay} autoComplete="off">
+          <input
+            className="input"
+            placeholder="Kart Numarası (16 hane)"
+            maxLength={19}
+            value={cardNo}
+            onChange={(e) =>
+              setCardNo(
+                e.target.value
+                  .replace(/\D/g, "")
+                  .replace(/(.{4})/g, "$1 ")
+                  .trim()
+                  .slice(0, 19)
+              )
+            }
+            inputMode="numeric"
+          />
+          <input
+            className="input"
+            placeholder="Kart Üzerindeki İsim"
+            value={cardName}
+            onChange={(e) => setCardName(e.target.value)}
+            autoComplete="cc-name"
+          />
+          <div className="flex gap-2">
+            <input
+              className="input flex-1"
+              placeholder="AA/YY"
+              value={cardDate}
+              onChange={(e) => setCardDate(e.target.value)}
+              maxLength={5}
+              inputMode="text"
+              autoComplete="cc-exp"
+            />
+            <input
+              className="input flex-1"
+              placeholder="CVV"
+              maxLength={4}
+              value={cvv}
+              onChange={(e) => setCvv(e.target.value.replace(/\D/g, ""))}
+              inputMode="numeric"
+              autoComplete="cc-csc"
+            />
+          </div>
+          {error && <div className="text-red-400 text-xs mt-2">{error}</div>}
+          <button
+            type="submit"
+            className="w-full btn bg-gradient-to-r from-[#bfa658] to-[#ffeec2] text-black text-lg font-bold py-3 mt-4 rounded-lg flex items-center justify-center"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="animate-spin h-6 w-6 border-2 border-[#bfa658] border-t-transparent rounded-full"></span>
+            ) : (
+              "Öde ve VIP hizmetin keyfini çıkar"
+            )}
+          </button>
+        </form>
       </div>
     </div>
   );
