@@ -2,7 +2,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 
-// Segment ve transfer tipleri
 const defaultSegments = [
   { key: "Ekonomik", label: "Ekonomik" },
   { key: "Lüks", label: "Lüks" },
@@ -37,12 +36,11 @@ function getFormCache() {
     transfer: window.localStorage.getItem("yt_transfer") || "",
     date: window.localStorage.getItem("yt_date") || "",
     time: window.localStorage.getItem("yt_time") || "",
-    pnr: window.localStorage.getItem("yt_pnr") || "",
+    // pnr default görünmesin
   };
 }
 
 export default function VipTransferForm() {
-  // localStorage'dan oku (her mountta)
   const initial = getFormCache();
   const [from, setFrom] = useState(initial.from);
   const [to, setTo] = useState(initial.to);
@@ -51,12 +49,15 @@ export default function VipTransferForm() {
   const [transfer, setTransfer] = useState(initial.transfer);
   const [date, setDate] = useState(initial.date);
   const [time, setTime] = useState(initial.time);
-  const [pnr, setPnr] = useState(initial.pnr);
-  // Google autocomplete için
+  const [pnr, setPnr] = useState("");
+  const [showPnr, setShowPnr] = useState(false);
+
+  // Google Autocomplete refs
   const fromRef = useRef();
   const toRef = useRef();
+  const dateInputRef = useRef();
 
-  // Google Places Autocomplete
+  // Google Autocomplete sadece Nereden/Nereye için
   useEffect(() => {
     if (!window.google || !window.google.maps || !fromRef.current || !toRef.current) return;
 
@@ -75,17 +76,42 @@ export default function VipTransferForm() {
       else if (place?.name) setTo(place.name);
       else setTo(toRef.current.value);
     });
-    // Cleanup
+
     return () => {
       window.google.maps.event.clearInstanceListeners(acFrom);
       window.google.maps.event.clearInstanceListeners(acTo);
     };
   }, []);
 
+  // HavaliManı kontrolü (her yazışta anında kontrol!)
+  useEffect(() => {
+    const isHavalimani = (str) =>
+      str?.toLowerCase().includes("havalimanı") ||
+      str?.toLowerCase().includes("airport");
+    if (isHavalimani(from) || isHavalimani(to)) setShowPnr(true);
+    else {
+      setShowPnr(false);
+      setPnr("");
+    }
+  }, [from, to]);
+
+  // Tarih inputuna tıklayınca her yerine tıklanabilme desteği
+  useEffect(() => {
+    if (!dateInputRef.current) return;
+    const el = dateInputRef.current;
+    const openPicker = () => el.showPicker && el.showPicker();
+    el.addEventListener("click", openPicker);
+    el.addEventListener("focus", openPicker);
+    return () => {
+      el.removeEventListener("click", openPicker);
+      el.removeEventListener("focus", openPicker);
+    };
+  }, []);
+
   function handleSubmit(e) {
     e.preventDefault();
-    setFormCache({ from, to, people, segment, transfer, date, time, pnr });
-    window.location.href = "/rezervasyon"; // Otomatik yönlendir
+    setFormCache({ from, to, people, segment, transfer, date, time, pnr: showPnr ? pnr : "" });
+    window.location.href = "/rezervasyon";
   }
 
   const inputClass =
@@ -96,16 +122,14 @@ export default function VipTransferForm() {
       <h2 className="text-3xl font-bold text-[#bfa658] mb-1" style={{ marginTop: 0 }}>
         VIP Transfer Rezervasyonu
       </h2>
-      <div
-        style={{
-          height: 2,
-          background: "#bfa658",
-          borderRadius: 2,
-          width: "100%",
-          marginBottom: 18,
-          marginTop: 3,
-        }}
-      />
+      <div style={{
+        height: 2,
+        background: "#bfa658",
+        borderRadius: 2,
+        width: "100%",
+        marginBottom: 18,
+        marginTop: 3,
+      }} />
       <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-5">
         {/* Nereden */}
         <div className="col-span-1">
@@ -139,16 +163,18 @@ export default function VipTransferForm() {
             {Array.from({ length: 16 }, (_, i) => i + 1).map(val => <option key={val} value={val}>{val}</option>)}
           </select>
         </div>
-        {/* PNR */}
-        <div>
-          <label className="block text-[#bfa658] font-semibold mb-1">PNR (varsa)</label>
-          <input
-            className={inputClass}
-            placeholder="Uçuş Kodu (varsa)"
-            value={pnr}
-            onChange={e => setPnr(e.target.value)}
-          />
-        </div>
+        {/* PNR sadece havalimanı varsa */}
+        {showPnr ? (
+          <div>
+            <label className="block text-[#bfa658] font-semibold mb-1">PNR/Uçuş Kodu</label>
+            <input
+              className={inputClass}
+              placeholder="Uçuş Rezervasyon Kodu"
+              value={pnr}
+              onChange={e => setPnr(e.target.value)}
+            />
+          </div>
+        ) : <div></div>}
         {/* Transfer Türü */}
         <div>
           <label className="block text-[#bfa658] font-semibold mb-1">Transfer Türü</label>
@@ -170,10 +196,13 @@ export default function VipTransferForm() {
           <label className="block text-[#bfa658] font-semibold mb-1">Tarih</label>
           <input
             type="date"
+            ref={dateInputRef}
             className={inputClass}
             value={date}
             onChange={e => setDate(e.target.value)}
             min={new Date().toISOString().split("T")[0]}
+            style={{ cursor: "pointer" }}
+            readOnly // Takvimle açmayı zorlamak için, elle yazmayı da engeller
           />
         </div>
         {/* Saat */}
