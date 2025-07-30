@@ -1,34 +1,24 @@
-"use client";
+// components/KvkkPopup.jsx
 import React, { useState, useEffect } from "react";
 
 export default function KvkkPopup({ open, onClose, text = "", onConfirm }) {
   const [scrolled, setScrolled] = useState(false);
 
-  useEffect(() => {
-    setScrolled(false); // popup açıldığında tekrar aktif et
-  }, [open]);
-
+  useEffect(() => setScrolled(false), [open]);
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 bg-[#18140dcc] z-[1000] flex items-center justify-center">
       <div className="relative w-[97vw] max-w-2xl bg-[#231d0f] border border-[#bfa658] rounded-2xl p-8 max-h-[90vh] flex flex-col shadow-2xl">
-        <button
-          className="absolute top-4 right-6 text-2xl text-[#bfa658] font-bold"
-          onClick={onClose}
-          tabIndex={0}
-          aria-label="Kapat"
-        >
-          ×
-        </button>
-        <h2 className="text-2xl font-bold mb-4 text-[#bfa658] text-center">
-          KVKK, Mesafeli Satış ve Tüm Politikalar
-        </h2>
+        <button className="absolute top-4 right-6 text-2xl text-[#bfa658] font-bold" onClick={onClose}>×</button>
+        <div className="text-2xl font-bold mb-4 text-[#bfa658] text-center">KVKK, Mesafeli Satış ve Tüm Politikalar</div>
         <div
-          className="overflow-y-auto text-[#ffeec2] text-sm md:text-base leading-relaxed px-2"
-          style={{ maxHeight: "45vh", border: "1px solid #bfa658", borderRadius: 10, padding: 12, background: "#2a2415" }}
+          className="overflow-y-auto policy-content text-[#ffeec2] text-base leading-relaxed px-2"
+          style={{
+            maxHeight: "45vh", border: "1px solid #bfa658",
+            borderRadius: 10, background: "#2a2415", padding: 18
+          }}
           onScroll={e => {
-            // Scroll sona geldiyse scrolled true
             const { scrollTop, clientHeight, scrollHeight } = e.target;
             if (scrollTop + clientHeight >= scrollHeight - 10) setScrolled(true);
           }}
@@ -46,6 +36,26 @@ export default function KvkkPopup({ open, onClose, text = "", onConfirm }) {
         >
           {scrolled ? "Okudum, Onaylıyorum" : "Metni sona kadar okuyunuz"}
         </button>
+        <style jsx>{`
+          .policy-content h1, .policy-content h2 {
+            color: #ffd700;
+            margin-top: 16px; margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 1.15em;
+          }
+          .policy-content ul, .policy-content ol {
+            margin-left: 16px;
+            margin-bottom: 10px;
+          }
+          .policy-content li {
+            margin-bottom: 7px;
+            line-height: 1.5;
+          }
+          .policy-content a {
+            color: #ffd700;
+            text-decoration: underline;
+          }
+        `}</style>
       </div>
     </div>
   );
