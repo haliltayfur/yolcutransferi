@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 
-// Basit KDV oranı, ekstra toplamı
+// Su ekstrası popup'a gönderilmeli
 const calcExtrasTotal = (extras) =>
   (extras || []).reduce((sum, x) => sum + (x.price || 0) * (x.qty || 1), 0);
 
@@ -90,10 +90,7 @@ export default function PaymentPopup({
             </span>
           </div>
         </div>
-        <div className="bg-[#ffeec299] p-3 rounded-lg text-black font-semibold mb-2 text-center">
-          Kredi kartı bilgileriniz demo olarak alınacaktır. <br />
-          Gerçek ödeme burada gerçekleşmez. (Sahte bilgiler girebilirsiniz)
-        </div>
+        {/* DEMO UYARISI YOK */}
         <form className="grid grid-cols-1 gap-2" onSubmit={handlePay} autoComplete="off">
           <input
             className="input"
