@@ -1,4 +1,3 @@
-// PATH: app/components/VipTransferForm.jsx
 "use client";
 import { useState, useEffect, useRef } from "react";
 
@@ -36,12 +35,13 @@ function getFormCache() {
     transfer: window.localStorage.getItem("yt_transfer") || "",
     date: window.localStorage.getItem("yt_date") || "",
     time: window.localStorage.getItem("yt_time") || "",
+    pnr: window.localStorage.getItem("yt_pnr") || "",
   };
 }
 
-function isHavalimani(str) {
-  if (!str) return false;
-  return /havalimanı|airport/i.test(str.toLowerCase());
+function isHavalimani(val) {
+  if (!val) return false;
+  return /(havaalanı|havalimanı|airport)/i.test(val);
 }
 
 export default function VipTransferForm() {
@@ -53,15 +53,14 @@ export default function VipTransferForm() {
   const [transfer, setTransfer] = useState(initial.transfer);
   const [date, setDate] = useState(initial.date);
   const [time, setTime] = useState(initial.time);
-  const [pnr, setPnr] = useState("");
+  const [pnr, setPnr] = useState(initial.pnr || "");
   const [showPnr, setShowPnr] = useState(false);
 
-  // Google Autocomplete refs
   const fromRef = useRef();
   const toRef = useRef();
   const dateInputRef = useRef();
 
-  // Google Autocomplete sadece Nereden/Nereye için
+  // Google Autocomplete
   useEffect(() => {
     if (!window.google || !window.google.maps || !fromRef.current || !toRef.current) return;
 
@@ -87,16 +86,17 @@ export default function VipTransferForm() {
     };
   }, []);
 
-  // Havalimanı kontrolü
+  // Havalimanı kontrolü (her üç alanda)
   useEffect(() => {
-    if (isHavalimani(from) || isHavalimani(to)) setShowPnr(true);
-    else {
+    if (isHavalimani(from) || isHavalimani(to) || isHavalimani(transfer)) {
+      setShowPnr(true);
+    } else {
       setShowPnr(false);
       setPnr("");
     }
-  }, [from, to]);
+  }, [from, to, transfer]);
 
-  // Tarih inputuna tıklayınca/odaklanınca takvim aç (readOnly KALKSIN)
+  // Tarih inputu UX
   useEffect(() => {
     if (!dateInputRef.current) return;
     const el = dateInputRef.current;
@@ -173,6 +173,7 @@ export default function VipTransferForm() {
               placeholder="Uçuş Rezervasyon Kodu"
               value={pnr}
               onChange={e => setPnr(e.target.value)}
+              autoComplete="off"
             />
           </div>
         ) : <div></div>}
@@ -203,7 +204,6 @@ export default function VipTransferForm() {
             onChange={e => setDate(e.target.value)}
             min={new Date().toISOString().split("T")[0]}
             style={{ cursor: "pointer" }}
-            // readOnly **KULLANMA!**
           />
         </div>
         {/* Saat */}
