@@ -94,7 +94,7 @@ export default function Araclar() {
         {/* Footer Notu */}
         <div className="mt-14 text-center text-[#e0d7bc] text-[15px]">
           <span className="text-gold">
-            Tüm araçlar YolcuTransferi iş ortaklarından; hijyen ve bakım standartlarında sunulur.
+            Tüm araçlar YolcuTransferi.com iş ortaklarına ait olup, hijyen ve bakım standartlarında sunulur.
           </span>
         </div>
       </div>
