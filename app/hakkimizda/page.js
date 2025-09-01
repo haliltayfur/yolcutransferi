@@ -15,7 +15,7 @@ export default function Hakkimizda() {
 
         <div className="text-base md:text-lg text-[#ecd9aa] leading-relaxed font-normal space-y-7">
           <p className="mb-5">
-            <span className="font-semibold text-[#ffeec2]">YolcuTransferi.com</span> olarak, Türkiye genelinde VIP ulaşım, havalimanı transferi, şehirler arası taşımacılık ve özel etkinliklerde kusursuz hizmet anlayışıyla faaliyet gösteriyoruz. Gücümüzü; alanında deneyimli şoförler ve güvenilir transfer firmalarıyla kurduğumuz güçlü iş birliklerinden alıyoruz.
+            <span className="font-semibold text-[#ffeec2]">YolcuTransferi.com</span> olarak, Türkiye genelinde VIP ulaşım, havalimanı transferi, şehirler arası taşımacılık ve özel etkinliklerde yüksek standartlı hizmet anlayışıyla faaliyet gösteriyoruz. Gücümüzü; alanında deneyimli şoförler, güvenilir transfer firmaları ve teknolojik altyapımızdan alıyoruz.
           </p>
 
           <ul className="pl-6 space-y-4 mb-2">
@@ -37,14 +37,14 @@ export default function Hakkimizda() {
               <span className="inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
               <span>
                 <span className="text-[#ffeec2] font-semibold">Seçkin İş Birlikleri:</span>{" "}
-                Her iş ortağımız sektörün tecrübeli firmalarından ve lisanslı, profesyonel şoförlerden oluşur. Tüm iş birlikleri özenle seçilir ve sürekli denetlenir.
+                Her iş ortağımız lisanslı ve profesyonel şoförlerden oluşur. Tüm iş birlikleri özenle seçilir ve düzenli olarak denetlenir.
               </span>
             </li>
             <li className="flex items-start gap-2">
               <span className="inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-br from-[#e3b77b] to-[#bfa658] mt-2"></span>
               <span>
                 <span className="text-[#ffeec2] font-semibold">Sigortalı & Yasal Güvence:</span>{" "}
-                Tüm transferler yasal zeminde ve sigortalı olarak gerçekleştirilir. Müşteri memnuniyeti ve güvenliği daima önceliğimizdir.
+                Tüm transferler yasal zeminde ve sigortalı olarak gerçekleştirilir. Müşteri memnuniyeti ve güvenliği önceliğimizdir.
               </span>
             </li>
             <li className="flex items-start gap-2">
@@ -64,19 +64,34 @@ export default function Hakkimizda() {
           </ul>
 
           <p>
-            Yolculuğunuzun her aşamasında tek muhatabınız <b>YolcuTransferi.com</b> olur. Tüm talepleriniz teknolojik altyapımızla güvenle ve hızla karşılanır. İster bireysel ister kurumsal olun; VIP havalimanı, şehirler arası, toplu organizasyon, özel tur veya tekne transferi gibi tüm ayrıcalıklar sadece birkaç tık uzağınızda.
+            Yolculuğunuzun her aşamasında tek muhatabınız <b>YolcuTransferi.com</b> olur. İster bireysel ister kurumsal olun; VIP havalimanı, şehirler arası, toplu organizasyon, özel tur veya tekne transferi gibi tüm ayrıcalıklar sadece birkaç tık uzağınızda.
           </p>
           <p>
-            Deneyimli transfer firmaları ve lisanslı şoförlerle kurduğumuz sürdürülebilir iş birlikleri, platformumuzun kalite standartlarını yükseltir. Sunduğumuz hizmet ağında siz de iş ortağımız olmak istiyorsanız, bize ulaşarak <b>iş birliği başvurusu</b> yapabilirsiniz.
+            Araç sahipleri ve şoförler için <b>iş ortaklığı modeli</b> sunuyoruz. Aracınızla sisteme katıldığınızda, gelen rezervasyonlar otomatik olarak size yönlendirilir ve siz de işinizi büyütme fırsatı yakalarsınız.
+          </p>
+          <p>
+            Kurumsal firmalar için ise; iletişim kanallarımız üzerinden özel transfer talepleri toplayıp, size özel <b>tekliflendirme</b> yapıyoruz. Böylece şirketinizin tüm VIP transfer ihtiyaçlarını güvenle karşılıyoruz.
           </p>
         </div>
 
-        <div className="flex justify-start mt-10">
+        <div className="flex flex-col sm:flex-row gap-4 justify-start mt-10">
           <Link
             href="/rezervasyon"
             className="bg-gradient-to-tr from-[#cbb26a] to-[#bfa658] text-black font-bold text-lg px-7 py-3 rounded-xl shadow-md border border-[#fff6ce] hover:scale-105 hover:from-[#e6d199] hover:to-[#c4ad5f] transition"
           >
             Rezervasyon Yap
+          </Link>
+          <Link
+            href="/is-ortakligi"
+            className="bg-gradient-to-tr from-[#e3b77b] to-[#cfa95f] text-black font-bold text-lg px-7 py-3 rounded-xl shadow-md border border-[#fff6ce] hover:scale-105 hover:from-[#f5db9c] hover:to-[#cfa95f] transition"
+          >
+            İş Ortağı Ol
+          </Link>
+          <Link
+            href="/iletisim"
+            className="bg-gradient-to-tr from-[#ffd97d] to-[#d4a947] text-black font-bold text-lg px-7 py-3 rounded-xl shadow-md border border-[#fff6ce] hover:scale-105 hover:from-[#ffe9ad] hover:to-[#d4a947] transition"
+          >
+            Kurumsal Teklif Al
           </Link>
         </div>
       </section>
