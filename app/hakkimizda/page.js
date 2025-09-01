@@ -72,28 +72,7 @@ export default function Hakkimizda() {
           <p>
             Kurumsal firmalar için ise; iletişim kanallarımız üzerinden özel transfer talepleri toplayıp, size özel <b>tekliflendirme</b> yapıyoruz. Böylece şirketinizin tüm VIP transfer ihtiyaçlarını güvenle karşılıyoruz.
           </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-start mt-10">
-          <Link
-            href="/rezervasyon"
-            className="bg-gradient-to-tr from-[#cbb26a] to-[#bfa658] text-black font-bold text-lg px-7 py-3 rounded-xl shadow-md border border-[#fff6ce] hover:scale-105 hover:from-[#e6d199] hover:to-[#c4ad5f] transition"
-          >
-            Rezervasyon Yap
-          </Link>
-          <Link
-            href="/is-ortakligi"
-            className="bg-gradient-to-tr from-[#e3b77b] to-[#cfa95f] text-black font-bold text-lg px-7 py-3 rounded-xl shadow-md border border-[#fff6ce] hover:scale-105 hover:from-[#f5db9c] hover:to-[#cfa95f] transition"
-          >
-            İş Ortağı Ol
-          </Link>
-          <Link
-            href="/iletisim"
-            className="bg-gradient-to-tr from-[#ffd97d] to-[#d4a947] text-black font-bold text-lg px-7 py-3 rounded-xl shadow-md border border-[#fff6ce] hover:scale-105 hover:from-[#ffe9ad] hover:to-[#d4a947] transition"
-          >
-            Kurumsal Teklif Al
-          </Link>
-        </div>
+       
       </section>
     </main>
   );
