@@ -9,17 +9,13 @@ export default function Hakkimizda() {
         {/* Başlık ve slogan */}
         <h1 className="text-3xl md:text-4xl font-extrabold text-[#bfa658] tracking-tight mb-6 text-center">
           Hakkımızda
-        </h1>
-        <div className="text-lg md:text-xl text-[#ffeec2] font-semibold text-center mb-12">
-          VIP transferde ayrıcalık, teknoloji ve güvenin adı: <br /> YolcuTransferi.com
-        </div>
+       
 
         <div className="text-base md:text-lg text-[#ecd9aa] leading-relaxed font-normal space-y-10">
           
           {/* Kurumsal Tanıtım */}
           <section>
-            <h2 className="text-2xl font-bold text-[#ffeec2] mb-4">Kimiz?</h2>
-            <p>
+        
               <span className="font-semibold text-[#ffeec2]">YolcuTransferi.com</span>, 
               Türkiye genelinde VIP ulaşım deneyimini en üst seviyeye taşıyan, 
               teknoloji odaklı ve müşteri memnuniyetini merkeze alan bir transfer platformudur. 
