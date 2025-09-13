@@ -3,74 +3,111 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Resend } from "resend";
 
-// ENV'DEN KEY'i çek
-const resend = new Resend(process.env.RESEND_API_KEY);
+export const runtime = "nodejs";        // Resend için şart
+export const dynamic = "force-dynamic"; // DB işlemlerinde cache'e takılmasın
+
+// ENV
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const MAIL_FROM = process.env.MAIL_FROM || "YolcuTransferi <onboarding@resend.dev>"; // domain doğrulanana dek güvenli
+const MAIL_TO   = process.env.MAIL_TO   || "info@yolcutransferi.com";
+
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+
+function sanitize(str) {
+  return String(str || "").toString();
+}
 
 export async function POST(req) {
   try {
-    // 1) JSON al
     const body = await req.json();
 
-    // VALIDASYON: KVKK ve zorunlu alanlar
-    if (!body.ad || !body.soyad || !body.telefon || !body.email || !body.mesaj || !body.iletisimTercihi || !body.kvkkOnay) {
+    const ad = sanitize(body.ad);
+    const soyad = sanitize(body.soyad);
+    const telefon = sanitize(body.telefon);
+    const email = sanitize(body.email);
+    const mesaj = sanitize(body.mesaj);
+    const iletisimTercihi = sanitize(body.iletisimTercihi);
+    const neden = sanitize(body.neden);
+    const kvkkOnay = body.kvkkOnay === true || body.kvkkOnay === "true";
+
+    // Zorunlu alanlar
+    if (!ad || !soyad || !telefon || !email || !mesaj || !iletisimTercihi || !kvkkOnay) {
       return NextResponse.json({ error: "Lütfen tüm zorunlu alanları doldurun." }, { status: 400 });
     }
 
-    // 2) DB'ye kayıt at
+    // --- DB KAYIT ---
     const db = await connectToDatabase();
+
     const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const dateStr = `${String(now.getDate()).padStart(2,"0")}${String(now.getMonth()+1).padStart(2,"0")}${now.getFullYear()}`;
+
     const countToday = await db.collection("iletisimForms").countDocuments({
-      createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) }
+      createdAt: { $gte: todayStart }
     });
-    const kayitNo = `iletisim${dateStr}_${String(countToday+1).padStart(5,"0")}`;
+
+    const kayitNo = `iletisim${dateStr}_${String(countToday + 1).padStart(5,"0")}`;
 
     const yeniKayit = {
-      ...body,
+      ad, soyad, telefon, email, mesaj, iletisimTercihi, neden,
+      kvkkOnay,
       createdAt: now,
       kaldirildi: false,
       kayitNo,
-      kvkkOnay: body.kvkkOnay === "true" || body.kvkkOnay === true
     };
+
     await db.collection("iletisimForms").insertOne(yeniKayit);
 
-    // 3) Müşteriye onay maili
-    await resend.emails.send({
-      from: "YolcuTransferi <info@yolcutransferi.com>",
-      to: [body.email],
-      subject: "Yolcu Transferi İletişim",
-      html: `<b>${body.neden || ""}</b> konulu mesajınızı uzman ekibimize ilettik.<br/>
-             Tercih ettiğiniz gibi size <b>${body.iletisimTercihi}</b> üzerinden ulaşacağız.<br/><br/>
-             <b>Kayıt No:</b> ${kayitNo}<br/>
-             <b>Mesajınız:</b><br/>
-             <div style="border:1px solid #ffeec2;border-radius:8px;padding:8px 16px;margin:8px 0;color:#000;background:#fff8e1">
-             ${body.mesaj.replace(/\n/g, "<br/>")}
-             </div>
-             <br/>
-             7/24 VIP Yolcu Transferi için Yolcutransferi.com olarak her zaman yanınızdayız.`
-    });
+    // --- MAİLLER ---
+    if (!resend) {
+      console.error("[iletisim] RESEND_API_KEY tanımlı değil, mail gönderimi atlandı.");
+    } else {
+      const customerMail = resend.emails.send({
+        from: MAIL_FROM,
+        to: [email],
+        subject: "YolcuTransferi — İletişim talebinizi aldık",
+        html: `
+          <b>${neden || ""}</b> konulu mesajınızı uzman ekibimize ilettik.<br/>
+          Size <b>${iletisimTercihi}</b> üzerinden dönüş yapacağız.<br/><br/>
+          <b>Kayıt No:</b> ${kayitNo}<br/>
+          <b>Mesajınız:</b><br/>
+          <div style="border:1px solid #ffeec2;border-radius:8px;padding:8px 16px;margin:8px 0;color:#000;background:#fff8e1">
+            ${mesaj.replace(/\n/g, "<br/>")}
+          </div>
+          <br/>YolcuTransferi.com
+        `.trim(),
+      });
 
-    // 4) Admin ve byhalil'e info maili (KISA & KURUMSAL)
-    await resend.emails.send({
-      from: "YolcuTransferi <info@yolcutransferi.com>",
-      to: ["info@yolcutransferi.com", "byhaliltayfur@hotmail.com"],
-      subject: "Yeni İletişim Mesajı",
-      html: `<b>Ad Soyad:</b> ${body.ad} ${body.soyad || ""}<br/>
-             <b>Telefon:</b> ${body.telefon}<br/>
-             <b>E-posta:</b> ${body.email}<br/>
-             <b>İletişim Nedeni:</b> ${body.neden}<br/>
-             <b>Tercih:</b> ${body.iletisimTercihi}<br/>
-             <b>Kayıt No:</b> ${kayitNo}<br/>
-             <b>Mesaj:</b><br/>
-             <div style="border:1px solid #ffeec2;border-radius:8px;padding:8px 16px;margin:8px 0;color:#000;background:#fff8e1">
-             ${body.mesaj.replace(/\n/g, "<br/>")}
-             </div>
-             <b>KVKK Onay:</b> ${body.kvkkOnay ? "Evet" : "Hayır"}<br/>`
-    });
+      const adminMail = resend.emails.send({
+        from: MAIL_FROM,
+        to: [MAIL_TO, "byhaliltayfur@hotmail.com"],
+        subject: "Yeni İletişim Mesajı",
+        html: `
+          <b>Ad Soyad:</b> ${ad} ${soyad}<br/>
+          <b>Telefon:</b> ${telefon}<br/>
+          <b>E-posta:</b> ${email}<br/>
+          <b>İletişim Nedeni:</b> ${neden || "-"}<br/>
+          <b>Tercih:</b> ${iletisimTercihi}<br/>
+          <b>Kayıt No:</b> ${kayitNo}<br/>
+          <b>Mesaj:</b><br/>
+          <div style="border:1px solid #ffeec2;border-radius:8px;padding:8px 16px;margin:8px 0;color:#000;background:#fff8e1">
+            ${mesaj.replace(/\n/g, "<br/>")}
+          </div>
+          <b>KVKK Onay:</b> ${kvkkOnay ? "Evet" : "Hayır"}<br/>
+        `.trim(),
+      });
+
+      const results = await Promise.allSettled([customerMail, adminMail]);
+      results.forEach((r, i) => {
+        if (r.status === "rejected") {
+          console.error(`[iletisim] Mail #${i + 1} başarısız:`, r.reason);
+        }
+      });
+    }
 
     return NextResponse.json({ success: true, kayitNo });
   } catch (err) {
-    console.error("Kayıt eklenirken hata:", err);
-    return NextResponse.json({ error: err.toString() }, { status: 500 });
+    console.error("Kayıt/Mail hatası:", err);
+    return NextResponse.json({ error: String(err?.message || err) }, { status: 500 });
   }
 }
