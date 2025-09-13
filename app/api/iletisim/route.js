@@ -7,57 +7,60 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+// --- ENV ---
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
+// Domain doğrulanana kadar güvenli FROM:
+const MAIL_FROM = process.env.MAIL_FROM || 'YolcuTransferi <info@yolcutransferi.com>';
+// Birden fazla admin için virgüllü liste desteklenir:
+const MAIL_ADMINS = (
+  process.env.MAIL_ADMINS
+  || process.env.MAIL_TO
+  || "byhaliltayfur@hotmail.com"
+)
+  .split(",")
+  .map(s => s.trim())
+  .filter(Boolean);
+
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
-// Domaininizi Resend üzerinde SPF/DKIM ile doğrulayana kadar geçici FROM:
-const MAIL_FROM = process.env.MAIL_FROM || "YolcuTransferi <onboarding@resend.dev>";
-// Virgülle çoklu admin tanımı desteklenir (örn: "info@yol...,destek@yol...")
-const MAIL_ADMINS =
-  (process.env.MAIL_ADMINS || process.env.MAIL_TO || "info@yolcutransferi.com,byhaliltayfur@hotmail.com")
-    .split(",")
-    .map(s => s.trim())
-    .filter(Boolean);
-
-function s(v) { return String(v ?? ""); }
+function s(v){ return String(v ?? ""); }
 
 async function sendEmailSafe(opts) {
-  if (!resend) return { ok: false, id: null, error: "RESEND_API_KEY missing" };
+  if (!resend) return { ok:false, id:null, error:"RESEND_API_KEY missing" };
   try {
     const { data, error } = await resend.emails.send(opts);
     if (error) {
-      // Resend SDK çoğu durumda error ile resolve eder (throw etmez)
-      console.error("[mail] ERR:", error);
-      return { ok: false, id: data?.id || null, error: (error?.message || JSON.stringify(error)) };
+      // Resend çoğu hatada reject etmez, error ile resolve eder.
+      return { ok:false, id:data?.id || null, error: error?.message || JSON.stringify(error) };
     }
-    return { ok: true, id: data?.id || null, error: null };
+    return { ok:true, id:data?.id || null, error:null };
   } catch (e) {
-    console.error("[mail] EXC:", e);
-    return { ok: false, id: null, error: String(e?.message || e) };
+    return { ok:false, id:null, error:String(e?.message || e) };
   }
 }
 
 export async function POST(req) {
-  const env = process.env.VERCEL_ENV || process.env.NODE_ENV || "unknown";
+  const env    = process.env.VERCEL_ENV || process.env.NODE_ENV || "unknown";
   const dbName = process.env.MONGODB_DB || "yolcutransferi";
 
   try {
     const body = await req.json();
 
-    const ad = s(body.ad);
-    const soyad = s(body.soyad);
-    const telefon = s(body.telefon);
-    const email = s(body.email);
-    const mesaj = s(body.mesaj);
+    const ad              = s(body.ad);
+    const soyad           = s(body.soyad);
+    const telefon         = s(body.telefon);
+    const email           = s(body.email);
+    const mesaj           = s(body.mesaj);
     const iletisimTercihi = s(body.iletisimTercihi);
-    const neden = s(body.neden);
-    const kvkkOnay = body.kvkkOnay === true || body.kvkkOnay === "true";
+    const neden           = s(body.neden);
+    const kvkkOnay        = body.kvkkOnay === true || body.kvkkOnay === "true";
 
+    // Basit zorunlu alan kontrolü
     if (!ad || !soyad || !telefon || !email || !mesaj || !iletisimTercihi || !kvkkOnay) {
-      return NextResponse.json({ error: "Lütfen tüm zorunlu alanları doldurun." }, { status: 400 });
+      return NextResponse.json({ error:"Lütfen tüm zorunlu alanları doldurun." }, { status:400 });
     }
 
-    // 1) DB'ye yaz
+    // --- 1) DB'ye yaz ---
     const db = await connectToDatabase();
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -72,22 +75,23 @@ export async function POST(req) {
       kaldirildi: false,
       kayitNo,
     };
-    await db.collection("iletisimForms").insertOne(doc);
 
-    // 2) ADMIN mailleri (her alıcıya AYRI gönder)
+    const insertRes = await db.collection("iletisimForms").insertOne(doc);
+
+    // --- 2) ADMIN mailleri: her alıcıya AYRI gönder + sonucu kaydet ---
     const adminResults = [];
     for (const to of MAIL_ADMINS) {
       const r = await sendEmailSafe({
         from: MAIL_FROM,
         to,
-        reply_to: email, // müşteriye cevap atmak için
+        reply_to: email, // direkt reply müşteriye düşsün
         subject: "Yeni İletişim Mesajı",
         html: `
           <b>Ad Soyad:</b> ${ad} ${soyad}<br/>
           <b>Telefon:</b> ${telefon}<br/>
           <b>E-posta:</b> ${email}<br/>
           <b>İletişim Nedeni:</b> ${neden || "-"}<br/>
-          <b>Tercih:</b> ${iletisimTercihi}<br/>
+          <b>İletişim Tercihi:</b> ${iletisimTercihi}<br/>
           <b>Kayıt No:</b> ${kayitNo}<br/>
           <b>Mesaj:</b><br/>
           <div style="border:1px solid #ffeec2;border-radius:8px;padding:8px 16px;margin:8px 0;color:#000;background:#fff8e1">
@@ -99,7 +103,7 @@ export async function POST(req) {
       adminResults.push({ to, ...r });
     }
 
-    // 3) MÜŞTERİ onay maili
+    // --- 3) MÜŞTERİ onay maili ---
     const customerResult = await sendEmailSafe({
       from: MAIL_FROM,
       to: email,
@@ -116,10 +120,13 @@ export async function POST(req) {
       `.trim(),
     });
 
-    // Log: hangi admin düştü/düşmedi gör
-    console.log("[iletisim] adminResults:", adminResults);
-    console.log("[iletisim] customerResult:", customerResult);
+    // --- 4) Mail sonuçlarını DB'ye işle (admin & müşteri) ---
+    await db.collection("iletisimForms").updateOne(
+      { _id: insertRes.insertedId },
+      { $set: { mail: { admins: adminResults, customer: customerResult }, mailAt: new Date() } }
+    );
 
+    // --- 5) Sonuç ---
     return NextResponse.json(
       {
         success: true,
