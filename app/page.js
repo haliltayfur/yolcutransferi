@@ -37,6 +37,13 @@ export default function Home() {
 
   return (
     <main className="w-full flex flex-col items-center bg-black min-h-screen">
+      {/* === DUYURU BANTI === */}
+      <div className="w-full bg-[#bfa658] text-black text-center py-3 px-4">
+        <span className="font-semibold tracking-wide">
+          Sitemiz yapım aşamasındadır.
+        </span>
+      </div>
+
       {/* === SLIDER === */}
       <div
         ref={sliderOuterRef}
@@ -75,6 +82,7 @@ export default function Home() {
         >
           <VipTransferForm onComplete={handleFormComplete} />
         </div>
+
         {/* VİDEO */}
         {!isMobile && (
           <div
@@ -86,7 +94,7 @@ export default function Home() {
               boxShadow: "0 0 16px #0008",
               border: "2px solid #bfa658",
               background: "#1c1c1c",
-              display: "block"
+              display: "block",
             }}
           >
             <video
@@ -97,7 +105,7 @@ export default function Home() {
                 height: "100%",
                 objectFit: "cover",
                 background: "#1c1c1c",
-                borderRadius: "24px"
+                borderRadius: "24px",
               }}
               preload="auto"
               playsInline
