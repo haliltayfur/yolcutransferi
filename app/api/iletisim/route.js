@@ -83,3 +83,125 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
+
+    // ---- 1) Form verileri ----
+    const ad              = s(body.ad);
+    const soyad           = s(body.soyad);
+    const telefon         = s(body.telefon);
+    const email           = s(body.email);
+    const mesaj           = s(body.mesaj);
+    const iletisimTercihi = s(body.iletisimTercihi);
+    const neden           = s(body.neden);
+    const kvkkOnay        = body.kvkkOnay === true || body.kvkkOnay === "true";
+
+    if (!ad || !soyad || !telefon || !email || !mesaj || !iletisimTercihi || !kvkkOnay) {
+      return NextResponse.json({ error: "Lütfen tüm zorunlu alanları doldurun." }, { status: 400 });
+    }
+
+    // ---- 2) DB'ye yaz ----
+    const db = await connectToDatabase();
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dateStr = `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}`;
+    const countToday = await db.collection("iletisimForms").countDocuments({ createdAt: { $gte: todayStart } });
+    const kayitNo = `iletisim${dateStr}_${String(countToday + 1).padStart(5, "0")}`;
+
+    const doc = {
+      ad, soyad, telefon, email, mesaj, iletisimTercihi, neden,
+      kvkkOnay,
+      createdAt: now,
+      kaldirildi: false,
+      kayitNo,
+    };
+
+    const insertRes = await db.collection("iletisimForms").insertOne(doc);
+
+    // ---- 3) Mail env'lerini oku (RUN-TIME) ----
+    const { RESEND_API_KEY, MAIL_FROM, MAIL_ADMINS } = getMailEnv();
+
+    // ---- 4) Mail içerikleri ----
+    const adminSubject = "Yeni İletişim Mesajı";
+    const adminHtml = `
+      <b>Ad Soyad:</b> ${ad} ${soyad}<br/>
+      <b>Telefon:</b> ${telefon}<br/>
+      <b>E-posta:</b> ${email}<br/>
+      <b>İletişim Nedeni:</b> ${neden || "-"}<br/>
+      <b>İletişim Tercihi:</b> ${iletisimTercihi}<br/>
+      <b>Kayıt No:</b> ${kayitNo}<br/>
+      <b>Mesaj:</b><br/>
+      <div style="border:1px solid #ffeec2;border-radius:8px;padding:8px 16px;margin:8px 0;color:#000;background:#fff8e1">
+        ${mesaj.replace(/\n/g, "<br/>")}
+      </div>
+      <b>KVKK Onay:</b> ${kvkkOnay ? "Evet" : "Hayır"}<br/>
+    `.trim();
+
+    const customerSubject = "YolcuTransferi — İletişim talebinizi aldık";
+    const customerHtml = `
+      <b>${neden || ""}</b> konulu mesajınızı uzman ekibimize ilettik.<br/>
+      Size <b>${iletisimTercihi}</b> üzerinden dönüş yapacağız.<br/><br/>
+      <b>Kayıt No:</b> ${kayitNo}<br/>
+      <b>Mesajınız:</b><br/>
+      <div style="border:1px solid #ffeec2;border-radius:8px;padding:8px 16px;margin:8px 0;color:#000;background:#fff8e1">
+        ${mesaj.replace(/\n/g, "<br/>")}
+      </div>
+      <br/>YolcuTransferi.com
+    `.trim();
+
+    // ---- 5) Gönderimler (önce Resend) ----
+    const adminResults = [];
+    if (MAIL_ADMINS.length > 0) {
+      for (const to of MAIL_ADMINS) {
+        // Önce Resend dene
+        const rResend = await sendViaResend({
+          apiKey: RESEND_API_KEY,
+          from: MAIL_FROM,
+          to,
+          subject: adminSubject,
+          html: adminHtml,
+          replyTo: email,
+        });
+
+        // // Gerekirse SMTP fallback'i burada deneyebilirsin:
+        // const finalR = rResend.ok ? rResend : await sendViaSMTP({
+        //   from: MAIL_FROM, to, subject: adminSubject, html: adminHtml, replyTo: email
+        // });
+
+        adminResults.push({ to, ...rResend });
+      }
+    }
+
+    const customerResult = await sendViaResend({
+      apiKey: RESEND_API_KEY,
+      from: MAIL_FROM,
+      to: email,
+      subject: customerSubject,
+      html: customerHtml,
+    });
+    // // SMTP fallback istersen:
+    // const customerFinal = customerResult.ok ? customerResult : await sendViaSMTP({
+    //   from: MAIL_FROM, to: email, subject: customerSubject, html: customerHtml
+    // });
+
+    // ---- 6) Sonuçları kayda işle ----
+    await db.collection("iletisimForms").updateOne(
+      { _id: insertRes.insertedId },
+      { $set: { mail: { admins: adminResults, customer: customerResult }, mailAt: new Date(), mailMeta: { from: MAIL_FROM, admins: MAIL_ADMINS } } }
+    );
+
+    // ---- 7) Dönüş ----
+    return NextResponse.json(
+      {
+        success: true,
+        env, dbName, kayitNo,
+        mailFrom: MAIL_FROM,
+        mailAdmins: MAIL_ADMINS,
+        sent: { admins: adminResults, customer: customerResult }
+      },
+      { headers: { "Cache-Control": "no-store" } }
+    );
+
+  } catch (err) {
+    console.error("[/api/iletisim] Hata:", err);
+    return NextResponse.json({ error: String(err?.message || err) }, { status: 500, headers: { "Cache-Control": "no-store" } });
+  }
+}
