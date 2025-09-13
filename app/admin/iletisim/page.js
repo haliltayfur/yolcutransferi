@@ -1,21 +1,21 @@
+// /app/admin/iletisim/page.js
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-// Kayıt no üretici
+// Kayıt no üretici (createdAt üzerinden stabil)
 function kayitNoUret(form, i) {
   if (form.kayitNo) return form.kayitNo;
-  const tarihStr = form.createdAt || form.tarih;
-  if (tarihStr) {
-    const t = new Date(tarihStr);
+  const t = form.createdAt ? new Date(form.createdAt) : null;
+  if (t && !isNaN(t)) {
     const yy = t.getFullYear();
     const mm = String(t.getMonth() + 1).padStart(2, "0");
     const dd = String(t.getDate()).padStart(2, "0");
     return `iletisim${yy}${mm}${dd}_${String(i + 1).padStart(4, "0")}`;
   }
-  return `iletisim_000${i + 1}`;
+  return `iletisim_${String(i + 1).padStart(4, "0")}`;
 }
 
 export default function AdminIletisim() {
@@ -26,42 +26,78 @@ export default function AdminIletisim() {
   const [showRemoved, setShowRemoved] = useState(false);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  const pollingRef = useRef();
+  const [lastRefreshed, setLastRefreshed] = useState(null);
+  const pollingRef = useRef(null);
 
-  // === POLLING (60 saniyede bir) ve Şimdi Yenile ===
-  async function fetchForms() {
-    setLoading(true);
+  // === ÇEKME: cache yok, param ile cache-bust ===
+  async function fetchForms(force = false) {
     try {
-      const res = await fetch("/api/admin/iletisim");
+      if (!force) setLoading(true);
+      const url = `/api/iletisim/forms?ts=${Date.now()}`; // cache-bust
+      const res = await fetch(url, {
+        cache: "no-store",
+        headers: {
+          "x-no-cache": String(Date.now()), // proxy/cache kırıcı
+        },
+      });
       const data = await res.json();
       let arr = Array.isArray(data.forms) ? data.forms : [];
-      arr = arr.map(x => ({ ...x, kaldirildi: x.kaldirildi || false }));
-      setForms(arr.filter(f => !f.kaldirildi));
-      setRemovedForms(arr.filter(f => f.kaldirildi));
+
+      // Güvenli normalize
+      arr = arr.map((x) => ({
+        ...x,
+        kaldirildi: !!x.kaldirildi,
+      }));
+
+      // Sunucu zaten sort ediyor; yine de garanti olsun:
+      arr.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+      setForms(arr.filter((f) => !f.kaldirildi));
+      setRemovedForms(arr.filter((f) => f.kaldirildi));
+      setLastRefreshed(new Date());
     } catch (e) {
-      setForms([]); setRemovedForms([]);
+      console.error("İletişim kayıtları alınamadı:", e);
+      setForms([]);
+      setRemovedForms([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
+
+  // === POLLING: 3 sn'de bir + focus/visibility anında ===
   useEffect(() => {
-    fetchForms();
-    pollingRef.current = setInterval(fetchForms, 60000);
-    return () => clearInterval(pollingRef.current);
+    fetchForms(true); // ilk yüklemede hızlı getir
+
+    // 3sn polling
+    pollingRef.current = setInterval(() => fetchForms(true), 3000);
+
+    // Pencere odağa gelince ve görünür olunca anında yenile
+    function onFocus() { fetchForms(true); }
+    function onVisibility() { if (document.visibilityState === "visible") fetchForms(true); }
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      clearInterval(pollingRef.current);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, []);
 
-  // Sadece butona basınca veriyi güncelle
   function handleRefresh() {
-    fetchForms();
+    fetchForms(true);
   }
 
+  // Bu endpointler sende mevcutsa çalışır; yoksa olduğu gibi bırak
   async function handleKaldir(_id) {
     await fetch(`/api/admin/iletisim/${_id}/kaldir`, { method: "POST" });
-    fetchForms();
+    fetchForms(true);
     setModalForm(null);
   }
   async function handleSil(_id) {
     await fetch(`/api/admin/iletisim/${_id}`, { method: "DELETE" });
-    fetchForms();
+    fetchForms(true);
     setModalForm(null);
   }
 
@@ -73,7 +109,7 @@ export default function AdminIletisim() {
       ...arr.map((f, i) => [
         kayitNoUret(f, i),
         f.createdAt ? format(new Date(f.createdAt), "dd.MM.yyyy HH:mm") : "",
-        `${f.ad || ""} ${f.soyad || ""}`,
+        `${f.ad || ""} ${f.soyad || ""}`.trim(),
         f.telefon || "",
         f.email || "",
         f.neden || "",
@@ -90,18 +126,15 @@ export default function AdminIletisim() {
     saveAs(new Blob([wbout], { type: "application/octet-stream" }), "iletisim_basvurulari.xlsx");
   }
 
-  // === TABLO ===
   const dataArr = showRemoved ? removedForms : forms;
   const totalPages = Math.max(1, Math.ceil(dataArr.length / perPage));
   const pagedForms = dataArr.slice((page - 1) * perPage, page * perPage);
 
-  const columns = [
-    "Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Neden", "Mesaj", "İşlem"
-  ];
+  const columns = ["Kayıt No", "Tarih", "Ad Soyad", "Telefon", "E-posta", "Neden", "Mesaj", "İşlem"];
 
   return (
     <main className="max-w-6xl mx-auto px-2 py-8">
-      <h1 className="text-3xl font-bold text-[#bfa658] mb-8">İletişimden Gelenler</h1>
+      <h1 className="text-3xl font-bold text-[#bfa658] mb-2">İletişimden Gelenler</h1>
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <select
           value={perPage}
@@ -126,8 +159,11 @@ export default function AdminIletisim() {
         >
           Şimdi Yenile
         </button>
-        <span className="ml-2 text-sm text-gray-400">{dataArr.length} kayıt bulundu.</span>
+        <span className="ml-2 text-sm text-gray-400">
+          {dataArr.length} kayıt • {lastRefreshed ? `Son yenileme: ${format(lastRefreshed, "HH:mm:ss")}` : "—"}
+        </span>
       </div>
+
       <div className="overflow-x-auto bg-black/80 rounded-2xl border-2 border-[#bfa658]">
         <table className="min-w-full text-xs border-separate border-spacing-0">
           <thead>
@@ -152,9 +188,9 @@ export default function AdminIletisim() {
               </tr>
             ) : (
               pagedForms.map((form, i) => (
-                <tr key={form._id || i} className="hover:bg-[#231d10] transition">
+                <tr key={form._id || `${form.email}-${form.createdAt}-${i}`} className="hover:bg-[#231d10] transition">
                   <td className="p-2 border-b border-[#bfa658] font-semibold whitespace-nowrap" style={{ borderRight: '1px solid #bfa658' }}>
-                    {kayitNoUret(form, i + (page-1)*perPage)}
+                    {kayitNoUret(form, i + (page - 1) * perPage)}
                   </td>
                   <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658' }}>
                     {form.createdAt ? format(new Date(form.createdAt), "dd.MM.yyyy HH:mm") : ""}
@@ -162,9 +198,9 @@ export default function AdminIletisim() {
                   <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658' }}>{form.ad} {form.soyad}</td>
                   <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658' }}>{form.telefon}</td>
                   <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658' }}>{form.email}</td>
-                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658' }}>{form.neden}</td>
+                  <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658' }}>{form.neden || "-"}</td>
                   <td className="p-2 border-b border-[#bfa658] whitespace-nowrap" style={{ borderRight: '1px solid #bfa658' }}>
-                    {form.mesaj && form.mesaj.length > 30 ? form.mesaj.slice(0, 30) + "..." : form.mesaj}
+                    {form.mesaj && form.mesaj.length > 30 ? form.mesaj.slice(0, 30) + "..." : (form.mesaj || "")}
                   </td>
                   <td className="p-2 border-b border-[#bfa658] text-center whitespace-nowrap min-w-[110px]" style={{ borderRight: 'none' }}>
                     <div className="flex flex-row gap-1 justify-center items-center">
@@ -191,6 +227,7 @@ export default function AdminIletisim() {
           </tbody>
         </table>
       </div>
+
       {totalPages > 1 && (
         <div className="flex justify-center gap-1 mt-5">
           {Array.from({ length: totalPages }, (_, i) => (
@@ -207,25 +244,15 @@ export default function AdminIletisim() {
           ))}
         </div>
       )}
-      {/* Modal Detay Popup */}
+
+      {/* Modal Detay */}
       {modalForm && (
-        <div className="fixed left-0 top-0 w-full h-full bg-black/80 flex items-center justify-center z-50"
-          onClick={() => setModalForm(null)}
-        >
-          <div
-            className="bg-white text-black p-0 rounded-xl max-w-2xl w-full shadow-2xl relative overflow-hidden"
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Header */}
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50" onClick={() => setModalForm(null)}>
+          <div className="bg-white text-black rounded-xl max-w-2xl w-full shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200 bg-[#f3ecd1]">
               <div className="text-xl font-bold text-[#bfa658]">Mesaj Detayı</div>
-              <button
-                className="text-2xl text-gray-400 hover:text-black"
-                onClick={() => setModalForm(null)}
-                aria-label="Kapat"
-              >×</button>
+              <button className="text-2xl text-gray-400 hover:text-black" onClick={() => setModalForm(null)} aria-label="Kapat">×</button>
             </div>
-            {/* İçerik */}
             <div className="px-6 py-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-[16px] mb-4">
                 <div><b>Kayıt No:</b> {kayitNoUret(modalForm, 0)}</div>
@@ -233,32 +260,24 @@ export default function AdminIletisim() {
                 <div><b>Ad Soyad:</b> {modalForm.ad} {modalForm.soyad}</div>
                 <div><b>Telefon:</b> {modalForm.telefon}</div>
                 <div><b>E-posta:</b> {modalForm.email}</div>
-                <div><b>İletişim Nedeni:</b> {modalForm.neden}</div>
+                <div><b>İletişim Nedeni:</b> {modalForm.neden || "-"}</div>
                 <div><b>İletişim Tercihi:</b> {modalForm.iletisimTercihi}</div>
                 <div><b>KVKK Onay:</b> {modalForm.kvkkOnay ? "Evet" : "Hayır"}</div>
               </div>
               <div className="mb-1 text-[15px]"><b>Mesaj:</b></div>
-              <div className="bg-gray-100 rounded-md p-3 text-gray-900 font-mono max-h-48 overflow-y-auto whitespace-pre-line break-words">{modalForm.mesaj}</div>
+              <div className="bg-gray-100 rounded-md p-3 text-gray-900 font-mono max-h-48 overflow-y-auto whitespace-pre-line break-words">
+                {modalForm.mesaj}
+              </div>
               {modalForm.ek && (
                 <div className="mt-4"><b>Ek Dosya:</b> <a href={modalForm.ek} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Görüntüle/İndir</a></div>
               )}
             </div>
-            {/* Alt Butonlar */}
             <div className="flex gap-3 justify-end bg-[#faf8ef] px-6 py-4 border-t border-gray-200">
               {!modalForm.kaldirildi && (
-                <button
-                  onClick={() => handleKaldir(modalForm._id)}
-                  className="bg-yellow-800 text-[#ffeec2] px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
-                >Kaldır</button>
+                <button onClick={() => handleKaldir(modalForm._id)} className="bg-yellow-800 text-[#ffeec2] px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition">Kaldır</button>
               )}
-              <button
-                onClick={() => handleSil(modalForm._id)}
-                className="bg-red-700 text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-red-400 hover:text-black transition"
-              >Sil</button>
-              <button
-                className="bg-black text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition"
-                onClick={() => setModalForm(null)}
-              >Kapat</button>
+              <button onClick={() => handleSil(modalForm._id)} className="bg-red-700 text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-red-400 hover:text-black transition">Sil</button>
+              <button className="bg-black text-white px-4 py-2 rounded font-bold text-sm border border-[#bfa658] hover:bg-[#bfa658] hover:text-black transition" onClick={() => setModalForm(null)}>Kapat</button>
             </div>
           </div>
         </div>
